@@ -1,0 +1,9 @@
+*.spec
+ui_*.py
+build/*
+dist/*
+__pycache__/*
+venv/*
+form.ui.autosave
+NMRAnalyzer*
+
