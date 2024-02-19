@@ -4,6 +4,7 @@ import sys, os, re
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog
 from PySide6.QtCore import QCoreApplication, Signal
 import numpy as np
+from scipy.optimize import curve_fit
 import pyqtgraph as pg
 from pyqtgraph.exporters import ImageExporter
 from ui_Form import Ui_Analyzer
@@ -21,6 +22,8 @@ class MainWindow(QMainWindow):
 
         self.ui.btn_Start.clicked.connect(self.analysis)
 
+        self.ui.btn_Save.clicked.connect(self.save_data)
+        self.ui.btn_Load.clicked.connect(self.load_data)
         #Graphs
         # Seetings for FFT
         graph_fft = self.ui.FFTWidget
@@ -47,6 +50,9 @@ class MainWindow(QMainWindow):
         graph_DQ_points.getAxis('bottom').setLabel("DQ Filtering Time")
         graph_DQ_points.getAxis('left').setLabel("T2*")
         graph_DQ_points.setBackground('w')
+        # Initialize coefficients
+        self.coeff = None
+        self.line_item = None
           
 
         # Settings for graph DQ distribution
@@ -69,10 +75,14 @@ class MainWindow(QMainWindow):
 
         # Buttons
         self.ui.btn_Start.setEnabled(False)
+        self.ui.btn_Save.setEnabled(False)
+        
+        self.ui.radioButton_Log.clicked.connect(self.t2_dq_graph)
 
 
         # Draw graph Temperature vs combobox option
         self.ui.comboBox.currentIndexChanged.connect(self.updateGraph)
+        self.ui.comboBox_2.currentIndexChanged.connect(self.plot_fit)
 
         # Change event
         self.ui.dq_min.valueChanged.connect(self.linearization)
@@ -122,6 +132,7 @@ class MainWindow(QMainWindow):
                     # Clear data files and return
                     self.ui.btn_SelectFiles.setEnabled(True)
                     self.ui.radioButton.setEnabled(True)
+
                     self.selected_files.clear()
                     return
                 
@@ -135,12 +146,15 @@ class MainWindow(QMainWindow):
                     self.ui.btn_SelectFiles.setEnabled(True)
                     self.ui.btn_Start.setEnabled(False)
                     self.ui.radioButton.setEnabled(True)
+                    self.ui.btn_Save.setEnabled(False)
+
                     return
             elif filename.startswith("DQ") is False and current_tab_index == 1:
                 dialog = NotificationDialog()
                 if dialog.exec() == QDialog.Rejected:
                     self.ui.btn_SelectFiles.setEnabled(True)
                     self.ui.btn_Start.setEnabled(False)
+                    self.ui.btn_Save.setEnabled(False)
                     self.ui.radioButton.setEnabled(True)
                     return
 
@@ -201,11 +215,6 @@ class MainWindow(QMainWindow):
                 Amplitude = self.calculate_amplitude(y, z)
                 DQ = self.calculate_DQ_intensity(x, Amplitude)
                 self.fill_table_DQ(DQ, M2, T2, dq_filtering_time, i, self.ui.table_DQ)
-                self.dq_t2_graph()
-
-             
-
-
             
             i=i+1
         
@@ -240,8 +249,6 @@ class MainWindow(QMainWindow):
                 exporter_fid.parameters()['width'] = 1000
                 exporter_fid.export(fid_file_path)
 
-        if current_tab_index == 1 and filename.startswith("DQ"):
-            self.linearization()           
             
         self.ui.textEdit_6.setText(f"Finished")
 
@@ -255,7 +262,13 @@ class MainWindow(QMainWindow):
         # Enable all Buttons after analysis
         self.ui.btn_SelectFiles.setEnabled(True)
         self.ui.btn_Start.setEnabled(True)
+        self.ui.btn_Save.setEnabled(True)
         self.ui.radioButton.setEnabled(True)
+
+        if current_tab_index == 1 and filename.startswith("DQ"):
+            self.dq_t2_graph()
+            self.t2_dq_graph()  
+            self.linearization() 
 
     def linearization(self):
         time_min = self.ui.dq_min.value()
@@ -271,7 +284,8 @@ class MainWindow(QMainWindow):
             print("Not enough data points")
             return
 
-        coeff = np.polyfit(x, y, 1)
+        self.coeff = np.polyfit(x, y, 1)
+        
 
         Integral = np.trapz(dq)
         DQ_norm = dq/Integral
@@ -285,14 +299,117 @@ class MainWindow(QMainWindow):
         self.ui.table_DQ.setHorizontalHeaderItem(5, QTableWidgetItem("DQ Norm"))
 
         for row in range(self.ui.table_DQ.rowCount()):
-            T2_lin = coeff[0] * dq_time[row] + coeff[1]
+            T2_lin = self.coeff[0] * dq_time[row] + self.coeff[1]
             T2_lin = round(T2_lin, 4)
             item = QTableWidgetItem(str(T2_lin))
             self.ui.table_DQ.setItem(row, 4, item)
             item2 = QTableWidgetItem(str(round(DQ_norm[row], 4)))
             self.ui.table_DQ.setItem(row, 5, item2)
+    
+        self.t2_dq_graph()
+        self.plot_line()
 
+    def plot_line(self):
+        self.graph_line = self.ui.DQ_Widget_1
+        
+        if self.coeff is not None:
+            # Generate x values for the line
+            x_line = np.arange(0, 105.1, 0.1)
+            
+            # Calculate y values using the coefficients
+            y_line = np.polyval(self.coeff, x_line)
+            
+            # Plot the line
+            self.dq_t2_graph()
+            self.graph_line.plot(x_line, y_line, pen='r')  
 
+    def plot_fit(self, index):
+        if index == 0:
+            self.plot_gauss()
+        elif index == 1:
+            self.plot_lorenz()
+        elif index == 2:
+            self.plot_voigt()
+        else:
+            return
+
+    def plot_gauss(self):
+        _x = self.read_column_values(self.ui.table_DQ, 4)
+        y = self.read_column_values(self.ui.table_DQ, 5)
+
+        button = self.ui.radioButton_Log
+        if button.isChecked():
+            x = np.log10(_x)
+        else:
+            x = _x
+
+        initial_guess = [10**(-4), 10, 1]  # Initial guess for the parameters [amplitude, center, width]
+        params, covariance = curve_fit(self.gaussian, x, y, p0=initial_guess)
+
+        amp_fit, cen_fit, wid_fit = params
+
+        x_fit = np.arange(0, 105.1, 0.1)
+        y_fit = self.gaussian(x_fit, *params)
+
+        # Plot the line
+        self.t2_dq_graph()
+        self.ui.DQ_Widget_2.plot(x_fit, y_fit, pen='r')
+
+    def gaussian(self, x, amp, cen, wid):
+        return amp * np.exp(-(x - cen)**2 / (2 * wid**2))
+
+    def plot_lorenz(self):
+        _x = self.read_column_values(self.ui.table_DQ, 4)
+        y = self.read_column_values(self.ui.table_DQ, 5)
+
+        button = self.ui.radioButton_Log
+        if button.isChecked():
+            x = np.log10(_x)
+        else:
+            x = _x
+
+        initial_guess = [1, 0, 1]  # Initial guess for the parameters [amplitude, center, width]
+        params, covariance = curve_fit(self.lorenz, x, y, p0=initial_guess)
+
+        amp_fit, cen_fit, wid_fit = params
+
+        x_fit = np.arange(0, 105.1, 0.1)
+        y_fit = self.lorenz(x_fit, *params)
+
+        # Plot the line
+        self.t2_dq_graph()
+        self.ui.DQ_Widget_2.plot(x_fit, y_fit, pen='r')
+
+    def lorenz(self, x, amp, cen, wid):
+        return (amp * (wid**2)) / ((x - cen)**2 + (wid**2))
+
+    def plot_voigt(self):
+        def voigt(x, amp_gauss, cen_gauss, wid_gauss, amp_lorenz, cen_lorenz, wid_lorenz, frac):
+            gauss_component = self.gaussian(x, amp_gauss, cen_gauss, wid_gauss)
+            lorenz_component = self.lorenz(x, amp_lorenz, cen_lorenz, wid_lorenz)
+            return frac * lorenz_component + (1 - frac) * gauss_component
+
+        _x = self.read_column_values(self.ui.table_DQ, 4)
+        y = self.read_column_values(self.ui.table_DQ, 5)
+
+        button = self.ui.radioButton_Log
+        if button.isChecked():
+            x = np.log10(_x)
+        else:
+            x = _x
+
+        initial_guess = [1, 0, 1, 1, 0, 1, 0.5]  # Initial guess for the parameters [amplitude, center, width]
+        params, covariance = curve_fit(voigt, x, y, p0=initial_guess)
+
+        #amp_fit, cen_fit, wid_fit = params
+
+        x_fit = np.arange(0, 105.1, 0.1)
+        y_fit = voigt(x_fit, *params)
+
+        # Plot the line
+        self.t2_dq_graph()
+        self.ui.DQ_Widget_2.plot(x_fit, y_fit, pen='r')
+        
     def updateGraph(self, index):
         x = self.read_column_values(self.ui.table_SE, 0)
 
@@ -323,6 +440,22 @@ class MainWindow(QMainWindow):
         self.ui.DQ_Widget_1.clear()
         self.ui.DQ_Widget_1.plot(x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=5)
 
+    def t2_dq_graph(self):
+        x = self.read_column_values(self.ui.table_DQ, 4)
+        y= self.read_column_values(self.ui.table_DQ, 5)
+
+        graph_DQ_distr = self.ui.DQ_Widget_2
+        button = self.ui.radioButton_Log
+        if button.isChecked():
+            new_x = np.log10(x)
+            graph_DQ_distr.getAxis('bottom').setLabel("log(T2*)")
+        else:
+            new_x = x
+            graph_DQ_distr.getAxis('bottom').setLabel("T2*")
+
+        graph_DQ_distr.clear()
+        graph_DQ_distr.plot(new_x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=5)
+
     def read_column_values(self, table, column_index):
         column_values = []
         for row in range(table.rowCount()):
@@ -330,7 +463,7 @@ class MainWindow(QMainWindow):
             if item is not None:
                 column_values.append(float(item.text()))  # Assuming the values are numeric!!!!!
         return column_values
-
+    
     def extract_temperature(self, filename):
         match = re.search(r'_(\d+)_c\.dat', filename)
         if match:
@@ -552,12 +685,109 @@ class MainWindow(QMainWindow):
         
         return Real_apod
 
+    def save_data(self):
+        parent_folder = os.path.dirname(self.selected_files[0])
+
+        current_tab_index = self.ui.tabWidget.currentIndex()
+
+        SE_temperature = self.ui.SEWidget        
+        DQ_points = self.ui.DQ_Widget_1
+        DQ_distribution = self.ui.DQ_Widget_2
+
+        SE_table = self.ui.table_SE
+        DQ_table = self.ui.table_DQ
+
+        if current_tab_index == 0:
+            graph_file_path = os.path.join(parent_folder, 'Result', f"SE_temperature.png")
+            table_file_path = os.path.join(parent_folder, 'Result', f"SE_table.csv")
+        elif current_tab_index == 1:
+            graph_file_path = os.path.join(parent_folder, 'Result', f"DQ_points.png")
+            graph_file_path_2 = os.path.join(parent_folder, 'Result', f"DQ_distribution.png")
+            table_file_path = os.path.join(parent_folder, 'Result', f"DQ_table.csv")
+
+        if os.path.exists(graph_file_path):
+            os.remove(graph_file_path)
+        if os.path.exists(graph_file_path_2):
+            os.remove(graph_file_path_2)
+        if os.path.exists(table_file_path):
+            os.remove(table_file_path)
+
+        pg.QtGui.QGuiApplication.processEvents()  # Make sure all events are processed before exporting
+
+        if current_tab_index == 0:
+            #Image
+            exporter_se = pg.exporters.ImageExporter(SE_temperature.plotItem)
+            exporter_se.parameters()['width'] = 1000
+            exporter_se.export(graph_file_path)
+
+            #Table
+            self.save_table_to_csv(table_file_path, SE_table)
+
+        elif current_tab_index == 1:
+            #Image
+            exporter_dq1 = pg.exporters.ImageExporter(DQ_points.plotItem)
+            exporter_dq1.parameters()['width'] = 1000
+            exporter_dq1.export(graph_file_path)
+
+            exporter_dq2 = pg.exporters.ImageExporter(DQ_distribution.plotItem)
+            exporter_dq2.parameters()['width'] = 1000
+            exporter_dq2.export(graph_file_path_2)
+
+            #Table
+            self.save_table_to_csv(table_file_path, DQ_table)
+
+    def save_table_to_csv(self, path, table):
+        with open(path, 'w') as f:
+            # Write data row by row
+            for row in range(table.rowCount()):
+                row_values = []
+                for col in range(table.columnCount()):
+                    item = table.item(row, col)
+                    if item is not None:
+                        row_values.append(item.text())
+                    else:
+                        row_values.append("")  # Handle empty cells
+                f.write(','.join(row_values) + '\n')
+
+    def load_data(self):
+        dlg = OpenFilesDialog(self)
+        if dlg.exec():
+            tableName = dlg.selectedFiles()
+            self.selected_table = tableName
+            self.load_table_from_csv(tableName)
+
+    def load_table_from_csv(self, tableName):
+        current_tab_index = self.ui.tabWidget.currentIndex()
+        if current_tab_index == 0:
+            table = self.ui.table_SE
+        elif current_tab_index == 1:
+            table = self.ui.table_DQ
+
+        file_path = tableName[0]
+
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+            table.setRowCount(len(lines))
+            for row, line in enumerate(lines):
+                values = line.strip().split(',')
+                for col, value in enumerate(values):
+                    item = QTableWidgetItem(value)
+                    table.setItem(row, col, item)
+
+        if current_tab_index == 0:
+            self.updateGraph()
+        elif current_tab_index == 1:
+            self.dq_t2_graph()
+            self.t2_dq_graph()  
+            self.linearization() 
+
+
 
 class OpenFilesDialog(QFileDialog, Ui_ChooseFiles):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
-        self.setNameFilter(str("Data (*.dat *.txt)"))
+        self.setNameFilter(str("Data (*.dat *.txt *.csv)"))
         self.setDirectory(str("C:/Mega/NMR/003_Temperature"))
         #self.setDirectory(str("C:/Mega/NMR/003_Temperature/2023_12_21_SE_Temperature_PS35000"))
         
