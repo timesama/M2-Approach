@@ -73,6 +73,11 @@ class MainWindow(QMainWindow):
         table_DQ.setColumnWidth(2,70)
         table_DQ.setColumnWidth(3,70)
 
+        table_DQ.currentItemChanged.connect(self.dq_t2_graph)
+        table_DQ.currentItemChanged.connect(self.linearization)
+        table_DQ.currentItemChanged.connect(self.t2_dq_graph)
+        table_DQ.currentItemChanged.connect(self.plot_fit)
+
         # Buttons
         self.ui.btn_Start.setEnabled(False)
         self.ui.btn_Save.setEnabled(False)
@@ -465,7 +470,7 @@ class MainWindow(QMainWindow):
         return column_values
     
     def extract_temperature(self, filename):
-        match = re.search(r'_(\d+)_c\.dat', filename)
+        match = re.search(r'.*_(-?\s*\d+)_c.dat', filename)
         if match:
             temperature = match.group(1)
         else:
@@ -705,10 +710,11 @@ class MainWindow(QMainWindow):
             graph_file_path_2 = os.path.join(parent_folder, 'Result', f"DQ_distribution.png")
             table_file_path = os.path.join(parent_folder, 'Result', f"DQ_table.csv")
 
+            if os.path.exists(graph_file_path_2):
+                os.remove(graph_file_path_2)
+
         if os.path.exists(graph_file_path):
             os.remove(graph_file_path)
-        if os.path.exists(graph_file_path_2):
-            os.remove(graph_file_path_2)
         if os.path.exists(table_file_path):
             os.remove(table_file_path)
 

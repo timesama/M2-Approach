@@ -79,7 +79,7 @@
        </rect>
       </property>
       <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
+       <set>QAbstractItemView::CurrentChanged</set>
       </property>
       <property name="columnCount">
        <number>4</number>
@@ -174,7 +174,7 @@
        </rect>
       </property>
       <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
+       <set>QAbstractItemView::CurrentChanged</set>
       </property>
       <property name="columnCount">
        <number>4</number>
