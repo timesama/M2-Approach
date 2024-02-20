@@ -796,6 +796,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>Load</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_Phasing">
+    <property name="geometry">
+     <rect>
+      <x>809</x>
+      <y>280</y>
+      <width>121</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Manual Phasing</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <customwidgets>

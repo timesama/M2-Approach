@@ -11,6 +11,7 @@ from ui_Form import Ui_Analyzer
 from ui_ChooseFiles import Ui_ChooseFiles
 from ui_Notification import Ui_Dialog
 from ui_Error import Ui_Error
+from ui_PhasingManual import Ui_Form as Ui_PhasingManual
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -81,8 +82,10 @@ class MainWindow(QMainWindow):
         # Buttons
         self.ui.btn_Start.setEnabled(False)
         self.ui.btn_Save.setEnabled(False)
+        self.ui.pushButton_Phasing.clicked.connect(self.open_phasing_manual)
         
         self.ui.radioButton_Log.clicked.connect(self.t2_dq_graph)
+        
 
 
         # Draw graph Temperature vs combobox option
@@ -101,8 +104,14 @@ class MainWindow(QMainWindow):
             self.selected_files = fileNames
         self.ui.btn_Start.setEnabled(True)
 
+    def open_phasing_manual(self):
+        self.phasing_manual_window = PhasingManual()
+        self.phasing_manual_window.show()
 
     def analysis(self):
+        
+
+
         current_tab_index = self.ui.tabWidget.currentIndex()
         
         graph_fft = self.ui.FFTWidget
@@ -833,6 +842,18 @@ class AlertDialog(QDialog, Ui_Error):
     def close_dialog(self):
         self.reject() 
         
+class PhasingManual(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.ui = Ui_PhasingManual()
+        self.ui.setupUi(self)
+
+        graph_phasing = self.ui.PhasingGraph
+        graph_phasing.getAxis('bottom').setLabel("Frequency, MHz")
+        graph_phasing.getAxis('left').setLabel("Amplitude, a.u.")
+        graph_phasing.setBackground('w')
+        graph_phasing.setTitle("Phasing")   
+
 
 
 if __name__ == "__main__":
