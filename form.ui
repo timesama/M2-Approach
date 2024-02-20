@@ -174,7 +174,7 @@
        </rect>
       </property>
       <property name="editTriggers">
-       <set>QAbstractItemView::CurrentChanged</set>
+       <set>QAbstractItemView::AllEditTriggers</set>
       </property>
       <property name="columnCount">
        <number>4</number>
@@ -401,7 +401,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </item>
       <item>
        <property name="text">
-        <string>Pseudo Voight</string>
+        <string>Pseudo Voigt</string>
        </property>
       </item>
      </widget>
