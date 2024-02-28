@@ -107,11 +107,11 @@ class MainWindow(QMainWindow):
 
         legend = pg.LegendItem(offset=(300, 10), parent=self.ui.FidWidget.graphicsItem())
 
+        if not self.load_data_and_check_validity((self.selected_files[0]), current_tab_index):
+            return
+
         for i, file_path in enumerate(self.selected_files, start=1):
             filename = os.path.basename(file_path)
-
-            if not self.load_data_and_check_validity(file_path, current_tab_index):
-                return
 
             self.disable_buttons()
             self.ui.btn_SelectFiles.setEnabled(False)
@@ -151,18 +151,19 @@ class MainWindow(QMainWindow):
 
         M2, T2 = self.calculate_M2(Real_apod, Frequency)
 
-        if current_tab_index == 0 and filename.startswith("SE"):
-            match = re.search(r'.*_(-?\s*\d+)_c.dat', filename)
+        if current_tab_index == 0:
+            match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
             temperature = self.extract_info(match)
 
             SFC = self.calculate_SFC(Amp)
             self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
 
             if self.ui.radioButton.isChecked():
+                print('Checked')
                 self.save_figures(file_path, temperature)
 
 
-        elif current_tab_index == 1 and filename.startswith("DQ"):
+        elif current_tab_index == 1:
             match = re.search(r'_(\d+\.\d+)_', filename)
             dq_time = self.extract_info(match)
 
@@ -481,14 +482,19 @@ class MainWindow(QMainWindow):
 
         graph_fft = self.ui.FFTWidget
         graph_fid = self.ui.FidWidget
-        
-        fft_file_path = os.path.join(parent_folder, 'Result', f"FFT_{variable}.png")
-        fid_file_path = os.path.join(parent_folder, 'Result', f"FID_{variable}.png")
 
-        if os.path.exists(fft_file_path):
-            os.remove(fft_file_path)
-        if os.path.exists(fid_file_path):
-            os.remove(fid_file_path)
+        fft_file_path = (parent_folder + '/Result/' + f"FFT_{variable}.png")
+        fid_file_path = (parent_folder + '/Result/' + f"FID_{variable}.png")
+        os.makedirs(parent_folder + '/Result/', exist_ok=True)
+   
+        
+        # fft_file_path = os.path.normpath(os.path.join(parent_folder, 'Result', f"FFT_{variable}.png"))
+        # fid_file_path = os.path.normpath(os.path.join(parent_folder, 'Result', f"FID_{variable}.png"))
+
+        # if os.path.exists(fft_file_path):
+        #     os.remove(fft_file_path)
+        # if os.path.exists(fid_file_path):
+        #     os.remove(fid_file_path)
 
         pg.QtGui.QGuiApplication.processEvents()
 
@@ -513,7 +519,7 @@ class MainWindow(QMainWindow):
                 self.selected_files.clear()
                 return False
             
-        elif not (filename.startswith("SE") and current_tab_index == 0) and \
+        elif not ((filename.startswith("SE") or filename.startswith("XS")) and current_tab_index == 0) and \
             not (filename.startswith("DQ") and current_tab_index == 1):
             dialog = NotificationDialog()
             if dialog.exec() == QDialog.Rejected:
