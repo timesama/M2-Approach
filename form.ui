@@ -813,6 +813,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
    </widget>
 <<<<<<< HEAD
+<<<<<<< HEAD
    <widget class="QPushButton" name="btn_Add">
     <property name="geometry">
      <rect>
@@ -826,6 +827,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>Add</string>
     </property>
    </widget>
+=======
+>>>>>>> parent of dfcb10d (Add button adds files)
 =======
 >>>>>>> parent of dfcb10d (Add button adds files)
   </widget>
