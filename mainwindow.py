@@ -50,8 +50,17 @@ class MainWindow(QMainWindow):
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
         self.ui.dq_max.valueChanged.connect(self.update_dq_graphs)
 
+        self.ui.comboBox_4.currentIndexChanged.connect(self.update_file)
+
         # Disable buttons initially
         self.disable_buttons()
+
+    def update_file(self):
+        # self.ui.comboBox_4.setCurrentIndex(i-1)
+        i = self.ui.comboBox_4.currentIndex() + 1
+        current_tab_index =  self.ui.tabWidget.currentIndex()
+        file_path = self.selected_files[i-1]
+        self.process_file_data(file_path, current_tab_index, i)
 
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
@@ -84,7 +93,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox.setEnabled(False)
         self.ui.comboBox_2.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
-        self.ui.btn_SingleFile.setEnabled(False)
         self.ui.checkBox.setEnabled(False)
 
     def enable_buttons(self):
@@ -99,13 +107,13 @@ class MainWindow(QMainWindow):
         self.ui.comboBox.setEnabled(True)
         self.ui.comboBox_2.setEnabled(True)
         self.ui.radioButton_Log.setEnabled(True)
-        self.ui.btn_SingleFile.setEnabled(True)
         self.ui.checkBox.setEnabled(True)
     
     # All these functions refer to the general analysis where FFT and FID are produced
     def analysis(self):
 
         # Clear Combobox
+       
         while self.ui.comboBox_4.count()>0:
             self.ui.comboBox_4.removeItem(0)
 
@@ -128,8 +136,8 @@ class MainWindow(QMainWindow):
             self.ui.radioButton.setEnabled(False)
 
             self.ui.comboBox_4.addItem(f"{filename}")
-            self.ui.comboBox_4.setCurrentIndex(i-1)
-
+            self.ui.comboBox_4.setCurrentIndex(-1)
+            
             self.ui.textEdit_6.setText(f"Analysing file {i} out of {len(self.selected_files)}")
 
             self.process_file_data(file_path, current_tab_index, i)
@@ -226,7 +234,7 @@ class MainWindow(QMainWindow):
         graph.plot(x, y3, pen='b')
 
     # Working with SE graphs
-    def update_yaxis(self, index):
+    def update_yaxis(self):
         x = self.read_column_values(self.ui.table_SE, 0)
 
         text = self.ui.comboBox.currentText()
@@ -373,6 +381,9 @@ class MainWindow(QMainWindow):
         return frac * lorenz_component + (1 - frac) * gauss_component
     
     # Working with tables
+    def nan_value(self, table, row, column_index):
+        table.setItem(row, column_index, QTableWidgetItem('NaN'))
+
     def fill_table(self, table, c1, c2, c3, c4, i):
         j = i-1
 
@@ -389,8 +400,10 @@ class MainWindow(QMainWindow):
         column_values = []
         for row in range(table.rowCount()):
             item = table.item(row, column_index)
-            if item is not None:
+            if item is not None and item.text() != '':
                 column_values.append(float(item.text()))  # Assuming the values are numeric!!!!!
+            else:
+                self.nan_value(table, row, column_index)
         return column_values
 
     # Save and load data

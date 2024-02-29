@@ -786,6 +786,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <height>30</height>
      </rect>
     </property>
+    <property name="placeholderText">
+     <string>Choose File for Analysis</string>
+    </property>
    </widget>
    <widget class="QCheckBox" name="checkBox">
     <property name="geometry">
