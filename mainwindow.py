@@ -22,11 +22,8 @@ class MainWindow(QMainWindow):
         self.ui = Ui_Analyzer()
         self.ui.setupUi(self)
 
-        self.selected_files = []
-
         # Connect buttons to their respective slots
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
-        self.ui.btn_Add.clicked.connect(self.open_select_dialog)
         self.ui.btn_Start.clicked.connect(self.analysis)
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.btn_Load.clicked.connect(self.load_data)
@@ -85,11 +82,9 @@ class MainWindow(QMainWindow):
         for col in range(table.columnCount()):
             for row in range(table.rowCount()):
                 item = table.item(row, col)
-                if item is not None:
-                    item.setBackground(QColor(255, 255, 255))
+                item.setBackground(QColor(255, 255, 255))
             item_selected = table.item(row_selected-1, col)
-            if item_selected is not None:
-                item_selected.setBackground(QColor(255, 255, 0))
+            item_selected.setBackground(QColor(255, 255, 0))
         
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
@@ -106,9 +101,8 @@ class MainWindow(QMainWindow):
         dlg = OpenFilesDialog(self)
         if dlg.exec():
             fileNames = dlg.selectedFiles()
-            self.selected_files.extend(fileNames)
+            self.selected_files = fileNames
         self.ui.btn_Start.setEnabled(True)
-        self.ui.btn_Add.setEnabled(True)
 
     def open_phasing_manual(self):
         self.phasing_manual_window = PhasingManual()
@@ -124,7 +118,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_2.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
         self.ui.checkBox.setEnabled(False)
-        self.ui.btn_Add.setEnabled(False)
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -140,7 +133,6 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_Log.setEnabled(True)
         self.ui.checkBox.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
-        self.ui.btn_Add.setEnabled(True)
     
     # All these functions refer to the general analysis where FFT and FID are produced
     def analysis(self):
@@ -773,7 +765,7 @@ class OpenFilesDialog(QFileDialog, Ui_ChooseFiles):
         
 
     def on_file_selected(self, files):
-        self.selected_files.extend(files)
+        self.selected_files = files
 
 class NotificationDialog(QDialog, Ui_Dialog):
     stateChanged = Signal(bool)
