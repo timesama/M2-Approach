@@ -3,6 +3,7 @@ import sys, os, re
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog
 from PySide6.QtCore import QCoreApplication, Signal
+from PySide6.QtGui import QColor
 import numpy as np
 from scipy.optimize import curve_fit
 import pyqtgraph as pg
@@ -24,7 +25,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Start.clicked.connect(self.analysis)
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.btn_Load.clicked.connect(self.load_data)
-        self.ui.pushButton_Phasing.clicked.connect(self.open_phasing_manual)
+        self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
         self.ui.radioButton_Log.clicked.connect(self.plot_fit)
 
         # Graph setup
@@ -56,12 +57,33 @@ class MainWindow(QMainWindow):
         self.disable_buttons()
 
     def update_file(self):
-        # self.ui.comboBox_4.setCurrentIndex(i-1)
         i = self.ui.comboBox_4.currentIndex() + 1
         current_tab_index =  self.ui.tabWidget.currentIndex()
-        file_path = self.selected_files[i-1]
+        try:
+            file_path = self.selected_files[i-1]
+        except:
+            return
+        
         self.process_file_data(file_path, current_tab_index, i)
 
+        # Update general figures
+        if current_tab_index == 1:
+            self.highlight_row(self.ui.table_DQ, i) 
+            self.update_dq_graphs()
+        elif current_tab_index == 0:
+            self.highlight_row(self.ui.table_SE, i)
+            self.update_yaxis()
+
+        #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
+            
+    def highlight_row(self, table, row_selected):
+        for col in range(table.columnCount()):
+            for row in range(table.rowCount()):
+                item = table.item(row, col)
+                item.setBackground(QColor(255, 255, 255))
+            item_selected = table.item(row_selected-1, col)
+            item_selected.setBackground(QColor(255, 255, 0))
+        
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
         graph_widget.getAxis('bottom').setLabel(xlabel)
@@ -87,7 +109,7 @@ class MainWindow(QMainWindow):
     def disable_buttons(self):
         self.ui.btn_Start.setEnabled(False)
         self.ui.btn_Save.setEnabled(False)
-        self.ui.pushButton_Phasing.setEnabled(False)
+        self.ui.btn_Phasing.setEnabled(False)
         self.ui.dq_min.setEnabled(False)
         self.ui.dq_max.setEnabled(False)
         self.ui.comboBox.setEnabled(False)
@@ -100,7 +122,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Start.setEnabled(True)
         self.ui.btn_Save.setEnabled(True)
         self.ui.radioButton.setEnabled(True)
-        self.ui.pushButton_Phasing.setEnabled(True)
+        self.ui.btn_Phasing.setEnabled(True)
         self.ui.btn_Load.setEnabled(True)
         self.ui.dq_min.setEnabled(True)
         self.ui.dq_max.setEnabled(True)
@@ -108,6 +130,7 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_2.setEnabled(True)
         self.ui.radioButton_Log.setEnabled(True)
         self.ui.checkBox.setEnabled(True)
+        self.ui.comboBox_4.setEnabled(True)
     
     # All these functions refer to the general analysis where FFT and FID are produced
     def analysis(self):
@@ -153,7 +176,7 @@ class MainWindow(QMainWindow):
         legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[1], name='Re')
         legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[2], name='Im')
         self.enable_buttons()
-        if current_tab_index == 1 and filename.startswith("DQ"):
+        if current_tab_index == 1:
             self.update_dq_graphs()
 
     def process_file_data(self, file_path, current_tab_index, i):
@@ -473,11 +496,16 @@ class MainWindow(QMainWindow):
 
         file_path = tableName[0]
 
+        while self.ui.comboBox_4.count()>0:
+            self.ui.comboBox_4.removeItem(0)
+            self.ui.comboBox_4.setCurrentIndex(-1)
+
         with open(file_path, 'r') as f:
             lines = f.readlines()
             table.setRowCount(len(lines))
             for row, line in enumerate(lines):
                 values = line.strip().split(',')
+                self.ui.comboBox_4.addItem(f"File #{row+1}")
                 for col, value in enumerate(values):
                     item = QTableWidgetItem(value)
                     table.setItem(row, col, item)
@@ -488,7 +516,9 @@ class MainWindow(QMainWindow):
             self.update_dq_graphs()  
 
         self.enable_buttons()
-        self.ui.pushButton_Phasing.setEnabled(False)
+        self.ui.comboBox_4.setEnabled(False)
+        self.ui.checkBox.setEnabled(False)
+        self.ui.btn_Phasing.setEnabled(False)
 
     def save_figures(self, file_path, variable):
         # Set names

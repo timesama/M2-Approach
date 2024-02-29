@@ -78,8 +78,17 @@
         <height>341</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
       <property name="editTriggers">
        <set>QAbstractItemView::CurrentChanged</set>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
       </property>
       <property name="columnCount">
        <number>4</number>
@@ -764,7 +773,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>Load</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_Phasing">
+   <widget class="QPushButton" name="btn_Phasing">
     <property name="geometry">
      <rect>
       <x>930</x>
@@ -801,19 +810,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="text">
      <string>Precise FFT</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_SingleFile">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>270</y>
-      <width>121</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Single File Analysis</string>
     </property>
    </widget>
   </widget>
