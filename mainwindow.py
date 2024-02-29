@@ -84,6 +84,8 @@ class MainWindow(QMainWindow):
         self.ui.comboBox.setEnabled(False)
         self.ui.comboBox_2.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
+        self.ui.btn_SingleFile.setEnabled(False)
+        self.ui.checkBox.setEnabled(False)
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -97,9 +99,16 @@ class MainWindow(QMainWindow):
         self.ui.comboBox.setEnabled(True)
         self.ui.comboBox_2.setEnabled(True)
         self.ui.radioButton_Log.setEnabled(True)
+        self.ui.btn_SingleFile.setEnabled(True)
+        self.ui.checkBox.setEnabled(True)
     
     # All these functions refer to the general analysis where FFT and FID are produced
     def analysis(self):
+
+        # Clear Combobox
+        while self.ui.comboBox_4.count()>0:
+            self.ui.comboBox_4.removeItem(0)
+
         current_tab_index = self.ui.tabWidget.currentIndex()
 
         self.ui.table_SE.setRowCount(len(self.selected_files))
@@ -118,8 +127,9 @@ class MainWindow(QMainWindow):
             self.ui.btn_Load.setEnabled(False)
             self.ui.radioButton.setEnabled(False)
 
-            self.ui.textEdit_4.clear()
-            self.ui.textEdit_4.append(f"File: {filename}")
+            self.ui.comboBox_4.addItem(f"{filename}")
+            self.ui.comboBox_4.setCurrentIndex(i-1)
+
             self.ui.textEdit_6.setText(f"Analysing file {i} out of {len(self.selected_files)}")
 
             self.process_file_data(file_path, current_tab_index, i)
@@ -159,7 +169,6 @@ class MainWindow(QMainWindow):
             self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
 
             if self.ui.radioButton.isChecked():
-                print('Checked')
                 self.save_figures(file_path, temperature)
 
 
@@ -184,8 +193,12 @@ class MainWindow(QMainWindow):
         Re_ap, Im_ap = self.apodization(Time_p, Amp, Re, Im) #(math procedure)
         Time, Fid = self.add_zeros(Time_p, Re_ap, Im_ap, 16384)  #(math procedure)
         Frequency = self.calculate_frequency_scale(Time)  #(math procedure)
-        FFT = self.FFT_handmade(Fid, Time, Frequency)  #(math procedure)
 
+        if self.ui.checkBox.isChecked():
+            FFT = self.FFT_handmade(Fid, Time, Frequency)  #(math procedure)
+        else:
+            FFT = np.fft.fftshift(np.fft.fft(Fid))
+            
         # This condition is never met
         if len(Frequency) != len(FFT):
             Frequency = np.linspace(Frequency[0], Frequency[-1], len(FFT))
@@ -216,22 +229,25 @@ class MainWindow(QMainWindow):
     def update_yaxis(self, index):
         x = self.read_column_values(self.ui.table_SE, 0)
 
-        if index == 0:  # SFC
+        text = self.ui.comboBox.currentText()
+
+        if text == "SFC":  
             y =  self.read_column_values(self.ui.table_SE, 1)
             self.ui.SEWidget.getAxis('left').setLabel("SFC")
             
-        elif index == 1:  # M2
+        elif text == "M2":  
             y =  self.read_column_values(self.ui.table_SE, 2)
             self.ui.SEWidget.getAxis('left').setLabel("M2")
             
-        elif index == 2:  # T2*
+        elif text == "T2*":  
             y =  self.read_column_values(self.ui.table_SE, 3)
             self.ui.SEWidget.getAxis('left').setLabel("T2*")
 
-        elif index == 3:  # Set y
+        else:  # Set y
             y =  [0]
             x = [0]
-            self.ui.SEWidget.getAxis('left').setLabel("NaN")
+            self.ui.SEWidget.getAxis('left').setLabel("Not Set")
+            return
             
             
         self.ui.SEWidget.clear()
@@ -382,8 +398,7 @@ class MainWindow(QMainWindow):
         parent_folder = os.path.dirname(self.selected_files[0])
 
         current_tab_index = self.ui.tabWidget.currentIndex()
-
-        SE_temperature = self.ui.SEWidget        
+     
         DQ_points = self.ui.DQ_Widget_1
         DQ_distribution = self.ui.DQ_Widget_2
 
@@ -391,29 +406,15 @@ class MainWindow(QMainWindow):
         DQ_table = self.ui.table_DQ
 
         if current_tab_index == 0:
-            graph_file_path = os.path.join(parent_folder, 'Result', f"SE_temperature.png")
             table_file_path = os.path.join(parent_folder, 'Result', f"SE_table.csv")
         elif current_tab_index == 1:
             graph_file_path = os.path.join(parent_folder, 'Result', f"DQ_points.png")
             graph_file_path_2 = os.path.join(parent_folder, 'Result', f"DQ_distribution.png")
             table_file_path = os.path.join(parent_folder, 'Result', f"DQ_table.csv")
 
-            if os.path.exists(graph_file_path_2):
-                os.remove(graph_file_path_2)
-
-        if os.path.exists(graph_file_path):
-            os.remove(graph_file_path)
-        if os.path.exists(table_file_path):
-            os.remove(table_file_path)
-
         pg.QtGui.QGuiApplication.processEvents()  # Make sure all events are processed before exporting
 
         if current_tab_index == 0:
-            #Image
-            exporter_se = pg.exporters.ImageExporter(SE_temperature.plotItem)
-            exporter_se.parameters()['width'] = 1000
-            exporter_se.export(graph_file_path)
-
             #Table
             self.save_table_to_csv(table_file_path, SE_table)
 
