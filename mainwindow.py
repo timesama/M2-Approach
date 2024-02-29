@@ -1,12 +1,14 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog
-from PySide6.QtCore import QCoreApplication, Signal
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QPushButton, QSlider, QLabel, QLineEdit
+from PySide6.QtCore import QCoreApplication, Signal, Qt
 from PySide6.QtGui import QColor
+from PySide6 import QtGui
 import numpy as np
 from scipy.optimize import curve_fit
 import pyqtgraph as pg
+import matplotlib.pyplot as plt
 from pyqtgraph.exporters import ImageExporter
 from ui_Form import Ui_Analyzer
 from ui_ChooseFiles import Ui_ChooseFiles
@@ -802,17 +804,64 @@ class AlertDialog(QDialog, Ui_Error):
     def close_dialog(self):
         self.reject() 
         
-class PhasingManual(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.ui = Ui_PhasingManual()
-        self.ui.setupUi(self)
+class PhasingManual(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
 
-        graph_phasing = self.ui.PhasingGraph
-        graph_phasing.getAxis('bottom').setLabel("Frequency, MHz")
-        graph_phasing.getAxis('left').setLabel("Amplitude, a.u.")
-        graph_phasing.setBackground('w')
-        graph_phasing.setTitle("Phasing")   
+        # graph_phasing = self.ui.PhasingGraph
+        # graph_phasing.getAxis('bottom').setLabel("Frequency, MHz")
+        # graph_phasing.getAxis('left').setLabel("Amplitude, a.u.")
+        # graph_phasing.setBackground('w')
+        # graph_phasing.setTitle("Phasing")   
+
+
+    def initUI(self):
+        self.setWindowTitle("Phasing Manual")
+        self.setGeometry(100, 100, 824, 429)
+
+        self.UIAxes = plt.figure().add_subplot(111)
+        self.UIAxes.set_title('FFT Phasing')
+        self.UIAxes.set_xlabel('Freq, MHz')
+        self.UIAxes.set_ylabel('Amplitude')
+        self.UIAxes.set_xlim(-1, 1)
+        self.UIAxes.set_ylim(-30, 50)
+
+        self.aSliderLabel = QLabel('a', self)
+        self.aSliderLabel.setFont(QtGui.QFont('SansSerif', 10))
+        self.aSliderLabel.setGeometry(400, 135, 25, 23)
+
+        # Create more labels, sliders, edit fields, buttons, etc., similarly
+
+        self.createUI()
+        self.show()
+
+    def createUI(self):
+        self.aSlider_a = QSlider(Qt.Vertical, self)
+        self.aSlider_a.setGeometry(400, 170, 3, 200)
+        self.aSlider_a.valueChanged.connect(self.aSlider_2ValueChanged)
+
+        # Create more sliders and connect them to appropriate methods
+
+        self.ManualReadButton = QPushButton('Manual Read', self)
+        self.ManualReadButton.setGeometry(703, 156, 86, 30)
+        self.ManualReadButton.clicked.connect(self.ManualReadButtonPushed)
+
+        # Create more buttons and connect them to appropriate methods
+
+    def aSlider_2ValueChanged(self):
+        value_a = self.aSlider_a.value()
+        value_b = self.aSlider_b.value()
+        value_c = self.aSlider_c.value()
+        value_d = self.aSlider_d.value()
+
+        # Update the UI and perform calculations based on slider values
+
+    def ManualReadButtonPushed(self):
+        value_a = float(self.ValueaEditField.text())
+        value_b = float(self.ValuebEditField.text())
+        value_c = float(self.ValuecEditField.text())
+        value_d = float(self.ValuedEditField.text())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

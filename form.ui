@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Analyzer</class>
- <widget class="QMainWindow" name="Analyzer">
+ <widget class="QMainWindow" name="NMR">
   <property name="geometry">
    <rect>
     <x>0</x>
