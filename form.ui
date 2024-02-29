@@ -812,6 +812,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>Precise FFT</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btn_Add">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>140</y>
+      <width>80</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <customwidgets>
