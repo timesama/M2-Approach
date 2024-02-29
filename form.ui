@@ -812,6 +812,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>Precise FFT</string>
     </property>
    </widget>
+<<<<<<< HEAD
    <widget class="QPushButton" name="btn_Add">
     <property name="geometry">
      <rect>
@@ -825,6 +826,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>Add</string>
     </property>
    </widget>
+=======
+>>>>>>> parent of dfcb10d (Add button adds files)
   </widget>
  </widget>
  <customwidgets>
