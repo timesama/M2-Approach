@@ -803,7 +803,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QPushButton" name="btn_SingleFile">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>360</x>
       <y>270</y>
       <width>121</width>
       <height>22</height>
