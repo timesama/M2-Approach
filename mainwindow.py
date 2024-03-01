@@ -71,10 +71,6 @@ class MainWindow(QMainWindow):
         
         self.process_file_data(file_path, current_tab_index, i)
 
-    def clear_list(self):
-        self.selected_files = []
-
-
         # Update general figures
         if current_tab_index == 1:
             self.highlight_row(self.ui.table_DQ, i) 
@@ -84,6 +80,9 @@ class MainWindow(QMainWindow):
             self.update_yaxis()
 
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
+            
+    def clear_list(self):
+        self.selected_files = []
             
     def highlight_row(self, table, row_selected):
         for col in range(table.columnCount()):
