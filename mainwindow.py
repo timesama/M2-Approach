@@ -79,6 +79,8 @@ class MainWindow(QMainWindow):
             self.highlight_row(self.ui.table_SE, i)
             self.update_yaxis()
 
+        self.ui.btn_Phasing.setEnabled(True)
+
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
             
     def clear_list(self):
@@ -115,7 +117,9 @@ class MainWindow(QMainWindow):
 
     def open_phasing_manual(self):
         self.phasing_manual_window = PhasingManual()
+        self.phasing_manual_window.read_data(self.Frequency, self.Re_spectra, self.Im_spectra)
         self.phasing_manual_window.show()
+        
 
     def disable_buttons(self):
         self.ui.btn_Start.setEnabled(False)
@@ -134,7 +138,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_Start.setEnabled(True)
         self.ui.btn_Save.setEnabled(True)
         self.ui.radioButton.setEnabled(True)
-        self.ui.btn_Phasing.setEnabled(True)
         self.ui.btn_Load.setEnabled(True)
         self.ui.dq_min.setEnabled(True)
         self.ui.dq_max.setEnabled(True)
@@ -196,6 +199,7 @@ class MainWindow(QMainWindow):
         legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[1], name='Re')
         legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[2], name='Im')
         self.enable_buttons()
+        self.ui.btn_Phasing.setEnabled(True) # TODO: delete after setting phasing manual.
         if current_tab_index == 1:
             self.update_dq_graphs()
 
@@ -243,24 +247,24 @@ class MainWindow(QMainWindow):
 
         Re_ap, Im_ap = self.apodization(Time_p, Amp, Re, Im) #(math procedure)
         Time, Fid = self.add_zeros(Time_p, Re_ap, Im_ap, 16384)  #(math procedure)
-        Frequency = self.calculate_frequency_scale(Time)  #(math procedure)
+        self.Frequency = self.calculate_frequency_scale(Time)  #(math procedure)
 
         if self.ui.checkBox.isChecked():
-            FFT = self.FFT_handmade(Fid, Time, Frequency)  #(math procedure)
+            FFT = self.FFT_handmade(Fid, Time, self.Frequency)  #(math procedure)
         else:
             FFT = np.fft.fftshift(np.fft.fft(Fid))
             
         # This condition is never met
-        if len(Frequency) != len(FFT):
-            Frequency = np.linspace(Frequency[0], Frequency[-1], len(FFT))
+        if len(self.Frequency) != len(FFT):
+            self.Frequency = np.linspace(self.Frequency[0], self.Frequency[-1], len(FFT))
 
-        Amp_spectra, Re_spectra, Im_spectra = self.simple_baseline_correction(FFT) #(math procedure)
-        Real_apod = self.calculate_apodization(Re_spectra, Frequency) #(math procedure)
+        self.Amp_spectra, self.Re_spectra, self.Im_spectra = self.simple_baseline_correction(FFT) #(math procedure)
+        Real_apod = self.calculate_apodization(self.Re_spectra, self.Frequency) #(math procedure)
 
         # Update FFT graph
-        self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
+        self.update_graphs(self.Frequency, self.Amp_spectra, self.Re_spectra, self.Im_spectra, self.ui.FFTWidget)
 
-        return Frequency, Real_apod, Amp
+        return self.Frequency, Real_apod, Amp
     
     def extract_info(self, pattern):
         if pattern:
@@ -447,7 +451,6 @@ class MainWindow(QMainWindow):
         # Display R2, Xo and FWHM
         self.ui.textEdit_4.setText(f"R\u00B2: {round(R, 4)} \nX\u2080: {round(cen, 4)} \nFWHM: {round(fwhm, 4)} \nFraction (Lorenz): {round(w,2)}")
 
-
     def gaussian(self, x, amp, cen, wid, y0):
         return amp * np.exp(-(x - cen)**2 / (2 * wid**2)) + y0
 
@@ -459,7 +462,6 @@ class MainWindow(QMainWindow):
         gaussian = amp *(np.exp((-4 * np.log(2) * (x - cen)**2) / wid**2)) / (wid * np.sqrt(np.pi / (4 * np.log(2))))
         return  (frac * lorentzian + (1 - frac) * gaussian) + y0
 
-    
     def calculate_r_squared(self, y_true, y_pred):
 
         y_true = np.array(y_true)
@@ -507,7 +509,6 @@ class MainWindow(QMainWindow):
 
     # Save and load data
     def save_data(self):
-        #TODO indexing of existing files
         parent_folder = os.path.dirname(self.selected_files[0])
 
         current_tab_index = self.ui.tabWidget.currentIndex()
@@ -526,6 +527,13 @@ class MainWindow(QMainWindow):
             table_file_path = os.path.join(parent_folder, 'Result', f"DQ_table.csv")
 
         pg.QtGui.QGuiApplication.processEvents()  # Make sure all events are processed before exporting
+
+            # Check if the file already exists, if so, append an index to the filename
+        if os.path.exists(table_file_path):
+            index = 1
+            while os.path.exists(f"{table_file_path[:-4]} ({index}).csv"):
+                index += 1
+            table_file_path = f"{table_file_path[:-4]} ({index}).csv"
 
         if current_tab_index == 0:
             #Table
@@ -559,6 +567,7 @@ class MainWindow(QMainWindow):
 
     def load_data(self):
         dlg = OpenFilesDialog(self)
+        self.ui.btn_Save.setEnabled(False)
         if dlg.exec():
             tableName = dlg.selectedFiles()
             self.selected_table = tableName
@@ -863,16 +872,112 @@ class AlertDialog(QDialog, Ui_Error):
         self.reject() 
         
 class PhasingManual(QDialog):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_PhasingManual()
         self.ui.setupUi(self)
 
+        self.Frequency = None
+        self.Re_spectra = None
+        self.Im_spectra = None
+
         graph_phasing = self.ui.PhasingGraph
         graph_phasing.getAxis('bottom').setLabel("Frequency, MHz")
         graph_phasing.getAxis('left').setLabel("Amplitude, a.u.")
         graph_phasing.setBackground('w')
-        graph_phasing.setTitle("Phasing")   
+        graph_phasing.setTitle("Phasing")
+        self.ui.PhasingGraph.addLegend()
+
+        self.ui.pushButton_2.clicked.connect(self.zero)
+        self.ui.verticalSlider_a.valueChanged.connect(self.value_changed)
+        self.ui.verticalSlider_b.valueChanged.connect(self.value_changed)
+        self.ui.verticalSlider_c.valueChanged.connect(self.value_changed)
+        self.ui.verticalSlider_d.valueChanged.connect(self.value_changed)
+        self.ui.dial.valueChanged.connect(self.smoothing_changed)
+        self.ui.pushButton_3.clicked.connect(self.manual_read)
+
+    def read_data(self, Frequency, Re_spectra, Im_spectra):
+        self.Frequency = Frequency
+        self.Re = Im_spectra
+        self.Im = Re_spectra
+
+        self.zero()
+
+    def zero(self):
+        self.a = 0
+        self.b = 0
+        self.c = 0
+        self.d = 0
+        self.Smooth = 0
+
+        self.ui.verticalSlider_a.setValue(0)
+        self.ui.verticalSlider_b.setValue(self.b)
+        self.ui.verticalSlider_c.setValue(self.c)
+        self.ui.verticalSlider_d.setValue(self.d)
+        self.ui.Box_a.setValue(self.a)
+        self.ui.Box_b.setValue(self.b)
+        self.ui.Box_c.setValue(self.c)
+        self.ui.Box_d.setValue(self.d)
+        self.ui.dial.setValue(self.Smooth)
+        self.ui.Box_smooth.setValue(self.Smooth)
+
+        self.process_data()
+
+    #TODO: Integral, delta, read data from box to slider, zero somehow zeros one by one
+    
+    def process_data(self):
+        Re_phased = self.calculate_phase()
+        self.update_plot(Re_phased)
+
+    
+    def calculate_phase(self):
+        phi = self.a + self.b * self.Frequency + self.c * self.Frequency ** 2 + self.d * self.Frequency ** 3
+        Real_phased = self.Re * np.cos(np.deg2rad(phi)) - self.Im * np.sin(np.deg2rad(phi))
+        return Real_phased
+
+    def update_plot(self, Re_phased):
+        self.ui.PhasingGraph.clear()
+        self.ui.PhasingGraph.plot(self.Frequency, self.Re, pen='k', name = 'Original') #Real origin
+        self.ui.PhasingGraph.plot(self.Frequency, Re_phased, pen='b', name = 'Phased') #Real phased
+
+    def value_changed(self):
+        self.a = self.ui.verticalSlider_a.value()
+        self.b = self.ui.verticalSlider_b.value()
+        self.c = self.ui.verticalSlider_c.value()
+        self.d = self.ui.verticalSlider_d.value()
+
+        self.ui.Box_a.setValue(self.a)
+        self.ui.Box_b.setValue(self.b)
+        self.ui.Box_c.setValue(self.c)
+        self.ui.Box_d.setValue(self.d)
+
+
+        if self.Frequency is not None and self.Re is not None and self.Im is not None:
+            self.process_data()
+        else:
+            return
+
+    def smoothing_changed(self):
+        self.Smooth = self.ui.dial.value()
+        self.ui.Box_smooth.setValue(self.Smooth)
+        self.process_data()
+
+    def manual_read(self):
+        self.a = self.ui.Box_a.value()
+        self.b = self.ui.Box_b.value()
+        self.c = self.ui.Box_c.value()
+        self.d = self.ui.Box_d.value()
+        self.Smooth = self.ui.Box_smooth.value()
+
+        self.ui.dial.setValue(self.Smooth)
+        self.ui.verticalSlider_a.setValue(self.a)
+        self.ui.verticalSlider_b.setValue(self.b)
+        self.ui.verticalSlider_c.setValue(self.c)
+        self.ui.verticalSlider_d.setValue(self.d)
+
+        self.process_data()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
