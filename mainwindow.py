@@ -6,6 +6,7 @@ from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor
 import numpy as np
 from scipy.optimize import curve_fit
+from scipy.signal import savgol_filter
 import pyqtgraph as pg
 from pyqtgraph.exporters import ImageExporter
 from ui_Form import Ui_Analyzer
@@ -321,8 +322,11 @@ class MainWindow(QMainWindow):
 
     # Working with DQ graphs
     def update_dq_graphs(self):
-        self.linearization()
-        self.plot_fit()
+        if len(self.selected_files) > 1:
+            self.linearization()
+            self.plot_fit()
+        else:
+            return
 
     def dq_t2_graph(self):
         x = self.read_column_values(self.ui.table_DQ, 0)
@@ -912,34 +916,54 @@ class PhasingManual(QDialog):
         self.Smooth = 0
 
         self.ui.verticalSlider_a.setValue(0)
-        self.ui.verticalSlider_b.setValue(self.b)
-        self.ui.verticalSlider_c.setValue(self.c)
-        self.ui.verticalSlider_d.setValue(self.d)
-        self.ui.Box_a.setValue(self.a)
-        self.ui.Box_b.setValue(self.b)
-        self.ui.Box_c.setValue(self.c)
-        self.ui.Box_d.setValue(self.d)
-        self.ui.dial.setValue(self.Smooth)
-        self.ui.Box_smooth.setValue(self.Smooth)
+        self.ui.verticalSlider_b.setValue(0)
+        self.ui.verticalSlider_c.setValue(0)
+        self.ui.verticalSlider_d.setValue(0)
+        self.ui.Box_a.setValue(0)
+        self.ui.Box_b.setValue(0)
+        self.ui.Box_c.setValue(0)
+        self.ui.Box_d.setValue(0)
+        self.ui.dial.setValue(0)
+        self.ui.Box_smooth.setValue(0)
 
         self.process_data()
 
-    #TODO: Integral, delta, read data from box to slider, zero somehow zeros one by one
+    #TODO: save and exit
     
     def process_data(self):
         Re_phased = self.calculate_phase()
         self.update_plot(Re_phased)
-
+        self.update_text(Re_phased)
     
     def calculate_phase(self):
         phi = self.a + self.b * self.Frequency + self.c * self.Frequency ** 2 + self.d * self.Frequency ** 3
         Real_phased = self.Re * np.cos(np.deg2rad(phi)) - self.Im * np.sin(np.deg2rad(phi))
+
+        if self.Smooth > 1:
+            self.Smooth = int(self.Smooth)
+            Real_phased = self.smooth(Real_phased)
+
         return Real_phased
+    
+    def smooth(self,y,): #hyinya redo
+        new_array = savgol_filter(y, window_length=self.Smooth, polyorder=1)
+
+        return new_array
 
     def update_plot(self, Re_phased):
         self.ui.PhasingGraph.clear()
-        self.ui.PhasingGraph.plot(self.Frequency, self.Re, pen='k', name = 'Original') #Real origin
+        self.ui.PhasingGraph.plot(self.Frequency, self.Re, pen='r', name = 'Original') #Real origin
         self.ui.PhasingGraph.plot(self.Frequency, Re_phased, pen='b', name = 'Phased') #Real phased
+
+    def update_text(self, Re_phased):
+        Integral = np.trapz(Re_phased)
+        left_mean = np.mean(Re_phased[:100])
+        right_mean = np.mean(Re_phased[-100:])
+        delta = left_mean - right_mean
+
+        self.ui.Integral.setText(f"Integral: {round(Integral,3)}")
+        self.ui.Delta.setText(f"Delta: {round(delta,7)}")
+
 
     def value_changed(self):
         self.a = self.ui.verticalSlider_a.value()
@@ -970,6 +994,13 @@ class PhasingManual(QDialog):
         self.d = self.ui.Box_d.value()
         self.Smooth = self.ui.Box_smooth.value()
 
+        self.ui.verticalSlider_a.valueChanged.disconnect(self.value_changed)
+        self.ui.verticalSlider_b.valueChanged.disconnect(self.value_changed)
+        self.ui.verticalSlider_c.valueChanged.disconnect(self.value_changed)
+        self.ui.verticalSlider_d.valueChanged.disconnect(self.value_changed)
+        self.ui.dial.valueChanged.disconnect(self.smoothing_changed)
+        
+
         self.ui.dial.setValue(self.Smooth)
         self.ui.verticalSlider_a.setValue(self.a)
         self.ui.verticalSlider_b.setValue(self.b)
@@ -977,6 +1008,12 @@ class PhasingManual(QDialog):
         self.ui.verticalSlider_d.setValue(self.d)
 
         self.process_data()
+
+        self.ui.verticalSlider_a.valueChanged.connect(self.value_changed)
+        self.ui.verticalSlider_b.valueChanged.connect(self.value_changed)
+        self.ui.verticalSlider_c.valueChanged.connect(self.value_changed)
+        self.ui.verticalSlider_d.valueChanged.connect(self.value_changed)
+        self.ui.dial.valueChanged.connect(self.smoothing_changed)
 
 
 if __name__ == "__main__":
