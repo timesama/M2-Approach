@@ -16,10 +16,204 @@ from ui_Notification import Ui_Dialog
 from ui_Error import Ui_Error
 from ui_PhasingManual import Ui_Form as Ui_PhasingManual
 
+# Global 
+Frequency = []
+Re_spectra = []
+Im_spectra = []
+
+# Math procedures
+def adjust_frequency(Frequency, FID):
+    # NoClass
+    freq = Frequency
+
+    FFT = np.fft.fftshift(np.fft.fft(FID))
+    if len(freq) != len(FFT):
+        freq = np.linspace(Frequency[0], Frequency[-1], len(FFT))
+
+    index_max = np.argmax(FFT)          
+    index_zero = find_nearest(freq, 0)
+    delta_index = index_max - index_zero
+
+    FFT_shifted = np.concatenate((FFT[delta_index:], FFT[:delta_index]))
+
+    FID_shifted = np.fft.ifft(np.fft.fftshift(FFT_shifted))
+
+    return FID_shifted
+
 def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
+
+def pre_processing(Time_initial, Real_initial, Imaginary_initial):
+    # NoClass
+    # Crop the data time<0
+    Time_cropped, Real_cropped, Imaginary_cropped = crop_time_zero(Time_initial, Real_initial, Imaginary_initial)
+    # Perform time domain phasing
+    phase_angle, Re_phased, Im_phased = time_domain_phase(Real_cropped, Imaginary_cropped)
+    # Calculate amplitude
+    Amplitude_cropped = calculate_amplitude(Re_phased, Im_phased)
+    # Normalize data to max of Amplitude
+    Amp, Re, Im = normalize(Amplitude_cropped, Re_phased, Im_phased)
+
+    return Time_cropped, Amp, Re, Im  
+
+def calculate_amplitude(Real, Imaginary):
+    # NoClass
+    Amp = np.sqrt(Real ** 2 + Imaginary ** 2)
+    return Amp
+
+def normalize(Amplitude, Real, Imaginary):
+    # NoClass
+    Amplitude_max = np.max(Amplitude)
+    Amp = Amplitude/Amplitude_max
+    Re = Real/Amplitude_max
+    Im = Imaginary/Amplitude_max
+    return Amp, Re, Im
+
+def crop_time_zero(Time, Real, Imaginary):
+    # NoClass
+    if Time[0] < 0:
+        Time_start = 0
+        Time_crop_idx = np.where(Time >= Time_start)[0][0]
+        Time_cropped = Time[Time_crop_idx:]
+        Real_cropped = Real[Time_crop_idx:]
+        Imaginary_cropped = Imaginary[Time_crop_idx:]
+        return Time_cropped, Real_cropped, Imaginary_cropped
+    else:
+        return Time, Real, Imaginary
+
+def time_domain_phase(Real, Imaginary):
+    # NoClass
+    delta = np.zeros(360)
+    
+    for phi in range(360):
+        Re_phased = Real * np.cos(np.deg2rad(phi)) - Imaginary * np.sin(np.deg2rad(phi))
+        Im_phased = Real * np.sin(np.deg2rad(phi)) + Imaginary * np.cos(np.deg2rad(phi))
+        Magnitude_phased = calculate_amplitude(Re_phased, Im_phased)
+        
+        Re_cut = Re_phased[:10]
+        Ma_cut = Magnitude_phased[:10]
+        
+        delta[phi] = np.mean(Ma_cut - Re_cut)
+    
+    idx = np.argmin(delta)
+
+    Re = Real * np.cos(np.deg2rad(idx)) - Imaginary * np.sin(np.deg2rad(idx))
+    Im = Real * np.sin(np.deg2rad(idx)) + Imaginary * np.cos(np.deg2rad(idx))
+
+    
+    return idx, Re, Im
+
+def apodization(Time, Amplitude, Real, Imaginary):
+    # NoClass
+    coeffs = np.polyfit(Time, Amplitude, 1)  # Fit an exponential decay function
+    c = np.polyval(coeffs, Time)
+    d = np.argmin(np.abs(c - 1e-5))
+    sigma = Time[d]
+    apodization_function = np.exp(-(Time / sigma) ** 4)
+    Re_ap = Real * apodization_function
+    Im_ap = Imaginary * apodization_function
+    return Re_ap, Im_ap
+
+def add_zeros(Time, Real, Imaginary, number_of_points):
+    # NoClass
+    length_diff = number_of_points - len(Time)
+    amount_to_add = np.zeros(length_diff)
+
+    Re_zero = np.concatenate((Real, amount_to_add))
+    Im_zero = np.concatenate((Imaginary, amount_to_add))
+
+    dt = Time[1] - Time[0]
+    Time_to_add = Time[-1] + np.arange(1, length_diff + 1) * dt
+
+    Time = np.concatenate((Time, Time_to_add))
+    Fid = np.array(Re_zero + 1j * Im_zero)
+
+    return Time, Fid
+
+def calculate_frequency_scale(Time):
+    # NoClass
+    numberp = len(Time)
+
+    dt = Time[1] - Time[0]
+    f_range = 1 / dt
+    f_nyquist = f_range / 2
+    df = 2 * (f_nyquist / numberp)
+    Freq = np.arange(-f_nyquist, f_nyquist + df, df)
+
+    return Freq
+
+def simple_baseline_correction(FFT):
+    # NoClass
+    twentyperc = int(round(len(FFT) * 0.02))
+    Baseline = np.mean(np.real(FFT[:twentyperc]))
+    FFT_corrected = FFT - Baseline
+    Re = np.real(FFT_corrected)
+    Im = np.imag(FFT_corrected)
+    Amp = calculate_amplitude(Re, Im)
+    return Amp, Re, Im
+
+def calculate_apodization(Real, Freq):
+    # NoClass
+    # Find sigma at 2% from the max amplitude of the spectra
+    Maximum = np.max(np.abs(Real))
+    idx_max = np.argmax(np.abs(Real))
+    ten_percent = Maximum * 0.02
+
+    b = np.argmin(np.abs(Real[idx_max:] - ten_percent))
+    Amplitudes = np.interp(ten_percent, Real, Real)
+    sigma_ap = Freq[idx_max + b]
+
+    apodization_function_s = np.exp(-(Freq / sigma_ap) ** 6)
+
+    Real_apod = Real * apodization_function_s
+    
+    return Real_apod
+
+def calculate_DQ_intensity(Time, Amplitude):
+    # NoClass
+    idx_time = np.argmin(np.abs(Time - 4))
+    DQ = np.mean(Amplitude[:idx_time])
+    return DQ
+
+def calculate_SFC(Amplitude):
+    # NoClass
+    S = np.mean(Amplitude[1:4])
+    L = np.mean(Amplitude[50:70])
+    SFC = (S-L)/S
+    return SFC
+
+def calculate_M2(FFT_real, Frequency):
+    # NoClass
+    # Take the integral of the REAL PART OF FFT by counts
+    Integral = np.trapz(np.real(FFT_real))
+    
+    # Normalize FFT to the Integral value
+    Fur_normalized = np.real(FFT_real) / Integral
+    
+    # Calculate the integral of normalized FFT to receive 1
+    Integral_one = np.trapz(Fur_normalized)
+    
+    # Multiplication (the power ^n will give the nth moment (here it is n=2)
+    Multiplication = (Frequency ** 2) * Fur_normalized
+    
+    # Calculate the integral of multiplication - the nth moment
+    # The (2pi)^2 are the units to transform from rad/sec to Hz
+    # ppbly it should be (2pi)^n for generalized moment calculation
+    M2 = (np.trapz(Multiplication)) * 4 * np.pi ** 2
+    
+    # Check the validity
+    if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
+        print('Apodization is wrong!')
+
+    if M2 < 0:
+        M2 = 0
+        T2 = 0
+    else:
+        T2 = np.sqrt(2/M2)
+    
+    return M2, T2
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -124,9 +318,11 @@ class MainWindow(QMainWindow):
 
     def open_phasing_manual(self):
         self.phasing_manual_window = PhasingManual()
-        self.phasing_manual_window.read_data(self.Frequency, self.Re_spectra, self.Im_spectra)
+        self.phasing_manual_window.read_data()
         self.phasing_manual_window.show()
-        
+
+        self.phasing_manual_window.closed.connect(self.after_phasing)
+
     def disable_buttons(self):
         self.ui.btn_Start.setEnabled(False)
         self.ui.btn_Save.setEnabled(False)
@@ -205,77 +401,118 @@ class MainWindow(QMainWindow):
         legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[1], name='Re')
         legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[2], name='Im')
         self.enable_buttons()
-        self.ui.btn_Phasing.setEnabled(True) # TODO: delete after setting phasing manual.
         if current_tab_index == 1:
             self.update_dq_graphs()
 
     def process_file_data(self, file_path, current_tab_index, i):
         # Read data
         data = np.loadtxt(file_path)
+
+        if data.shape[1] != 3:
+            return
+        
         x, y, z = data[:, 0], data[:, 1], data[:, 2]
 
         # Read name of filename
         filename = os.path.basename(file_path)
         
-        # General mamth procedures and graph updates
+        # General math procedures and graph updates
         Frequency, Real_apod, Amp = self.general_analysis(x,y,z)
 
-        M2, T2 = self.calculate_M2(Real_apod, Frequency)
 
-        if current_tab_index == 0:
-            match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
-            temperature = self.extract_info(match)
+        if self.ui.comboBox_4.currentIndex() == -1:
+            M2, T2 = calculate_M2(Real_apod, Frequency)
 
-            SFC = self.calculate_SFC(Amp)
-            self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
+            if current_tab_index == 0:
+                match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
+                temperature = self.extract_info(match)
 
-            if self.ui.radioButton.isChecked():
-                self.save_figures(file_path, temperature)
+                SFC = calculate_SFC(Amp)
+                self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
 
+                if self.ui.radioButton.isChecked():
+                    self.save_figures(file_path, temperature)
 
-        elif current_tab_index == 1:
-            match = re.search(r'_(\d+\.\d+)_', filename)
-            dq_time = self.extract_info(match)
+            elif current_tab_index == 1:
+                match = re.search(r'_(\d+\.\d+)_', filename)
+                dq_time = self.extract_info(match)
 
-            Amplitude = self.calculate_amplitude(y, z)
-            DQ = self.calculate_DQ_intensity(x, Amplitude)            
-            self.fill_table(self.ui.table_DQ, dq_time, DQ, M2, T2, i)
+                Amplitude = calculate_amplitude(y, z)
+                DQ = calculate_DQ_intensity(x, Amplitude)            
+                self.fill_table(self.ui.table_DQ, dq_time, DQ, M2, T2, i)
 
-            if self.ui.radioButton.isChecked():
-                self.save_figures(file_path, dq_time)
+                if self.ui.radioButton.isChecked():
+                    self.save_figures(file_path, dq_time)
+        else:
+            pass
 
     def general_analysis(self, x, y, z):
+        global Frequency, Re_spectra, Im_spectra
         
         # Simple preprocessing (math procedure)
-        Time_p, Amp, Re, Im = self.pre_processing(x, y, z)
+        Time_p, Amp, Re, Im = pre_processing(x, y, z)
 
         # Update FID graph
         self.update_graphs(Time_p, Amp, Re, Im, self.ui.FidWidget)
 
-        Re_ap, Im_ap = self.apodization(Time_p, Amp, Re, Im) #(math procedure)
-        Time, Fid_unshifted = self.add_zeros(Time_p, Re_ap, Im_ap, 16384)  #(math procedure)
-        self.Frequency = self.calculate_frequency_scale(Time)  #(math procedure)
+        Re_ap, Im_ap = apodization(Time_p, Amp, Re, Im) #(math procedure)
+        Time, Fid_unshifted = add_zeros(Time_p, Re_ap, Im_ap, 16384)  #(math procedure)
+        Frequency = calculate_frequency_scale(Time)  #(math procedure)
         # Adjust frequency
-        Fid = self.adjust_frequency(self.Frequency, Fid_unshifted)
+        Fid = adjust_frequency(Frequency, Fid_unshifted)
 
 
         if self.ui.checkBox.isChecked():
-            FFT = self.FFT_handmade(Fid, Time, self.Frequency)  #(math procedure)
+            FFT = self.FFT_handmade(Fid, Time, Frequency)  #(math procedure)
         else:
             FFT = np.fft.fftshift(np.fft.fft(Fid))
             
         # This condition is never met
-        if len(self.Frequency) != len(FFT):
-            self.Frequency = np.linspace(self.Frequency[0], self.Frequency[-1], len(FFT))
+        if len(Frequency) != len(FFT):
+            Frequency = np.linspace(Frequency[0], Frequency[-1], len(FFT))
 
-        self.Amp_spectra, self.Re_spectra, self.Im_spectra = self.simple_baseline_correction(FFT) #(math procedure)
-        Real_apod = self.calculate_apodization(self.Re_spectra, self.Frequency) #(math procedure)
+        Amp_spectra, Re_spectra, Im_spectra = simple_baseline_correction(FFT) #(math procedure)
+        Real_apod = calculate_apodization(Re_spectra, Frequency) #(math procedure)
 
         # Update FFT graph
-        self.update_graphs(self.Frequency, self.Amp_spectra, self.Re_spectra, self.Im_spectra, self.ui.FFTWidget)
+        self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
 
-        return self.Frequency, Real_apod, Amp
+        return Frequency, Real_apod, Amp
     
+    def after_phasing(self):
+        global Frequency, Re_spectra, Im_spectra
+
+        i = self.ui.comboBox_4.currentIndex()
+        current_tab_index =  self.ui.tabWidget.currentIndex()
+
+        Real_apod   = calculate_apodization(Re_spectra, Frequency) #(math procedure)
+        Amp_spectra = calculate_amplitude(Re_spectra, Im_spectra)
+
+        # Update FFT graph
+        self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
+
+        M2, T2 = calculate_M2(Real_apod, Frequency)
+        M2_r = round(M2, 6)
+        T2_r = round(T2, 6)
+
+        if current_tab_index == 0:
+            table = self.ui.table_SE
+
+            table.setItem(i, 2, QTableWidgetItem(M2_r))
+            table.setItem(i, 3, QTableWidgetItem(T2_r))
+
+            self.update_yaxis()
+
+        elif current_tab_index == 1:
+            table = self.ui.table_DQ
+
+            table.setItem(i, 2, QTableWidgetItem(str(M2_r)))
+            table.setItem(i, 3, QTableWidgetItem(str(T2_r)))
+
+            #self.update_dq_graphs()
+
+        # update table
+
     def extract_info(self, pattern):
         # NoClass
         if pattern:
@@ -669,136 +906,10 @@ class MainWindow(QMainWindow):
         return True
 
     # Math procedures
-    def adjust_frequency(self, Frequency, FID):
-        # NoClass
-        freq = Frequency
-
-        FFT = np.fft.fftshift(np.fft.fft(FID))
-        if len(freq) != len(FFT):
-            freq = np.linspace(Frequency[0], Frequency[-1], len(FFT))
-
-        index_max = np.argmax(FFT)          
-        index_zero = find_nearest(freq, 0)
-        delta_index = index_max - index_zero
-
-        # Delete because it is only for curiosity TODO
-        if delta_index < 0:
-            print('Max in negative freq')
-        else:
-            print('Max in positive freq')
-
-        FFT_shifted = np.concatenate((FFT[delta_index:], FFT[:delta_index]))
-
-        FID_shifted = np.fft.ifft(np.fft.fftshift(FFT_shifted))
-
-        return FID_shifted
-
-    def pre_processing(self, Time_initial, Real_initial, Imaginary_initial):
-        # NoClass
-        # Crop the data time<0
-        Time_cropped, Real_cropped, Imaginary_cropped = self.crop_time_zero(Time_initial, Real_initial, Imaginary_initial)
-        # Perform time domain phasing
-        phase_angle, Re_phased, Im_phased = self.time_domain_phase(Real_cropped, Imaginary_cropped)
-        # Calculate amplitude
-        Amplitude_cropped = self.calculate_amplitude(Re_phased, Im_phased)
-        # Normalize data to max of Amplitude
-        Amp, Re, Im = self.normalize(Amplitude_cropped, Re_phased, Im_phased)
-
-        return Time_cropped, Amp, Re, Im  
-    
-    def calculate_amplitude(self, Real, Imaginary):
-        # NoClass
-        Amp = np.sqrt(Real ** 2 + Imaginary ** 2)
-        return Amp
-    
-    def normalize(self, Amplitude, Real, Imaginary):
-        # NoClass
-        Amplitude_max = np.max(Amplitude)
-        Amp = Amplitude/Amplitude_max
-        Re = Real/Amplitude_max
-        Im = Imaginary/Amplitude_max
-        return Amp, Re, Im
-    
-    def crop_time_zero(self, Time, Real, Imaginary):
-        # NoClass
-        if Time[0] < 0:
-            Time_start = 0
-            Time_crop_idx = np.where(Time >= Time_start)[0][0]
-            Time_cropped = Time[Time_crop_idx:]
-            Real_cropped = Real[Time_crop_idx:]
-            Imaginary_cropped = Imaginary[Time_crop_idx:]
-            print('brit mila')
-            return Time_cropped, Real_cropped, Imaginary_cropped
-        else:
-            return Time, Real, Imaginary
-
-    def time_domain_phase(self, Real, Imaginary):
-        # NoClass
-        delta = np.zeros(360)
-        
-        for phi in range(360):
-            Re_phased = Real * np.cos(np.deg2rad(phi)) - Imaginary * np.sin(np.deg2rad(phi))
-            Im_phased = Real * np.sin(np.deg2rad(phi)) + Imaginary * np.cos(np.deg2rad(phi))
-            Magnitude_phased = self.calculate_amplitude(Re_phased, Im_phased)
-            
-            Re_cut = Re_phased[:10]
-            Ma_cut = Magnitude_phased[:10]
-            
-            delta[phi] = np.mean(Ma_cut - Re_cut)
-        
-        idx = np.argmin(delta)
-
-        Re = Real * np.cos(np.deg2rad(idx)) - Imaginary * np.sin(np.deg2rad(idx))
-        Im = Real * np.sin(np.deg2rad(idx)) + Imaginary * np.cos(np.deg2rad(idx))
-
-        
-        return idx, Re, Im
-
-    def apodization(self, Time, Amplitude, Real, Imaginary):
-        # NoClass
-        coeffs = np.polyfit(Time, Amplitude, 1)  # Fit an exponential decay function
-        c = np.polyval(coeffs, Time)
-        d = np.argmin(np.abs(c - 1e-5))
-        sigma = Time[d]
-        apodization_function = np.exp(-(Time / sigma) ** 4)
-        Re_ap = Real * apodization_function
-        Im_ap = Imaginary * apodization_function
-        return Re_ap, Im_ap
-
-    def add_zeros(self, Time, Real, Imaginary, number_of_points):
-        # NoClass
-        length_diff = number_of_points - len(Time)
-        amount_to_add = np.zeros(length_diff)
-
-        Re_zero = np.concatenate((Real, amount_to_add))
-        Im_zero = np.concatenate((Imaginary, amount_to_add))
-
-        dt = Time[1] - Time[0]
-        Time_to_add = Time[-1] + np.arange(1, length_diff + 1) * dt
-
-        Time = np.concatenate((Time, Time_to_add))
-        Fid = np.array(Re_zero + 1j * Im_zero)
-
-        return Time, Fid
-
-    def calculate_frequency_scale(self, Time):
-        # NoClass
-        numberp = len(Time)
-
-        dt = Time[1] - Time[0]
-        f_range = 1 / dt
-        f_nyquist = f_range / 2
-        df = 2 * (f_nyquist / numberp)
-        Freq = np.arange(-f_nyquist, f_nyquist + df, df)
-
-        return Freq
-
     def FFT_handmade(self, Fid, Time, Freq):
-        # NoClass
-        M = len(Time)
         N = len(Freq)
         Fur = np.zeros(N, dtype=complex)
-    
+
 
         cos_values = np.cos(2 * np.pi * Time[:, None] * Freq)
         sin_values = np.sin(2 * np.pi * Time[:, None] * Freq)
@@ -811,77 +922,6 @@ class MainWindow(QMainWindow):
             Fur[i] = np.sum(Fid * (cos_values[:, i] - 1j * sin_values[:, i]))
         QCoreApplication.processEvents()
         return Fur
-        
-    def simple_baseline_correction(self, FFT):
-        # NoClass
-        twentyperc = int(round(len(FFT) * 0.02))
-        Baseline = np.mean(np.real(FFT[:twentyperc]))
-        FFT_corrected = FFT - Baseline
-        Re = np.real(FFT_corrected)
-        Im = np.imag(FFT_corrected)
-        Amp = self.calculate_amplitude(Re, Im)
-        return Amp, Re, Im
-    
-    def calculate_apodization(self, Real, Freq):
-        # NoClass
-        # Find sigma at 2% from the max amplitude of the spectra
-        Maximum = np.max(np.abs(Real))
-        idx_max = np.argmax(np.abs(Real))
-        ten_percent = Maximum * 0.02
-
-        b = np.argmin(np.abs(Real[idx_max:] - ten_percent))
-        Amplitudes = np.interp(ten_percent, Real, Real)
-        sigma_ap = Freq[idx_max + b]
-
-        apodization_function_s = np.exp(-(Freq / sigma_ap) ** 6)
-
-        Real_apod = Real * apodization_function_s
-        
-        return Real_apod
-
-    def calculate_DQ_intensity(self, Time, Amplitude):
-        # NoClass
-        idx_time = np.argmin(np.abs(Time - 4))
-        DQ = np.mean(Amplitude[:idx_time])
-        return DQ
-
-    def calculate_SFC(self, Amplitude):
-        # NoClass
-        S = np.mean(Amplitude[1:4])
-        L = np.mean(Amplitude[50:70])
-        SFC = (S-L)/S
-        return SFC
-    
-    def calculate_M2(self, FFT_real, Frequency):
-        # NoClass
-        # Take the integral of the REAL PART OF FFT by counts
-        Integral = np.trapz(np.real(FFT_real))
-        
-        # Normalize FFT to the Integral value
-        Fur_normalized = np.real(FFT_real) / Integral
-        
-        # Calculate the integral of normalized FFT to receive 1
-        Integral_one = np.trapz(Fur_normalized)
-        
-        # Multiplication (the power ^n will give the nth moment (here it is n=2)
-        Multiplication = (Frequency ** 2) * Fur_normalized
-        
-        # Calculate the integral of multiplication - the nth moment
-        # The (2pi)^2 are the units to transform from rad/sec to Hz
-        # ppbly it should be (2pi)^n for generalized moment calculation
-        M2 = (np.trapz(Multiplication)) * 4 * np.pi ** 2
-        
-        # Check the validity
-        if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
-            print('Apodization is wrong!')
-
-        if M2 < 0:
-            M2 = 0
-            T2 = 0
-        else:
-            T2 = np.sqrt(2/M2)
-        
-        return M2, T2
 
 class OpenFilesDialog(QFileDialog, Ui_ChooseFiles):
     def __init__(self, parent=None):
@@ -889,7 +929,6 @@ class OpenFilesDialog(QFileDialog, Ui_ChooseFiles):
         self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
         self.setNameFilter(str("Data (*.dat *.txt *.csv)"))
         self.setDirectory(str("C:/Mega/NMR/003_Temperature"))
-        #self.setDirectory(str("C:/Mega/NMR/003_Temperature/2023_12_21_SE_Temperature_PS35000"))
         
         self.selected_files = []  # Variable to store selected file paths
         self.setupUi(self)
@@ -928,15 +967,12 @@ class AlertDialog(QDialog, Ui_Error):
         self.reject() 
         
 class PhasingManual(QDialog):
-
+    # TODO somehow create an araay of ORIGINAL Re_spectra and be able to restore it...
+    closed = Signal()
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_PhasingManual()
         self.ui.setupUi(self)
-
-        self.Frequency = None
-        self.Re_spectra = None
-        self.Im_spectra = None
 
         graph_phasing = self.ui.PhasingGraph
         graph_phasing.getAxis('bottom').setLabel("Frequency, MHz")
@@ -952,13 +988,31 @@ class PhasingManual(QDialog):
         self.ui.verticalSlider_d.valueChanged.connect(self.value_changed)
         self.ui.dial.valueChanged.connect(self.smoothing_changed)
         self.ui.pushButton_3.clicked.connect(self.manual_read)
+        self.ui.pushButton.clicked.connect(self.save_data)
 
-    def read_data(self, Frequency, Re_spectra, Im_spectra):
-        self.Frequency = Frequency
-        self.Re = Im_spectra
-        self.Im = Re_spectra
+        self.Real_freq_phased = None
+
+    def read_data(self):
+        global Frequency, Re_spectra, Im_spectra
 
         self.zero()
+
+    def save_data(self):
+        global Re_spectra
+
+        if self.Real_freq_phased is not None:
+            Re_spectra = self.Real_freq_phased
+        else: 
+            Re_spectra = Re_spectra
+        
+
+        self.close()
+
+    def closeEvent(self, event):
+        self.closed.emit()
+        super().closeEvent(event)
+
+
 
     def zero(self):
         self.a = 0
@@ -978,45 +1032,49 @@ class PhasingManual(QDialog):
         self.ui.dial.setValue(0)
         self.ui.Box_smooth.setValue(0)
 
-        self.process_data()
-
-    #TODO: save and exit
+        if self.Real_freq_phased is not None:
+            self.process_data()
     
     def process_data(self):
-        Re_phased = self.calculate_phase()
-        self.update_plot(Re_phased)
-        self.update_text(Re_phased)
+        self.Real_freq_phased = self.calculate_phase()
+        self.update_plot()
+        self.update_text()
     
     def calculate_phase(self):
-        phi = self.a + self.b * self.Frequency + self.c * self.Frequency ** 2 + self.d * self.Frequency ** 3
-        Real_phased = self.Re * np.cos(np.deg2rad(phi)) - self.Im * np.sin(np.deg2rad(phi))
+        global Frequency, Re_spectra, Im_spectra
+        phi = self.a + self.b * Frequency + self.c * Frequency ** 2 + self.d * Frequency ** 3
+        self.Real_freq_phased = Re_spectra * np.cos(np.deg2rad(phi)) - Im_spectra * np.sin(np.deg2rad(phi))
 
         if self.Smooth > 1:
             self.Smooth = int(self.Smooth)
-            Real_phased = self.smooth(Real_phased)
+            self.Real_freq_phased = self.smooth(self.Real_freq_phased)
 
-        return Real_phased
-    
+        return self.Real_freq_phased
+
     def smooth(self,y,):
         new_array = savgol_filter(y, window_length=self.Smooth, polyorder=1)
 
         return new_array
 
-    def update_plot(self, Re_phased):
-        self.ui.PhasingGraph.clear()
-        self.ui.PhasingGraph.plot(self.Frequency, self.Re, pen='r', name = 'Original') #Real origin
-        self.ui.PhasingGraph.plot(self.Frequency, Re_phased, pen='b', name = 'Phased') #Real phased
+    def update_plot(self):
+        global Frequency, Re_spectra, Im_spectra
 
-    def update_text(self, Re_phased):
-        Integral = np.trapz(Re_phased)
-        left_mean = np.mean(Re_phased[:100])
-        right_mean = np.mean(Re_phased[-100:])
+        self.ui.PhasingGraph.clear()
+        self.ui.PhasingGraph.plot(Frequency, Re_spectra, pen='r', name = 'Original') #Real origin
+        self.ui.PhasingGraph.plot(Frequency, self.Real_freq_phased, pen='b', name = 'Phased') #Real phased
+
+    def update_text(self):
+        Integral = np.trapz(self.Real_freq_phased)
+        left_mean = np.mean(self.Real_freq_phased[:100])
+        right_mean = np.mean(self.Real_freq_phased[-100:])
         delta = left_mean - right_mean
 
         self.ui.Integral.setText(f"Integral: {round(Integral,3)}")
         self.ui.Delta.setText(f"Delta: {round(delta,7)}")
 
     def value_changed(self):
+        global Frequency, Re_spectra, Im_spectra
+
         self.a = self.ui.verticalSlider_a.value()
         self.b = self.ui.verticalSlider_b.value()
         self.c = self.ui.verticalSlider_c.value()
@@ -1028,7 +1086,7 @@ class PhasingManual(QDialog):
         self.ui.Box_d.setValue(self.d)
 
 
-        if self.Frequency is not None and self.Re is not None and self.Im is not None:
+        if Frequency is not None and Re_spectra is not None and Im_spectra is not None:
             self.process_data()
         else:
             return
