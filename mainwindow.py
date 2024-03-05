@@ -408,13 +408,14 @@ class MainWindow(QMainWindow):
         # Read data
         data = np.loadtxt(file_path)
 
+        # Read name of filename
+        filename = os.path.basename(file_path)
+
         if data.shape[1] != 3:
             return
         
         x, y, z = data[:, 0], data[:, 1], data[:, 2]
 
-        # Read name of filename
-        filename = os.path.basename(file_path)
         
         # General math procedures and graph updates
         Frequency, Real_apod, Amp = self.general_analysis(x,y,z)
