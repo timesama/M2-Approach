@@ -8,12 +8,18 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 import pyqtgraph as pg
+import matplotlib.pyplot as plt
 from pyqtgraph.exporters import ImageExporter
 from ui_Form import Ui_Analyzer
 from ui_ChooseFiles import Ui_ChooseFiles
 from ui_Notification import Ui_Dialog
 from ui_Error import Ui_Error
 from ui_PhasingManual import Ui_Form as Ui_PhasingManual
+
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -121,7 +127,6 @@ class MainWindow(QMainWindow):
         self.phasing_manual_window.read_data(self.Frequency, self.Re_spectra, self.Im_spectra)
         self.phasing_manual_window.show()
         
-
     def disable_buttons(self):
         self.ui.btn_Start.setEnabled(False)
         self.ui.btn_Save.setEnabled(False)
@@ -240,6 +245,7 @@ class MainWindow(QMainWindow):
                 self.save_figures(file_path, dq_time)
 
     def general_analysis(self, x, y, z):
+        
         # Simple preprocessing (math procedure)
         Time_p, Amp, Re, Im = self.pre_processing(x, y, z)
 
@@ -247,8 +253,11 @@ class MainWindow(QMainWindow):
         self.update_graphs(Time_p, Amp, Re, Im, self.ui.FidWidget)
 
         Re_ap, Im_ap = self.apodization(Time_p, Amp, Re, Im) #(math procedure)
-        Time, Fid = self.add_zeros(Time_p, Re_ap, Im_ap, 16384)  #(math procedure)
+        Time, Fid_unshifted = self.add_zeros(Time_p, Re_ap, Im_ap, 16384)  #(math procedure)
         self.Frequency = self.calculate_frequency_scale(Time)  #(math procedure)
+        # Adjust frequency
+        Fid = self.adjust_frequency(self.Frequency, Fid_unshifted)
+
 
         if self.ui.checkBox.isChecked():
             FFT = self.FFT_handmade(Fid, Time, self.Frequency)  #(math procedure)
@@ -268,6 +277,7 @@ class MainWindow(QMainWindow):
         return self.Frequency, Real_apod, Amp
     
     def extract_info(self, pattern):
+        # NoClass
         if pattern:
             info = pattern.group(1)
         else:
@@ -456,17 +466,21 @@ class MainWindow(QMainWindow):
         self.ui.textEdit_4.setText(f"R\u00B2: {round(R, 4)} \nX\u2080: {round(cen, 4)} \nFWHM: {round(fwhm, 4)} \nFraction (Lorenz): {round(w,2)}")
 
     def gaussian(self, x, amp, cen, wid, y0):
+        # NoClass
         return amp * np.exp(-(x - cen)**2 / (2 * wid**2)) + y0
 
     def lorenz(self, x, amp, cen, wid, y0):
+        # NoClass
         return (amp * (wid**2)) / ((x - cen)**2 + (wid**2)) + y0
     
     def voigt(self, x, amp, cen, wid, frac, y0):
+        # NoClass
         lorentzian = amp *(2 * wid) / (np.pi * (4 * (x - cen)**2 + wid**2))
         gaussian = amp *(np.exp((-4 * np.log(2) * (x - cen)**2) / wid**2)) / (wid * np.sqrt(np.pi / (4 * np.log(2))))
         return  (frac * lorentzian + (1 - frac) * gaussian) + y0
 
     def calculate_r_squared(self, y_true, y_pred):
+        # NoClass
 
         y_true = np.array(y_true)
         y_pred = np.array(y_pred)
@@ -654,8 +668,33 @@ class MainWindow(QMainWindow):
             
         return True
 
-    # Math procedures        
+    # Math procedures
+    def adjust_frequency(self, Frequency, FID):
+        # NoClass
+        freq = Frequency
+
+        FFT = np.fft.fftshift(np.fft.fft(FID))
+        if len(freq) != len(FFT):
+            freq = np.linspace(Frequency[0], Frequency[-1], len(FFT))
+
+        index_max = np.argmax(FFT)          
+        index_zero = find_nearest(freq, 0)
+        delta_index = index_max - index_zero
+
+        # Delete because it is only for curiosity TODO
+        if delta_index < 0:
+            print('Max in negative freq')
+        else:
+            print('Max in positive freq')
+
+        FFT_shifted = np.concatenate((FFT[delta_index:], FFT[:delta_index]))
+
+        FID_shifted = np.fft.ifft(np.fft.fftshift(FFT_shifted))
+
+        return FID_shifted
+
     def pre_processing(self, Time_initial, Real_initial, Imaginary_initial):
+        # NoClass
         # Crop the data time<0
         Time_cropped, Real_cropped, Imaginary_cropped = self.crop_time_zero(Time_initial, Real_initial, Imaginary_initial)
         # Perform time domain phasing
@@ -668,10 +707,12 @@ class MainWindow(QMainWindow):
         return Time_cropped, Amp, Re, Im  
     
     def calculate_amplitude(self, Real, Imaginary):
+        # NoClass
         Amp = np.sqrt(Real ** 2 + Imaginary ** 2)
         return Amp
     
     def normalize(self, Amplitude, Real, Imaginary):
+        # NoClass
         Amplitude_max = np.max(Amplitude)
         Amp = Amplitude/Amplitude_max
         Re = Real/Amplitude_max
@@ -679,6 +720,7 @@ class MainWindow(QMainWindow):
         return Amp, Re, Im
     
     def crop_time_zero(self, Time, Real, Imaginary):
+        # NoClass
         if Time[0] < 0:
             Time_start = 0
             Time_crop_idx = np.where(Time >= Time_start)[0][0]
@@ -691,6 +733,7 @@ class MainWindow(QMainWindow):
             return Time, Real, Imaginary
 
     def time_domain_phase(self, Real, Imaginary):
+        # NoClass
         delta = np.zeros(360)
         
         for phi in range(360):
@@ -712,6 +755,7 @@ class MainWindow(QMainWindow):
         return idx, Re, Im
 
     def apodization(self, Time, Amplitude, Real, Imaginary):
+        # NoClass
         coeffs = np.polyfit(Time, Amplitude, 1)  # Fit an exponential decay function
         c = np.polyval(coeffs, Time)
         d = np.argmin(np.abs(c - 1e-5))
@@ -722,6 +766,7 @@ class MainWindow(QMainWindow):
         return Re_ap, Im_ap
 
     def add_zeros(self, Time, Real, Imaginary, number_of_points):
+        # NoClass
         length_diff = number_of_points - len(Time)
         amount_to_add = np.zeros(length_diff)
 
@@ -737,6 +782,7 @@ class MainWindow(QMainWindow):
         return Time, Fid
 
     def calculate_frequency_scale(self, Time):
+        # NoClass
         numberp = len(Time)
 
         dt = Time[1] - Time[0]
@@ -748,6 +794,7 @@ class MainWindow(QMainWindow):
         return Freq
 
     def FFT_handmade(self, Fid, Time, Freq):
+        # NoClass
         M = len(Time)
         N = len(Freq)
         Fur = np.zeros(N, dtype=complex)
@@ -766,6 +813,7 @@ class MainWindow(QMainWindow):
         return Fur
         
     def simple_baseline_correction(self, FFT):
+        # NoClass
         twentyperc = int(round(len(FFT) * 0.02))
         Baseline = np.mean(np.real(FFT[:twentyperc]))
         FFT_corrected = FFT - Baseline
@@ -775,6 +823,7 @@ class MainWindow(QMainWindow):
         return Amp, Re, Im
     
     def calculate_apodization(self, Real, Freq):
+        # NoClass
         # Find sigma at 2% from the max amplitude of the spectra
         Maximum = np.max(np.abs(Real))
         idx_max = np.argmax(np.abs(Real))
@@ -791,17 +840,20 @@ class MainWindow(QMainWindow):
         return Real_apod
 
     def calculate_DQ_intensity(self, Time, Amplitude):
+        # NoClass
         idx_time = np.argmin(np.abs(Time - 4))
         DQ = np.mean(Amplitude[:idx_time])
         return DQ
 
     def calculate_SFC(self, Amplitude):
+        # NoClass
         S = np.mean(Amplitude[1:4])
         L = np.mean(Amplitude[50:70])
         SFC = (S-L)/S
         return SFC
     
     def calculate_M2(self, FFT_real, Frequency):
+        # NoClass
         # Take the integral of the REAL PART OF FFT by counts
         Integral = np.trapz(np.real(FFT_real))
         
@@ -945,7 +997,7 @@ class PhasingManual(QDialog):
 
         return Real_phased
     
-    def smooth(self,y,): #hyinya redo
+    def smooth(self,y,):
         new_array = savgol_filter(y, window_length=self.Smooth, polyorder=1)
 
         return new_array
@@ -963,7 +1015,6 @@ class PhasingManual(QDialog):
 
         self.ui.Integral.setText(f"Integral: {round(Integral,3)}")
         self.ui.Delta.setText(f"Delta: {round(delta,7)}")
-
 
     def value_changed(self):
         self.a = self.ui.verticalSlider_a.value()
