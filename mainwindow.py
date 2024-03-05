@@ -46,7 +46,6 @@ def find_nearest(array, value):
     return idx
 
 def pre_processing(Time_initial, Real_initial, Imaginary_initial):
-    # NoClass
     # Crop the data time<0
     Time_cropped, Real_cropped, Imaginary_cropped = crop_time_zero(Time_initial, Real_initial, Imaginary_initial)
     # Perform time domain phasing
@@ -56,7 +55,41 @@ def pre_processing(Time_initial, Real_initial, Imaginary_initial):
     # Normalize data to max of Amplitude
     Amp, Re, Im = normalize(Amplitude_cropped, Re_phased, Im_phased)
 
-    return Time_cropped, Amp, Re, Im  
+    #TODO long component
+
+    # # Here goes long component
+    # data_ref = np.loadtxt('C:/Mega/NMR/002_SpinMate/SE_Glycerol_4000microsec.dat')
+    # Time_ref, Re_ref, Im_ref = data_ref[:, 0], data_ref[:, 1], data_ref[:, 2]
+
+    # # Crop the data time<0
+    # Time_ref_cropped, Real_ref_cropped, Imaginary_ref_cropped = crop_time_zero(Time_ref, Re_ref, Im_ref)
+    # # Perform time domain phasing
+    # phase_ref_angle, Re_ref_phased, Im_ref_phased = time_domain_phase(Real_ref_cropped, Imaginary_ref_cropped)
+    # # Calculate amplitude
+    # Amplitude_ref_cropped = calculate_amplitude(Re_ref_phased, Im_ref_phased)
+    # # Normalize data to max of Amplitude
+    # Amp_ref, Re_ref, Im_ref = normalize(Amplitude_ref_cropped, Re_ref_phased, Im_ref_phased)
+
+    # Amp = Amp[:7500]
+    # Re = Re[:7500]
+    # Im = Im[:7500]
+
+    # Amp_ref = Amp_ref[:7500]
+    # Re_ref = Re_ref[:7500]
+    # Im_ref = Im_ref[:7500]
+
+    # Amp = Amp/Amp_ref
+    # Re = Re/Amp_ref
+    # Im = Im/Amp_ref
+
+
+
+    # # if self.ui.checkBox_1.isChecked():
+    # #     subtract_long_component()
+
+    # return Time_cropped[:7500], Amp, Re, Im 
+
+    return Time_cropped, Amp, Re, Im   
 
 def calculate_amplitude(Real, Imaginary):
     # NoClass
@@ -92,8 +125,8 @@ def time_domain_phase(Real, Imaginary):
         Im_phased = Real * np.sin(np.deg2rad(phi)) + Imaginary * np.cos(np.deg2rad(phi))
         Magnitude_phased = calculate_amplitude(Re_phased, Im_phased)
         
-        Re_cut = Re_phased[:10]
-        Ma_cut = Magnitude_phased[:10]
+        Re_cut = Re_phased[:100]
+        Ma_cut = Magnitude_phased[:100]
         
         delta[phi] = np.mean(Ma_cut - Re_cut)
     
@@ -354,7 +387,6 @@ class MainWindow(QMainWindow):
     def analysis(self):
 
         # Clear Combobox
-       
         while self.ui.comboBox_4.count()>0:
             self.ui.comboBox_4.removeItem(0)
 
@@ -467,6 +499,7 @@ class MainWindow(QMainWindow):
             FFT = self.FFT_handmade(Fid, Time, Frequency)  #(math procedure)
         else:
             FFT = np.fft.fftshift(np.fft.fft(Fid))
+
             
         # This condition is never met
         if len(Frequency) != len(FFT):
