@@ -53,7 +53,15 @@ def pre_processing(Time_initial, Real_initial, Imaginary_initial):
     # Calculate amplitude
     Amplitude_cropped = calculate_amplitude(Re_phased, Im_phased)
     # Normalize data to max of Amplitude
-    Amp, Re, Im = normalize(Amplitude_cropped, Re_phased, Im_phased)
+    Amp_n, Re_n, Im_n = normalize(Amplitude_cropped, Re_phased, Im_phased)
+    
+    # TODO This is wrong
+    Freq_adjust = calculate_frequency_scale(Time_cropped)
+    Amp_freq = adjust_frequency(Freq_adjust, Amp_n)
+
+    Re = np.real(Amp_freq)
+    Im = np.imag(Amp_freq)
+    Amp = calculate_amplitude(Re, Im)
 
     #TODO long component
 
@@ -125,8 +133,8 @@ def time_domain_phase(Real, Imaginary):
         Im_phased = Real * np.sin(np.deg2rad(phi)) + Imaginary * np.cos(np.deg2rad(phi))
         Magnitude_phased = calculate_amplitude(Re_phased, Im_phased)
         
-        Re_cut = Re_phased[:100]
-        Ma_cut = Magnitude_phased[:100]
+        Re_cut = Re_phased[:50]
+        Ma_cut = Magnitude_phased[:50]
         
         delta[phi] = np.mean(Ma_cut - Re_cut)
     
@@ -319,6 +327,8 @@ class MainWindow(QMainWindow):
             
     def clear_list(self):
         self.selected_files = []
+        self.ui.table_SE.setRowCount(0)
+        self.ui.table_DQ.setRowCount(0)
             
     def highlight_row(self, table, row_selected):
         for col in range(table.columnCount()):
@@ -422,9 +432,9 @@ class MainWindow(QMainWindow):
 
             self.process_file_data(file_path, current_tab_index, i)
 
-        self.finalize_analysis(legend, current_tab_index, filename)
+        self.finalize_analysis(legend, current_tab_index)
 
-    def finalize_analysis(self, legend, current_tab_index, filename):
+    def finalize_analysis(self, legend, current_tab_index):
         self.ui.textEdit_6.setText(f"Finished")
         legend.removeItem('Amplitude')
         legend.removeItem('Re')
@@ -476,6 +486,7 @@ class MainWindow(QMainWindow):
 
                 if self.ui.radioButton.isChecked():
                     self.save_figures(file_path, dq_time)
+
         else:
             pass
 
@@ -489,7 +500,7 @@ class MainWindow(QMainWindow):
         self.update_graphs(Time_p, Amp, Re, Im, self.ui.FidWidget)
 
         Re_ap, Im_ap = apodization(Time_p, Amp, Re, Im) #(math procedure)
-        Time, Fid_unshifted = add_zeros(Time_p, Re_ap, Im_ap, 16384)  #(math procedure)
+        Time, Fid_unshifted = add_zeros(Time_p, Re_ap, Im_ap, 16383)  #(math procedure)
         Frequency = calculate_frequency_scale(Time)  #(math procedure)
         # Adjust frequency
         Fid = adjust_frequency(Frequency, Fid_unshifted)
@@ -532,8 +543,8 @@ class MainWindow(QMainWindow):
         if current_tab_index == 0:
             table = self.ui.table_SE
 
-            table.setItem(i, 2, QTableWidgetItem(M2_r))
-            table.setItem(i, 3, QTableWidgetItem(T2_r))
+            table.setItem(i, 2, QTableWidgetItem(str(M2_r)))
+            table.setItem(i, 3, QTableWidgetItem(str(T2_r)))
 
             self.update_yaxis()
 
