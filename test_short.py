@@ -1,18 +1,13 @@
 # This Python file uses the following encoding: utf-8
-import sys, os, re
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
-import pyqtgraph as pg
 import matplotlib.pyplot as plt
-from pyqtgraph.exporters import ImageExporter
 
-def process_file_data( file_path):
+def process_file_data(file_path):
     # Read data
     data = np.loadtxt(file_path)
-    
     x, y, z = data[:, 0], data[:, 1], data[:, 2]
-
     
     # General math procedures and graph updates
     Frequency, Real_apod, Time_p, Amp, Re, Im = general_analysis(x,y,z)
@@ -48,10 +43,11 @@ def pre_processing(Time_initial, Real_initial, Imaginary_initial):
     Amp_cropped = calculate_amplitude(Real_cropped, Imaginary_cropped) # For plotting only
 
     # Normalize data to max of Amplitude
-    Amp_normalized, Re_normalized, Im_normalized = normalize(Amp_cropped, Real_cropped, Imaginary_cropped)
+    #Amp_normalized, Re_normalized, Im_normalized = normalize(Amp_cropped, Real_cropped, Imaginary_cropped)
 
     # Perform Phasing in time-domain
-    Re_phased, Im_phased = time_domain_phase(Re_normalized, Im_normalized)
+    #Re_phased, Im_phased = time_domain_phase(Re_normalized, Im_normalized)
+    Re_phased, Im_phased = time_domain_phase(Real_cropped, Imaginary_cropped)
     Amp_phased = calculate_amplitude(Re_phased, Im_phased)  
 
     # Perform Frequency adjustment 
@@ -103,12 +99,10 @@ def find_nearest(array, value):
     return idx
 
 def calculate_amplitude(Real, Imaginary):
-    # NoClass
     Amp = np.sqrt(Real ** 2 + Imaginary ** 2)
     return Amp
 
 def normalize(Amplitude, Real, Imaginary):
-    # NoClass
     Amplitude_max = np.max(Amplitude)
     Amp = Amplitude/Amplitude_max
     Re = Real/Amplitude_max
@@ -147,7 +141,6 @@ def time_domain_phase(Real, Imaginary):
     return Re, Im
 
 def apodization(Time, Amplitude, Real, Imaginary):
-    # NoClass
     coeffs = np.polyfit(Time, Amplitude, 1)  # Fit an exponential decay function
     c = np.polyval(coeffs, Time)
     d = np.argmin(np.abs(c - 1e-5))
@@ -174,7 +167,6 @@ def add_zeros(Time, Real, Imaginary, number_of_points):
     return Time, Fid
 
 def calculate_frequency_scale(Time):
-    # NoClass
     numberp = len(Time)
 
     dt = Time[1] - Time[0]
@@ -186,7 +178,6 @@ def calculate_frequency_scale(Time):
     return Freq
 
 def simple_baseline_correction(FFT):
-    # NoClass
     twentyperc = int(round(len(FFT) * 0.02))
     Baseline = np.mean(np.real(FFT[:twentyperc]))
     FFT_corrected = FFT - Baseline
@@ -196,7 +187,6 @@ def simple_baseline_correction(FFT):
     return Amp, Re, Im
 
 def calculate_apodization(Real, Freq):
-    # NoClass
     # Find sigma at 2% from the max amplitude of the spectra
     Maximum = np.max(np.abs(Real))
     idx_max = np.argmax(np.abs(Real))
@@ -213,7 +203,6 @@ def calculate_apodization(Real, Freq):
     return Real_apod
 
 def calculate_SFC(Amplitude):
-    # NoClass
     S = np.mean(Amplitude[1:4])
     L = np.mean(Amplitude[50:70])
     SFC = (S-L)/S
@@ -251,13 +240,13 @@ def calculate_M2(FFT_real, Frequency):
     return M2, T2
 
 def decaying_exponential(x, a, b, c):
-    return a * np.exp(-b * x) + c
+    return a * np.exp(-x/b) + c
 
-Time, Amp, Re, Im = process_file_data(r'C:\Mega\NMR\003_Temperature\2024_03_01_Chocolates\2024_03_07_Chocolate_85per_MSE_SE\SE_Ch85_20_c.dat')
+Time, Amp, Re, Im = process_file_data(r'C:\Mega\NMR\003_Temperature\2024_03_01_Chocolates\2024_03_07_Chocolate_85per_MSE_SE\SE_Ch85_70_c.dat')
 #Time, Amp, Re, Im = process_file_data(r'C:\Mega\NMR\003_Temperature\2023_12_05_CPMG_SE_Temperature_choco_85_2\SE\SE_Chocolate85percent_20_c.dat')
 #Time, Amp, Re, Im = process_file_data(r'C:\Mega\NMR\003_Temperature\2023_12_21_SE_Temperature_PS35000\SE_PS_70_c.dat')
 
-Time_r, Amp_r, Re_r, Im_r = process_file_data(r'C:\Mega\NMR\003_Temperature\2024_03_08_SE_Temperature_Glycerol\SE_Glycerol_20_c.dat')
+Time_r, Amp_r, Re_r, Im_r = process_file_data(r'C:\Mega\NMR\003_Temperature\2024_03_08_SE_Temperature_Glycerol\SE_Glycerol_70_c.dat')
 
 if len(Time) > len(Time_r):
     Time=Time[:len(Time_r)]
@@ -271,39 +260,73 @@ else:
     Im_r=Im_r[:len(Time)]
 
 Re_gly_norm = Re/Amp_r
+Amp_gly_norm = Amp/Amp_r
+Im_gly_norm = Im/Amp_r
 
 plt.figure()
-plt.plot(Time, Re, color = 'black', label = 'Real Sample')
-plt.plot(Time_r, Amp_r, color = 'red', label = 'Amplitude Gly')
-plt.plot(Time, Re_gly_norm, color = 'blue', label = 'Real Normalized')
-plt.xlabel('Time μs')
-plt.ylabel('Normalized Amplitude')
-plt.legend()
-
+plt.plot(Time, Re, 'r--', label='1 Curve')
+plt.plot(Time, Amp, 'k--', label='2 Curve')
+plt.plot(Time, Re_gly_norm, 'r-', label='3 Curve')
+plt.plot(Time, Amp_gly_norm, 'k-', label='4 Curve')
+plt.plot(Time, Im, 'b--', label='4 Curve')
 
 # Fit the decaying exponential function to the data
+maximum = find_nearest(Time, 250)
+minimum = find_nearest(Time, 50)
 
-maximum = find_nearest(Time, 300)
-minimum = np.argmax(Re_gly_norm[:maximum])
-
-# minimum = find_nearest(Time, 50)
-
+# Cut the ranges for fitting
 Time_range = Time[minimum:maximum]
 Re_gly_norm_range = Re_gly_norm[minimum:maximum]
+Amp_gly_norm_range = Amp_gly_norm[minimum:maximum]
+Im_gly_norm_range = Im_gly_norm[minimum:maximum]
 
-popt, pcov = curve_fit(decaying_exponential, Time_range, Re_gly_norm_range, bounds=([0, 0, 0], [np.inf, np.inf, np.inf]))
+# Fit data to exponential decay
+coeff = [0.9, 400, 0.1]
+popt, pcov = curve_fit(decaying_exponential, Time_range, Re_gly_norm_range, p0=coeff, bounds=([0, 0, 0], [np.inf, np.inf, np.inf]))
+popt__, pcov__ = curve_fit(decaying_exponential, Time_range, Amp_gly_norm_range,p0=coeff, bounds=([0, 0, 0], [np.inf, np.inf, np.inf]))
+popt_, pcov_ = curve_fit(decaying_exponential, Time_range, Im_gly_norm_range, p0=[1, 400, 0])
 
-# Plot the original data and the fitted curve
+# Set the ranges for subtraction
+Time_cropped = Time[0:maximum]
+Real_cropped = Re_gly_norm[0:maximum]
+Amp_cropped = Amp_gly_norm[0:maximum]
+Im_cropped = Im_gly_norm[0:maximum]
+
+# Create the fitted data within the desired range
+Real_fitted = decaying_exponential(Time_cropped, *popt)
+Amp_fitted = decaying_exponential(Time_cropped, *popt__)
+Im_fitted = decaying_exponential(Time_cropped, *popt_)
+
 plt.figure()
-plt.plot(Time, Re_gly_norm, color = 'black', label='Original Data')
-plt.plot(Time_range, decaying_exponential(Time_range, *popt), 'r--', label='Fitted Curve')
-plt.xlabel('Time μs')
-plt.ylabel('Amplitude')
-plt.legend()
+plt.plot(Time_cropped, Real_fitted, 'r--', label='1 Curve')
+plt.plot(Time_cropped, Real_cropped, 'r-', label='2 Curve')
+plt.plot(Time_cropped, Amp_fitted, 'k--', label='3 Curve')
+plt.plot(Time_cropped, Amp_cropped, 'k-', label='4 Curve')
+plt.plot(Time_cropped, Im_fitted, 'b--', label='3 Curve')
+plt.plot(Time_cropped, Im_cropped, 'b-', label='4 Curve')
 
 
+# Subtract
+Real_subtracted = Real_cropped - Real_fitted
+#Amp_subtracted = Amp_cropped - Amp_fitted
+Im_subtracted = Im_cropped - Im_fitted
+Amp_subtracted = calculate_amplitude(Real_subtracted, Im_subtracted)
+#Im_subtracted = np.zeros((np.shape(Real_subtracted)))
+
+# Normalize
+Amp_normalized, Re_normalized, Im_normalized = normalize(Amp_subtracted, Real_subtracted, Im_subtracted)
+
+
+plt.figure()
+#plt.plot(Time_cropped, Real_subtracted, 'r--', label='1 Curve')
+#plt.plot(Time_cropped, Amp_subtracted, 'k--', label='2 Curve')
+#plt.plot(Time_cropped, Im_subtracted, 'b--', label='2 Curve')
+plt.plot(Time_cropped, Im_normalized, 'b-', label='Im')
+plt.plot(Time_cropped, Re_normalized, 'r-', label='Re')
+plt.plot(Time_cropped, Amp_normalized, 'k-', label='Am')
 
 
 
 plt.show()
+
 print('end')
