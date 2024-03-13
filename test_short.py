@@ -1,8 +1,9 @@
 # This Python file uses the following encoding: utf-8
 import numpy as np
 from scipy.optimize import curve_fit
-from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
+
+
 
 def process_file_data(file_path):
     # Read data

@@ -1,7 +1,6 @@
 # This Python file uses the following encoding: utf-8
 import numpy as np
 from scipy.optimize import curve_fit
-from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 
 # Step by step time-domain and frequency domain FID processing
@@ -10,8 +9,8 @@ def decaying_exponential(x, a, b, c):
     return a * np.exp(-x/b) + c
 # I lied
 
-file_path = r'C:\Mega\NMR\003_Temperature\2024_03_01_Chocolates\2024_03_07_Chocolate_85per_MSE_SE\SE_Ch85_20_c.dat'
-file_path_glycerol = r'C:\Mega\NMR\003_Temperature\2024_03_08_SE_Temperature_Glycerol\SE_Glycerol_20_c.dat'
+file_path = r'C:\Mega\NMR\003_Temperature\2024_03_01_Chocolates\2024_03_07_Chocolate_85per_MSE_SE\SE_Ch85_30_c.dat'
+file_path_glycerol = r'C:\Mega\NMR\003_Temperature\2024_03_08_SE_Temperature_Glycerol\SE_Glycerol_30_c.dat'
 
 # 1. Read the data:
 data = np.loadtxt(file_path)
