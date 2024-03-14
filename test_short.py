@@ -133,6 +133,7 @@ def time_domain_phase(Real, Imaginary):
         delta[phi] = np.mean(Ma_cut - Re_cut)
     
     idx = np.argmin(delta)
+    print(idx)
 
     Re = Real * np.cos(np.deg2rad(idx)) - Imaginary * np.sin(np.deg2rad(idx))
     Im = Real * np.sin(np.deg2rad(idx)) + Imaginary * np.cos(np.deg2rad(idx))

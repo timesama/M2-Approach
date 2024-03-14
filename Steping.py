@@ -53,6 +53,7 @@ for phi in range(360):
     delta[phi] = np.mean(Ma_cut - Re_cut)
 
 idx = np.argmin(delta)
+print(idx)
 
 Re_phased = Real * np.cos(np.deg2rad(idx)) - Imag * np.sin(np.deg2rad(idx))
 Im_phased = Real * np.sin(np.deg2rad(idx)) + Imag * np.cos(np.deg2rad(idx))
