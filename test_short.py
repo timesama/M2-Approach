@@ -21,58 +21,53 @@ def analysis_time_domain(file_path):
 
     return T_cr, R_sh, I_sh
 
+def reference_long_component(Time, Component, Amplitude_gly, coeff):
+    # 2. Normalize (reference) components to Amplitude of the reference
+    Component_n = Component/Amplitude_gly
+
+    # 3. Cut the ranges for fitting
+    minimum = find_nearest(Time, 50)
+    maximum = find_nearest(Time, 250)
+
+    Time_range = Time[minimum:maximum]
+    Component_n_range = Component_n[minimum:maximum]
+
+    # 7. Fit data to exponential decay
+    popt, _      = curve_fit(decaying_exponential, Time_range, Component_n_range, p0=coeff)
+    
+    # 8. Set the ranges for subtraction
+    Time_cropped  = Time[0:maximum]
+    Component_c   = Component_n[0:maximum]
+
+    # 9. Calculate the curves fitted to data within the desired range
+    Component_f = decaying_exponential(Time_cropped, *popt)
+
+    # 10. Subtract
+    Component_sub = Component_c - Component_f
+
+    return Component_sub, Time_cropped
+
 def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     # r stands for reference, s stands for sample
-    Amp_r = calculate_amplitude(Re_s, Im_r)
+    Amp_r = calculate_amplitude(Re_r, Im_r)
     Amp_s = calculate_amplitude(Re_s, Im_s)
 
     # 1. Crop the arrays together (they should be of the same length, but I know, I know...)
     if len(Time_s) > len(Time_r):
-        Time_  =   Time_s[:len(Time_r)]
+        Time  =   Time_s[:len(Time_r)]
         Amp_s   =   Amp_s[:len(Time_r)]
         Re_s    =   Re_s[:len(Time_r)]
         Im_s    =   Im_s[:len(Time_r)]
     else:  
-        Time_  =   Time_r[:len(Time_s)]
+        Time  =   Time_r[:len(Time_s)]
         Amp_r   =   Amp_r[:len(Time_s)]
-        Re_r    =   Re_r[:len(Time_s)]
-        Im_r    =   Im_r[:len(Time_s)]
 
-    # 2. Normalize (reference) components to Amplitude of the reference
-    Re_gly_norm = Re_s/Amp_r
-    Im_gly_norm = Im_s/Amp_r
-    #Amp_gly_norm = Amp_s/Amp_r
+    coeff_re = [0.9, 400, 0.1]
+    coeff_im = [1, 400, 0]
 
-    # 3. Cut the ranges for fitting
-    minimum = find_nearest(Time_, 50)
-    maximum = find_nearest(Time_, 250)
-
-    Time_range = Time_[minimum:maximum]
-    Re_gly_norm_range = Re_gly_norm[minimum:maximum]
-    Im_gly_norm_range = Im_gly_norm[minimum:maximum]
-    #Amp_gly_norm_range = Amp_gly_norm[minimum:maximum]
-
-    # 7. Fit data to exponential decay
-    coeff = [0.9, 400, 0.1]
-    popt, pcov      = curve_fit(decaying_exponential, Time_range, Re_gly_norm_range, p0=coeff, bounds=([0, 0, 0], [np.inf, np.inf, np.inf]))
-    popt_, pcov_    = curve_fit(decaying_exponential, Time_range, Im_gly_norm_range, p0=[1, 400, 0])
-    #popt__, pcov__ = curve_fit(decaying_exponential, Time_range, Amp_gly_norm_range,p0=coeff, bounds=([0, 0, 0], [np.inf, np.inf, np.inf]))
+    Real_subtracted, Time_cropped   = reference_long_component(Time, Re_s, Amp_r, coeff_re)
+    Im_subtracted, _     = reference_long_component(Time, Im_s, Amp_r, coeff_im)
     
-    # 8. Set the ranges for subtraction
-    Time_cropped = Time_[0:maximum]
-    Real_cropped    = Re_gly_norm[0:maximum]
-    Im_cropped      = Im_gly_norm[0:maximum]
-    #Amp_cropped = Amp_gly_norm[0:maximum]
-
-    # 9. Calculate the curves fitted to data within the desired range
-    Real_fitted = decaying_exponential(Time_cropped, *popt)
-    Im_fitted   = decaying_exponential(Time_cropped, *popt_)
-    #Amp_fitted = decaying_exponential(Time_cropped, *popt__)
-
-    # 10. Subtract
-    Real_subtracted = Real_cropped - Real_fitted
-    Im_subtracted = Im_cropped - Im_fitted
-
     # 11. Normalize
     Re_n, Im_n = normalize(Real_subtracted, Im_subtracted)
 
@@ -229,46 +224,6 @@ def calculate_apodization(Real, Freq):
     Real_apod = Real * apodization_function_s
     
     return Real_apod
-
-def calculate_M2(FFT_real, Frequency):
-    # NoClass
-    # Take the integral of the REAL PART OF FFT by counts
-    Integral = np.trapz(np.real(FFT_real))
-    
-    # Normalize FFT to the Integral value
-    Fur_normalized = np.real(FFT_real) / Integral
-    
-    # Calculate the integral of normalized FFT to receive 1
-    Integral_one = np.trapz(Fur_normalized)
-    
-    # Multiplication (the power ^n will give the nth moment (here it is n=2)
-    Multiplication = (Frequency ** 2) * Fur_normalized
-    
-    # Calculate the integral of multiplication - the nth moment
-    # The (2pi)^2 are the units to transform from rad/sec to Hz
-    # ppbly it should be (2pi)^n for generalized moment calculation
-    M2 = (np.trapz(Multiplication)) * 4 * np.pi ** 2
-    
-    # Check the validity
-    if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
-        print('Apodization is wrong!')
-
-    if M2 < 0:
-        M2 = 0
-        T2 = 0
-    else:
-        T2 = np.sqrt(2/M2)
-    
-    return M2, T2
-
-def decaying_exponential(x, a, b, c):
-    return a * np.exp(-x/b) + c
-
-def calculate_SFC(Amplitude):
-    S = np.mean(Amplitude[1:4])
-    L = np.mean(Amplitude[50:70])
-    SFC = (S-L)/S
-    return SFC
 
 def calculate_amplitude(Real, Imaginary):
     # NoClass

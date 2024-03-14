@@ -63,7 +63,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -717,7 +717,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <bool>true</bool>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="autoExclusive">
      <bool>false</bool>
@@ -899,6 +899,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_2">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>350</x>
@@ -909,6 +912,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="text">
      <string>Subtract long component</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

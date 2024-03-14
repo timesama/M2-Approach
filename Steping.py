@@ -247,7 +247,7 @@ Im_gly_norm_range = Im_gly_norm[minimum:maximum]
 
 # 7. Fit data to exponential decay
 coeff = [0.9, 400, 0.1]
-popt, pcov = curve_fit(decaying_exponential, Time_range, Re_gly_norm_range, p0=coeff, bounds=([0, 0, 0], [np.inf, np.inf, np.inf]))
+popt, pcov = curve_fit(decaying_exponential, Time_range, Re_gly_norm_range, p0=coeff)
 popt__, pcov__ = curve_fit(decaying_exponential, Time_range, Amp_gly_norm_range,p0=coeff, bounds=([0, 0, 0], [np.inf, np.inf, np.inf]))
 popt_, pcov_ = curve_fit(decaying_exponential, Time_range, Im_gly_norm_range, p0=[1, 400, 0])
 
