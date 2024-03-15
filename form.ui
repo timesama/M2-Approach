@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Analyzer</class>
- <widget class="QMainWindow" name="Analyzer">
+ <class>NMR</class>
+ <widget class="QMainWindow" name="NMR">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -9,6 +9,9 @@
     <width>1100</width>
     <height>700</height>
    </rect>
+  </property>
+  <property name="windowTitle">
+   <string>NMR</string>
   </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">

@@ -10,11 +10,11 @@ from scipy.signal import savgol_filter
 import pyqtgraph as pg
 from pyqtgraph.exporters import ImageExporter
 import matplotlib.pyplot as plt
-from ui_Form import Ui_Analyzer
+from ui_Form import Ui_NMR
 from ui_ChooseFiles import Ui_ChooseFiles
-from ui_Notification import Ui_Dialog
+from ui_Notification import Ui_Note
 from ui_Error import Ui_Error
-from ui_PhasingManual import Ui_Form as Ui_PhasingManual
+from ui_PhasingManual import Ui_Phasing as Ui_PhasingManual
 
 # Global 
 Frequency = []
@@ -309,7 +309,7 @@ def decaying_exponential(x, a, b, c):
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.ui = Ui_Analyzer()
+        self.ui = Ui_NMR()
         self.ui.setupUi(self)
 
         self.selected_files = []
@@ -891,7 +891,7 @@ class MainWindow(QMainWindow):
 
         SE_table = self.ui.table_SE
         DQ_table = self.ui.table_DQ
-        
+
         os.makedirs(parent_folder + '/Result/', exist_ok=True)
         if current_tab_index == 0:
             table_file_path = os.path.join(parent_folder, 'Result', f"SE_table.csv")
@@ -1055,7 +1055,7 @@ class OpenFilesDialog(QFileDialog, Ui_ChooseFiles):
     def on_file_selected(self, files):
         self.selected_files.extend(files)
 
-class NotificationDialog(QDialog, Ui_Dialog):
+class NotificationDialog(QDialog, Ui_Note):
     stateChanged = Signal(bool)
 
     def __init__(self, parent=None):
