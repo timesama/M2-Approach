@@ -891,7 +891,8 @@ class MainWindow(QMainWindow):
 
         SE_table = self.ui.table_SE
         DQ_table = self.ui.table_DQ
-
+        
+        os.makedirs(parent_folder + '/Result/', exist_ok=True)
         if current_tab_index == 0:
             table_file_path = os.path.join(parent_folder, 'Result', f"SE_table.csv")
         elif current_tab_index == 1:
@@ -988,7 +989,6 @@ class MainWindow(QMainWindow):
 
         fft_file_path = (parent_folder + '/Result/' + f"FFT_{variable}.png")
         fid_file_path = (parent_folder + '/Result/' + f"FID_{variable}.png")
-        os.makedirs(parent_folder + '/Result/', exist_ok=True)
 
         pg.QtGui.QGuiApplication.processEvents()
 
