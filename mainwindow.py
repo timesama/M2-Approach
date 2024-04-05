@@ -138,12 +138,13 @@ def time_domain_phase(Real, Imaginary):
         Im_phased = Real * np.sin(np.deg2rad(phi)) + Imaginary * np.cos(np.deg2rad(phi))
         Magnitude_phased = calculate_amplitude(Re_phased, Im_phased)
         
-        Re_cut = Re_phased[:50]
-        Ma_cut = Magnitude_phased[:50]
+        Re_cut = Re_phased[:5]
+        Ma_cut = Magnitude_phased[:5]
         
         delta[phi] = np.mean(Ma_cut - Re_cut)
     
     idx = np.argmin(delta)
+    print(idx)
 
     Re = Real * np.cos(np.deg2rad(idx)) - Imaginary * np.sin(np.deg2rad(idx))
     Im = Real * np.sin(np.deg2rad(idx)) + Imaginary * np.cos(np.deg2rad(idx))
@@ -213,6 +214,7 @@ def add_zeros(Time, Real, Imaginary, number_of_points):
 
     Time = np.concatenate((Time, Time_to_add))
     Fid = np.array(Re_zero + 1j * Im_zero)
+    Fid = Fid[:-1]
 
     return Time, Fid
 
@@ -253,6 +255,7 @@ def calculate_frequency_scale(Time):
     f_nyquist = f_range / 2
     df = 2 * (f_nyquist / numberp)
     Freq = np.arange(-f_nyquist, f_nyquist + df, df)
+    Freq = Freq[:-1]
 
     return Freq
 
@@ -1041,7 +1044,7 @@ class MainWindow(QMainWindow):
         QCoreApplication.processEvents()
         return Fur
 
-class OpenFilesDialog(QFileDialog, Ui_ChooseFiles):
+class OpenFilesDialog(QFileDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
@@ -1049,11 +1052,14 @@ class OpenFilesDialog(QFileDialog, Ui_ChooseFiles):
         self.setDirectory(str("C:/Mega/NMR/003_Temperature"))
         
         self.selected_files = []  # Variable to store selected file paths
-        self.setupUi(self)
+
         
 
-    def on_file_selected(self, files):
-        self.selected_files.extend(files)
+    def on_file_selected(self):
+        options = QFileDialog.Options()
+        files, _ = QFileDialog.getOpenFileNames(self, "Load Files", "", "Data Files (*.dat *.txt *.csv)", options=options)
+        if files:
+            self.selected_files.extend(files)
 
 class NotificationDialog(QDialog, Ui_Note):
     stateChanged = Signal(bool)
