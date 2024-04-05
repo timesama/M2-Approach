@@ -904,17 +904,19 @@ class MainWindow(QMainWindow):
             self.dq_t2[row] = dq_t2
         self.update_DQ_comparison_plot()
 
-
     def update_DQ_comparison_plot(self):
         cmap = pg.ColorMap([0, len(self.dq_t2)], [pg.mkColor('b'), pg.mkColor('r')])  # Blue to red
         for key, data in self.dq_t2.items():
-            x = data[:,0] #DQ filtering time
-            y = data[:,1] #DQ amlitude
-            z = data[:,2] #T2*
+            dq_time = data[:,0] #DQ filtering time
+            dq = data[:,1] #DQ amlitude
+            T2 = data[:,2] #T2*
+
+            Integral = np.trapz(dq)
+            dq_norm = dq/Integral
 
             color = tuple(cmap.map(key))
-            self.ui.DQ_Widget_3.plot(x, z, pen=None, symbol='o', symbolBrush=color, symbolSize=5)
-
+            self.ui.DQ_Widget_3.plot(dq_time, T2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5)
+            self.ui.DQ_Widget_4.plot(dq_time, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5)
 
         
 
