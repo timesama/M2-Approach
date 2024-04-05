@@ -906,14 +906,15 @@ class MainWindow(QMainWindow):
 
 
     def update_DQ_comparison_plot(self):
-
+        cmap = pg.ColorMap([0, len(self.dq_t2)], [pg.mkColor('b'), pg.mkColor('r')])  # Blue to red
         for key, data in self.dq_t2.items():
             x = data[:,0] #DQ filtering time
             y = data[:,1] #DQ amlitude
             z = data[:,2] #T2*
-            self.ui.DQ_Widget_3.plot(x, z, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=5)
-        # Update the widget
-        #self.ui.DQ_Widget_3.update()
+
+            color = tuple(cmap.map(key))
+            self.ui.DQ_Widget_3.plot(x, z, pen=None, symbol='o', symbolBrush=color, symbolSize=5)
+
 
         
 
