@@ -889,7 +889,7 @@ class MainWindow(QMainWindow):
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
             foldername = os.path.dirname(parent_folder)
             item = QTableWidgetItem(foldername)
-            default_name = QTableWidgetItem(row+1)
+            default_name = QTableWidgetItem(str(row+1))
             table.setItem(row, 0, item)
             table.setItem(row, 1, default_name)
 
@@ -906,7 +906,25 @@ class MainWindow(QMainWindow):
 
     def update_DQ_comparison_plot(self):
         cmap = pg.ColorMap([0, len(self.dq_t2)], [pg.mkColor('b'), pg.mkColor('r')])  # Blue to red
-        for key, data in self.dq_t2.items():
+
+        legend = self.ui.DQ_Widget_3.addLegend()
+        legend1 = self.ui.DQ_Widget_4.addLegend()  # Get the legend object
+        self.ui.DQ_Widget_3.clear()
+        self.ui.DQ_Widget_4.clear()
+        if legend is not None:
+            legend.clear()
+            legend1.clear()
+            self.ui.DQ_Widget_3.addLegend()
+            self.ui.DQ_Widget_4.addLegend()
+            legend.setPen((0, 0, 0))  
+            legend1.setPen((0, 0, 0)) 
+
+
+        for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.dq_t2.items()):
+            file_name_item = self.ui.table_DQ_2.item(row, 1)
+            if file_name_item is not None:
+                file_name = file_name_item.text()
+
             dq_time = data[:,0] #DQ filtering time
             dq = data[:,1] #DQ amlitude
             T2 = data[:,2] #T2*
@@ -914,11 +932,36 @@ class MainWindow(QMainWindow):
             Integral = np.trapz(dq)
             dq_norm = dq/Integral
 
-            color = tuple(cmap.map(key))
-            self.ui.DQ_Widget_3.plot(dq_time, T2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5)
-            self.ui.DQ_Widget_4.plot(dq_time, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5)
+            Integral = np.trapz(dq)
+            dq_norm = dq/Integral
 
-        
+
+            color = tuple(cmap.map(key))
+            self.ui.DQ_Widget_3.plot(dq_time, T2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
+            self.ui.DQ_Widget_4.plot(dq_time, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
+
+
+        # for row in range(self.ui.table_DQ_2.rowCount()):
+        # # Get the file name from the second column of the table
+        #     file_name_item = self.ui.table_DQ_2.item(row, 1)
+        #     if file_name_item is not None:
+        #         file_name = file_name_item.text()
+        #     else:
+        #         file_name = 'Name'
+
+
+        # for key, data in self.dq_t2.items():
+        #     dq_time = data[:,0] #DQ filtering time
+        #     dq = data[:,1] #DQ amlitude
+        #     T2 = data[:,2] #T2*
+
+        #     Integral = np.trapz(dq)
+        #     dq_norm = dq/Integral
+
+        #     color = tuple(cmap.map(key))
+        #     self.ui.DQ_Widget_3.plot(dq_time, T2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=filename)
+        #     self.ui.DQ_Widget_4.plot(dq_time, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=filename)
+
 
     def nan_value(self, table, row, column_index):
         table.setItem(row, column_index, QTableWidgetItem('NaN'))
