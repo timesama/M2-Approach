@@ -317,6 +317,7 @@ class MainWindow(QMainWindow):
         self.selected_files = []
         self.selected_files_gly = []
         self.selected_DQfiles = []
+        self.dq_t2 = {}
 
         # Connect buttons to their respective slots
         self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
@@ -330,6 +331,7 @@ class MainWindow(QMainWindow):
         self.ui.tabWidget.currentChanged.connect(self.groupBox_status)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_DQdialog)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
+        self.ui.btn_Launch.clicked.connect(self.launch)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -887,8 +889,31 @@ class MainWindow(QMainWindow):
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
             foldername = os.path.dirname(parent_folder)
             item = QTableWidgetItem(foldername)
+            default_name = QTableWidgetItem(row+1)
             table.setItem(row, 0, item)
-            table.setItem(row, 1, row+1)
+            table.setItem(row, 1, default_name)
+
+    def launch(self):
+        self.dq_t2 = {}
+        for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
+            # Read data from file
+            data = np.loadtxt(parent_folder, delimiter=',')
+
+            # Read the DQ filtering time, DQ amlitude and corresponding T2*
+            dq_t2 = data[:, [0, 1, 3]]
+            self.dq_t2[row] = dq_t2
+        self.update_DQ_comparison_plot()
+
+
+    def update_DQ_comparison_plot(self):
+
+        for key, data in self.dq_t2.items():
+            x = data[:,0] #DQ filtering time
+            y = data[:,1] #DQ amlitude
+            z = data[:,2] #T2*
+            self.ui.DQ_Widget_3.plot(x, z, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=5)
+        # Update the widget
+        #self.ui.DQ_Widget_3.update()
 
         
 
