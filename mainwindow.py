@@ -1035,6 +1035,10 @@ class MainWindow(QMainWindow):
         if current_tab_index == 0:
             self.update_yaxis()
         elif current_tab_index == 1:
+            self.selected_files = [
+                "AmIanIdiot.txt",
+                "Yes.txt"
+            ]
             self.update_dq_graphs()  
 
         self.enable_buttons()
