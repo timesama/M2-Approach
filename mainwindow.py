@@ -11,7 +11,6 @@ import pyqtgraph as pg
 from pyqtgraph.exporters import ImageExporter
 import matplotlib.pyplot as plt
 from ui_Form import Ui_NMR
-from ui_ChooseFiles import Ui_ChooseFiles
 from ui_Notification import Ui_Note
 from ui_Error import Ui_Error
 from ui_PhasingManual import Ui_Phasing as Ui_PhasingManual
@@ -317,6 +316,7 @@ class MainWindow(QMainWindow):
 
         self.selected_files = []
         self.selected_files_gly = []
+        self.selected_DQfiles = []
 
         # Connect buttons to their respective slots
         self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
@@ -327,6 +327,9 @@ class MainWindow(QMainWindow):
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
         self.ui.radioButton_Log.clicked.connect(self.plot_fit)
+        self.ui.tabWidget.currentChanged.connect(self.groupBox_status)
+        self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_DQdialog)
+        self.ui.btn_ClearTable.clicked.connect(self.clear_list)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -334,6 +337,9 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.SEWidget, "Temperature, °C", "", "")
         self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T2*", "")
         self.setup_graph(self.ui.DQ_Widget_2, "", "Norm. DQ Intensity", "")
+        self.setup_graph(self.ui.DQ_Widget_3, "DQ Filtering Time", "T2*", "")
+        self.setup_graph(self.ui.DQ_Widget_4, "", "Norm. DQ Intensity", "")
+        self.setup_graph(self.ui.DQ_Widget_5, "Temperature, °C", "", "")
 
         # Table setup
         self.setup_table(self.ui.table_SE)
@@ -391,8 +397,10 @@ class MainWindow(QMainWindow):
     def clear_list(self):
         self.selected_files = []
         self.selected_files_gly = []
+        self.selected_DQfiles = []
         self.ui.table_SE.setRowCount(0)
         self.ui.table_DQ.setRowCount(0)
+        self.ui.table_DQ_2.setRowCount(0)
             
     def highlight_row(self, table, row_selected):
         for col in range(table.columnCount()):
@@ -414,6 +422,14 @@ class MainWindow(QMainWindow):
         column_widths = [70] * 4
         for i, width in enumerate(column_widths):
             table_widget.setColumnWidth(i, width)
+
+    def open_select_DQdialog(self):
+        dlg = OpenFilesDialog(self)
+        if dlg.exec():
+            DQfileNames = dlg.selectedFiles()
+            self.selected_DQfiles.extend(DQfileNames)
+            self.update_DQ_comparison()
+            #TODO update table, update graphs          
 
     def open_select_dialog(self):
         dlg = OpenFilesDialog(self)
@@ -437,6 +453,13 @@ class MainWindow(QMainWindow):
         self.phasing_manual_window.show()
 
         self.phasing_manual_window.closed.connect(self.after_phasing)
+
+    def groupBox_status(self):
+        current_tab_index =  self.ui.tabWidget.currentIndex()
+        if current_tab_index == 2:
+            self.ui.groupBox.setEnabled(False)
+        else:
+            self.ui.groupBox.setEnabled(True)
 
     def disable_buttons(self):
         self.ui.btn_Start.setEnabled(False)
@@ -635,7 +658,6 @@ class MainWindow(QMainWindow):
         # update table
 
     def extract_info(self, pattern):
-        # NoClass
         if pattern:
             info = pattern.group(1)
         else:
@@ -858,6 +880,18 @@ class MainWindow(QMainWindow):
         return r_squared
     
     # Working with tables
+    def update_DQ_comparison(self):
+        table = self.ui.table_DQ_2
+        table.setRowCount(len(self.selected_DQfiles))
+
+        for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
+            foldername = os.path.dirname(parent_folder)
+            item = QTableWidgetItem(foldername)
+            table.setItem(row, 0, item)
+            table.setItem(row, 1, row+1)
+
+        
+
     def nan_value(self, table, row, column_index):
         table.setItem(row, column_index, QTableWidgetItem('NaN'))
 
@@ -1135,8 +1169,6 @@ class PhasingManual(QDialog):
     def closeEvent(self, event):
         self.closed.emit()
         super().closeEvent(event)
-
-
 
     def zero(self):
         self.a = 0
