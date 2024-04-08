@@ -143,7 +143,7 @@ def time_domain_phase(Real, Imaginary):
         delta[phi] = np.mean(Ma_cut - Re_cut)
     
     idx = np.argmin(delta)
-    print(idx)
+    #print(idx)
 
     Re = Real * np.cos(np.deg2rad(idx)) - Imaginary * np.sin(np.deg2rad(idx))
     Im = Real * np.sin(np.deg2rad(idx)) + Imaginary * np.cos(np.deg2rad(idx))
@@ -537,6 +537,7 @@ class MainWindow(QMainWindow):
         legend = pg.LegendItem(offset=(300, 10), parent=self.ui.FidWidget.graphicsItem())
 
         if not self.load_data_and_check_validity((self.selected_files[0]), current_tab_index):
+            print('This is not statement')
             return
         
         if self.ui.checkBox_2.isChecked():
@@ -566,23 +567,22 @@ class MainWindow(QMainWindow):
                     try:
                         self.process_file_data(file_path, file_path_gly, current_tab_index, i)
                     except:
-                        QMessageBox.warning(self, "Invalid Data", f"I couldn't analyze {file_path}. Terminate analysis", QMessageBox.Ok)
-                        #self.enable_buttons()
-                        self.terminate()
-                        self.ui.btn_SelectFiles.setEnabled(True)
+                        self.analysis_error(file_path)
                         return
             else:
                 try:
                     self.process_file_data(file_path, [], current_tab_index, i)
                 except:
-                    QMessageBox.warning(self, "Invalid Data", f"I couldn't analyze {file_path}. Terminate analysis", QMessageBox.Ok)
-                    #self.enable_buttons()
-                    self.terminate()
-                    self.ui.btn_SelectFiles.setEnabled(True)
+                    self.analysis_error(file_path)
                     return
-
-
+                    
         self.finalize_analysis(legend, current_tab_index)
+
+    def analysis_error(self, file_path):
+        QMessageBox.warning(self, "Invalid Data", f"Error in {file_path}. Restarting analysis", QMessageBox.Ok)
+        self.selected_files.remove(file_path)
+        self.ui.btn_SelectFiles.setEnabled(True)
+        self.analysis()
 
     def finalize_analysis(self, legend, current_tab_index):
         self.ui.textEdit_6.setText(f"Finished")
@@ -1258,12 +1258,16 @@ class MainWindow(QMainWindow):
                     self.ui.btn_SelectFiles.setEnabled(True)
                     self.ui.radioButton.setEnabled(True)
                     return False
-                
             return True
         except:
-            #QMessageBox.warning(self, "Invalid Data", f"I can't read the {file_path} file.", QMessageBox.Ok)
+            QMessageBox.warning(self, "Invalid Data", f"I can't read the {file_path} file, deleting it.", QMessageBox.Ok)
+            self.selected_files.remove(file_path)
 
-            return False
+            if self.selected_files == []:
+                self.disable_buttons()
+                return False
+            else:
+                return False
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):
