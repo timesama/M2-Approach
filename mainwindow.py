@@ -363,6 +363,8 @@ class MainWindow(QMainWindow):
         self.ui.dq_min_2.valueChanged.connect(self.update_DQ_comparison_plot)
         self.ui.dq_max_2.valueChanged.connect(self.update_DQ_comparison_plot)
 
+        self.ui.radioButton_Log_2.clicked.connect(self.update_DQ_comparison_plot) # this is a bad coding
+
         self.ui.comboBox_4.currentIndexChanged.connect(self.update_file)
 
         # Disable buttons initially
@@ -434,8 +436,7 @@ class MainWindow(QMainWindow):
             DQfileNames = dlg.selectedFiles()
             self.selected_DQfiles.extend(DQfileNames)
             self.update_DQ_comparison()
-            #TODO update table, update graphs          
-
+       
     def open_select_dialog(self):
         dlg = OpenFilesDialog(self)
         if dlg.exec():
@@ -477,6 +478,11 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_Log.setEnabled(False)
         self.ui.checkBox.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
+        self.ui.radioButton_Log_2.setEnabled(False)
+        self.ui.comboBox_5.setEnabled(False)
+        self.ui.dq_min_2.setEnabled(False)
+        self.ui.dq_max_2.setEnabled(False)
+        self.ui.btn_Launch.setEnabled(False)
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -896,6 +902,7 @@ class MainWindow(QMainWindow):
     def update_DQ_comparison(self):
         table = self.ui.table_DQ_2
         table.setRowCount(len(self.selected_DQfiles))
+        self.ui.btn_Launch.setEnabled(True)
 
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
             foldername = os.path.dirname(parent_folder)
@@ -905,6 +912,11 @@ class MainWindow(QMainWindow):
             table.setItem(row, 1, default_name)
 
     def launch(self):
+        self.ui.radioButton_Log_2.setEnabled(True)
+        self.ui.comboBox_5.setEnabled(True)
+        self.ui.dq_min_2.setEnabled(True)
+        self.ui.dq_max_2.setEnabled(True)
+
         self.dq_t2 = {}
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
             # Read data from file
@@ -928,7 +940,7 @@ class MainWindow(QMainWindow):
             self.ui.DQ_Widget_3.addLegend()
             self.ui.DQ_Widget_4.addLegend()
             legend.setPen((0, 0, 0))  
-            legend1.setPen((0, 0, 0)) 
+            legend1.setPen((0, 0, 0))
 
 
         for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.dq_t2.items()):
@@ -947,7 +959,6 @@ class MainWindow(QMainWindow):
             time_min = self.ui.dq_min_2.value()
             time_max = self.ui.dq_max_2.value()
 
-
             t2_x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
             if len(t2_x) < 3:
                 time_min = 0
@@ -958,17 +969,21 @@ class MainWindow(QMainWindow):
 
 
             t2_y = t2[(dq_time >= time_min) & (dq_time <= time_max)]
-
             coeff = np.polyfit(t2_x, t2_y, 1)
-
-            t2_lin = coeff[0] * dq_time + coeff[1] # Will it work?
+            t2_lin_ = coeff[0] * dq_time + coeff[1] # Will it work?
 
 
             # Dq time on T2
+
+            if self.ui.radioButton_Log_2.isChecked():
+                t2_lin = np.log10(t2_lin_)
+                self.ui.DQ_Widget_4.getAxis('bottom').setLabel("log(T2*)")
+            else:
+                t2_lin = t2_lin_
+                self.ui.DQ_Widget_4.getAxis('bottom').setLabel("T2*")
+            
             Integral = np.trapz(dq)
             dq_norm = dq/Integral
-
-
 
             # Draw a graph
             color = tuple(cmap.map(key))
