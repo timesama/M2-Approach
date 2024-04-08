@@ -360,6 +360,9 @@ class MainWindow(QMainWindow):
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
         self.ui.dq_max.valueChanged.connect(self.update_dq_graphs)
 
+        self.ui.dq_min_2.valueChanged.connect(self.update_DQ_comparison_plot)
+        self.ui.dq_max_2.valueChanged.connect(self.update_DQ_comparison_plot)
+
         self.ui.comboBox_4.currentIndexChanged.connect(self.update_file)
 
         # Disable buttons initially
@@ -735,6 +738,13 @@ class MainWindow(QMainWindow):
         dq = np.array(self.read_column_values(self.ui.table_DQ, 1))
 
         x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
+        if len(x) < 3:
+            time_min = 0
+            time_max = 20
+            self.ui.dq_min.setValue(time_min)
+            self.ui.dq_max.setValue(time_max)
+            x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
+        
         y = t2[(dq_time >= time_min) & (dq_time <= time_max)]
 
         if len(x) <= 1 or len(y) <= 1:
@@ -881,6 +891,7 @@ class MainWindow(QMainWindow):
 
         return r_squared
     
+
     # Working with tables
     def update_DQ_comparison(self):
         table = self.ui.table_DQ_2
@@ -925,17 +936,50 @@ class MainWindow(QMainWindow):
             if file_name_item is not None:
                 file_name = file_name_item.text()
 
+
+            # Initial arrays
             dq_time = data[:,0] #DQ filtering time
             dq = data[:,1] #DQ amlitude
-            T2 = data[:,2] #T2*
+            t2 = data[:,2] #T2*
 
+            # Linear
+            # Read boxes for ALL the graph just opne for the sake of consistency
+            time_min = self.ui.dq_min_2.value()
+            time_max = self.ui.dq_max_2.value()
+
+
+            t2_x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
+            if len(t2_x) < 3:
+                time_min = 0
+                time_max = 20
+                self.ui.dq_min_2.setValue(time_min)
+                self.ui.dq_max_2.setValue(time_max)
+                t2_x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
+
+
+            t2_y = t2[(dq_time >= time_min) & (dq_time <= time_max)]
+
+            coeff = np.polyfit(t2_x, t2_y, 1)
+
+            t2_lin = coeff[0] * dq_time + coeff[1] # Will it work?
+
+
+            # Dq time on T2
             Integral = np.trapz(dq)
             dq_norm = dq/Integral
 
 
+
+            # Draw a graph
             color = tuple(cmap.map(key))
-            self.ui.DQ_Widget_3.plot(dq_time, T2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
-            self.ui.DQ_Widget_4.plot(T2, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
+            self.ui.DQ_Widget_3.plot(dq_time, t2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
+            self.ui.DQ_Widget_4.plot(t2_lin, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
+
+            if coeff is not None:
+                x_line = np.arange(0, 105.1, 0.1)
+                y_line = np.polyval(coeff, x_line)
+                
+                self.ui.DQ_Widget_3.plot(x_line, y_line, pen='r') 
 
 
     def nan_value(self, table, row, column_index):
