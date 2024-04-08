@@ -932,35 +932,10 @@ class MainWindow(QMainWindow):
             Integral = np.trapz(dq)
             dq_norm = dq/Integral
 
-            Integral = np.trapz(dq)
-            dq_norm = dq/Integral
-
 
             color = tuple(cmap.map(key))
             self.ui.DQ_Widget_3.plot(dq_time, T2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
-            self.ui.DQ_Widget_4.plot(dq_time, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
-
-
-        # for row in range(self.ui.table_DQ_2.rowCount()):
-        # # Get the file name from the second column of the table
-        #     file_name_item = self.ui.table_DQ_2.item(row, 1)
-        #     if file_name_item is not None:
-        #         file_name = file_name_item.text()
-        #     else:
-        #         file_name = 'Name'
-
-
-        # for key, data in self.dq_t2.items():
-        #     dq_time = data[:,0] #DQ filtering time
-        #     dq = data[:,1] #DQ amlitude
-        #     T2 = data[:,2] #T2*
-
-        #     Integral = np.trapz(dq)
-        #     dq_norm = dq/Integral
-
-        #     color = tuple(cmap.map(key))
-        #     self.ui.DQ_Widget_3.plot(dq_time, T2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=filename)
-        #     self.ui.DQ_Widget_4.plot(dq_time, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=filename)
+            self.ui.DQ_Widget_4.plot(T2, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
 
 
     def nan_value(self, table, row, column_index):
