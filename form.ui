@@ -724,16 +724,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="currentText">
-       <string/>
+       <string>Gauss</string>
       </property>
       <property name="currentIndex">
-       <number>-1</number>
+       <number>0</number>
       </property>
       <property name="maxVisibleItems">
        <number>10</number>
       </property>
       <property name="placeholderText">
-       <string>Function:</string>
+       <string>Gauss</string>
       </property>
       <item>
        <property name="text">

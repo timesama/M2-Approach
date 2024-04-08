@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor
 import numpy as np
@@ -341,7 +341,7 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQ_Widget_2, "", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQ_Widget_3, "DQ Filtering Time", "T2*", "")
         self.setup_graph(self.ui.DQ_Widget_4, "", "Norm. DQ Intensity", "")
-        self.setup_graph(self.ui.DQ_Widget_5, "Temperature, °C", "", "")
+        self.setup_graph(self.ui.DQ_Widget_5, "Name", "Center", "")
 
         # Table setup
         self.setup_table(self.ui.table_SE)
@@ -364,7 +364,7 @@ class MainWindow(QMainWindow):
         self.ui.dq_max_2.valueChanged.connect(self.update_DQ_comparison_plot)
 
         self.ui.radioButton_Log_2.clicked.connect(self.update_DQ_comparison_plot) # this is a bad coding
-
+        self.ui.comboBox_5.currentIndexChanged.connect(self.update_DQ_comparison_plot)
         self.ui.comboBox_4.currentIndexChanged.connect(self.update_file)
 
         # Disable buttons initially
@@ -408,6 +408,23 @@ class MainWindow(QMainWindow):
         self.ui.table_SE.setRowCount(0)
         self.ui.table_DQ.setRowCount(0)
         self.ui.table_DQ_2.setRowCount(0)
+    
+    def terminate(self):
+        self.disable_buttons()
+        self.selected_files = []
+        self.selected_files_gly = []
+        self.selected_DQfiles = []
+        self.ui.table_SE.setRowCount(0)
+        self.ui.table_DQ.setRowCount(0)
+        self.ui.table_DQ_2.setRowCount(0)
+        self.ui.DQ_Widget_1.clear()
+        self.ui.DQ_Widget_2.clear()
+        self.ui.DQ_Widget_3.clear()
+        self.ui.DQ_Widget_4.clear()
+        self.ui.DQ_Widget_5.clear()
+        self.ui.SEWidget.clear()
+        self.ui.FFTWidget.clear()
+        self.ui.FidWidget.clear()
             
     def highlight_row(self, table, row_selected):
         for col in range(table.columnCount()):
@@ -540,16 +557,29 @@ class MainWindow(QMainWindow):
             
             if self.ui.checkBox_2.isChecked():
                 if len(self.selected_files_gly) != len(self.selected_files):
-                    print('The amount of Reference files and Sample files is not the same')
-                    self.enable_buttons()
-                    self.disable_buttons()
-                    self.clear_list()
+                    QMessageBox.warning(self, "Invalid Data", f"The amount of reference files is not the same as sample files. Terminate analysis.", QMessageBox.Ok)
+                    self.terminate()
+                    self.ui.btn_SelectFiles.setEnabled(True)
                     return
                 else: 
                     file_path_gly = self.selected_files_gly[i-1]
-                    self.process_file_data(file_path, file_path_gly, current_tab_index, i)
+                    try:
+                        self.process_file_data(file_path, file_path_gly, current_tab_index, i)
+                    except:
+                        QMessageBox.warning(self, "Invalid Data", f"I couldn't analyze {file_path}. Terminate analysis", QMessageBox.Ok)
+                        #self.enable_buttons()
+                        self.terminate()
+                        self.ui.btn_SelectFiles.setEnabled(True)
+                        return
             else:
-                self.process_file_data(file_path, [], current_tab_index, i)
+                try:
+                    self.process_file_data(file_path, [], current_tab_index, i)
+                except:
+                    QMessageBox.warning(self, "Invalid Data", f"I couldn't analyze {file_path}. Terminate analysis", QMessageBox.Ok)
+                    #self.enable_buttons()
+                    self.terminate()
+                    self.ui.btn_SelectFiles.setEnabled(True)
+                    return
 
 
         self.finalize_analysis(legend, current_tab_index)
@@ -897,7 +927,6 @@ class MainWindow(QMainWindow):
 
         return r_squared
     
-
     # Working with tables
     def update_DQ_comparison(self):
         table = self.ui.table_DQ_2
@@ -906,6 +935,21 @@ class MainWindow(QMainWindow):
 
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
             foldername = os.path.dirname(parent_folder)
+
+            try: 
+                data = np.loadtxt(parent_folder, delimiter=',')
+                if data.shape[1] < 3:
+                    QMessageBox.warning(self, "Invalid Data", f"The file {foldername} does not have at least 3 columns and will be removed from the table and file list.", QMessageBox.Ok)
+                    table.removeRow(row)
+                    del self.selected_DQfiles[row]
+
+            except: 
+                QMessageBox.warning(self, "Invalid Data", f"The file {foldername} does not have , as delimiter and will be removed from the table and file list.", QMessageBox.Ok)
+                table.removeRow(row)
+                del self.selected_DQfiles[row]
+                
+            print(self.selected_DQfiles)
+                
             item = QTableWidgetItem(foldername)
             default_name = QTableWidgetItem(str(row+1))
             table.setItem(row, 0, item)
@@ -930,26 +974,39 @@ class MainWindow(QMainWindow):
     def update_DQ_comparison_plot(self):
         cmap = pg.ColorMap([0, len(self.dq_t2)], [pg.mkColor('b'), pg.mkColor('r')])  # Blue to red
 
-        legend = self.ui.DQ_Widget_3.addLegend()
+        #legend = self.ui.DQ_Widget_3.addLegend()
         legend1 = self.ui.DQ_Widget_4.addLegend()  # Get the legend object
         self.ui.DQ_Widget_3.clear()
         self.ui.DQ_Widget_4.clear()
-        if legend is not None:
-            legend.clear()
+        self.ui.DQ_Widget_5.clear()
+
+        if legend1 is not None:
+            #legend.clear()
             legend1.clear()
-            self.ui.DQ_Widget_3.addLegend()
+            #self.ui.DQ_Widget_3.addLegend()
             self.ui.DQ_Widget_4.addLegend()
-            legend.setPen((0, 0, 0))  
+            #legend.setPen((0, 0, 0))  
             legend1.setPen((0, 0, 0))
 
+        # This is a mess :(
 
+        center = []
+        comparison_par = []
         for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.dq_t2.items()):
             file_name_item = self.ui.table_DQ_2.item(row, 1)
             if file_name_item is not None:
                 file_name = file_name_item.text()
 
+                try:
+                    _comp_par = float(file_name)
+                except:
+                    _comp_par = 0
+                    self.ui.table_DQ_2.setItem(row, 1, QTableWidgetItem('0'))
+                comparison_par.append(_comp_par)
 
             # Initial arrays
+
+
             dq_time = data[:,0] #DQ filtering time
             dq = data[:,1] #DQ amlitude
             t2 = data[:,2] #T2*
@@ -974,28 +1031,62 @@ class MainWindow(QMainWindow):
 
 
             # Dq time on T2
+            Integral = np.trapz(dq)
+            dq_norm = dq/Integral
 
             if self.ui.radioButton_Log_2.isChecked():
                 t2_lin = np.log10(t2_lin_)
                 self.ui.DQ_Widget_4.getAxis('bottom').setLabel("log(T2*)")
+                p = [1, 1, 1, 0]
+                b=([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, 1, np.inf])
             else:
                 t2_lin = t2_lin_
                 self.ui.DQ_Widget_4.getAxis('bottom').setLabel("T2*")
-            
-            Integral = np.trapz(dq)
-            dq_norm = dq/Integral
+                p = [1, 5, 5, 0]
+                b=([0, 0, 0, 0, 0], [ np.inf, np.inf, np.inf, 1, np.inf])
+
+            text = self.ui.comboBox_5.currentText()
+            dq_fit = np.arange(0, np.max(t2_lin) + 0.001, 0.01)
+            b1=([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf])
+
+            if text == 'Gauss':
+                params, _ = curve_fit(self.gaussian, t2_lin, dq_norm, p0=p, bounds=b1)
+                y_fit = self.gaussian(dq_fit, *params)
+                y_r2 = self.gaussian(t2_lin, *params)
+                cen = params[1]
+                center.append(cen)
+                fwhm = params[2]
+                w = 0
+            elif text == 'Lorenz':
+                params, _ = curve_fit(self.lorenz, t2_lin, dq_norm, p0=p, bounds=b1)
+                y_fit = self.lorenz(dq_fit, *params)
+                y_r2 = self.lorenz(t2_lin, *params)
+                cen = params[1]
+                center.append(cen)
+                fwhm = params[2]
+                w = 1
+            elif text == 'Pseudo Voigt':
+                params, _ = curve_fit(self.voigt, t2_lin, dq_norm,  bounds = b)
+                y_fit = self.voigt(dq_fit, *params)
+                y_r2 = self.voigt(t2_lin, *params)
+                cen = params[1]
+                center.append(cen)
+                fwhm = params[2]
+                w = params[3]
 
             # Draw a graph
             color = tuple(cmap.map(key))
             self.ui.DQ_Widget_3.plot(dq_time, t2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
             self.ui.DQ_Widget_4.plot(t2_lin, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
+            self.ui.DQ_Widget_4.plot(dq_fit, y_fit, pen=color)
 
             if coeff is not None:
                 x_line = np.arange(0, 105.1, 0.1)
                 y_line = np.polyval(coeff, x_line)
                 
-                self.ui.DQ_Widget_3.plot(x_line, y_line, pen='r') 
+                self.ui.DQ_Widget_3.plot(x_line, y_line, pen=color) 
 
+        self.ui.DQ_Widget_5.plot(comparison_par, center, pen=None, symbolPen=None, symbol='o', symbolBrush='r')
 
     def nan_value(self, table, row, column_index):
         table.setItem(row, column_index, QTableWidgetItem('NaN'))
@@ -1147,27 +1238,32 @@ class MainWindow(QMainWindow):
         exporter_fid.export(fid_file_path)
 
     def load_data_and_check_validity(self, file_path, current_tab_index):
-        data = np.loadtxt(file_path)
-        filename = os.path.basename(file_path)
+        try: 
+            data = np.loadtxt(file_path)
+            filename = os.path.basename(file_path)
 
-        # Check that there are 3 columns
-        if data.shape[1] != 3:
-            dialog = AlertDialog()
-            if dialog.exec() == QDialog.Rejected:
-                self.ui.btn_SelectFiles.setEnabled(True)
-                self.ui.radioButton.setEnabled(True)
-                self.selected_files.clear()
-                return False
-            
-        elif not ((filename.startswith("SE") or filename.startswith("XS")) and current_tab_index == 0) and \
-            not (filename.startswith("DQ") and current_tab_index == 1):
-            dialog = NotificationDialog()
-            if dialog.exec() == QDialog.Rejected:
-                self.ui.btn_SelectFiles.setEnabled(True)
-                self.ui.radioButton.setEnabled(True)
-                return False
-            
-        return True
+            # Check that there are 3 columns
+            if data.shape[1] != 3:
+                dialog = AlertDialog()
+                if dialog.exec() == QDialog.Rejected:
+                    self.ui.btn_SelectFiles.setEnabled(True)
+                    self.ui.radioButton.setEnabled(True)
+                    self.selected_files.clear()
+                    return False
+                
+            elif not ((filename.startswith("SE") or filename.startswith("XS")) and current_tab_index == 0) and \
+                not (filename.startswith("DQ") and current_tab_index == 1) and not current_tab_index == 2:
+                dialog = NotificationDialog()
+                if dialog.exec() == QDialog.Rejected:
+                    self.ui.btn_SelectFiles.setEnabled(True)
+                    self.ui.radioButton.setEnabled(True)
+                    return False
+                
+            return True
+        except:
+            #QMessageBox.warning(self, "Invalid Data", f"I can't read the {file_path} file.", QMessageBox.Ok)
+
+            return False
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):
