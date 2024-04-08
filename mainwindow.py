@@ -196,6 +196,8 @@ def apodization(Time, Real, Imaginary):
     c = np.polyval(coeffs, Time)
     d = np.argmin(np.abs(c - 1e-5))
     sigma = Time[d]
+    if sigma == 0:
+        sigma = 1000
     apodization_function = np.exp(-(Time / sigma) ** 4)
     Re_ap = Real * apodization_function
     Im_ap = Imaginary * apodization_function
@@ -935,6 +937,7 @@ class MainWindow(QMainWindow):
 
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
             foldername = os.path.dirname(parent_folder)
+            filename = os.path.basename(parent_folder)
 
             try: 
                 data = np.loadtxt(parent_folder, delimiter=',')
@@ -947,10 +950,9 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "Invalid Data", f"The file {foldername} does not have , as delimiter and will be removed from the table and file list.", QMessageBox.Ok)
                 table.removeRow(row)
                 del self.selected_DQfiles[row]
+
                 
-            print(self.selected_DQfiles)
-                
-            item = QTableWidgetItem(foldername)
+            item = QTableWidgetItem(filename)
             default_name = QTableWidgetItem(str(row+1))
             table.setItem(row, 0, item)
             table.setItem(row, 1, default_name)
@@ -996,13 +998,15 @@ class MainWindow(QMainWindow):
             file_name_item = self.ui.table_DQ_2.item(row, 1)
             if file_name_item is not None:
                 file_name = file_name_item.text()
-
-                try:
-                    _comp_par = float(file_name)
-                except:
-                    _comp_par = 0
-                    self.ui.table_DQ_2.setItem(row, 1, QTableWidgetItem('0'))
-                comparison_par.append(_comp_par)
+                if file_name != 'hide':
+                    try:
+                        _comp_par = float(file_name)
+                    except:
+                        _comp_par = 0
+                        self.ui.table_DQ_2.setItem(row, 1, QTableWidgetItem('0'))
+                    comparison_par.append(_comp_par)
+                else:
+                    continue
 
             # Initial arrays
 
@@ -1126,12 +1130,14 @@ class MainWindow(QMainWindow):
         DQ_table = self.ui.table_DQ
 
         os.makedirs(parent_folder + '/Result/', exist_ok=True)
+        basefolder = os.path.dirname(parent_folder)
+        os.makedirs(basefolder + '/DQ_table/', exist_ok=True)
         if current_tab_index == 0:
             table_file_path = os.path.join(parent_folder, 'Result', f"SE_table.csv")
         elif current_tab_index == 1:
             graph_file_path = os.path.join(parent_folder, 'Result', f"DQ_points.png")
             graph_file_path_2 = os.path.join(parent_folder, 'Result', f"DQ_distribution.png")
-            table_file_path = os.path.join(parent_folder, 'Result', f"DQ_table.csv")
+            table_file_path = os.path.join(basefolder, 'DQ_table', f"DQ_table_{os.path.basename(parent_folder)}.csv")
 
         pg.QtGui.QGuiApplication.processEvents()  # Make sure all events are processed before exporting
 
