@@ -313,6 +313,9 @@ def calculate_DQ_intensity(Time, Amplitude):
 def decaying_exponential(x, a, b, c):
     return a * np.exp(-x/b) + c
 
+def decaying_2exponential(x, a1, b1, a2, b2, c):
+    return a1 * np.exp(-x/b1) + a2 * np.exp(-x/b2) + c
+
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -324,6 +327,7 @@ class MainWindow(QMainWindow):
         self.selected_files_gly = []
         self.selected_DQfiles = []
         self.dq_t2 = {}
+        self.t1_dictionary ={}
 
         # Connect buttons to their respective slots
         self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
@@ -340,6 +344,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_Launch.clicked.connect(self.launch)
         self.ui.btn_SelectFolders_T1.clicked.connect(self.open_folder_dialog)
+        self.ui.btn_Plot.clicked.connect(self.plot_t1_temperature)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -360,11 +365,15 @@ class MainWindow(QMainWindow):
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
         self.ui.table_SE.currentItemChanged.connect(self.update_yaxis)
+        self.ui.radioButton_2.clicked.connect(self.calculate_T1)
+        self.ui.radioButton_3.clicked.connect(self.calculate_T1)
+
 
         # Connect combobox signals to slots
         self.ui.comboBox.currentIndexChanged.connect(self.update_yaxis)
         self.ui.comboBox_3.currentIndexChanged.connect(self.update_yaxis)
         self.ui.comboBox_2.currentIndexChanged.connect(self.plot_fit)
+        self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_T1)
 
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
@@ -447,6 +456,11 @@ class MainWindow(QMainWindow):
             item_selected = table.item(row_selected-1, col)
             if item_selected is not None:
                 item_selected.setBackground(QColor(255, 255, 0))
+
+        # self.ui.table_SE.selectRow(5)
+        # self.ui.table_SE.currentRow()
+        #TODO normally
+
         
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
@@ -481,10 +495,15 @@ class MainWindow(QMainWindow):
             folder_path = QFileDialog.getExistingDirectory(self, "Select Folder", initial_directory, options=options)
             if folder_path:
                 self.selected_folders.append(folder_path)
+                initial_directory = os.path.dirname(folder_path)
             else:
                 break 
+        # Clear Combobox
+        while self.ui.comboBox_6.count()>0:
+            self.ui.comboBox_6.removeItem(0)
+        self.update_T1_table()
         
-
+        
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self)
         if dlg.exec():
@@ -523,6 +542,7 @@ class MainWindow(QMainWindow):
         self.ui.dq_min_2.setEnabled(False)
         self.ui.dq_max_2.setEnabled(False)
         self.ui.btn_Launch.setEnabled(False)
+        self.ui.btn_Plot.setEnabled(False)
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -950,6 +970,147 @@ class MainWindow(QMainWindow):
 
         return r_squared
     
+    # T1 section
+    def update_T1_table(self):
+        table = self.ui.table_T1
+        table.setRowCount(len(self.selected_folders))
+        self.ui.btn_Plot.setEnabled(True)
+
+        
+
+        for row, parent_folder in enumerate(self.selected_folders, start=0):
+            filename = os.path.basename(parent_folder)
+            files_in_folder = os.listdir(parent_folder)
+
+            t1_files = [file for file in files_in_folder if file.startswith("T1")]
+
+            if len(t1_files) != 1:
+                QMessageBox.warning(self, "Invalid Data", f"The folder {filename} does not have one T1 file and will be removed from the table and file list.", QMessageBox.Ok)
+                table.removeRow(row)
+                del self.selected_folders[row]
+            
+        for row, parent_folder in enumerate(self.selected_folders, start=0):
+            foldername = os.path.dirname(parent_folder)
+            samplename = os.path.split(foldername)[1]
+            filename = os.path.basename(parent_folder)
+            files_in_folder = os.listdir(parent_folder)
+
+
+            t1_files = [file for file in files_in_folder if file.startswith("T1")]
+
+            self.ui.comboBox_6.addItem(f"{filename}")
+            self.ui.comboBox_6.setCurrentIndex(-1)
+
+
+            try:
+                full_path_to_data = os.path.join(parent_folder, t1_files[0])
+                with open(full_path_to_data, "r") as file:
+                    lines = [line.replace('\t\t\t', '').rstrip('\n') for line in file if not (line.rstrip('\n').endswith('\t\t\t\t'))]
+                
+                Time = []
+                Signal = []
+
+                for line in lines[1:]:  # Skip the first line !!!
+                    parts = line.split('\t')
+                    if len(parts) != 2:
+                        raise ValueError("Data has more than 2 columns")
+                    time_value = float(parts[0])
+                    signal_value = float(parts[1])
+                    Time.append(time_value)
+                    Signal.append(signal_value)
+
+                if filename not in self.t1_dictionary:
+                    self.t1_dictionary[filename] = {"Time": [], "Signal": []}
+                    
+
+                self.t1_dictionary[filename]["Time"].extend(Time)
+                self.t1_dictionary[filename]["Signal"].extend(Signal)
+
+            except ValueError as e:
+                QMessageBox.warning(self, "Invalid Data", f"I couldn't read {filename} due to: {str(e)}, removing file from the table and file list.", QMessageBox.Ok)
+                table.removeRow(row)
+                del self.selected_folders[row]
+            except Exception as e:
+                QMessageBox.warning(self, "Invalid Data", f"I couldn't read {filename}, removing file from the table and file list.", QMessageBox.Ok)
+                table.removeRow(row)
+                del self.selected_folders[row]
+
+                
+            
+            Sample = QTableWidgetItem(samplename)
+            Temperature = QTableWidgetItem(filename)
+            
+            table.setItem(row, 0, Sample)
+            table.setItem(row, 1, Temperature)
+
+
+        # print("Time values for temperature", filename, ":", t1_dictionary[filename]["Time"])
+        # print("Signal values for temperature", filename, ":", t1_dictionary[filename]["Signal"])
+
+    def calculate_T1(self):
+        selected_file_idx = self.ui.comboBox_6.currentIndex()
+
+        if selected_file_idx == -1:
+            return
+        
+        value_from_row = self.ui.table_T1.item(selected_file_idx, 1).text()
+        Time = np.array(self.t1_dictionary[value_from_row]['Time'])/1000
+        Signal = np.array(self.t1_dictionary[value_from_row]['Signal'])
+
+        Time_fit = np.arange(min(Time), max(Time) + 1, 1)
+        if self.ui.radioButton_2.isChecked():
+            p = [-10, 200, 15]
+            popt, pcov = curve_fit(decaying_exponential, Time, Signal, p0 = p, maxfev=100000)
+            fitted_curve = decaying_exponential(Time_fit, *popt)
+            tau = round(popt[1],1)
+            tau_str = str(tau)
+            self.ui.textEdit_T1.setText(f"T1: {tau}")
+            item = QTableWidgetItem(tau_str)
+            self.ui.table_T1.setItem(selected_file_idx,2,item)
+            item2 = QTableWidgetItem('0')
+            self.ui.table_T1.setItem(selected_file_idx,3,item2)
+
+        else:
+            p = [-10, 200, -10, 200, 15]
+            popt, pcov = curve_fit(decaying_2exponential, Time, Signal, p0 = p, maxfev=100000)
+            fitted_curve = decaying_2exponential(Time_fit, *popt)
+            tau = round(popt[1],1)
+            tau2 = round(popt[3],1)
+            self.ui.textEdit_T1.setText(f"T1: {tau} \n T1: {tau2}")
+            tau_str = str(tau)
+            tau_str2 = str(tau2)
+            item = QTableWidgetItem(tau_str)
+            item2 = QTableWidgetItem(tau_str2)
+            self.ui.table_T1.setItem(selected_file_idx,2,item)
+            self.ui.table_T1.setItem(selected_file_idx,3,item2)
+        
+        figure = self.ui.T1_Widget_1
+        figure.clear()
+        figure.plot(Time, Signal, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        figure.plot(Time_fit, fitted_curve, pen='r')
+
+    def plot_t1_temperature(self):
+        table = self.ui.table_T1
+        graph = self.ui.T1_Widget_2
+        graph.clear()
+
+        if table.rowCount() < 1:
+            return
+
+        Temperature = []
+        T1 =[]
+        for row in range(table.rowCount()):
+            if table.item(row,1) and table.item(row,2) is not None:
+                C = float(table.item(row, 1).text())
+                T = float(table.item(row, 2).text())
+                Temperature.append(C)
+                T1.append(T)
+            else:
+                print('oops')
+
+        graph.plot(Temperature,T1, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+
+
     # Working with tables
     def update_DQ_comparison(self):
         table = self.ui.table_DQ_2

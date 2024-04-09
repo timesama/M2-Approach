@@ -907,17 +907,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Select Folders</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_Launch_2">
+     <widget class="QPushButton" name="btn_Plot">
       <property name="geometry">
        <rect>
-        <x>260</x>
-        <y>320</y>
+        <x>730</x>
+        <y>290</y>
         <width>91</width>
         <height>22</height>
        </rect>
       </property>
       <property name="text">
-       <string>Launch</string>
+       <string>Plot</string>
       </property>
      </widget>
      <widget class="PlotWidget" name="T1_Widget_2" native="true">
@@ -1024,6 +1024,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <set>Qt::NoTextInteraction</set>
        </property>
       </widget>
+     </widget>
+     <widget class="QComboBox" name="comboBox_6">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>10</y>
+        <width>161</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="placeholderText">
+       <string>Choose File for Analysis</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_last">
