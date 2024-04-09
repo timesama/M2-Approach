@@ -342,13 +342,13 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
         self.setup_graph(self.ui.FidWidget, "Time, ms", "Amplitude", "FID")
         self.setup_graph(self.ui.SEWidget, "Temperature, °C", "", "")
-        self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T2*", "")
+        self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_2, "", "Norm. DQ Intensity", "")
-        self.setup_graph(self.ui.DQ_Widget_3, "DQ Filtering Time", "T2*", "")
+        self.setup_graph(self.ui.DQ_Widget_3, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_4, "", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQ_Widget_5, "Name", "Center", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time", "Signal", "")
-        self.setup_graph(self.ui.T1_Widget_2, "Temperature, °C", "T1", "")
+        self.setup_graph(self.ui.T1_Widget_2, "Temperature, °C", "T₁", "")
 
         # Table setup
         self.setup_table(self.ui.table_SE)
@@ -725,10 +725,10 @@ class MainWindow(QMainWindow):
 
         if axis_x == "T, C":
             self.ui.SEWidget.getAxis('bottom').setLabel("Temperature, °C")
-            self.ui.table_SE.setHorizontalHeaderLabels(["Temp.", "SFC", "M2", "T2*"])
+            self.ui.table_SE.setHorizontalHeaderLabels(["Temp.", "SFC", "M₂", "T₂*"])
         elif axis_x == "XS, %":
             self.ui.SEWidget.getAxis('bottom').setLabel("XS, %")
-            self.ui.table_SE.setHorizontalHeaderLabels(["XS", "SFC", "M2", "T2*"])
+            self.ui.table_SE.setHorizontalHeaderLabels(["XS", "SFC", "M₂", "T₂*"])
         else:
             return
         
@@ -740,13 +740,13 @@ class MainWindow(QMainWindow):
             y =  self.read_column_values(self.ui.table_SE, 1)
             self.ui.SEWidget.getAxis('left').setLabel("SFC")
             
-        elif text == "M2":  
+        elif text == "M₂":  
             y =  self.read_column_values(self.ui.table_SE, 2)
-            self.ui.SEWidget.getAxis('left').setLabel("M2")
+            self.ui.SEWidget.getAxis('left').setLabel("M₂")
             
-        elif text == "T2*":  
+        elif text == "T₂*":  
             y =  self.read_column_values(self.ui.table_SE, 3)
-            self.ui.SEWidget.getAxis('left').setLabel("T2*")
+            self.ui.SEWidget.getAxis('left').setLabel("T₂*")
 
         else:  # Set y
             y =  [0]
@@ -799,7 +799,7 @@ class MainWindow(QMainWindow):
 
         self.ui.table_DQ.setColumnCount(5)
         self.ui.table_DQ.setColumnWidth(4,70)
-        self.ui.table_DQ.setHorizontalHeaderItem(4, QTableWidgetItem("T2* lin"))
+        self.ui.table_DQ.setHorizontalHeaderItem(4, QTableWidgetItem("T₂* lin"))
 
         self.ui.table_DQ.setColumnCount(6)
         self.ui.table_DQ.setColumnWidth(5,70)
@@ -836,10 +836,10 @@ class MainWindow(QMainWindow):
         button = self.ui.radioButton_Log
         if button.isChecked():
             new_x = np.log10(x)
-            graph_DQ_distr.getAxis('bottom').setLabel("log(T2*)")
+            graph_DQ_distr.getAxis('bottom').setLabel("log(T₂*)")
         else:
             new_x = x
-            graph_DQ_distr.getAxis('bottom').setLabel("T2*")
+            graph_DQ_distr.getAxis('bottom').setLabel("T₂*")
 
         graph_DQ_distr.clear()
         graph_DQ_distr.plot(new_x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=5)
@@ -1044,12 +1044,12 @@ class MainWindow(QMainWindow):
 
             if self.ui.radioButton_Log_2.isChecked():
                 t2_lin = np.log10(t2_lin_)
-                self.ui.DQ_Widget_4.getAxis('bottom').setLabel("log(T2*)")
+                self.ui.DQ_Widget_4.getAxis('bottom').setLabel("log(T₂*)")
                 p = [1, 1, 1, 0]
                 b=([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, 1, np.inf])
             else:
                 t2_lin = t2_lin_
-                self.ui.DQ_Widget_4.getAxis('bottom').setLabel("T2*")
+                self.ui.DQ_Widget_4.getAxis('bottom').setLabel("T₂*")
                 p = [1, 5, 5, 0]
                 b=([0, 0, 0, 0, 0], [ np.inf, np.inf, np.inf, 1, np.inf])
 

@@ -160,12 +160,12 @@
        </item>
        <item>
         <property name="text">
-         <string>M2</string>
+         <string>M₂</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>T2*</string>
+         <string>T₂*</string>
         </property>
        </item>
       </widget>
@@ -241,12 +241,12 @@
       </column>
       <column>
        <property name="text">
-        <string>M2</string>
+        <string>M₂</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>T2*</string>
+        <string>T₂*</string>
        </property>
       </column>
      </widget>
@@ -818,7 +818,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </widget>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>T1</string>
+      <string>T₁</string>
      </attribute>
      <widget class="PlotWidget" name="T1_Widget_1" native="true">
       <property name="geometry">
