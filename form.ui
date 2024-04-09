@@ -885,12 +885,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </column>
       <column>
        <property name="text">
-        <string>T1 (1)</string>
+        <string>T₁ (1)</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>T1 (2)</string>
+        <string>T₁ (2)</string>
        </property>
       </column>
      </widget>

@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox, QTreeView, QAbstractItemView
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor
 import numpy as np
@@ -320,6 +320,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.selected_files = []
+        self.selected_folders = []
         self.selected_files_gly = []
         self.selected_DQfiles = []
         self.dq_t2 = {}
@@ -335,8 +336,10 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_Log.clicked.connect(self.plot_fit)
         self.ui.tabWidget.currentChanged.connect(self.groupBox_status)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_DQdialog)
+        self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_Launch.clicked.connect(self.launch)
+        self.ui.btn_SelectFolders_T1.clicked.connect(self.open_folder_dialog)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -412,9 +415,11 @@ class MainWindow(QMainWindow):
         self.selected_files = []
         self.selected_files_gly = []
         self.selected_DQfiles = []
+        self.selected_folders = []
         self.ui.table_SE.setRowCount(0)
         self.ui.table_DQ.setRowCount(0)
         self.ui.table_DQ_2.setRowCount(0)
+        self.ui.table_T1.setRowCount(0)
     
     def terminate(self):
         self.disable_buttons()
@@ -467,6 +472,18 @@ class MainWindow(QMainWindow):
             self.selected_files.extend(fileNames)
         self.ui.btn_Start.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
+
+    def open_folder_dialog(self):
+        options = QFileDialog.Options()
+        initial_directory = "C:/Mega/NMR/003_Temperature"
+        
+        while True:
+            folder_path = QFileDialog.getExistingDirectory(self, "Select Folder", initial_directory, options=options)
+            if folder_path:
+                self.selected_folders.append(folder_path)
+            else:
+                break 
+        
 
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self)
