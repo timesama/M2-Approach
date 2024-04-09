@@ -75,7 +75,7 @@
      </sizepolicy>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -513,8 +513,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="PlotWidget" name="DQ_Widget_3" native="true">
       <property name="geometry">
        <rect>
-        <x>380</x>
-        <y>20</y>
+        <x>390</x>
+        <y>30</y>
         <width>311</width>
         <height>241</height>
        </rect>
@@ -526,8 +526,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="PlotWidget" name="DQ_Widget_4" native="true">
       <property name="geometry">
        <rect>
-        <x>710</x>
-        <y>20</y>
+        <x>720</x>
+        <y>30</y>
         <width>311</width>
         <height>241</height>
        </rect>
@@ -536,18 +536,18 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="PlotWidget" name="DQ_Widget_5" native="true">
       <property name="geometry">
        <rect>
-        <x>710</x>
+        <x>720</x>
         <y>300</y>
-        <width>311</width>
-        <height>241</height>
+        <width>300</width>
+        <height>240</height>
        </rect>
       </property>
      </widget>
      <widget class="QPushButton" name="btn_SelectFilesDQ">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>310</y>
+        <x>30</x>
+        <y>320</y>
         <width>91</width>
         <height>22</height>
        </rect>
@@ -559,8 +559,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QDoubleSpinBox" name="dq_min_2">
       <property name="geometry">
        <rect>
-        <x>480</x>
-        <y>270</y>
+        <x>490</x>
+        <y>280</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -587,8 +587,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_9">
       <property name="geometry">
        <rect>
-        <x>570</x>
-        <y>270</y>
+        <x>580</x>
+        <y>280</y>
         <width>31</width>
         <height>31</height>
        </rect>
@@ -632,8 +632,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QDoubleSpinBox" name="dq_max_2">
       <property name="geometry">
        <rect>
-        <x>600</x>
-        <y>270</y>
+        <x>610</x>
+        <y>280</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -660,8 +660,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_10">
       <property name="geometry">
        <rect>
-        <x>380</x>
-        <y>270</y>
+        <x>390</x>
+        <y>280</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -704,8 +704,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QRadioButton" name="radioButton_Log_2">
       <property name="geometry">
        <rect>
-        <x>770</x>
-        <y>270</y>
+        <x>780</x>
+        <y>280</y>
         <width>83</width>
         <height>21</height>
        </rect>
@@ -717,8 +717,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QComboBox" name="comboBox_5">
       <property name="geometry">
        <rect>
-        <x>860</x>
-        <y>270</y>
+        <x>870</x>
+        <y>280</y>
         <width>91</width>
         <height>23</height>
        </rect>
@@ -754,8 +754,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTableWidget" name="table_DQ_2">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>10</y>
+        <x>20</x>
+        <y>20</y>
         <width>341</width>
         <height>271</height>
        </rect>
@@ -792,8 +792,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="btn_ClearTable">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>340</y>
+        <x>30</x>
+        <y>350</y>
         <width>91</width>
         <height>22</height>
        </rect>
@@ -805,8 +805,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="btn_Launch">
       <property name="geometry">
        <rect>
-        <x>250</x>
-        <y>310</y>
+        <x>260</x>
+        <y>320</y>
         <width>91</width>
         <height>22</height>
        </rect>
@@ -816,9 +816,219 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_4">
+    <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>Tab 2</string>
+      <string>T1</string>
+     </attribute>
+     <widget class="PlotWidget" name="T1_Widget_1" native="true">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>30</y>
+        <width>311</width>
+        <height>241</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_ClearTable_2">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>350</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Clear Table</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="table_T1">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>341</width>
+        <height>271</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::CurrentChanged</set>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="columnCount">
+       <number>4</number>
+      </property>
+      <column>
+       <property name="text">
+        <string>Folder</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Temperature</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>T1 (1)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>T1 (2)</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QPushButton" name="btn_SelectFolders_T1">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>320</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select Folders</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_Launch_2">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>320</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Launch</string>
+      </property>
+     </widget>
+     <widget class="PlotWidget" name="T1_Widget_2" native="true">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>30</y>
+        <width>311</width>
+        <height>241</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_equations">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>280</y>
+        <width>311</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QRadioButton" name="radioButton_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>83</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>1 Exp</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_3">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>83</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>2 Exp</string>
+       </property>
+      </widget>
+      <widget class="QTextEdit" name="textEdit_T1">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>10</y>
+         <width>221</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: transparent</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
+       </property>
+       <property name="undoRedoEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="html">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_last">
+     <attribute name="title">
+      <string>Extra</string>
      </attribute>
      <widget class="QLineEdit" name="lineEdit_2">
       <property name="geometry">

@@ -15,6 +15,9 @@ from ui_Notification import Ui_Note
 from ui_Error import Ui_Error
 from ui_PhasingManual import Ui_Phasing as Ui_PhasingManual
 
+pg.CONFIG_OPTIONS['background'] = 'w'
+pg.CONFIG_OPTIONS['foreground'] = 'k'
+
 # Global 
 Frequency = []
 Re_spectra = []
@@ -344,6 +347,8 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQ_Widget_3, "DQ Filtering Time", "T2*", "")
         self.setup_graph(self.ui.DQ_Widget_4, "", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQ_Widget_5, "Name", "Center", "")
+        self.setup_graph(self.ui.T1_Widget_1, "Time", "Signal", "")
+        self.setup_graph(self.ui.T1_Widget_2, "Temperature, °C", "T1", "")
 
         # Table setup
         self.setup_table(self.ui.table_SE)
@@ -441,7 +446,6 @@ class MainWindow(QMainWindow):
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
         graph_widget.getAxis('bottom').setLabel(xlabel)
-        graph_widget.setBackground('w')
         graph_widget.setTitle(title)
 
     def setup_table(self, table_widget):
@@ -481,7 +485,7 @@ class MainWindow(QMainWindow):
 
     def groupBox_status(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
-        if current_tab_index == 2:
+        if current_tab_index == 2 or current_tab_index == 3:
             self.ui.groupBox.setEnabled(False)
         else:
             self.ui.groupBox.setEnabled(True)
@@ -1350,7 +1354,6 @@ class PhasingManual(QDialog):
         graph_phasing = self.ui.PhasingGraph
         graph_phasing.getAxis('bottom').setLabel("Frequency, MHz")
         graph_phasing.getAxis('left').setLabel("Amplitude, a.u.")
-        graph_phasing.setBackground('w')
         graph_phasing.setTitle("Phasing")
         self.ui.PhasingGraph.addLegend()
 
