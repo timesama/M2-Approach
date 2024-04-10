@@ -357,6 +357,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Launch.clicked.connect(self.launch)
         self.ui.btn_SelectFolders_T1.clicked.connect(self.open_folder_dialog)
         self.ui.btn_Plot.clicked.connect(self.plot_t1_temperature)
+        #self.ui.checkBox.clicked.connect(self.disable_buttons2)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -460,14 +461,19 @@ class MainWindow(QMainWindow):
         self.ui.FidWidget.clear()
             
     def highlight_row(self, table, row_selected):
-        for col in range(table.columnCount()):
-            for row in range(table.rowCount()):
-                item = table.item(row, col)
-                if item is not None:
-                    item.setBackground(QColor(255, 255, 255))
-            item_selected = table.item(row_selected-1, col)
-            if item_selected is not None:
-                item_selected.setBackground(QColor(255, 255, 0))
+
+        #for row in range(table.rowCount()):
+        table.selectRow(row_selected-1)
+
+
+        # for col in range(table.columnCount()):
+        #     for row in range(table.rowCount()):
+        #         item = table.item(row, col)
+        #         if item is not None:
+        #             item.setBackground(QColor(255, 255, 255))
+        #     item_selected = table.item(row_selected-1, col)
+        #     if item_selected is not None:
+        #         item_selected.setBackground(QColor(255, 255, 0))
 
         # self.ui.table_SE.selectRow(5)
         # self.ui.table_SE.currentRow()
@@ -514,8 +520,7 @@ class MainWindow(QMainWindow):
         while self.ui.comboBox_6.count()>0:
             self.ui.comboBox_6.removeItem(0)
         self.update_T1_table()
-        
-        
+           
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self)
         if dlg.exec():
@@ -555,6 +560,27 @@ class MainWindow(QMainWindow):
         self.ui.dq_max_2.setEnabled(False)
         self.ui.btn_Launch.setEnabled(False)
         self.ui.btn_Plot.setEnabled(False)
+
+    def disable_buttons2(self):
+        if self.ui.checkBox.isEnabled():
+            self.ui.btn_Start.setEnabled(True)
+            self.ui.btn_Save.setEnabled(False)
+            self.ui.btn_Phasing.setEnabled(False)
+            self.ui.dq_min.setEnabled(False)
+            self.ui.dq_max.setEnabled(False)
+            self.ui.comboBox.setEnabled(False)
+            self.ui.comboBox_2.setEnabled(False)
+            self.ui.radioButton_Log.setEnabled(False)
+            self.ui.checkBox.setEnabled(True)
+            self.ui.btn_Add.setEnabled(False)
+            self.ui.radioButton_Log_2.setEnabled(False)
+            self.ui.comboBox_5.setEnabled(False)
+            self.ui.dq_min_2.setEnabled(False)
+            self.ui.dq_max_2.setEnabled(False)
+            self.ui.btn_Launch.setEnabled(False)
+            self.ui.btn_Plot.setEnabled(False)
+        else:
+            self.enable_buttons()
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -719,9 +745,7 @@ class MainWindow(QMainWindow):
                     self.save_figures(file_path, dq_time)
         else:
             pass
-    
-        
-        
+     
     def after_phasing(self):
         global Frequency, Re_spectra, Im_spectra
 
