@@ -321,28 +321,16 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_NMR()
         self.ui.setupUi(self)
+
+        # Set window geometry
         screen = QApplication.primaryScreen()
-        # if screen:
-        #     available_geometry = screen.availableGeometry()
-        #     self.setGeometry(available_geometry)
-        #     self.showMaximized()
-
-        # Set the window flags to enable the maximize and minimize buttons
-        # self.setWindowState(Qt.WindowMaximized)
-        # self.setWindowFlags(self.windowFlags() | Qt.WindowMinMaxButtonsHint)
-
-        
-
-        # # Disable the maximize and minimize buttons initially
-        # self.setWindowFlags(self.windowFlags() & ~Qt.WindowMaximizeButtonHint)
-        # self.setWindowFlags(self.windowFlags() & ~Qt.WindowMinimizeButtonHint)
 
         if screen:
             available_geometry = screen.availableGeometry()
             left = top = 10
             width = available_geometry.width() - left
             height = available_geometry.height() - 3 * top
-            self.setGeometry(left, top, width, height)
+            self.setMaximumSize(width, height)
             self.showMaximized()
         
 
@@ -578,7 +566,6 @@ class MainWindow(QMainWindow):
         self.ui.dq_max.setEnabled(True)
         self.ui.comboBox.setEnabled(True)
         self.ui.comboBox_2.setEnabled(True)
-        self.ui.radioButton_Log.setEnabled(True)
         self.ui.checkBox.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
@@ -595,11 +582,11 @@ class MainWindow(QMainWindow):
         self.ui.DQ_Widget_2.clear()
         self.ui.DQ_Widget_3.clear()
         self.ui.DQ_Widget_4.clear()
+        self.ui.comboBox.setCurrentIndex(-1)
+        self.ui.comboBox_2.setCurrentIndex(-1)
+        self.ui.textEdit_4.setText("")
 
         current_tab_index = self.ui.tabWidget.currentIndex()
-
-        self.ui.table_SE.setRowCount(len(self.selected_files))
-        self.ui.table_DQ.setRowCount(len(self.selected_files))
 
         legend = pg.LegendItem(offset=(300, 10), parent=self.ui.FidWidget.graphicsItem())
 
@@ -713,6 +700,7 @@ class MainWindow(QMainWindow):
                 temperature = self.extract_info(match)
 
                 SFC = calculate_SFC(Amp)
+                self.ui.table_SE.setRowCount(len(self.selected_files))
                 self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
 
                 if self.ui.radioButton.isChecked():
@@ -723,7 +711,8 @@ class MainWindow(QMainWindow):
                 dq_time = self.extract_info(match)
 
                 Amplitude = calculate_amplitude(y, z)
-                DQ = calculate_DQ_intensity(x, Amplitude)            
+                DQ = calculate_DQ_intensity(x, Amplitude)     
+                self.ui.table_DQ.setRowCount(len(self.selected_files))       
                 self.fill_table(self.ui.table_DQ, dq_time, DQ, M2, T2, i)
 
                 if self.ui.radioButton.isChecked():
@@ -731,6 +720,8 @@ class MainWindow(QMainWindow):
         else:
             pass
     
+        
+        
     def after_phasing(self):
         global Frequency, Re_spectra, Im_spectra
 
@@ -888,6 +879,7 @@ class MainWindow(QMainWindow):
             # Plot the graph and the line
             self.dq_t2_graph()
             self.graph_line.plot(x_line, y_line, pen='r')  
+            self.t2_dq_graph()
 
     def t2_dq_graph(self):
         x = self.read_column_values(self.ui.table_DQ, 4)
@@ -914,10 +906,12 @@ class MainWindow(QMainWindow):
             x = np.log10(_x)
             p = [1, 1, 1, 0]
             b=([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, 1, np.inf])
+            self.ui.DQ_Widget_2.getAxis('bottom').setLabel("log(T₂*)")
         else:
             x = _x
             p = [1, 5, 5, 0]
             b=([0, 0, 0, 0, 0], [ np.inf, np.inf, np.inf, 1, np.inf])
+            self.ui.DQ_Widget_2.getAxis('bottom').setLabel("T₂*")
 
         text = self.ui.comboBox_2.currentText()
         
@@ -932,6 +926,7 @@ class MainWindow(QMainWindow):
             cen = params[1]
             fwhm = params[2]
             w = 0
+            button.setEnabled(True)
         elif text == 'Lorenz':
             params, _ = curve_fit(self.lorenz, x, y, p0=p, bounds=b1)
             y_fit = self.lorenz(x_fit, *params)
@@ -939,6 +934,7 @@ class MainWindow(QMainWindow):
             cen = params[1]
             fwhm = params[2]
             w = 1
+            button.setEnabled(True)
         elif text == 'Pseudo Voigt':
             params, _ = curve_fit(self.voigt, x, y,  bounds = b)
             y_fit = self.voigt(x_fit, *params)
@@ -946,10 +942,11 @@ class MainWindow(QMainWindow):
             cen = params[1]
             fwhm = params[2]
             w = params[3]
+            button.setEnabled(True)
         else:
-            x_fit = []
-            y_fit = []
+            button.setEnabled(False)
             return
+
 
         #R2
         R = self.calculate_r_squared(y, y_r2)

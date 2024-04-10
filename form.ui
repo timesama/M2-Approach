@@ -68,8 +68,8 @@
    </property>
    <property name="maximumSize">
     <size>
-     <width>1100</width>
-     <height>900</height>
+     <width>1280</width>
+     <height>800</height>
     </size>
    </property>
    <widget class="QTabWidget" name="tabWidget">
@@ -80,8 +80,8 @@
      <rect>
       <x>10</x>
       <y>310</y>
-      <width>1081</width>
-      <height>581</height>
+      <width>1251</width>
+      <height>471</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -91,7 +91,7 @@
      </sizepolicy>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -102,8 +102,8 @@
        <rect>
         <x>20</x>
         <y>20</y>
-        <width>320</width>
-        <height>480</height>
+        <width>361</width>
+        <height>400</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -145,10 +145,10 @@
      <widget class="PlotWidget" name="SEWidget" native="true">
       <property name="geometry">
        <rect>
-        <x>360</x>
+        <x>690</x>
         <y>20</y>
-        <width>631</width>
-        <height>471</height>
+        <width>541</width>
+        <height>411</height>
        </rect>
       </property>
       <widget class="QComboBox" name="comboBox">
@@ -223,10 +223,10 @@
      <widget class="PlotWidget" name="DQ_Widget_1" native="true">
       <property name="geometry">
        <rect>
-        <x>380</x>
-        <y>30</y>
+        <x>570</x>
+        <y>20</y>
         <width>311</width>
-        <height>241</height>
+        <height>351</height>
        </rect>
       </property>
      </widget>
@@ -235,8 +235,8 @@
        <rect>
         <x>20</x>
         <y>20</y>
-        <width>320</width>
-        <height>480</height>
+        <width>521</width>
+        <height>400</height>
        </rect>
       </property>
       <property name="editTriggers">
@@ -269,18 +269,18 @@
      <widget class="PlotWidget" name="DQ_Widget_2" native="true">
       <property name="geometry">
        <rect>
-        <x>720</x>
-        <y>30</y>
+        <x>910</x>
+        <y>20</y>
         <width>311</width>
-        <height>241</height>
+        <height>351</height>
        </rect>
       </property>
      </widget>
      <widget class="QRadioButton" name="radioButton_Log">
       <property name="geometry">
        <rect>
-        <x>770</x>
-        <y>280</y>
+        <x>940</x>
+        <y>380</y>
         <width>83</width>
         <height>21</height>
        </rect>
@@ -292,8 +292,8 @@
      <widget class="QDoubleSpinBox" name="dq_min">
       <property name="geometry">
        <rect>
-        <x>480</x>
-        <y>280</y>
+        <x>660</x>
+        <y>390</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -320,8 +320,8 @@
      <widget class="QDoubleSpinBox" name="dq_max">
       <property name="geometry">
        <rect>
-        <x>600</x>
-        <y>280</y>
+        <x>780</x>
+        <y>390</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -348,8 +348,8 @@
      <widget class="QTextEdit" name="textEdit_7">
       <property name="geometry">
        <rect>
-        <x>380</x>
-        <y>280</y>
+        <x>560</x>
+        <y>390</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -392,8 +392,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_8">
       <property name="geometry">
        <rect>
-        <x>570</x>
-        <y>280</y>
+        <x>750</x>
+        <y>390</y>
         <width>31</width>
         <height>31</height>
        </rect>
@@ -437,9 +437,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QComboBox" name="comboBox_2">
       <property name="geometry">
        <rect>
-        <x>860</x>
-        <y>280</y>
-        <width>91</width>
+        <x>940</x>
+        <y>410</y>
+        <width>81</width>
         <height>23</height>
        </rect>
       </property>
@@ -474,10 +474,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_4">
       <property name="geometry">
        <rect>
-        <x>860</x>
-        <y>260</y>
-        <width>161</width>
-        <height>81</height>
+        <x>1120</x>
+        <y>360</y>
+        <width>121</width>
+        <height>71</height>
        </rect>
       </property>
       <property name="mouseTracking">
@@ -529,10 +529,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="PlotWidget" name="DQ_Widget_3" native="true">
       <property name="geometry">
        <rect>
-        <x>380</x>
-        <y>30</y>
-        <width>311</width>
-        <height>241</height>
+        <x>250</x>
+        <y>0</y>
+        <width>310</width>
+        <height>331</height>
        </rect>
       </property>
       <property name="sizeIncrement">
@@ -548,30 +548,30 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="PlotWidget" name="DQ_Widget_4" native="true">
       <property name="geometry">
        <rect>
-        <x>710</x>
-        <y>30</y>
-        <width>311</width>
-        <height>241</height>
+        <x>580</x>
+        <y>0</y>
+        <width>310</width>
+        <height>331</height>
        </rect>
       </property>
      </widget>
      <widget class="PlotWidget" name="DQ_Widget_5" native="true">
       <property name="geometry">
        <rect>
-        <x>720</x>
-        <y>300</y>
-        <width>300</width>
-        <height>240</height>
+        <x>910</x>
+        <y>0</y>
+        <width>310</width>
+        <height>331</height>
        </rect>
       </property>
      </widget>
      <widget class="QPushButton" name="btn_SelectFilesDQ">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>320</y>
-        <width>91</width>
-        <height>22</height>
+        <x>20</x>
+        <y>400</y>
+        <width>90</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
@@ -581,8 +581,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QDoubleSpinBox" name="dq_min_2">
       <property name="geometry">
        <rect>
-        <x>480</x>
-        <y>280</y>
+        <x>360</x>
+        <y>350</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -609,8 +609,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_9">
       <property name="geometry">
        <rect>
-        <x>570</x>
-        <y>280</y>
+        <x>440</x>
+        <y>350</y>
         <width>31</width>
         <height>31</height>
        </rect>
@@ -654,8 +654,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QDoubleSpinBox" name="dq_max_2">
       <property name="geometry">
        <rect>
-        <x>600</x>
-        <y>280</y>
+        <x>460</x>
+        <y>350</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -682,8 +682,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_10">
       <property name="geometry">
        <rect>
-        <x>380</x>
-        <y>280</y>
+        <x>260</x>
+        <y>350</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -726,8 +726,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QRadioButton" name="radioButton_Log_2">
       <property name="geometry">
        <rect>
-        <x>770</x>
-        <y>280</y>
+        <x>720</x>
+        <y>350</y>
         <width>83</width>
         <height>21</height>
        </rect>
@@ -739,8 +739,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QComboBox" name="comboBox_5">
       <property name="geometry">
        <rect>
-        <x>860</x>
-        <y>280</y>
+        <x>810</x>
+        <y>350</y>
         <width>91</width>
         <height>23</height>
        </rect>
@@ -778,8 +778,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>20</x>
         <y>20</y>
-        <width>320</width>
-        <height>271</height>
+        <width>220</width>
+        <height>360</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -814,10 +814,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="btn_ClearTable">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>350</y>
-        <width>91</width>
-        <height>22</height>
+        <x>120</x>
+        <y>400</y>
+        <width>90</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
@@ -827,10 +827,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="btn_Launch">
       <property name="geometry">
        <rect>
-        <x>240</x>
-        <y>320</y>
-        <width>91</width>
-        <height>22</height>
+        <x>220</x>
+        <y>400</y>
+        <width>90</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
@@ -858,10 +858,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="btn_ClearTable_2">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>350</y>
-        <width>91</width>
-        <height>22</height>
+        <x>120</x>
+        <y>400</y>
+        <width>90</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
@@ -873,8 +873,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>20</x>
         <y>20</y>
-        <width>341</width>
-        <height>271</height>
+        <width>340</width>
+        <height>360</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -919,10 +919,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="btn_SelectFolders_T1">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>320</y>
-        <width>91</width>
-        <height>22</height>
+        <x>20</x>
+        <y>400</y>
+        <width>90</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
@@ -1085,7 +1085,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <rect>
       <x>10</x>
       <y>0</y>
-      <width>1081</width>
+      <width>1251</width>
       <height>301</height>
      </rect>
     </property>
@@ -1098,7 +1098,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </property>
      <property name="geometry">
       <rect>
-       <x>350</x>
+       <x>530</x>
        <y>270</y>
        <width>171</width>
        <height>21</height>
@@ -1158,7 +1158,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="PlotWidget" name="FFTWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>650</x>
+       <x>830</x>
        <y>60</y>
        <width>400</width>
        <height>200</height>
@@ -1232,7 +1232,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QComboBox" name="comboBox_4">
      <property name="geometry">
       <rect>
-       <x>220</x>
+       <x>420</x>
        <y>10</y>
        <width>320</width>
        <height>30</height>
@@ -1245,7 +1245,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="PlotWidget" name="FidWidget" native="true">
      <property name="geometry">
       <rect>
-       <x>220</x>
+       <x>410</x>
        <y>60</y>
        <width>400</width>
        <height>200</height>
@@ -1255,11 +1255,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QTextEdit" name="textEdit_6">
      <property name="geometry">
       <rect>
-       <x>550</x>
+       <x>760</x>
        <y>10</y>
        <width>170</width>
        <height>30</height>
       </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
      <property name="html">
       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -1288,7 +1291,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QPushButton" name="btn_Phasing">
      <property name="geometry">
       <rect>
-       <x>930</x>
+       <x>1110</x>
        <y>270</y>
        <width>121</width>
        <height>22</height>
@@ -1345,7 +1348,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QCheckBox" name="checkBox">
      <property name="geometry">
       <rect>
-       <x>530</x>
+       <x>710</x>
        <y>270</y>
        <width>91</width>
        <height>21</height>
@@ -1358,9 +1361,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QProgressBar" name="progressBar">
      <property name="geometry">
       <rect>
-       <x>920</x>
+       <x>1040</x>
        <y>10</y>
-       <width>121</width>
+       <width>191</width>
        <height>31</height>
       </rect>
      </property>
@@ -1384,7 +1387,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QTextEdit" name="textEdit_5">
      <property name="geometry">
       <rect>
-       <x>830</x>
+       <x>950</x>
        <y>10</y>
        <width>81</width>
        <height>31</height>
