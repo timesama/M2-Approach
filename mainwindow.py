@@ -1,8 +1,8 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re
-
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox, QTreeView, QAbstractItemView
-from PySide6.QtCore import QCoreApplication, Signal, Qt, SIGNAL
+import logging
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox, QPushButton
+from PySide6.QtCore import QCoreApplication, Signal, SIGNAL
 from PySide6.QtGui import QColor
 import numpy as np
 from scipy.optimize import curve_fit
@@ -22,6 +22,18 @@ pg.CONFIG_OPTIONS['foreground'] = 'k'
 Frequency = []
 Re_spectra = []
 Im_spectra = []
+
+# Configure logging settings
+logging.basicConfig(filename='app.log', level=logging.DEBUG)
+logger = logging.getLogger()
+
+class LoggedButton(QPushButton):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def mousePressEvent(self, event):
+        logger.debug(f'Button pressed: {self.text()}')
+        super().mousePressEvent(event)
 
 # Math procedures
 def analysis_time_domain(file_path):
