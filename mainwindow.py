@@ -512,7 +512,11 @@ class MainWindow(QMainWindow):
 
     def open_folder_dialog(self):
         options = QFileDialog.Options()
-        initial_directory = "C:/Mega/NMR/003_Temperature"
+        try:
+            initial_directory = "C:/Mega/NMR/003_Temperature"
+        except:
+            exe_dir = os.path.dirname(sys.argv[0])
+            initial_directory = exe_dir
         
         while True:
             folder_path = QFileDialog.getExistingDirectory(self, "Select Folder", initial_directory, options=options)
@@ -1528,7 +1532,14 @@ class OpenFilesDialog(QFileDialog):
         super().__init__(parent)
         self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
         self.setNameFilter(str("Data (*.dat *.txt *.csv)"))
-        self.setDirectory(str("C:/Mega/NMR/003_Temperature"))
+
+        initial_directory = "C:/Mega/NMR/003_Temperature"
+        if not os.path.exists(initial_directory):
+            exe_dir = os.path.dirname(sys.argv[0])
+            self.setDirectory(str(exe_dir))
+        else:
+            self.setDirectory(str(initial_directory))                  
+
         
         self.selected_files = []  # Variable to store selected file paths
 
