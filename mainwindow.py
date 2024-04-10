@@ -442,6 +442,10 @@ class MainWindow(QMainWindow):
         self.ui.table_DQ.setRowCount(0)
         self.ui.table_DQ_2.setRowCount(0)
         self.ui.table_T1.setRowCount(0)
+
+        while self.ui.comboBox_6.count()>0:
+            self.ui.comboBox_6.removeItem(0)
+
     
     def terminate(self):
         self.disable_buttons()
@@ -463,17 +467,17 @@ class MainWindow(QMainWindow):
     def highlight_row(self, table, row_selected):
 
         #for row in range(table.rowCount()):
-        table.selectRow(row_selected-1)
+        #table.selectRow(row_selected-1)
 
 
-        # for col in range(table.columnCount()):
-        #     for row in range(table.rowCount()):
-        #         item = table.item(row, col)
-        #         if item is not None:
-        #             item.setBackground(QColor(255, 255, 255))
-        #     item_selected = table.item(row_selected-1, col)
-        #     if item_selected is not None:
-        #         item_selected.setBackground(QColor(255, 255, 0))
+        for col in range(table.columnCount()):
+            for row in range(table.rowCount()):
+                item = table.item(row, col)
+                if item is not None:
+                    item.setBackground(QColor(255, 255, 255))
+            item_selected = table.item(row_selected-1, col)
+            if item_selected is not None:
+                item_selected.setBackground(QColor(255, 255, 0))
 
         # self.ui.table_SE.selectRow(5)
         # self.ui.table_SE.currentRow()
@@ -552,7 +556,7 @@ class MainWindow(QMainWindow):
         self.ui.comboBox.setEnabled(False)
         self.ui.comboBox_2.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
-        self.ui.checkBox.setEnabled(False)
+        #self.ui.checkBox.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
         self.ui.radioButton_Log_2.setEnabled(False)
         self.ui.comboBox_5.setEnabled(False)
@@ -561,26 +565,25 @@ class MainWindow(QMainWindow):
         self.ui.btn_Launch.setEnabled(False)
         self.ui.btn_Plot.setEnabled(False)
 
-    def disable_buttons2(self):
-        if self.ui.checkBox.isEnabled():
-            self.ui.btn_Start.setEnabled(True)
-            self.ui.btn_Save.setEnabled(False)
-            self.ui.btn_Phasing.setEnabled(False)
-            self.ui.dq_min.setEnabled(False)
-            self.ui.dq_max.setEnabled(False)
-            self.ui.comboBox.setEnabled(False)
-            self.ui.comboBox_2.setEnabled(False)
-            self.ui.radioButton_Log.setEnabled(False)
-            self.ui.checkBox.setEnabled(True)
-            self.ui.btn_Add.setEnabled(False)
-            self.ui.radioButton_Log_2.setEnabled(False)
-            self.ui.comboBox_5.setEnabled(False)
-            self.ui.dq_min_2.setEnabled(False)
-            self.ui.dq_max_2.setEnabled(False)
-            self.ui.btn_Launch.setEnabled(False)
-            self.ui.btn_Plot.setEnabled(False)
-        else:
-            self.enable_buttons()
+    # def disable_buttons2(self):
+    #     if self.ui.checkBox.isEnabled():
+    #         self.ui.btn_Start.setEnabled(True)
+    #         self.ui.btn_Save.setEnabled(False)
+    #         self.ui.btn_Phasing.setEnabled(False)
+    #         self.ui.dq_min.setEnabled(False)
+    #         self.ui.dq_max.setEnabled(False)
+    #         self.ui.comboBox.setEnabled(False)
+    #         self.ui.comboBox_2.setEnabled(False)
+    #         self.ui.radioButton_Log.setEnabled(False)
+    #         self.ui.btn_Add.setEnabled(False)
+    #         self.ui.radioButton_Log_2.setEnabled(False)
+    #         self.ui.comboBox_5.setEnabled(False)
+    #         self.ui.dq_min_2.setEnabled(False)
+    #         self.ui.dq_max_2.setEnabled(False)
+    #         self.ui.btn_Launch.setEnabled(False)
+    #         self.ui.btn_Plot.setEnabled(False)
+    #     else:
+    #         self.enable_buttons()
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -592,7 +595,7 @@ class MainWindow(QMainWindow):
         self.ui.dq_max.setEnabled(True)
         self.ui.comboBox.setEnabled(True)
         self.ui.comboBox_2.setEnabled(True)
-        self.ui.checkBox.setEnabled(True)
+        #self.ui.checkBox.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
     
@@ -705,10 +708,11 @@ class MainWindow(QMainWindow):
         Time_fid, Fid =  final_analysis_time_domain(Time, Re, Im)
 
         Frequency = calculate_frequency_scale(Time_fid)
-        if self.ui.checkBox.isChecked():
-            FFT = self.FFT_handmade(Fid, Time_fid, Frequency)  #(math procedure)
-        else:
-            FFT = np.fft.fftshift(np.fft.fft(Fid))
+        # if self.ui.checkBox.isChecked():
+        #     FFT = self.FFT_handmade(Fid, Time_fid, Frequency)  #(math procedure)
+        # else:
+        #     FFT = np.fft.fftshift(np.fft.fft(Fid))
+        FFT = np.fft.fftshift(np.fft.fft(Fid))
 
         # 8. Simple baseline
         Amp_spectra, Re_spectra, Im_spectra = simple_baseline_correction(FFT)
@@ -1043,9 +1047,6 @@ class MainWindow(QMainWindow):
 
             t1_files = [file for file in files_in_folder if file.startswith("T1")]
 
-            self.ui.comboBox_6.addItem(f"{filename}")
-            self.ui.comboBox_6.setCurrentIndex(-1)
-
 
             try:
                 full_path_to_data = os.path.join(parent_folder, t1_files[0])
@@ -1087,6 +1088,9 @@ class MainWindow(QMainWindow):
             
             table.setItem(row, 0, Sample)
             table.setItem(row, 1, Temperature)
+
+            self.ui.comboBox_6.addItem(f"{filename}")
+            self.ui.comboBox_6.setCurrentIndex(-1)
 
 
         # print("Time values for temperature", filename, ":", t1_dictionary[filename]["Time"])
@@ -1447,7 +1451,7 @@ class MainWindow(QMainWindow):
 
         self.enable_buttons()
         self.ui.comboBox_4.setEnabled(False)
-        self.ui.checkBox.setEnabled(False)
+        #self.ui.checkBox.setEnabled(False)
         self.ui.btn_Phasing.setEnabled(False)
 
     def save_figures(self, file_path, variable):
