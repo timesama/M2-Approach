@@ -2,7 +2,7 @@
 import sys, os, re
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox, QTreeView, QAbstractItemView
-from PySide6.QtCore import QCoreApplication, Signal
+from PySide6.QtCore import QCoreApplication, Signal, Qt
 from PySide6.QtGui import QColor
 import numpy as np
 from scipy.optimize import curve_fit
@@ -321,6 +321,30 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_NMR()
         self.ui.setupUi(self)
+        screen = QApplication.primaryScreen()
+        # if screen:
+        #     available_geometry = screen.availableGeometry()
+        #     self.setGeometry(available_geometry)
+        #     self.showMaximized()
+
+        # Set the window flags to enable the maximize and minimize buttons
+        # self.setWindowState(Qt.WindowMaximized)
+        # self.setWindowFlags(self.windowFlags() | Qt.WindowMinMaxButtonsHint)
+
+        
+
+        # # Disable the maximize and minimize buttons initially
+        # self.setWindowFlags(self.windowFlags() & ~Qt.WindowMaximizeButtonHint)
+        # self.setWindowFlags(self.windowFlags() & ~Qt.WindowMinimizeButtonHint)
+
+        if screen:
+            available_geometry = screen.availableGeometry()
+            left = top = 10
+            width = available_geometry.width() - left
+            height = available_geometry.height() - 3 * top
+            self.setGeometry(left, top, width, height)
+            self.showMaximized()
+        
 
         self.selected_files = []
         self.selected_folders = []

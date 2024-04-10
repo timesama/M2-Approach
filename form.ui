@@ -6,26 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
-    <height>900</height>
+    <width>1280</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>1100</width>
-    <height>700</height>
+    <width>1000</width>
+    <height>580</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1100</width>
-    <height>900</height>
+    <width>1280</width>
+    <height>800</height>
    </size>
   </property>
   <property name="sizeIncrement">
@@ -34,11 +34,27 @@
     <height>0</height>
    </size>
   </property>
+  <property name="baseSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>Analyser</string>
+   <string>Calculator</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>BrandIcon.ico</normaloff>BrandIcon.ico</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonIconOnly</enum>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="enabled">
@@ -75,7 +91,7 @@
      </sizepolicy>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -84,8 +100,8 @@
      <widget class="QTableWidget" name="table_SE">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>10</y>
+        <x>20</x>
+        <y>20</y>
         <width>320</width>
         <height>480</height>
        </rect>
@@ -129,10 +145,10 @@
      <widget class="PlotWidget" name="SEWidget" native="true">
       <property name="geometry">
        <rect>
-        <x>350</x>
-        <y>10</y>
-        <width>371</width>
-        <height>291</height>
+        <x>360</x>
+        <y>20</y>
+        <width>631</width>
+        <height>471</height>
        </rect>
       </property>
       <widget class="QComboBox" name="comboBox">
@@ -207,8 +223,8 @@
      <widget class="PlotWidget" name="DQ_Widget_1" native="true">
       <property name="geometry">
        <rect>
-        <x>360</x>
-        <y>10</y>
+        <x>380</x>
+        <y>30</y>
         <width>311</width>
         <height>241</height>
        </rect>
@@ -217,8 +233,8 @@
      <widget class="QTableWidget" name="table_DQ">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>10</y>
+        <x>20</x>
+        <y>20</y>
         <width>320</width>
         <height>480</height>
        </rect>
@@ -253,8 +269,8 @@
      <widget class="PlotWidget" name="DQ_Widget_2" native="true">
       <property name="geometry">
        <rect>
-        <x>700</x>
-        <y>10</y>
+        <x>720</x>
+        <y>30</y>
         <width>311</width>
         <height>241</height>
        </rect>
@@ -263,8 +279,8 @@
      <widget class="QRadioButton" name="radioButton_Log">
       <property name="geometry">
        <rect>
-        <x>750</x>
-        <y>260</y>
+        <x>770</x>
+        <y>280</y>
         <width>83</width>
         <height>21</height>
        </rect>
@@ -276,8 +292,8 @@
      <widget class="QDoubleSpinBox" name="dq_min">
       <property name="geometry">
        <rect>
-        <x>460</x>
-        <y>260</y>
+        <x>480</x>
+        <y>280</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -304,8 +320,8 @@
      <widget class="QDoubleSpinBox" name="dq_max">
       <property name="geometry">
        <rect>
-        <x>580</x>
-        <y>260</y>
+        <x>600</x>
+        <y>280</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -332,8 +348,8 @@
      <widget class="QTextEdit" name="textEdit_7">
       <property name="geometry">
        <rect>
-        <x>360</x>
-        <y>260</y>
+        <x>380</x>
+        <y>280</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -376,8 +392,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_8">
       <property name="geometry">
        <rect>
-        <x>550</x>
-        <y>260</y>
+        <x>570</x>
+        <y>280</y>
         <width>31</width>
         <height>31</height>
        </rect>
@@ -421,8 +437,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QComboBox" name="comboBox_2">
       <property name="geometry">
        <rect>
-        <x>750</x>
-        <y>290</y>
+        <x>860</x>
+        <y>280</y>
         <width>91</width>
         <height>23</height>
        </rect>
@@ -513,11 +529,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="PlotWidget" name="DQ_Widget_3" native="true">
       <property name="geometry">
        <rect>
-        <x>390</x>
+        <x>380</x>
         <y>30</y>
         <width>311</width>
         <height>241</height>
        </rect>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
       </property>
       <property name="styleSheet">
        <string notr="true"/>
@@ -526,7 +548,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="PlotWidget" name="DQ_Widget_4" native="true">
       <property name="geometry">
        <rect>
-        <x>720</x>
+        <x>710</x>
         <y>30</y>
         <width>311</width>
         <height>241</height>
@@ -559,7 +581,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QDoubleSpinBox" name="dq_min_2">
       <property name="geometry">
        <rect>
-        <x>490</x>
+        <x>480</x>
         <y>280</y>
         <width>81</width>
         <height>31</height>
@@ -587,7 +609,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_9">
       <property name="geometry">
        <rect>
-        <x>580</x>
+        <x>570</x>
         <y>280</y>
         <width>31</width>
         <height>31</height>
@@ -632,7 +654,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QDoubleSpinBox" name="dq_max_2">
       <property name="geometry">
        <rect>
-        <x>610</x>
+        <x>600</x>
         <y>280</y>
         <width>91</width>
         <height>31</height>
@@ -660,7 +682,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QTextEdit" name="textEdit_10">
       <property name="geometry">
        <rect>
-        <x>390</x>
+        <x>380</x>
         <y>280</y>
         <width>91</width>
         <height>31</height>
@@ -704,7 +726,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QRadioButton" name="radioButton_Log_2">
       <property name="geometry">
        <rect>
-        <x>780</x>
+        <x>770</x>
         <y>280</y>
         <width>83</width>
         <height>21</height>
@@ -717,7 +739,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QComboBox" name="comboBox_5">
       <property name="geometry">
        <rect>
-        <x>870</x>
+        <x>860</x>
         <y>280</y>
         <width>91</width>
         <height>23</height>
@@ -756,7 +778,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>20</x>
         <y>20</y>
-        <width>341</width>
+        <width>320</width>
         <height>271</height>
        </rect>
       </property>
@@ -805,7 +827,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QPushButton" name="btn_Launch">
       <property name="geometry">
        <rect>
-        <x>260</x>
+        <x>240</x>
         <y>320</y>
         <width>91</width>
         <height>22</height>
