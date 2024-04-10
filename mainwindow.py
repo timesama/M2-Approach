@@ -624,7 +624,6 @@ class MainWindow(QMainWindow):
         legend = pg.LegendItem(offset=(300, 10), parent=self.ui.FidWidget.graphicsItem())
 
         if not self.load_data_and_check_validity((self.selected_files[0]), current_tab_index):
-            print('This is not statement')
             return
         
         if self.ui.checkBox_2.isChecked():
@@ -1024,82 +1023,6 @@ class MainWindow(QMainWindow):
         return r_squared
     
     # T1 section
-    def update_T1_table1(self):
-        table = self.ui.table_T1
-        table.setRowCount(len(self.selected_folders))
-        self.ui.btn_Plot1.setEnabled(True)
-        self.ui.btn_Plot2.setEnabled(True)
-
-        
-
-        for row, parent_folder in enumerate(self.selected_folders, start=0):
-            filename = os.path.basename(parent_folder)
-            files_in_folder = os.listdir(parent_folder)
-
-            t1_files = [file for file in files_in_folder if file.startswith("T1")]
-
-            if len(t1_files) != 1:
-                QMessageBox.warning(self, "Invalid Data", f"The folder {filename} does not have one T1 file and will be removed from the table and file list.", QMessageBox.Ok)
-                table.removeRow(row)
-                del self.selected_folders[row]
-            
-        for row, parent_folder in enumerate(self.selected_folders, start=0):
-            foldername = os.path.dirname(parent_folder)
-            samplename = os.path.split(foldername)[1]
-            filename = os.path.basename(parent_folder)
-            files_in_folder = os.listdir(parent_folder)
-
-
-            t1_files = [file for file in files_in_folder if file.startswith("T1")]
-
-
-            try:
-                full_path_to_data = os.path.join(parent_folder, t1_files[0])
-                with open(full_path_to_data, "r") as file:
-                    lines = [line.replace('\t\t\t', '').rstrip('\n') for line in file if not (line.rstrip('\n').endswith('\t\t\t\t'))]
-                
-                Time = []
-                Signal = []
-
-                for line in lines[1:]:  # Skip the first line !!!
-                    parts = line.split('\t')
-                    if len(parts) != 2:
-                        raise ValueError("Data has more than 2 columns")
-                    time_value = float(parts[0])
-                    signal_value = float(parts[1])
-                    Time.append(time_value)
-                    Signal.append(signal_value)
-
-                if filename not in self.t1_dictionary:
-                    self.t1_dictionary[filename] = {"Time": [], "Signal": []}
-                    
-
-                self.t1_dictionary[filename]["Time"].extend(Time)
-                self.t1_dictionary[filename]["Signal"].extend(Signal)
-
-            except ValueError as e:
-                QMessageBox.warning(self, "Invalid Data", f"I couldn't read {filename} due to: {str(e)}, removing file from the table and file list.", QMessageBox.Ok)
-                table.removeRow(row)
-                del self.selected_folders[row]
-            except Exception as e:
-                QMessageBox.warning(self, "Invalid Data", f"I couldn't read {filename}, removing file from the table and file list.", QMessageBox.Ok)
-                table.removeRow(row)
-                del self.selected_folders[row]
-
-                
-            
-            Sample = QTableWidgetItem(samplename)
-            Temperature = QTableWidgetItem(filename)
-            
-            table.setItem(row, 0, Sample)
-            table.setItem(row, 1, Temperature)
-
-            self.ui.comboBox_6.addItem(f"{filename}")
-            self.ui.comboBox_6.setCurrentIndex(-1)
-
-
-        # print("Time values for temperature", filename, ":", t1_dictionary[filename]["Time"])
-        # print("Signal values for temperature", filename, ":", t1_dictionary[filename]["Signal"])
     
     def update_T1_table(self):
 
@@ -1572,12 +1495,11 @@ class MainWindow(QMainWindow):
 
             # Check that there are 3 columns
             if data.shape[1] != 3:
-                dialog = AlertDialog()
-                if dialog.exec() == QDialog.Rejected:
-                    self.ui.btn_SelectFiles.setEnabled(True)
-                    self.ui.radioButton.setEnabled(True)
-                    self.selected_files.clear()
-                    return False
+                QMessageBox.warning(self, "Invalid Data Format", f"I can't read the {filename} file, it should have 3 columns exactly, deleting it.", QMessageBox.Ok)
+                self.ui.btn_SelectFiles.setEnabled(True)
+                self.ui.radioButton.setEnabled(True)
+                self.selected_files.clear()
+                return False
                 
             elif not ((filename.startswith("SE") or filename.startswith("XS")) and current_tab_index == 0) and \
                 not (filename.startswith("DQ") and current_tab_index == 1) and not current_tab_index == 2:
@@ -1588,7 +1510,7 @@ class MainWindow(QMainWindow):
                     return False
             return True
         except:
-            QMessageBox.warning(self, "Invalid Data", f"I can't read the {file_path} file, deleting it.", QMessageBox.Ok)
+            QMessageBox.warning(self, "Invalid Data", f"I can't read the {filename} file, deleting it.", QMessageBox.Ok)
             self.selected_files.remove(file_path)
 
             if self.selected_files == []:
@@ -1652,15 +1574,6 @@ class NotificationDialog(QDialog, Ui_Note):
         self.stateChanged.emit(self.flag_ok)
         self.reject()
 
-class AlertDialog(QDialog, Ui_Error):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        self.pushButton.clicked.connect(self.close_dialog) 
-
-    def close_dialog(self):
-        self.reject() 
-        
 class PhasingManual(QDialog):
     # TODO somehow create an araay of ORIGINAL Re_spectra and be able to restore it...
     closed = Signal()
