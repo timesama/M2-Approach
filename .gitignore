@@ -6,4 +6,4 @@ __pycache__/*
 venv/*
 form.ui.autosave
 NMRAnalyzer*
-
+temp_data.txt
