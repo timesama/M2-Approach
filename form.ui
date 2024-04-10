@@ -937,17 +937,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Select Folders</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_Plot">
+     <widget class="QPushButton" name="btn_Plot1">
       <property name="geometry">
        <rect>
-        <x>740</x>
-        <y>420</y>
+        <x>840</x>
+        <y>370</y>
         <width>91</width>
         <height>22</height>
        </rect>
       </property>
       <property name="text">
-       <string>Plot</string>
+       <string>Plot T1 (1)</string>
       </property>
      </widget>
      <widget class="PlotWidget" name="T1_Widget_2" native="true">
@@ -966,9 +966,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QGroupBox" name="groupBox_equations">
       <property name="geometry">
        <rect>
-        <x>380</x>
+        <x>430</x>
         <y>370</y>
-        <width>311</width>
+        <width>261</width>
         <height>71</height>
        </rect>
       </property>
@@ -1007,9 +1007,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <widget class="QTextEdit" name="textEdit_T1">
        <property name="geometry">
         <rect>
-         <x>80</x>
+         <x>90</x>
          <y>10</y>
-         <width>221</width>
+         <width>161</width>
          <height>51</height>
         </rect>
        </property>
@@ -1066,6 +1066,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="placeholderText">
        <string>Choose File for Analysis</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_Plot2">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>400</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Plot T1 (2)</string>
       </property>
      </widget>
     </widget>
@@ -1299,7 +1312,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <widget class="QPushButton" name="btn_Phasing">
      <property name="geometry">
       <rect>
-       <x>1110</x>
+       <x>980</x>
        <y>270</y>
        <width>121</width>
        <height>22</height>
