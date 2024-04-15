@@ -437,6 +437,7 @@ class MainWindow(QMainWindow):
         self.selected_files_gly = []
         self.selected_DQfiles = []
         self.selected_folders = []
+        self.t1_dictionary = {}
         self.ui.table_SE.setRowCount(0)
         self.ui.table_DQ.setRowCount(0)
         self.ui.table_DQ_2.setRowCount(0)
@@ -1015,6 +1016,7 @@ class MainWindow(QMainWindow):
     # T1 section
     
     def update_T1_table(self):
+        #TODO in one table there could be two rows with SIMILAR temperatures, so the dictionary should include the filename as key
 
         for parent_folder in self.selected_folders:
 
