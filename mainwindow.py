@@ -1016,12 +1016,11 @@ class MainWindow(QMainWindow):
     # T1 section
     
     def update_T1_table(self):
-        #TODO in one table there could be two rows with SIMILAR temperatures, so the dictionary should include the filename as key
 
         for parent_folder in self.selected_folders:
 
-            #foldername = os.path.dirname(parent_folder)
-            #samplename = os.path.split(foldername)[1]
+            foldername = os.path.dirname(parent_folder)
+            samplename = os.path.split(foldername)[1]
             filename = os.path.basename(parent_folder)
             files_in_folder = os.listdir(parent_folder)
 
@@ -1048,12 +1047,12 @@ class MainWindow(QMainWindow):
                     Time.append(time_value)
                     Signal.append(signal_value)
 
-                if filename not in self.t1_dictionary:
-                    self.t1_dictionary[filename] = {"Time": [], "Signal": []}
+                if parent_folder not in self.t1_dictionary:
+                    self.t1_dictionary[samplename] = {"Time": [], "Signal": []}
                     
 
-                self.t1_dictionary[filename]["Time"].extend(Time)
-                self.t1_dictionary[filename]["Signal"].extend(Signal)
+                self.t1_dictionary[samplename]["Time"].extend(Time)
+                self.t1_dictionary[samplename]["Signal"].extend(Signal)
 
             except ValueError as e:
                 QMessageBox.warning(self, "Invalid Data", f"I couldn't read {filename} due to: {str(e)}, removing file from the table and file list.", QMessageBox.Ok)
@@ -1088,7 +1087,7 @@ class MainWindow(QMainWindow):
         if selected_file_idx == -1:
             return
         
-        value_from_row = self.ui.table_T1.item(selected_file_idx, 1).text()
+        value_from_row = self.ui.table_T1.item(selected_file_idx, 0).text()
         Time = np.array(self.t1_dictionary[value_from_row]['Time'])/1000
         Signal = np.array(self.t1_dictionary[value_from_row]['Signal'])
 
