@@ -360,7 +360,7 @@ class MainWindow(QMainWindow):
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
-        self.setup_graph(self.ui.FidWidget, "Time, ms", "Amplitude", "FID")
+        self.setup_graph(self.ui.FidWidget, "Time, μs", "Amplitude", "FID")
         self.setup_graph(self.ui.SEWidget, "Temperature, °C", "Choose", "")
         self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_2, "", "Norm. DQ Intensity", "")
