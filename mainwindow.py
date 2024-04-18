@@ -190,7 +190,7 @@ class MainWindow(QMainWindow):
 
         # self.ui.table_SE.selectRow(5)
         # self.ui.table_SE.currentRow()
-        #TODO normally
+        
   
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
