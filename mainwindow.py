@@ -356,7 +356,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_SelectFolders_T1.clicked.connect(self.open_folder_dialog)
         self.ui.btn_Plot1.clicked.connect(self.state_1exp)
         self.ui.btn_Plot2.clicked.connect(self.state_2exp)
-        #self.ui.checkBox.clicked.connect(self.disable_buttons2)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
