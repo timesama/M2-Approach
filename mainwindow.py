@@ -190,8 +190,7 @@ class MainWindow(QMainWindow):
 
         # self.ui.table_SE.selectRow(5)
         # self.ui.table_SE.currentRow()
-        
-  
+          
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
         graph_widget.getAxis('bottom').setLabel(xlabel)
@@ -722,67 +721,83 @@ class MainWindow(QMainWindow):
     # T1 section
     
     def update_T1_table(self):
+        t1_files = []
+        path_to_file = []
 
         for parent_folder in self.selected_folders:
+            number = 0
+            for root, dirs, files in os.walk(parent_folder):
+                for name in files:
+                    if name.startswith(("T1")):
+                        t1_files.append(name)
+                        path_to_file.append(os.path.join(root, name))
+                        number = number+1
 
-            foldername = os.path.dirname(parent_folder)
-            samplename = os.path.split(foldername)[1]
-            filename = os.path.basename(parent_folder)
-            files_in_folder = os.listdir(parent_folder)
 
-            t1_files = [file for file in files_in_folder if file.startswith("T1")]
+            if number < 1:
+                QMessageBox.warning(self, "Invalid Data", f"The folder {parent_folder} does not have any T1 files and will be removed from the table and file list.", QMessageBox.Ok)
+                for folder in self.selected_folders:
+                    if folder == parent_folder:
+                        self.selected_folders.remove(folder)
+                return
 
-            if len(t1_files) != 1:
-                QMessageBox.warning(self, "Invalid Data", f"The folder {filename} does not have one T1 file and will be removed from the table and file list.", QMessageBox.Ok)
-                self.selected_folders = [folder for folder in self.selected_folders if folder != parent_folder]
-
-            try:
-                full_path_to_data = os.path.join(parent_folder, t1_files[0])
-                with open(full_path_to_data, "r") as file:
-                    lines = [line.replace('\t\t\t', '').rstrip('\n') for line in file if not (line.rstrip('\n').endswith('\t\t\t\t'))]
-                
-                Time = []
-                Signal = []
-
-                for line in lines[1:]:  # Skip the first line !!!
-                    parts = line.split('\t')
-                    if len(parts) != 2:
-                        raise ValueError("Data has more than 2 columns")
-                    time_value = float(parts[0])
-                    signal_value = float(parts[1])
-                    Time.append(time_value)
-                    Signal.append(signal_value)
-
-                if parent_folder not in self.t1_dictionary:
-                    self.t1_dictionary[samplename] = {"Time": [], "Signal": []}
+            for current_file, path in zip(t1_files, path_to_file):
+                try:
+                    # path = os.path.join(parent_folder, current_file)
+                    with open(path, "r") as file:
+                        lines = [line.replace('\t\t\t', '').rstrip('\n') for line in file if not (line.rstrip('\n').endswith('\t\t\t\t'))]
                     
+                    Head_folder_name = os.path.split(os.path.dirname(path))[1] # in my case it is temperature
+                    Time = []
+                    Signal = []
 
-                self.t1_dictionary[samplename]["Time"].extend(Time)
-                self.t1_dictionary[samplename]["Signal"].extend(Signal)
+                    for line in lines[1:]:  # Skip the first line !!!
+                        parts = line.split('\t')
+                        if len(parts) != 2:
+                            raise ValueError("Data has more than 2 columns")
+                        time_value = float(parts[0])
+                        signal_value = float(parts[1])
+                        Time.append(time_value)
+                        Signal.append(signal_value)
+                        # We need to understand what to put in the dictionary and later READ from it as well
 
-            except ValueError as e:
-                QMessageBox.warning(self, "Invalid Data", f"I couldn't read {filename} due to: {str(e)}, removing file from the table and file list.", QMessageBox.Ok)
-                self.selected_folders = [folder for folder in self.selected_folders if folder != parent_folder]
-            except Exception as e:
-                QMessageBox.warning(self, "Invalid Data", f"I couldn't read {filename}, removing file from the table and file list.", QMessageBox.Ok)
-                self.selected_folders = [folder for folder in self.selected_folders if folder != parent_folder]
+
+                    self.t1_dictionary[path] = {"Temperature": [], "Time": [], "Signal": []}
+                    self.t1_dictionary[path]["Temperature"].append(Head_folder_name)
+                    self.t1_dictionary[path]["Time"].extend(Time)
+                    self.t1_dictionary[path]["Signal"].extend(Signal)
+
+                except ValueError as e:
+                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} due to: {str(e)}, removing file from the table and file list.", QMessageBox.Ok)
+                    for file in t1_files:
+                        if file == current_file:
+                            path_to_file.remove(path)
+                        
+                except Exception:
+                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file}, removing file from the table and file list.", QMessageBox.Ok)
+                    for file in t1_files:
+                        if file == current_file:
+                            path_to_file.remove(path)
+
+        for row, path in enumerate(path_to_file, start=0):
             
-        for row, parent_folder in enumerate(self.selected_folders, start=0):
-            filename = os.path.basename(parent_folder)
-            foldername = os.path.dirname(parent_folder)
-            samplename = os.path.split(foldername)[1]
+            filename = os.path.basename(path)
+            Temperature = os.path.split(os.path.dirname(path))[1]
 
 
             table = self.ui.table_T1
-            table.setRowCount(len(self.selected_folders))
+            table.setRowCount(len(t1_files))
             self.ui.btn_Plot1.setEnabled(True)
             self.ui.btn_Plot2.setEnabled(True)                
             
-            Sample = QTableWidgetItem(samplename)
-            Temperature = QTableWidgetItem(filename)
+            Folder = QTableWidgetItem(path)
+            Filename = QTableWidgetItem(filename)
+            Temp = QTableWidgetItem(Temperature)
+
             
-            table.setItem(row, 0, Sample)
-            table.setItem(row, 1, Temperature)
+            table.setItem(row, 0, Folder)
+            table.setItem(row, 1, Filename)
+            table.setItem(row, 2, Temp)
 
             self.ui.comboBox_6.addItem(f"{filename}")
             self.ui.comboBox_6.setCurrentIndex(-1)
@@ -798,6 +813,36 @@ class MainWindow(QMainWindow):
         Signal = np.array(self.t1_dictionary[value_from_row]['Signal'])
 
         Time_fit = np.arange(min(Time), max(Time) + 1, 1)
+
+
+        p = [-10, 200, 15]
+        b=([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
+        popt, _ = curve_fit(Cal.decaying_exponential, Time, Signal, p0 = p,bounds = b, maxfev=100000)
+        fitted_curve = Cal.decaying_exponential(Time_fit, *popt)
+        tau = round(popt[1],1)
+        tau_str = str(tau)
+        self.ui.textEdit_T1.setText(f"T1: {tau}")
+        item = QTableWidgetItem(tau_str)
+        self.ui.table_T1.setItem(selected_file_idx,3,item)
+
+                
+        figure = self.ui.T1_Widget_1
+        figure.clear()
+        figure.plot(Time, Signal, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        figure.plot(Time_fit, fitted_curve, pen='r')
+
+    def calculate_T2(self):
+        selected_file_idx = self.ui.comboBox_6.currentIndex()
+
+        if selected_file_idx == -1:
+            return
+        
+        value_from_row = self.ui.table_T1.item(selected_file_idx, 0).text()
+        Time = np.array(self.t1_dictionary[value_from_row]['Time'])/1000
+        Signal = np.array(self.t1_dictionary[value_from_row]['Signal'])
+
+        Time_fit = np.arange(min(Time), max(Time) + 1, 1)
+
         if self.ui.radioButton_2.isChecked():
             p = [-10, 200, 15]
             b=([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
@@ -857,16 +902,17 @@ class MainWindow(QMainWindow):
         Temperature = []
         T1 =[]
         for row in range(table.rowCount()):
-            if table.item(row,1) and table.item(row,2) is not None:
-                C = float(table.item(row, 1).text())
-                if self.State_exp1 == True:
-                    T = float(table.item(row, 2).text())
-                else:
-                    T = float(table.item(row, 3).text())
+            try:
+            #if table.item(row,2) and table.item(row,3) is not None :
+                C = float(table.item(row, 2).text())
+                T = float(table.item(row, 3).text())
                 Temperature.append(C)
                 T1.append(T)
-            else:
-                print('oops')
+
+            except:
+                Temperature.append(0)
+                T1.append(0)
+                    
 
         graph.plot(Temperature,T1, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
 

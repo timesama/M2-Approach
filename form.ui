@@ -91,7 +91,7 @@
      </sizepolicy>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -910,17 +910,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </column>
       <column>
        <property name="text">
+        <string>File name</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>Temperature</string>
        </property>
       </column>
       <column>
        <property name="text">
         <string>T₁ (1)</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>T₁ (2)</string>
        </property>
       </column>
      </widget>
@@ -947,7 +947,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>Plot T1 (1)</string>
+       <string>Plot T1</string>
       </property>
      </widget>
      <widget class="PlotWidget" name="T1_Widget_2" native="true">
@@ -963,11 +963,55 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string notr="true"/>
       </property>
      </widget>
+     <widget class="QComboBox" name="comboBox_6">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>10</y>
+        <width>161</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="placeholderText">
+       <string>Choose File for Analysis</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_DeleteRow">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>400</y>
+        <width>90</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Delete row</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_last">
+     <attribute name="title">
+      <string>Extra</string>
+     </attribute>
+     <widget class="QLineEdit" name="lineEdit_2">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>120</y>
+        <width>191</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Your advertisment could be here...</string>
+      </property>
+     </widget>
      <widget class="QGroupBox" name="groupBox_equations">
       <property name="geometry">
        <rect>
-        <x>430</x>
-        <y>370</y>
+        <x>230</x>
+        <y>330</y>
         <width>261</width>
         <height>71</height>
        </rect>
@@ -1055,48 +1099,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
       </widget>
      </widget>
-     <widget class="QComboBox" name="comboBox_6">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>10</y>
-        <width>161</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="placeholderText">
-       <string>Choose File for Analysis</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="btn_Plot2">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>400</y>
+        <x>240</x>
+        <y>180</y>
         <width>91</width>
         <height>22</height>
        </rect>
       </property>
       <property name="text">
        <string>Plot T1 (2)</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_last">
-     <attribute name="title">
-      <string>Extra</string>
-     </attribute>
-     <widget class="QLineEdit" name="lineEdit_2">
-      <property name="geometry">
-       <rect>
-        <x>370</x>
-        <y>120</y>
-        <width>191</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Your advertisment could be here...</string>
       </property>
      </widget>
     </widget>
