@@ -61,8 +61,9 @@ class MainWindow(QMainWindow):
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_Launch.clicked.connect(self.launch)
         self.ui.btn_SelectFolders_T1.clicked.connect(self.open_folder_dialog)
-        self.ui.btn_Plot1.clicked.connect(self.state_1exp)
-        self.ui.btn_Plot2.clicked.connect(self.state_2exp)
+        self.ui.btn_Plot1.clicked.connect(self.plot_t1_temperature)
+        self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
+        self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -172,6 +173,16 @@ class MainWindow(QMainWindow):
         self.ui.SEWidget.clear()
         self.ui.FFTWidget.clear()
         self.ui.FidWidget.clear()
+
+    def delete_row(self):
+        current_tab_index = self.ui.tabWidget.currentIndex()
+        if current_tab_index == 0:
+            table = self.ui.table_SE
+        if current_tab_index == 3:
+            table = self.ui.table_T1
+
+        row = table.currentRow()
+        table.removeRow(row)
             
     def highlight_row(self, table, row_selected):
 
@@ -291,14 +302,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
     
-    def state_1exp(self):
-        self.State_exp1 = True
-        self.plot_t1_temperature()
-    
-    def state_2exp(self):
-        self.State_exp1 = False
-        self.plot_t1_temperature()
-
     # All these functions refer to the general analysis where FFT and FID are produced
     def analysis(self):
         # Clear Combobox
