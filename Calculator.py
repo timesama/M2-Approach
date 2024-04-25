@@ -21,7 +21,14 @@ def analysis_time_domain(file_path):
     # 4.1 Calculate Freq
     Frequency = calculate_frequency_scale(T_cr)
     # 4.2 Shift Freq
-    R_sh, I_sh = adjust_frequency(Frequency, R_ph, I_ph)
+    R_sh1, I_sh1 = adjust_frequency(Frequency, R_ph, I_ph)
+
+    # 5 Again Phase
+    R_ph2, I_ph2 = time_domain_phase(R_sh1, I_sh1)
+
+    # Again frequency
+    R_sh, I_sh = adjust_frequency(Frequency, R_ph2, I_ph2)
+
 
     return T_cr, R_sh, I_sh
 

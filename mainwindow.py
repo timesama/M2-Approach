@@ -342,11 +342,18 @@ class MainWindow(QMainWindow):
             self.ui.textEdit_6.setText(f"Analysing file {i} out of {len(self.selected_files)}")                
             
             if self.ui.checkBox_2.isChecked():
-                if len(self.selected_files_gly) != len(self.selected_files):
+                if len(self.selected_files_gly) != len(self.selected_files) and self.ui.tabWidget.currentIndex() == 0:
                     QMessageBox.warning(self, "Invalid Data", f"The amount of reference files is not the same as sample files. Terminate analysis.", QMessageBox.Ok)
                     self.terminate()
                     self.ui.btn_SelectFiles.setEnabled(True)
                     return
+                elif self.ui.tabWidget.currentIndex() == 1:
+                    file_path_gly = self.selected_files_gly[0]
+                    try:
+                        self.process_file_data(file_path, file_path_gly, current_tab_index, i)
+                    except:
+                        self.analysis_error(file_path)
+                        return
                 else: 
                     file_path_gly = self.selected_files_gly[i-1]
                     try:

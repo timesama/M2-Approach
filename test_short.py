@@ -17,7 +17,15 @@ def analysis_time_domain(file_path):
     # 4.1 Calculate Freq
     Frequency = calculate_frequency_scale(T_cr)
     # 4.2 Shift Freq
-    R_sh, I_sh = adjust_frequency(Frequency, R_ph, I_ph)
+    R_sh1, I_sh1 = adjust_frequency(Frequency, R_ph, I_ph)
+
+    # 3. Phase the data
+    R_ph2, I_ph2 = time_domain_phase(R_sh1, I_sh1)
+
+    # 4.2 Shift Freq
+    R_sh, I_sh = adjust_frequency(Frequency, R_ph2, I_ph2)
+
+
 
     return T_cr, R_sh, I_sh
 
@@ -66,7 +74,14 @@ def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     coeff_im = [1, 400, 0]
 
     Real_subtracted, Time_cropped   = reference_long_component(Time, Re_s, Amp_r, coeff_re)
-    Im_subtracted, _     = reference_long_component(Time, Im_s, Amp_r, coeff_im)
+    Im_subtracted, _                = reference_long_component(Time, Im_s, Amp_r, coeff_im)
+
+
+    plt.figure()
+    plt.plot(Time_cropped, Real_subtracted, 'r-', label='Re normalized to Gly')
+    plt.plot(Time_cropped, Im_subtracted, 'b-', label='Im normalized to Gly')
+    plt.legend()
+
     
     # 11. Normalize
     Re_n, Im_n = normalize(Real_subtracted, Im_subtracted)
@@ -87,6 +102,13 @@ def FFT_processing(Time, Real, Imaginary):
 
     # 8. Simple baseline
     Amp, Re, Im = simple_baseline_correction(FFT)
+
+    # Plot the spectra
+    plt.figure()
+    plt.plot(Frequency, Re, 'r', label = 'Re')
+    plt.plot(Frequency, Im, 'b', label = 'Im')
+    plt.plot(Frequency, Amp, 'k', label = 'Amp')
+    plt.legend()
 
     # 9. Apodization
     Real_apod = calculate_apodization(Re, Frequency)
@@ -164,6 +186,13 @@ def adjust_frequency(Frequency, Re, Im):
     # Define Real, Imaginary and Amplitude
     Re_shifted = np.real(Fid_shifted)
     Im_shifted = np.imag(Fid_shifted)
+
+
+    # # Plot the spectra
+    # plt.figure()
+    # plt.plot(Frequency, FFT, 'r', label='Original') 
+    # plt.plot(Frequency, FFT_shifted, 'b', label='Adjusted')
+    # plt.legend()
 
     return Re_shifted, Im_shifted
 
@@ -246,7 +275,48 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-file_path = r'C:\Mega\NMR\003_Temperature\2024_03_01_Chocolates\2024_03_07_Chocolate_85per_MSE_SE\SE_Ch85_70_c.dat'
+def decaying_exponential(x, a, b, c):
+    return a * np.exp(-x/b) + c
+
+def calculate_M2(FFT_real, Frequency):
+    # NoClass
+    # Take the integral of the REAL PART OF FFT by counts
+    Integral = np.trapz(np.real(FFT_real))
+    
+    # Normalize FFT to the Integral value
+    Fur_normalized = np.real(FFT_real) / Integral
+    
+    # Calculate the integral of normalized FFT to receive 1
+    Integral_one = np.trapz(Fur_normalized)
+    
+    # Multiplication (the power ^n will give the nth moment (here it is n=2)
+    Multiplication = (Frequency ** 2) * Fur_normalized
+
+    # Plot the M2
+    plt.figure()
+    plt.plot(Frequency, Multiplication, 'r', label = 'Second moment')
+    plt.legend()
+    
+    # Calculate the integral of multiplication - the nth moment
+    # The (2pi)^2 are the units to transform from rad/sec to Hz
+    # ppbly it should be (2pi)^n for generalized moment calculation
+    M2 = (np.trapz(Multiplication)) * 4 * np.pi ** 2
+    
+    # Check the validity
+    if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
+        print('Apodization is wrong!')
+
+    if M2 < 0:
+        M2 = 0
+        T2 = 0
+    else:
+        T2 = np.sqrt(2/M2)
+    
+    return M2, T2
+
+file_path = r'C:\Mega\NMR\003_Temperature\DQ\20\DQ_Choc90_7.9_20_c.dat'
+
+# file_path = r'C:\Mega\NMR\003_Temperature\2024_03_01_Chocolates\2024_03_07_Chocolate_85per_MSE_SE\SE_Ch85_70_c.dat'
 #Time, Amp, Re, Im = process_file_data(r'C:\Mega\NMR\003_Temperature\2023_12_05_CPMG_SE_Temperature_choco_85_2\SE\SE_Chocolate85percent_20_c.dat')
 #Time, Amp, Re, Im = process_file_data(r'C:\Mega\NMR\003_Temperature\2023_12_21_SE_Temperature_PS35000\SE_PS_70_c.dat')
 
@@ -259,5 +329,6 @@ M2, T2 = FFT_processing(Time_cr, Re_n, Im_n)
 
 print(M2)
 print(T2)
+plt.show()
 
 print('end')

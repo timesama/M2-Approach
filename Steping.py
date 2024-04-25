@@ -9,7 +9,7 @@ def decaying_exponential(x, a, b, c):
     return a * np.exp(-x/b) + c
 # I lied
 
-file_path = r'C:\Mega\NMR\003_Temperature\2024_03_01_Chocolates\2024_03_07_Chocolate_85per_MSE_SE\SE_Ch85_70_c.dat'
+file_path = r'C:\Mega\NMR\003_Temperature\DQ\20\DQ_Choc90_7.9_20_c.dat'
 file_path_glycerol = r'C:\Mega\NMR\003_Temperature\2024_03_08_SE_Temperature_Glycerol\SE_Glycerol_70_c.dat'
 
 # 1. Read the data:
@@ -60,11 +60,11 @@ Im_phased = Real * np.sin(np.deg2rad(idx)) + Imag * np.cos(np.deg2rad(idx))
 Am_phased = np.sqrt(Re_phased ** 2 + Im_phased ** 2)
 
 # # Plot the phased data
-# plt.figure()
-# plt.plot(Time, Re_phased, 'r', label='Phased Re')
-# plt.plot(Time, Im_phased, 'b', label='Phased Im')
-# plt.plot(Time, Am_phased, 'k', label='Phased Amp')
-# plt.legend()
+plt.figure()
+plt.plot(Time, Re_phased, 'r', label='Phased Re')
+plt.plot(Time, Im_phased, 'b', label='Phased Im')
+plt.plot(Time, Am_phased, 'k', label='Phased Amp')
+plt.legend()
 
 
 # 4. Adjust the frequency
@@ -100,11 +100,11 @@ delta_index = index_max - index_zero
 # Shift the spectra (amplitude) by the difference in indices
 FFT_shifted = np.concatenate((FFT[delta_index:], FFT[:delta_index]))
 
-# # Plot the spectra
-# plt.figure()
-# plt.plot(Frequency, FFT, 'r', label='Original')
-# plt.plot(Frequency, FFT_shifted, 'b', label='Adjusted')
-# plt.legend()
+# Plot the spectra
+plt.figure()
+plt.plot(Frequency, FFT, 'r', label='Original')
+plt.plot(Frequency, FFT_shifted, 'b', label='Adjusted')
+plt.legend()
 
 # iFFT
 Fid_shifted = np.fft.ifft(np.fft.fftshift(FFT_shifted))
@@ -196,6 +196,12 @@ FFT_shifted_gly = np.concatenate((FFT_gly[delta_index_gly:], FFT_gly[:delta_inde
 
 # iFFT
 Fid_shifted_gly = np.fft.ifft(np.fft.fftshift(FFT_shifted_gly))
+
+# Plot the spectra
+plt.figure()
+plt.plot(Frequency_gly, FFT_gly, 'r', label='Original gly') 
+plt.plot(Frequency_gly, FFT_shifted_gly, 'b', label='Adjusted gly')
+plt.legend()
 
 # Define Real, Imaginary and Amplitude
 Re_r = np.real(Fid_shifted_gly)
