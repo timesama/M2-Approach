@@ -581,8 +581,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <rect>
         <x>910</x>
         <y>0</y>
-        <width>310</width>
-        <height>331</height>
+        <width>330</width>
+        <height>200</height>
        </rect>
       </property>
      </widget>
@@ -747,7 +747,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QRadioButton" name="radioButton_Log_2">
       <property name="geometry">
        <rect>
-        <x>720</x>
+        <x>700</x>
         <y>350</y>
         <width>83</width>
         <height>21</height>
@@ -760,7 +760,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <widget class="QComboBox" name="comboBox_5">
       <property name="geometry">
        <rect>
-        <x>810</x>
+        <x>790</x>
         <y>350</y>
         <width>91</width>
         <height>23</height>
@@ -856,6 +856,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="text">
        <string>Launch</string>
+      </property>
+     </widget>
+     <widget class="PlotWidget" name="DQ_Widget_6" native="true">
+      <property name="geometry">
+       <rect>
+        <x>910</x>
+        <y>220</y>
+        <width>330</width>
+        <height>200</height>
+       </rect>
       </property>
      </widget>
     </widget>

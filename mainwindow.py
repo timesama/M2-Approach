@@ -73,9 +73,11 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQ_Widget_2, "", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQ_Widget_3, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_4, "", "Norm. DQ Intensity", "")
-        self.setup_graph(self.ui.DQ_Widget_5, "Name", "Center", "")
+        self.setup_graph(self.ui.DQ_Widget_5, "", "Center", "")
+        self.setup_graph(self.ui.DQ_Widget_6, "Name", "FWHM", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time, μs", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "Temperature, °C", "T₁, μs", "")
+        
 
         # Table setup
         self.setup_table(self.ui.table_SE)
@@ -170,6 +172,7 @@ class MainWindow(QMainWindow):
         self.ui.DQ_Widget_3.clear()
         self.ui.DQ_Widget_4.clear()
         self.ui.DQ_Widget_5.clear()
+        self.ui.DQ_Widget_6.clear()
         self.ui.SEWidget.clear()
         self.ui.FFTWidget.clear()
         self.ui.FidWidget.clear()
@@ -652,7 +655,10 @@ class MainWindow(QMainWindow):
 
         text = self.ui.comboBox_2.currentText()
         
-        x_fit = np.arange(0, np.max(x) + 0.001, 0.01)
+        try:
+            x_fit = np.arange(0, np.max(x) + 0.001, 0.01)
+        except:
+            x_fit = np.arange(0, 100 + 0.001, 0.01)
 
         b1=([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf])
 
@@ -951,7 +957,13 @@ class MainWindow(QMainWindow):
 
                 
             item = QTableWidgetItem(filename)
-            default_name = QTableWidgetItem(str(row+1))
+
+            pattern = r'DQ_table_(\d+)(?!\([^)]*\))(?![A-Za-z])'
+            try:
+                default_name = QTableWidgetItem(str(re.search(pattern, filename).group(1)))
+            except:
+                default_name = QTableWidgetItem(str(row+1))
+
             table.setItem(row, 0, item)
             table.setItem(row, 1, default_name)
 
@@ -960,6 +972,9 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_5.setEnabled(True)
         self.ui.dq_min_2.setEnabled(True)
         self.ui.dq_max_2.setEnabled(True)
+
+
+
 
         self.dq_t2 = {}
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
@@ -976,9 +991,10 @@ class MainWindow(QMainWindow):
 
         #legend = self.ui.DQ_Widget_3.addLegend()
         legend1 = self.ui.DQ_Widget_4.addLegend()  # Get the legend object
-        self.ui.DQ_Widget_3.clear()
-        self.ui.DQ_Widget_4.clear()
+        self.ui.DQ_Widget_6.clear()
         self.ui.DQ_Widget_5.clear()
+        self.ui.DQ_Widget_4.clear()
+        self.ui.DQ_Widget_3.clear()
 
         if legend1 is not None:
             #legend.clear()
@@ -991,6 +1007,7 @@ class MainWindow(QMainWindow):
         # This is a mess :(
 
         center = []
+        weight = []
         comparison_par = []
         for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.dq_t2.items()):
             file_name_item = self.ui.table_DQ_2.item(row, 1)
@@ -1058,6 +1075,7 @@ class MainWindow(QMainWindow):
                 cen = params[1]
                 center.append(cen)
                 fwhm = params[2]
+                weight.append(fwhm)
                 w = 0
             elif text == 'Lorenz':
                 params, _ = curve_fit(self.lorenz, t2_lin, dq_norm, p0=p, bounds=b1)
@@ -1066,6 +1084,7 @@ class MainWindow(QMainWindow):
                 cen = params[1]
                 center.append(cen)
                 fwhm = params[2]
+                weight.append(fwhm)
                 w = 1
             elif text == 'Pseudo Voigt':
                 params, _ = curve_fit(self.voigt, t2_lin, dq_norm,  bounds = b)
@@ -1074,6 +1093,7 @@ class MainWindow(QMainWindow):
                 cen = params[1]
                 center.append(cen)
                 fwhm = params[2]
+                weight.append(fwhm)
                 w = params[3]
 
             # Draw a graph
@@ -1088,7 +1108,11 @@ class MainWindow(QMainWindow):
                 
                 self.ui.DQ_Widget_3.plot(x_line, y_line, pen=color) 
 
-        self.ui.DQ_Widget_5.plot(comparison_par, center, pen=None, symbolPen=None, symbol='o', symbolBrush='r')
+
+        self.ui.DQ_Widget_5.plot(comparison_par, center, pen='r', symbolPen=None, symbol='o', symbolBrush='r')
+        self.ui.DQ_Widget_6.plot(comparison_par, weight, pen='b', symbolPen=None, symbol='o', symbolBrush='b')
+
+
 
     def nan_value(self, table, row, column_index):
         table.setItem(row, column_index, QTableWidgetItem('NaN'))
