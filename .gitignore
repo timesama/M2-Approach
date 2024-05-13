@@ -7,3 +7,5 @@ venv/*
 form.ui.autosave
 NMRAnalyzer*
 temp_data.txt
+BrandIcon.ico
+Testfiles/*
