@@ -938,7 +938,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </column>
       <column>
        <property name="text">
-        <string>Temperature</string>
+        <string>X Axis</string>
        </property>
       </column>
       <column>
@@ -947,7 +947,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </property>
       </column>
      </widget>
-     <widget class="QPushButton" name="btn_SelectFolders_T1">
+     <widget class="QPushButton" name="btn_SelectFiles_T1">
       <property name="geometry">
        <rect>
         <x>20</x>
@@ -957,7 +957,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>Select Folders</string>
+       <string>Select Files</string>
       </property>
      </widget>
      <widget class="QPushButton" name="btn_Plot1">
@@ -970,7 +970,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </rect>
       </property>
       <property name="text">
-       <string>Plot T1</string>
+       <string>Plot T₁</string>
       </property>
      </widget>
      <widget class="PlotWidget" name="T1_Widget_2" native="true">
@@ -1030,19 +1030,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <string>Clear Table</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBox_7">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>10</y>
-        <width>161</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="placeholderText">
-       <string>Choose File for Analysis</string>
-      </property>
-     </widget>
      <widget class="QTableWidget" name="table_T2">
       <property name="geometry">
        <rect>
@@ -1068,7 +1055,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <enum>QAbstractItemView::SelectRows</enum>
       </property>
       <property name="columnCount">
-       <number>4</number>
+       <number>6</number>
       </property>
       <column>
        <property name="text">
@@ -1082,12 +1069,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </column>
       <column>
        <property name="text">
-        <string>Temperature</string>
+        <string>X Axis</string>
        </property>
       </column>
       <column>
        <property name="text">
         <string>T₂ (1)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>T₂ (2)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>T₂ (3)</string>
        </property>
       </column>
      </widget>
@@ -1260,6 +1257,74 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <string>3 Exp</string>
        </property>
       </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_equations_3">
+      <property name="geometry">
+       <rect>
+        <x>970</x>
+        <y>360</y>
+        <width>71</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <widget class="QRadioButton" name="radioButton_10">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>83</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>1 Exp</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_11">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>83</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>2 Exp</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_12">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>83</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>3 Exp</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QComboBox" name="comboBox_7">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>10</y>
+        <width>161</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="placeholderText">
+       <string>Choose File for Analysis</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_last">

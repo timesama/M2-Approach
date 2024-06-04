@@ -47,6 +47,7 @@ class MainWindow(QMainWindow):
         self.selected_T2files = []
         self.dq_t2 = {}
         self.t1_dictionary ={}
+        self.t2_dictionary ={}
 
         # Connect buttons to their respective slots
         self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
@@ -59,11 +60,14 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_Log.clicked.connect(self.plot_fit)
         self.ui.tabWidget.currentChanged.connect(self.groupBox_status)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_Launch.clicked.connect(self.launch)
-        self.ui.btn_SelectFolders_T1.clicked.connect(self.open_select_comparison_files_dialog)
-        self.ui.btn_Plot1.clicked.connect(self.plot_t1_temperature)
+        self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
+        self.ui.btn_Plot_T2.clicked.connect(self.plot_relaxation_time)
+        self.ui.btn_SelectFiles_T2.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
@@ -79,9 +83,9 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQ_Widget_5, "", "Center", "")
         self.setup_graph(self.ui.DQ_Widget_6, "Name", "FWHM", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time, μs", "Signal", "")
-        self.setup_graph(self.ui.T1_Widget_2, "Temperature, °C", "T₁, μs", "")
+        self.setup_graph(self.ui.T1_Widget_2, "X axis", "T₁, μs", "")
         self.setup_graph(self.ui.T2_Widget_1, "Time, μs", "Signal", "")
-        self.setup_graph(self.ui.T2_Widget_2, "Temperature, °C", "T₂, μs", "")
+        self.setup_graph(self.ui.T2_Widget_2, "X axis", "T₂, μs", "")
         
 
         # Table setup
@@ -91,15 +95,17 @@ class MainWindow(QMainWindow):
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
         self.ui.table_SE.currentItemChanged.connect(self.update_yaxis)
-        self.ui.radioButton_2.clicked.connect(self.calculate_T1)
-        self.ui.radioButton_3.clicked.connect(self.calculate_T1)
+        self.ui.radioButton_4.clicked.connect(self.calculate_relaxation_time)
+        self.ui.radioButton_5.clicked.connect(self.calculate_relaxation_time)
+        self.ui.radioButton_6.clicked.connect(self.calculate_relaxation_time)
 
 
         # Connect combobox signals to slots
         self.ui.comboBox.currentIndexChanged.connect(self.update_yaxis)
         self.ui.comboBox_3.currentIndexChanged.connect(self.update_yaxis)
         self.ui.comboBox_2.currentIndexChanged.connect(self.plot_fit)
-        self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_T1)
+        self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
+        self.ui.comboBox_7.currentIndexChanged.connect(self.calculate_relaxation_time)
 
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
@@ -162,10 +168,18 @@ class MainWindow(QMainWindow):
 
         self.ui.T1_Widget_1.clear()
         self.ui.T1_Widget_2.clear()
+        self.ui.T2_Widget_1.clear()
+        self.ui.T2_Widget_2.clear()
         self.ui.comboBox_6.currentIndexChanged.disconnect(self.calculate_T1)
+        self.ui.comboBox_7.currentIndexChanged.disconnect(self.calculate_T2)
+
         while self.ui.comboBox_6.count()>0:          
             self.ui.comboBox_6.removeItem(0)
         self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_T1)
+
+        while self.ui.comboBox_7.count()>0:          
+            self.ui.comboBox_7.removeItem(0)
+        self.ui.comboBox_7.currentIndexChanged.connect(self.calculate_T2)
 
     def terminate(self):
         self.disable_buttons()
@@ -233,18 +247,18 @@ class MainWindow(QMainWindow):
                 DQfileNames = dlg.selectedFiles()
                 self.selected_DQfiles.extend(DQfileNames)
                 self.update_DQ_comparison()
-            if current_tab_index == 3:
+            elif current_tab_index == 3:
                 while self.ui.comboBox_6.count()>0:
                     self.ui.comboBox_6.removeItem(0)
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
-                self.update_T1_table()
-            if current_tab_index == 4:
+                self.update_T12_table()
+            elif current_tab_index == 4:
                 while self.ui.comboBox_7.count()>0:
                     self.ui.comboBox_7.removeItem(0)
                 T2fileNames = dlg.selectedFiles()
                 self.selected_T2files.extend(T2fileNames)
-                self.update_T2_table()
+                self.update_T12_table()
             
     def open_select_dialog(self):
         dlg = OpenFilesDialog(self)
@@ -254,27 +268,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_Start.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
 
-    def open_folder_dialog(self):
-        options = QFileDialog.Options()
-        try:
-            initial_directory = "C:/Mega/NMR/003_Temperature"
-        except:
-            exe_dir = os.path.dirname(sys.argv[0])
-            initial_directory = exe_dir
-        
-        while True:
-            folder_path = QFileDialog.getExistingDirectory(self, "Select Folder", initial_directory, options=options)
-            if folder_path:
-                self.selected_folders.append(folder_path)
-                initial_directory = os.path.dirname(folder_path)
-            else:
-                break 
-    
-        # Clear Combobox
-        if self.ui.tabWidget.currentIndex() == 3:
-            while self.ui.comboBox_6.count()>0:
-                self.ui.comboBox_6.removeItem(0)
-            self.update_T1_table()
            
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self)
@@ -760,78 +753,187 @@ class MainWindow(QMainWindow):
 
         return r_squared
     
-    # T2 section
-    def update_T2_table(self):
-        pass
+    # Relaxation time section
+    def update_T12_table(self):
+        current_tab_index = self.ui.tabWidget.currentIndex()
 
+        if current_tab_index == 3:
+            selected_files = self.selected_T1files
+            table = self.ui.table_T1
+            combobox = self.ui.comboBox_6
+            pattern = r'T1_(.*).dat'
+            state = 'T1'
+            dictionary = self.t1_dictionary
 
-    # T1 section
-    
-    def update_T1_table(self):
-        if len(self.selected_T1files) < 2:
+        elif current_tab_index == 4:
+            selected_files = self.selected_T2files
+            table = self.ui.table_T2
+            combobox = self.ui.comboBox_7
+            pattern = r'T2_(.*).dat'
+            state = 'T2'
+            dictionary = self.t2_dictionary
+
+        else: 
+            return
+        
+        if len(selected_files) < 2:
             QMessageBox.warning(self, "Not enough data", f"Select at least 2 files for comparison.", QMessageBox.Ok)
             return
 
         file_name = []
-        temperature = []
-        pattern = r'T1_([0-9]+).dat'
+        x_axis = []
         
-        for file in self.selected_T1files:
+        for file in selected_files:
             current_file = [os.path.basename(file)]
-            temperature += [re.search(pattern,file).group(1)]
+            try:
+                x_axis += [re.search(pattern,file).group(1)]
+            except:
+                x_axis += ['0']
 
             try:
-                with open(file, "r") as data:
-                    lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
+                if state == 'T1':
+                    with open(file, "r") as data:
+                        lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
                 
-                Time = []
-                Signal = []
+                    Time = []
+                    Signal = []
 
-                for line in lines[1:]:  # Skip the first line !!!
-                    parts = line.split('\t')
-                    if len(parts) != 2:
-                        raise ValueError("Data has more than 2 columns")
-                    time_value = float(parts[0])
-                    signal_value = float(parts[1])
-                    Time.append(time_value)
-                    Signal.append(signal_value)
+                    for line in lines[1:]:  # Skip the first line !!!
+                        parts = line.split('\t')
+                        if len(parts) != 2:
+                            raise ValueError("Data has more than 2 columns")
+                        time_value = float(parts[0])
+                        signal_value = float(parts[1])
+                        Time.append(time_value)
+                        Signal.append(signal_value)
+                elif state == 'T2':
+                    data = np.loadtxt(file)
+                    Time, Signal = data[:, 0], data[:, 1]
+
                     # We need to understand what to put in the dictionary and later READ from it as well
 
-                self.t1_dictionary[file] = {"Temperature": [], "Time": [], "Signal": []}
-                self.t1_dictionary[file]["Temperature"].append(temperature)
-                self.t1_dictionary[file]["Time"].extend(Time)
-                self.t1_dictionary[file]["Signal"].extend(Signal)
+                dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
+                dictionary[file]["X Axis"].append(x_axis)
+                dictionary[file]["Time"].extend(Time)
+                dictionary[file]["Signal"].extend(Signal)
 
             except ValueError as e:
                 QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} due to: {str(e)}, removing file from the table and file list.", QMessageBox.Ok)
-                for file_to_delete in self.selected_T1files:
+                for file_to_delete in selected_files:
                     if file_to_delete == file:
-                        self.selected_T1files.remove(file)
+                        selected_files.remove(file)
                     
             except Exception:
                 QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file}, removing file from the table and file list.", QMessageBox.Ok)
-                for file_to_delete in self.selected_T1files:
+                for file_to_delete in selected_files:
                     if file_to_delete == file:
-                        self.selected_T1files.remove(file)
+                        selected_files.remove(file)
 
-            table = self.ui.table_T1
-            table.setRowCount(len(self.selected_T1files))
+            
+            table.setRowCount(len(selected_files))
             self.ui.btn_Plot1.setEnabled(True)
             self.ui.btn_Plot2.setEnabled(True)                
         
-        for row, file in zip(range(table.rowCount()), self.selected_T1files):
+        for row, file in zip(range(table.rowCount()), selected_files):
             Folder = QTableWidgetItem(file)
             file_name = os.path.basename(file)
-            temperature = re.search(pattern,file).group(1)
+            x_axis = re.search(pattern,file).group(1)
 
             Filename = QTableWidgetItem(file_name)
-            Temp = QTableWidgetItem(temperature)
+            Temp = QTableWidgetItem(x_axis)
             table.setItem(row, 0, Folder)
             table.setItem(row, 1, Filename)
             table.setItem(row, 2, Temp)
 
-            self.ui.comboBox_6.addItem(f"{file_name}")
-            self.ui.comboBox_6.setCurrentIndex(-1)
+            combobox.addItem(f"{file_name}")
+            combobox.setCurrentIndex(-1)
+
+    def calculate_relaxation_time(self):
+        current_tab_index = self.ui.tabWidget.currentIndex()
+
+        if current_tab_index == 3:
+            table = self.ui.table_T1
+            state = 'T1'
+            dictionary = self.t1_dictionary
+            denominator = 1000
+
+        elif current_tab_index == 4:
+            state = 'T2'
+            selected_file_idx = self.ui.comboBox_7.currentIndex()
+            table = self.ui.table_T2
+            dictionary = self.t2_dictionary
+            figure = self.ui.T2_Widget_1
+            denominator = 1
+
+        if selected_file_idx == -1:
+            return
+        
+        value_from_row = table.item(selected_file_idx, 0).text()
+        Time = np.array(dictionary[value_from_row]['Time'])/denominator
+        Signal = np.array(dictionary[value_from_row]['Signal'])
+
+        Time_fit = np.arange(min(Time), max(Time) + 1, 1)
+
+        if self.ui.radioButton_4.isChecked() or state == 'T1':
+            order = 1
+            Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
+
+            item = QTableWidgetItem(tau_str)
+            table.setItem(selected_file_idx,3,item)
+            item2 = QTableWidgetItem('0')
+            item3 = QTableWidgetItem('0')
+            table.setItem(selected_file_idx,4,item2)
+            table.setItem(selected_file_idx,5,item3)
+        if self.ui.radioButton_5.isChecked():
+            try:
+                order = 2
+                Time_fit, fitted_curve, tau_str, tau_str2, _ = Cal.fit_exponent(Time, Signal, order)
+                
+                item = QTableWidgetItem(tau_str)
+                item2 = QTableWidgetItem(tau_str2)
+                table.setItem(selected_file_idx,3,item)
+                table.setItem(selected_file_idx,4,item2)
+
+                item3 = QTableWidgetItem('0')
+
+                table.setItem(selected_file_idx,5,item3)
+            except:
+                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with three exponents. Fitting with one.", QMessageBox.Ok)
+                order = 1
+                Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
+
+                item = QTableWidgetItem(tau_str)
+                table.setItem(selected_file_idx,3,item)
+                item2 = QTableWidgetItem('0')
+                item3 = QTableWidgetItem('0')
+                table.setItem(selected_file_idx,4,item2)
+                table.setItem(selected_file_idx,5,item3)
+
+        elif self.ui.radioButton_6.isChecked():
+            try:
+                order = 3
+                Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
+                
+                item = QTableWidgetItem(tau_str)
+                item2 = QTableWidgetItem(tau_str2)
+                item3 = QTableWidgetItem(tau_str3)
+                table.setItem(selected_file_idx,3,item)
+                table.setItem(selected_file_idx,4,item2)
+                table.setItem(selected_file_idx,5,item3)
+            except:
+                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with two exponents. Fitting with two.", QMessageBox.Ok)
+                order = 2
+                Time_fit, fitted_curve, tau_str, tau_str2, _ = Cal.fit_exponent(Time, Signal, order)
+                item = QTableWidgetItem(tau_str)
+                table.setItem(selected_file_idx,3,item)
+                item2 = QTableWidgetItem(tau_str2)
+                item3 = QTableWidgetItem('0')
+                table.setItem(selected_file_idx,4,item2)
+                table.setItem(selected_file_idx,5,item3)
+        
+        figure.clear()
+        figure.plot(Time, Signal, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        figure.plot(Time_fit, fitted_curve, pen='r')
 
     def calculate_T1(self):
         selected_file_idx = self.ui.comboBox_6.currentIndex()
@@ -856,82 +958,121 @@ class MainWindow(QMainWindow):
         figure.plot(Time_fit, fitted_curve, pen='r')
 
     def calculate_T2(self):
-        selected_file_idx = self.ui.comboBox_6.currentIndex()
+        selected_file_idx = self.ui.comboBox_7.currentIndex()
+        table = self.ui.table_T2
+        dictionary = self.t2_dictionary
+        figure = self.ui.T2_Widget_1
 
         if selected_file_idx == -1:
             return
         
-        value_from_row = self.ui.table_T1.item(selected_file_idx, 0).text()
-        Time = np.array(self.t1_dictionary[value_from_row]['Time'])/1000
-        Signal = np.array(self.t1_dictionary[value_from_row]['Signal'])
+        value_from_row = table.item(selected_file_idx, 0).text()
+        Time = np.array(dictionary[value_from_row]['Time'])
+        Signal = np.array(dictionary[value_from_row]['Signal'])
 
         Time_fit = np.arange(min(Time), max(Time) + 1, 1)
 
-        if self.ui.radioButton_2.isChecked():
+        if self.ui.radioButton_4.isChecked():
             order = 1
             Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
 
             item = QTableWidgetItem(tau_str)
-            self.ui.table_T1.setItem(selected_file_idx,2,item)
+            table.setItem(selected_file_idx,3,item)
             item2 = QTableWidgetItem('0')
-            self.ui.table_T1.setItem(selected_file_idx,3,item2)
-        else:
+            item3 = QTableWidgetItem('0')
+            table.setItem(selected_file_idx,4,item2)
+            table.setItem(selected_file_idx,5,item3)
+        elif self.ui.radioButton_5.isChecked():
             try:
                 order = 2
                 Time_fit, fitted_curve, tau_str, tau_str2, _ = Cal.fit_exponent(Time, Signal, order)
                 
                 item = QTableWidgetItem(tau_str)
                 item2 = QTableWidgetItem(tau_str2)
-                self.ui.table_T1.setItem(selected_file_idx,2,item)
-                self.ui.table_T1.setItem(selected_file_idx,3,item2)
+                table.setItem(selected_file_idx,3,item)
+                table.setItem(selected_file_idx,4,item2)
+
+                item3 = QTableWidgetItem('0')
+
+                table.setItem(selected_file_idx,5,item3)
             except:
-                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with two exponents. Fitting with one.", QMessageBox.Ok)
-                p = [-10, 200, 15]
-                b=([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
-                popt, pcov = curve_fit(Cal.decaying_exponential, Time, Signal, p0 = p,bounds=b, maxfev=100000)
-                fitted_curve = Cal.decaying_exponential(Time_fit, *popt)
-                tau = round(popt[1],1)
-                tau_str = str(tau)
-                self.ui.textEdit_T1.setText(f"T1: {tau}")
+                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with three exponents. Fitting with one.", QMessageBox.Ok)
+                order = 1
+                Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
+
                 item = QTableWidgetItem(tau_str)
-                self.ui.table_T1.setItem(selected_file_idx,2,item)
+                table.setItem(selected_file_idx,3,item)
                 item2 = QTableWidgetItem('0')
-                self.ui.table_T1.setItem(selected_file_idx,3,item2)
+                item3 = QTableWidgetItem('0')
+                table.setItem(selected_file_idx,4,item2)
+                table.setItem(selected_file_idx,5,item3)
 
+        elif self.ui.radioButton_6.isChecked():
+            try:
+                order = 3
+                Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
+                
+                item = QTableWidgetItem(tau_str)
+                item2 = QTableWidgetItem(tau_str2)
+                item3 = QTableWidgetItem(tau_str3)
+                table.setItem(selected_file_idx,3,item)
+                table.setItem(selected_file_idx,4,item2)
+                table.setItem(selected_file_idx,5,item3)
+            except:
+                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with two exponents. Fitting with two.", QMessageBox.Ok)
+                order = 2
+                Time_fit, fitted_curve, tau_str, tau_str2, _ = Cal.fit_exponent(Time, Signal, order)
+                item = QTableWidgetItem(tau_str)
+                table.setItem(selected_file_idx,3,item)
+                item2 = QTableWidgetItem(tau_str2)
+                item3 = QTableWidgetItem('0')
+                table.setItem(selected_file_idx,4,item2)
+                table.setItem(selected_file_idx,5,item3)
         
-        
-
-        
-        figure = self.ui.T1_Widget_1
         figure.clear()
         figure.plot(Time, Signal, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
         figure.plot(Time_fit, fitted_curve, pen='r')
 
-    def plot_t1_temperature(self):
-        table = self.ui.table_T1
-        graph = self.ui.T1_Widget_2
-        graph.clear()
+    def plot_relaxation_time(self):
+        if self.ui.tabWidget.currentIndex() == 3:
+            table = self.ui.table_T1
+            graph = self.ui.T1_Widget_2
+            column = 3
+            
+        elif self.ui.tabWidget.currentIndex() == 4:
+            table = self.ui.table_T2
+            graph = self.ui.T2_Widget_2
 
+            if self.ui.radioButton_10.isChecked():
+                column = 3
+            elif self.ui.radioButton_11.isChecked():
+                column = 4
+            elif self.ui.radioButton_12.isChecked():
+                column = 5
+
+        graph.clear()
         if table.rowCount() < 1:
             return
 
-        Temperature = []
-        T1 =[]
+        x_axis = []
+        relaxation_time =[]
+        number = 1
         for row in range(table.rowCount()):
             try:
-            #if table.item(row,2) and table.item(row,3) is not None :
-                C = float(table.item(row, 2).text())
-                T = float(table.item(row, 3).text())
-                Temperature.append(C)
-                T1.append(T)
-
+                C = float(table.item(row, column-1).text())
+                x_axis.append(C)
             except:
-                Temperature.append(0)
-                T1.append(0)
+                x_axis.append(number)
+            
+            try:
+                T = float(table.item(row, column).text())
+                relaxation_time.append(T)
+            except:
+                relaxation_time.append(0)
+            number = number + 1
                     
 
-        graph.plot(Temperature,T1, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
-
+        graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
 
     # Working with tables
     def update_DQ_comparison(self):
@@ -972,9 +1113,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_5.setEnabled(True)
         self.ui.dq_min_2.setEnabled(True)
         self.ui.dq_max_2.setEnabled(True)
-
-
-
 
         self.dq_t2 = {}
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
@@ -1111,8 +1249,6 @@ class MainWindow(QMainWindow):
 
         self.ui.DQ_Widget_5.plot(comparison_par, center, pen='r', symbolPen=None, symbol='o', symbolBrush='r')
         self.ui.DQ_Widget_6.plot(comparison_par, weight, pen='b', symbolPen=None, symbol='o', symbolBrush='b')
-
-
 
     def nan_value(self, table, row, column_index):
         table.setItem(row, column_index, QTableWidgetItem('NaN'))
