@@ -320,8 +320,8 @@ def fit_exponent(Time, Signal, order):
         fitted_curve = decaying_exponential(Time_fit, *popt)
         tau = round(popt[1],1)
         tau_str = str(tau)
-        tau_str2 = str(tau)
-        tau_str3 = str(tau)
+        tau_str2 = str(0)
+        tau_str3 = str(0)
     elif order == 2:
         p = [-10, 100, -10, 100, 15]
         b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf])
@@ -331,7 +331,7 @@ def fit_exponent(Time, Signal, order):
         tau2 = round(popt[3],1)
         tau_str = str(tau)
         tau_str2 = str(tau2)
-        tau_str3 = str(tau)
+        tau_str3 = str(0)
     elif order ==3:
         p = [-10, 100, -10, 100, -10, 100, 15]
         b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf], [np.inf, 50000, np.inf, 50000, np.inf])

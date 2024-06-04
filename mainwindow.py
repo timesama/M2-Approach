@@ -170,16 +170,16 @@ class MainWindow(QMainWindow):
         self.ui.T1_Widget_2.clear()
         self.ui.T2_Widget_1.clear()
         self.ui.T2_Widget_2.clear()
-        self.ui.comboBox_6.currentIndexChanged.disconnect(self.calculate_T1)
-        self.ui.comboBox_7.currentIndexChanged.disconnect(self.calculate_T2)
+        self.ui.comboBox_6.currentIndexChanged.disconnect(self.calculate_relaxation_time)
+        self.ui.comboBox_7.currentIndexChanged.disconnect(self.calculate_relaxation_time)
 
         while self.ui.comboBox_6.count()>0:          
             self.ui.comboBox_6.removeItem(0)
-        self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_T1)
+        self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
 
         while self.ui.comboBox_7.count()>0:          
             self.ui.comboBox_7.removeItem(0)
-        self.ui.comboBox_7.currentIndexChanged.connect(self.calculate_T2)
+        self.ui.comboBox_7.currentIndexChanged.connect(self.calculate_relaxation_time)
 
     def terminate(self):
         self.disable_buttons()
@@ -853,6 +853,8 @@ class MainWindow(QMainWindow):
 
         if current_tab_index == 3:
             table = self.ui.table_T1
+            figure = self.ui.T1_Widget_1
+            selected_file_idx = self.ui.comboBox_6.currentIndex()
             state = 'T1'
             dictionary = self.t1_dictionary
             denominator = 1000
@@ -876,134 +878,36 @@ class MainWindow(QMainWindow):
 
         if self.ui.radioButton_4.isChecked() or state == 'T1':
             order = 1
-            Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
+            Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
 
             item = QTableWidgetItem(tau_str)
+            item2 = QTableWidgetItem(tau_str2)
+            item3 = QTableWidgetItem(tau_str3)
             table.setItem(selected_file_idx,3,item)
-            item2 = QTableWidgetItem('0')
-            item3 = QTableWidgetItem('0')
-            table.setItem(selected_file_idx,4,item2)
-            table.setItem(selected_file_idx,5,item3)
-        if self.ui.radioButton_5.isChecked():
-            try:
-                order = 2
-                Time_fit, fitted_curve, tau_str, tau_str2, _ = Cal.fit_exponent(Time, Signal, order)
-                
-                item = QTableWidgetItem(tau_str)
-                item2 = QTableWidgetItem(tau_str2)
-                table.setItem(selected_file_idx,3,item)
-                table.setItem(selected_file_idx,4,item2)
-
-                item3 = QTableWidgetItem('0')
-
-                table.setItem(selected_file_idx,5,item3)
-            except:
-                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with three exponents. Fitting with one.", QMessageBox.Ok)
-                order = 1
-                Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
-
-                item = QTableWidgetItem(tau_str)
-                table.setItem(selected_file_idx,3,item)
-                item2 = QTableWidgetItem('0')
-                item3 = QTableWidgetItem('0')
-                table.setItem(selected_file_idx,4,item2)
-                table.setItem(selected_file_idx,5,item3)
-
-        elif self.ui.radioButton_6.isChecked():
-            try:
-                order = 3
-                Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
-                
-                item = QTableWidgetItem(tau_str)
-                item2 = QTableWidgetItem(tau_str2)
-                item3 = QTableWidgetItem(tau_str3)
-                table.setItem(selected_file_idx,3,item)
-                table.setItem(selected_file_idx,4,item2)
-                table.setItem(selected_file_idx,5,item3)
-            except:
-                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with two exponents. Fitting with two.", QMessageBox.Ok)
-                order = 2
-                Time_fit, fitted_curve, tau_str, tau_str2, _ = Cal.fit_exponent(Time, Signal, order)
-                item = QTableWidgetItem(tau_str)
-                table.setItem(selected_file_idx,3,item)
-                item2 = QTableWidgetItem(tau_str2)
-                item3 = QTableWidgetItem('0')
-                table.setItem(selected_file_idx,4,item2)
-                table.setItem(selected_file_idx,5,item3)
-        
-        figure.clear()
-        figure.plot(Time, Signal, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
-        figure.plot(Time_fit, fitted_curve, pen='r')
-
-    def calculate_T1(self):
-        selected_file_idx = self.ui.comboBox_6.currentIndex()
-
-        if selected_file_idx == -1:
-            return
-        
-        value_from_row = self.ui.table_T1.item(selected_file_idx, 0).text()
-        Time = np.array(self.t1_dictionary[value_from_row]['Time'])/1000
-        Signal = np.array(self.t1_dictionary[value_from_row]['Signal'])
-
-        order = 1
-        Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
-
-        item = QTableWidgetItem(tau_str)
-        self.ui.table_T1.setItem(selected_file_idx,3,item)
-
-                
-        figure = self.ui.T1_Widget_1
-        figure.clear()
-        figure.plot(Time, Signal, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
-        figure.plot(Time_fit, fitted_curve, pen='r')
-
-    def calculate_T2(self):
-        selected_file_idx = self.ui.comboBox_7.currentIndex()
-        table = self.ui.table_T2
-        dictionary = self.t2_dictionary
-        figure = self.ui.T2_Widget_1
-
-        if selected_file_idx == -1:
-            return
-        
-        value_from_row = table.item(selected_file_idx, 0).text()
-        Time = np.array(dictionary[value_from_row]['Time'])
-        Signal = np.array(dictionary[value_from_row]['Signal'])
-
-        Time_fit = np.arange(min(Time), max(Time) + 1, 1)
-
-        if self.ui.radioButton_4.isChecked():
-            order = 1
-            Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
-
-            item = QTableWidgetItem(tau_str)
-            table.setItem(selected_file_idx,3,item)
-            item2 = QTableWidgetItem('0')
-            item3 = QTableWidgetItem('0')
-            table.setItem(selected_file_idx,4,item2)
-            table.setItem(selected_file_idx,5,item3)
+            # table.setItem(selected_file_idx,4,item2)
+            # table.setItem(selected_file_idx,5,item3)
+            
         elif self.ui.radioButton_5.isChecked():
             try:
                 order = 2
-                Time_fit, fitted_curve, tau_str, tau_str2, _ = Cal.fit_exponent(Time, Signal, order)
-                
+                Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
+
                 item = QTableWidgetItem(tau_str)
                 item2 = QTableWidgetItem(tau_str2)
+                item3 = QTableWidgetItem(tau_str3)
                 table.setItem(selected_file_idx,3,item)
                 table.setItem(selected_file_idx,4,item2)
-
-                item3 = QTableWidgetItem('0')
-
                 table.setItem(selected_file_idx,5,item3)
+
             except:
                 QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with three exponents. Fitting with one.", QMessageBox.Ok)
                 order = 1
-                Time_fit, fitted_curve, tau_str, _, _ = Cal.fit_exponent(Time, Signal, order)
+                Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
 
                 item = QTableWidgetItem(tau_str)
+                item2 = QTableWidgetItem(tau_str2)
+                item3 = QTableWidgetItem(tau_str3)
                 table.setItem(selected_file_idx,3,item)
-                item2 = QTableWidgetItem('0')
-                item3 = QTableWidgetItem('0')
                 table.setItem(selected_file_idx,4,item2)
                 table.setItem(selected_file_idx,5,item3)
 
@@ -1011,27 +915,29 @@ class MainWindow(QMainWindow):
             try:
                 order = 3
                 Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
-                
+
                 item = QTableWidgetItem(tau_str)
                 item2 = QTableWidgetItem(tau_str2)
                 item3 = QTableWidgetItem(tau_str3)
                 table.setItem(selected_file_idx,3,item)
                 table.setItem(selected_file_idx,4,item2)
                 table.setItem(selected_file_idx,5,item3)
+
             except:
                 QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with two exponents. Fitting with two.", QMessageBox.Ok)
                 order = 2
-                Time_fit, fitted_curve, tau_str, tau_str2, _ = Cal.fit_exponent(Time, Signal, order)
+                Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
+
                 item = QTableWidgetItem(tau_str)
-                table.setItem(selected_file_idx,3,item)
                 item2 = QTableWidgetItem(tau_str2)
-                item3 = QTableWidgetItem('0')
+                item3 = QTableWidgetItem(tau_str3)
+                table.setItem(selected_file_idx,3,item)
                 table.setItem(selected_file_idx,4,item2)
                 table.setItem(selected_file_idx,5,item3)
         
         figure.clear()
         figure.plot(Time, Signal, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
-        figure.plot(Time_fit, fitted_curve, pen='r')
+        figure.plot(Time_fit, fitted_curve, pen='b')
 
     def plot_relaxation_time(self):
         if self.ui.tabWidget.currentIndex() == 3:
