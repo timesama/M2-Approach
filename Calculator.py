@@ -329,8 +329,10 @@ def fit_exponent(Time, Signal, order):
         fitted_curve = decaying_2exponential(Time_fit, *popt)
         tau = round(popt[1],1)
         tau2 = round(popt[3],1)
-        tau_str = str(tau)
-        tau_str2 = str(tau2)
+
+        taus = sorted([tau,tau2])
+        tau_str = str(taus[0])
+        tau_str2 = str(taus[1])
         tau_str3 = str(0)
     elif order ==3:
         p = [-10, 100, -10, 100, -10, 100, 15]
@@ -340,9 +342,11 @@ def fit_exponent(Time, Signal, order):
         tau = round(popt[1],1)
         tau2 = round(popt[3],1)
         tau3 = round(popt[5],1)
-        tau_str = str(tau)
-        tau_str2 = str(tau2)
-        tau_str3 = str(tau3)
+
+        taus = sorted([tau,tau2,tau3])
+        tau_str = str(taus[0])
+        tau_str2 = str(taus[1])
+        tau_str3 = str(taus[2])
 
     return Time_fit, fitted_curve, tau_str, tau_str2, tau_str3
 

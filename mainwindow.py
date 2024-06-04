@@ -876,7 +876,7 @@ class MainWindow(QMainWindow):
 
         Time_fit = np.arange(min(Time), max(Time) + 1, 1)
 
-        if self.ui.radioButton_4.isChecked() or state == 'T1':
+        if state == 'T1':
             order = 1
             Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
 
@@ -884,8 +884,17 @@ class MainWindow(QMainWindow):
             item2 = QTableWidgetItem(tau_str2)
             item3 = QTableWidgetItem(tau_str3)
             table.setItem(selected_file_idx,3,item)
-            # table.setItem(selected_file_idx,4,item2)
-            # table.setItem(selected_file_idx,5,item3)
+
+        elif self.ui.radioButton_4.isChecked():
+            order = 1
+            Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
+
+            item = QTableWidgetItem(tau_str)
+            item2 = QTableWidgetItem(tau_str2)
+            item3 = QTableWidgetItem(tau_str3)
+            table.setItem(selected_file_idx,3,item)
+            table.setItem(selected_file_idx,4,item2)
+            table.setItem(selected_file_idx,5,item3)
             
         elif self.ui.radioButton_5.isChecked():
             try:
