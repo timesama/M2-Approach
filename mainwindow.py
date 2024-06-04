@@ -828,16 +828,9 @@ class MainWindow(QMainWindow):
         Time = np.array(self.t1_dictionary[value_from_row]['Time'])/1000
         Signal = np.array(self.t1_dictionary[value_from_row]['Signal'])
 
-        Time_fit = np.arange(min(Time), max(Time) + 1, 1)
+        order = 1
+        Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
 
-
-        p = [-10, 200, 15]
-        b=([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
-        popt, _ = curve_fit(Cal.decaying_exponential, Time, Signal, p0 = p,bounds = b, maxfev=100000)
-        fitted_curve = Cal.decaying_exponential(Time_fit, *popt)
-        tau = round(popt[1],1)
-        tau_str = str(tau)
-        self.ui.textEdit_T1.setText(f"T1: {tau}")
         item = QTableWidgetItem(tau_str)
         self.ui.table_T1.setItem(selected_file_idx,3,item)
 
@@ -866,7 +859,7 @@ class MainWindow(QMainWindow):
             fitted_curve = Cal.decaying_exponential(Time_fit, *popt)
             tau = round(popt[1],1)
             tau_str = str(tau)
-            self.ui.textEdit_T1.setText(f"T1: {tau}")
+
             item = QTableWidgetItem(tau_str)
             self.ui.table_T1.setItem(selected_file_idx,2,item)
             item2 = QTableWidgetItem('0')
@@ -880,6 +873,7 @@ class MainWindow(QMainWindow):
                 fitted_curve = Cal.decaying_2exponential(Time_fit, *popt)
                 tau = round(popt[1],1)
                 tau2 = round(popt[3],1)
+                
                 self.ui.textEdit_T1.setText(f"T1: {tau} \n T1: {tau2}")
                 tau_str = str(tau)
                 tau_str2 = str(tau2)

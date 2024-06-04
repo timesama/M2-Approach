@@ -307,5 +307,42 @@ def decaying_exponential(x, a, b, c):
 def decaying_2exponential(x, a1, b1, a2, b2, c):
     return a1 * np.exp(-x/b1) + a2 * np.exp(-x/b2) + c
 
+def decaying_3exponential(x, a1, b1, a2, b2, a3, b3, c):
+    return a1 * np.exp(-x/b1) + a2 * np.exp(-x/b2) + a3 * np.exp(-x/b3) + c
 
+def fit_exponent(Time, Signal, order):
+    Time_fit = np.arange(min(Time), max(Time) + 1, 1)
+
+    if order == 1:
+        p = [-10, 200, 15]
+        bouns = ([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
+        popt, _ = curve_fit(decaying_exponential, Time, Signal, p0 = p,bounds = bouns, maxfev=100000)
+        fitted_curve = decaying_exponential(Time_fit, *popt)
+        tau = round(popt[1],1)
+        tau_str = str(tau)
+        tau_str2 = str(tau)
+        tau_str3 = str(tau)
+    elif order == 2:
+        p = [-10, 200, -10, 200, 15]
+        b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf])
+        popt, pcov = curve_fit(decaying_2exponential, Time, Signal, p0 = p, bounds = b, maxfev=100000)
+        fitted_curve = decaying_2exponential(Time_fit, *popt)
+        tau = round(popt[1],1)
+        tau2 = round(popt[3],1)
+        tau_str = str(tau)
+        tau_str2 = str(tau2)
+        tau_str3 = str(tau)
+    elif order ==3:
+        p = [-10, 200, -10, 200, -10, 200, 15]
+        b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf], [np.inf, 50000, np.inf, 50000, np.inf])
+        popt, pcov = curve_fit(decaying_3exponential, Time, Signal, p0 = p, bounds = b, maxfev=100000)
+        fitted_curve = decaying_3exponential(Time_fit, *popt)
+        tau = round(popt[1],1)
+        tau2 = round(popt[3],1)
+        tau3 = round(popt[5],1)
+        tau_str = str(tau)
+        tau_str2 = str(tau2)
+        tau_str3 = str(tau3)
+
+    return Time_fit, fitted_curve, tau_str, tau_str2, tau_str3
 
