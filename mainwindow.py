@@ -44,10 +44,8 @@ class MainWindow(QMainWindow):
         self.selected_files_gly = []
         self.selected_DQfiles = []
         self.selected_T1files = []
-        self.selected_T2files = []
         self.dq_t2 = {}
-        self.t1_dictionary ={}
-        self.t2_dictionary ={}
+        self.tau_dictionary ={}
 
         # Connect buttons to their respective slots
         self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
@@ -60,17 +58,14 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_Log.clicked.connect(self.plot_fit)
         self.ui.tabWidget.currentChanged.connect(self.groupBox_status)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
-        self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_Launch.clicked.connect(self.launch)
         self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
-        self.ui.btn_Plot_T2.clicked.connect(self.plot_relaxation_time)
-        self.ui.btn_SelectFiles_T2.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
-        self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
+
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -83,9 +78,7 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQ_Widget_5, "", "Center", "")
         self.setup_graph(self.ui.DQ_Widget_6, "Name", "FWHM", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time, μs", "Signal", "")
-        self.setup_graph(self.ui.T1_Widget_2, "X axis", "T₁, μs", "")
-        self.setup_graph(self.ui.T2_Widget_1, "Time, μs", "Signal", "")
-        self.setup_graph(self.ui.T2_Widget_2, "X axis", "T₂, μs", "")
+        self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, μs", "")
         
 
         # Table setup
@@ -99,13 +92,11 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_5.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_6.clicked.connect(self.calculate_relaxation_time)
 
-
         # Connect combobox signals to slots
         self.ui.comboBox.currentIndexChanged.connect(self.update_yaxis)
         self.ui.comboBox_3.currentIndexChanged.connect(self.update_yaxis)
         self.ui.comboBox_2.currentIndexChanged.connect(self.plot_fit)
         self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
-        self.ui.comboBox_7.currentIndexChanged.connect(self.calculate_relaxation_time)
 
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
@@ -159,27 +150,20 @@ class MainWindow(QMainWindow):
         self.selected_T1files = []
         self.selected_T2files = []
         self.selected_folders = []
-        self.t1_dictionary = {}
+        self.tau_dictionary = {}
         self.ui.table_SE.setRowCount(0)
         self.ui.table_DQ.setRowCount(0)
         self.ui.table_DQ_2.setRowCount(0)
         self.ui.table_T1.setRowCount(0)
-        self.ui.table_T2.setRowCount(0)
 
         self.ui.T1_Widget_1.clear()
         self.ui.T1_Widget_2.clear()
-        self.ui.T2_Widget_1.clear()
-        self.ui.T2_Widget_2.clear()
         self.ui.comboBox_6.currentIndexChanged.disconnect(self.calculate_relaxation_time)
-        self.ui.comboBox_7.currentIndexChanged.disconnect(self.calculate_relaxation_time)
 
         while self.ui.comboBox_6.count()>0:          
             self.ui.comboBox_6.removeItem(0)
         self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
 
-        while self.ui.comboBox_7.count()>0:          
-            self.ui.comboBox_7.removeItem(0)
-        self.ui.comboBox_7.currentIndexChanged.connect(self.calculate_relaxation_time)
 
     def terminate(self):
         self.disable_buttons()
@@ -205,8 +189,6 @@ class MainWindow(QMainWindow):
             table = self.ui.table_SE
         if current_tab_index == 3:
             table = self.ui.table_T1
-        if current_tab_index == 4:
-            table = self.ui.table_T2
 
         row = table.currentRow()
         table.removeRow(row)
@@ -253,12 +235,6 @@ class MainWindow(QMainWindow):
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
                 self.update_T12_table()
-            elif current_tab_index == 4:
-                while self.ui.comboBox_7.count()>0:
-                    self.ui.comboBox_7.removeItem(0)
-                T2fileNames = dlg.selectedFiles()
-                self.selected_T2files.extend(T2fileNames)
-                self.update_T12_table()
             
     def open_select_dialog(self):
         dlg = OpenFilesDialog(self)
@@ -300,7 +276,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox.setEnabled(False)
         self.ui.comboBox_2.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
-        #self.ui.checkBox.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
         self.ui.radioButton_Log_2.setEnabled(False)
         self.ui.comboBox_5.setEnabled(False)
@@ -308,7 +283,7 @@ class MainWindow(QMainWindow):
         self.ui.dq_max_2.setEnabled(False)
         self.ui.btn_Launch.setEnabled(False)
         self.ui.btn_Plot1.setEnabled(False)
-        self.ui.btn_Plot2.setEnabled(False)
+
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -682,25 +657,25 @@ class MainWindow(QMainWindow):
         b1=([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf])
 
         if text == 'Gauss':
-            params, _ = curve_fit(self.gaussian, x, y, p0=p, bounds=b1)
-            y_fit = self.gaussian(x_fit, *params)
-            y_r2 = self.gaussian(x, *params)
+            params, _ = curve_fit(Cal.gaussian, x, y, p0=p, bounds=b1)
+            y_fit = Cal.gaussian(x_fit, *params)
+            y_r2 = Cal.gaussian(x, *params)
             cen = params[1]
             fwhm = params[2]
             w = 0
             button.setEnabled(True)
         elif text == 'Lorenz':
-            params, _ = curve_fit(self.lorenz, x, y, p0=p, bounds=b1)
-            y_fit = self.lorenz(x_fit, *params)
-            y_r2 = self.lorenz(x, *params)
+            params, _ = curve_fit(Cal.lorenz, x, y, p0=p, bounds=b1)
+            y_fit = Cal.lorenz(x_fit, *params)
+            y_r2 = Cal.lorenz(x, *params)
             cen = params[1]
             fwhm = params[2]
             w = 1
             button.setEnabled(True)
         elif text == 'Pseudo Voigt':
-            params, _ = curve_fit(self.voigt, x, y,  bounds = b)
-            y_fit = self.voigt(x_fit, *params)
-            y_r2 = self.voigt(x, *params)
+            params, _ = curve_fit(Cal.voigt, x, y,  bounds = b)
+            y_fit = Cal.voigt(x_fit, *params)
+            y_r2 = Cal.voigt(x, *params)
             cen = params[1]
             fwhm = params[2]
             w = params[3]
@@ -709,9 +684,8 @@ class MainWindow(QMainWindow):
             button.setEnabled(False)
             return
 
-
         #R2
-        R = self.calculate_r_squared(y, y_r2)
+        R = Cal.calculate_r_squared(y, y_r2)
         # Plot the line
         self.t2_dq_graph()
         self.ui.DQ_Widget_2.plot(x_fit, y_fit, pen='r')
@@ -719,66 +693,14 @@ class MainWindow(QMainWindow):
         # Display R2, Xo and FWHM
         self.ui.textEdit_4.setText(f"R\u00B2: {round(R, 4)} \nX\u2080: {round(cen, 4)} \nFWHM: {round(fwhm, 4)} \nFraction (Lorenz): {round(w,2)}")
 
-    def gaussian(self, x, amp, cen, wid, y0):
-        # NoClass
-        return amp * np.exp(-(x - cen)**2 / (2 * wid**2)) + y0
 
-    def lorenz(self, x, amp, cen, wid, y0):
-        # NoClass
-        return (amp * (wid**2)) / ((x - cen)**2 + (wid**2)) + y0
-    
-    def voigt(self, x, amp, cen, wid, frac, y0):
-        # NoClass
-        lorentzian = amp *(2 * wid) / (np.pi * (4 * (x - cen)**2 + wid**2))
-        gaussian = amp *(np.exp((-4 * np.log(2) * (x - cen)**2) / wid**2)) / (wid * np.sqrt(np.pi / (4 * np.log(2))))
-        return  (frac * lorentzian + (1 - frac) * gaussian) + y0
-
-    def calculate_r_squared(self, y_true, y_pred):
-        # NoClass
-
-        y_true = np.array(y_true)
-        y_pred = np.array(y_pred)
-
-        # Calculate the mean of the observed values
-        y_mean = np.mean(y_true)
-
-        # Calculate the total sum of squares (TSS)
-        ss_tot = np.sum((y_true - y_mean) ** 2)
-
-        # Calculate the residual sum of squares (RSS)
-        ss_res = np.sum((y_true - y_pred) ** 2)
-
-        # Calculate R-squared
-        r_squared = 1 - (ss_res / ss_tot)
-
-        return r_squared
-    
     # Relaxation time section
     def update_T12_table(self):
-        current_tab_index = self.ui.tabWidget.currentIndex()
-
-        if current_tab_index == 3:
-            selected_files = self.selected_T1files
-            table = self.ui.table_T1
-            combobox = self.ui.comboBox_6
-            pattern = r'T1_(.*).dat'
-            state = 'T1'
-            dictionary = self.t1_dictionary
-
-        elif current_tab_index == 4:
-            selected_files = self.selected_T2files
-            table = self.ui.table_T2
-            combobox = self.ui.comboBox_7
-            pattern = r'T2_(.*).dat'
-            state = 'T2'
-            dictionary = self.t2_dictionary
-
-        else: 
-            return
-        
-        # if len(selected_files) < 2:
-        #     QMessageBox.warning(self, "Not enough data", f"Select at least 2 files for comparison.", QMessageBox.Ok)
-        #     return
+        selected_files = self.selected_T1files
+        table = self.ui.table_T1
+        combobox = self.ui.comboBox_6
+        pattern = r'(T1_.*\.dat|T2_.*\.dat)'
+        dictionary = self.tau_dictionary
 
         file_name = []
         x_axis = []
@@ -822,8 +744,7 @@ class MainWindow(QMainWindow):
 
             
             table.setRowCount(len(selected_files))
-            self.ui.btn_Plot1.setEnabled(True)
-            self.ui.btn_Plot2.setEnabled(True)                
+            self.ui.btn_Plot1.setEnabled(True)            
         
         for row, file in zip(range(table.rowCount()), selected_files):
             Folder = QTableWidgetItem(file)
@@ -840,23 +761,17 @@ class MainWindow(QMainWindow):
             combobox.setCurrentIndex(-1)
 
     def calculate_relaxation_time(self):
-        current_tab_index = self.ui.tabWidget.currentIndex()
+        table = self.ui.table_T1
+        figure = self.ui.T1_Widget_1
+        selected_file_idx = self.ui.comboBox_6.currentIndex()
+        dictionary = self.tau_dictionary
 
-        if current_tab_index == 3:
-            table = self.ui.table_T1
-            figure = self.ui.T1_Widget_1
-            selected_file_idx = self.ui.comboBox_6.currentIndex()
-            state = 'T1'
-            dictionary = self.t1_dictionary
-            denominator = 1000
-
-        elif current_tab_index == 4:
-            state = 'T2'
-            selected_file_idx = self.ui.comboBox_7.currentIndex()
-            table = self.ui.table_T2
-            dictionary = self.t2_dictionary
-            figure = self.ui.T2_Widget_1
+        if self.ui.radioButton_16.isChecked():
+        # milisec units
             denominator = 1
+        else:
+        # microsec units
+            denominator = 1000
 
         if selected_file_idx == -1:
             return
@@ -867,16 +782,7 @@ class MainWindow(QMainWindow):
 
         Time_fit = np.arange(min(Time), max(Time) + 1, 1)
 
-        if state == 'T1':
-            order = 1
-            Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
-
-            item = QTableWidgetItem(tau_str)
-            item2 = QTableWidgetItem(tau_str2)
-            item3 = QTableWidgetItem(tau_str3)
-            table.setItem(selected_file_idx,3,item)
-
-        elif self.ui.radioButton_4.isChecked():
+        if self.ui.radioButton_4.isChecked():
             order = 1
             Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
 
@@ -900,7 +806,7 @@ class MainWindow(QMainWindow):
                 table.setItem(selected_file_idx,5,item3)
 
             except:
-                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with three exponents. Fitting with one.", QMessageBox.Ok)
+                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with two exponents. Fitting with one.", QMessageBox.Ok)
                 order = 1
                 Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
 
@@ -924,8 +830,8 @@ class MainWindow(QMainWindow):
                 table.setItem(selected_file_idx,5,item3)
 
             except:
-                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with two exponents. Fitting with two.", QMessageBox.Ok)
-                order = 2
+                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with three exponents. Fitting with one.", QMessageBox.Ok)
+                order = 1
                 Time_fit, fitted_curve, tau_str, tau_str2, tau_str3 = Cal.fit_exponent(Time, Signal, order)
 
                 item = QTableWidgetItem(tau_str)
@@ -1113,27 +1019,27 @@ class MainWindow(QMainWindow):
             b1=([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf])
 
             if text == 'Gauss':
-                params, _ = curve_fit(self.gaussian, t2_lin, dq_norm, p0=p, bounds=b1)
-                y_fit = self.gaussian(dq_fit, *params)
-                y_r2 = self.gaussian(t2_lin, *params)
+                params, _ = curve_fit(Cal.gaussian, t2_lin, dq_norm, p0=p, bounds=b1)
+                y_fit = Cal.gaussian(dq_fit, *params)
+                y_r2 = Cal.gaussian(t2_lin, *params)
                 cen = params[1]
                 center.append(cen)
                 fwhm = params[2]
                 weight.append(fwhm)
                 w = 0
             elif text == 'Lorenz':
-                params, _ = curve_fit(self.lorenz, t2_lin, dq_norm, p0=p, bounds=b1)
-                y_fit = self.lorenz(dq_fit, *params)
-                y_r2 = self.lorenz(t2_lin, *params)
+                params, _ = curve_fit(Cal.lorenz, t2_lin, dq_norm, p0=p, bounds=b1)
+                y_fit = Cal.lorenz(dq_fit, *params)
+                y_r2 = Cal.lorenz(t2_lin, *params)
                 cen = params[1]
                 center.append(cen)
                 fwhm = params[2]
                 weight.append(fwhm)
                 w = 1
             elif text == 'Pseudo Voigt':
-                params, _ = curve_fit(self.voigt, t2_lin, dq_norm,  bounds = b)
-                y_fit = self.voigt(dq_fit, *params)
-                y_r2 = self.voigt(t2_lin, *params)
+                params, _ = curve_fit(Cal.voigt, t2_lin, dq_norm,  bounds = b)
+                y_fit = Cal.voigt(dq_fit, *params)
+                y_r2 = Cal.voigt(t2_lin, *params)
                 cen = params[1]
                 center.append(cen)
                 fwhm = params[2]

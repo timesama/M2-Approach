@@ -335,7 +335,7 @@ def fit_exponent(Time, Signal, order):
         tau_str2 = str(taus[1])
         tau_str3 = str(0)
     elif order ==3:
-        p = [-10, 100, -10, 100, -10, 100, 15]
+        p = [-10, 10, -10, 50, -10, 100, 15]
         b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf], [np.inf, 50000, np.inf, 50000, np.inf])
         popt, pcov = curve_fit(decaying_3exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
         fitted_curve = decaying_3exponential(Time_fit, *popt)
@@ -349,4 +349,37 @@ def fit_exponent(Time, Signal, order):
         tau_str3 = str(taus[2])
 
     return Time_fit, fitted_curve, tau_str, tau_str2, tau_str3
+
+def calculate_r_squared(y_true, y_pred):
+
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    # Calculate the mean of the observed values
+    y_mean = np.mean(y_true)
+
+    # Calculate the total sum of squares (TSS)
+    ss_tot = np.sum((y_true - y_mean) ** 2)
+
+    # Calculate the residual sum of squares (RSS)
+    ss_res = np.sum((y_true - y_pred) ** 2)
+
+    # Calculate R-squared
+    r_squared = 1 - (ss_res / ss_tot)
+
+    return r_squared
+
+def gaussian(x, amp, cen, wid, y0):
+    # NoClass
+    return amp * np.exp(-(x - cen)**2 / (2 * wid**2)) + y0
+
+def lorenz(x, amp, cen, wid, y0):
+    # NoClass
+    return (amp * (wid**2)) / ((x - cen)**2 + (wid**2)) + y0
+
+def voigt(x, amp, cen, wid, frac, y0):
+    # NoClass
+    lorentzian = amp *(2 * wid) / (np.pi * (4 * (x - cen)**2 + wid**2))
+    gaussian = amp *(np.exp((-4 * np.log(2) * (x - cen)**2) / wid**2)) / (wid * np.sqrt(np.pi / (4 * np.log(2))))
+    return  (frac * lorentzian + (1 - frac) * gaussian) + y0
 
