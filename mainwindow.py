@@ -776,9 +776,9 @@ class MainWindow(QMainWindow):
         else: 
             return
         
-        if len(selected_files) < 2:
-            QMessageBox.warning(self, "Not enough data", f"Select at least 2 files for comparison.", QMessageBox.Ok)
-            return
+        # if len(selected_files) < 2:
+        #     QMessageBox.warning(self, "Not enough data", f"Select at least 2 files for comparison.", QMessageBox.Ok)
+        #     return
 
         file_name = []
         x_axis = []
@@ -790,44 +790,35 @@ class MainWindow(QMainWindow):
             except:
                 x_axis += ['0']
 
-            try:
-                if state == 'T1':
-                    with open(file, "r") as data:
-                        lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
-                
-                    Time = []
-                    Signal = []
+            Time = []
+            Signal = []
 
-                    for line in lines[1:]:  # Skip the first line !!!
-                        parts = line.split('\t')
-                        if len(parts) != 2:
-                            raise ValueError("Data has more than 2 columns")
-                        time_value = float(parts[0])
-                        signal_value = float(parts[1])
-                        Time.append(time_value)
-                        Signal.append(signal_value)
-                elif state == 'T2':
+            try:
+                # Read files as I create them from excel in spintrack
+                with open(file, "r") as data:
+                    lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
+
+                for line in lines[1:]:  # Skip the first line !!!
+                    parts = line.split('\t')
+                    time_value = float(parts[0])
+                    signal_value = float(parts[1])
+                    Time.append(time_value)
+                    Signal.append(signal_value)
+            except:
+                try:
+                    # read files regularly
                     data = np.loadtxt(file)
                     Time, Signal = data[:, 0], data[:, 1]
+                except Exception:
+                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file}, removing file from the table and file list.", QMessageBox.Ok)
+                    for file_to_delete in selected_files:
+                        if file_to_delete == file:
+                            selected_files.remove(file)
 
-                    # We need to understand what to put in the dictionary and later READ from it as well
-
-                dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
-                dictionary[file]["X Axis"].append(x_axis)
-                dictionary[file]["Time"].extend(Time)
-                dictionary[file]["Signal"].extend(Signal)
-
-            except ValueError as e:
-                QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} due to: {str(e)}, removing file from the table and file list.", QMessageBox.Ok)
-                for file_to_delete in selected_files:
-                    if file_to_delete == file:
-                        selected_files.remove(file)
-                    
-            except Exception:
-                QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file}, removing file from the table and file list.", QMessageBox.Ok)
-                for file_to_delete in selected_files:
-                    if file_to_delete == file:
-                        selected_files.remove(file)
+            dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
+            dictionary[file]["X Axis"].append(x_axis)
+            dictionary[file]["Time"].extend(Time)
+            dictionary[file]["Signal"].extend(Signal)
 
             
             table.setRowCount(len(selected_files))
