@@ -974,7 +974,7 @@ class MainWindow(QMainWindow):
         number = 1
         for row in range(table.rowCount()):
             try:
-                C = float(table.item(row, column-1).text())
+                C = float(table.item(row, 2).text())
                 x_axis.append(C)
             except:
                 x_axis.append(number)
