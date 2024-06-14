@@ -1,8 +1,8 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox, QPushButton
-from PySide6.QtCore import QCoreApplication, Signal, SIGNAL
-from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox
+from PySide6.QtCore import QCoreApplication, Signal
+from PySide6.QtGui import QColor, QIcon
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
@@ -26,6 +26,7 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_NMR()
         self.ui.setupUi(self)
+        self.setWindowIcon(QIcon('BrandIcon.ico'))
 
         # Set window geometry
         screen = QApplication.primaryScreen()
@@ -441,8 +442,10 @@ class MainWindow(QMainWindow):
                 self.ui.table_SE.setRowCount(len(self.selected_files))
                 self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
 
+                self.ui.table_SE.setItem(i-1, 4, QTableWidgetItem(filename))
+
                 if self.ui.radioButton.isChecked():
-                    self.save_figures(file_path, temperature)
+                    self.save_figures(file_path, filename)
 
             elif current_tab_index == 1:
                 match = re.search(r'_(\d+\.\d+)_', filename)

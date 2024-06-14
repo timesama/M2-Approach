@@ -37,8 +37,9 @@ def reference_long_component(Time, Component, Amplitude_gly, coeff):
     Component_n = Component/Amplitude_gly
 
     # 3. Cut the ranges for fitting
-    minimum = find_nearest(Time, 50)
+    minimum = find_nearest(Time, 60)
     maximum = find_nearest(Time, 250)
+    # TODO: The user can adjust these numbers
 
     Time_range = Time[minimum:maximum]
     Component_n_range = Component_n[minimum:maximum]
@@ -369,7 +370,6 @@ def fit_exponent(Time, Signal, order):
 
     return Time_fit, fitted_curve, tau1, tau2, tau3, R2, decrease_order
 
-
 def check_tau_values(tau1, tau2, tau3):
     decrease_order = False
 
@@ -387,7 +387,6 @@ def check_tau_values(tau1, tau2, tau3):
             decrease_order = False
     
     return decrease_order
-
 
 def calculate_r_squared(y_true, y_pred):
 
