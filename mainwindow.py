@@ -67,7 +67,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
 
-
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
         self.setup_graph(self.ui.FidWidget, "Time, μs", "Amplitude", "FID")
@@ -417,11 +416,10 @@ class MainWindow(QMainWindow):
         Time_fid, Fid =  Cal.final_analysis_time_domain(Time, Re, Im)
 
         Frequency = Cal.calculate_frequency_scale(Time_fid)
-        # if self.ui.checkBox.isChecked():
-        #     FFT = self.FFT_handmade(Fid, Time_fid, Frequency)  #(math procedure)
-        # else:
-        #     FFT = np.fft.fftshift(np.fft.fft(Fid))
-        FFT = np.fft.fftshift(np.fft.fft(Fid))
+        if self.ui.radioButton_2.isChecked():
+            FFT = self.FFT_handmade(Fid, Time_fid, Frequency)  #(math procedure)
+        else:
+            FFT = np.fft.fftshift(np.fft.fft(Fid))
 
         # 8. Simple baseline
         Amp_spectra, Re_spectra, Im_spectra = Cal.simple_baseline_correction(FFT)
