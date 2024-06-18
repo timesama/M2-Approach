@@ -8,9 +8,63 @@ from scipy.signal import savgol_filter
 
 
 # Math procedures
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
+def read_data(file_path, header):
+    data = np.loadtxt(file_path, skiprows=header)
+    x, y, z = data[:, 0], data[:, 1], data[:, 2]
+    return x, y, z
+
+def normalize_mq(DQ, MQ, state):
+    maximum = np.max(MQ)
+    DQ_norm = DQ/maximum
+    MQ_norm = MQ/maximum
+
+    if state == 'minus':
+        End = MQ_norm - DQ_norm
+    else:
+        End = MQ_norm + DQ_norm
+
+    return DQ_norm, MQ_norm, End
+
+
+def dqmq(file_path, fit_from, fit_to, p):
+
+    def exponent(x, a, b, c):
+        return a * np.exp(-power*(x/b)) + c
+
+    Time, DQ, Ref = read_data(file_path, 1)
+
+    power = p
+
+    DQ_norm, Ref_norm, Diff = normalize_mq(DQ, Ref, 'minus')
+
+    idx_min = find_nearest(Time, fit_from)
+    idx_max = find_nearest(Time, fit_to)
+    Time_cut = Time[idx_min:idx_max+1]
+    Diff_cut = Diff[idx_min:idx_max+1]
+
+    popt, _ = curve_fit(exponent, Time_cut, Diff_cut, p0=[(0, 10, 0)], maxfev=10000000)
+    fitted_curve = exponent(Time, *popt)
+
+    # Subtract difference function from Ref
+    MQ = Ref_norm - fitted_curve
+
+    DQ_normal, MQ_normal, Sum = normalize_mq(DQ_norm, MQ, 'plus')
+
+    nDQ = (DQ_normal)/Sum
+
+    nDQ = np.insert(nDQ, 0, 0)
+    Time0 = np.insert(Time, 0, 0)
+
+    return Time, DQ_norm, Ref_norm, Diff, DQ_normal, MQ_normal, Time0, nDQ, fitted_curve
+
 def analysis_time_domain(file_path):
     # 1. Read data
-    Time, Real, Imag = read_data(file_path)
+    Time, Real, Imag = read_data(file_path, 0)
     # 2. Crop time below zero
     T_cr, R_cr, I_cr = crop_time_zero(Time, Real, Imag)
 
@@ -108,8 +162,8 @@ def frequency_domain_analysis(FFT, Frequency):
 
     return M2, T2
 
-def read_data(file_path):
-    data = np.loadtxt(file_path)
+def read_data(file_path, header):
+    data = np.loadtxt(file_path, skiprows=header)
     x, y, z = data[:, 0], data[:, 1], data[:, 2]
     return x, y, z
 

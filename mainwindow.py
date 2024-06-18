@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
         self.selected_files_gly = []
         self.selected_DQfiles = []
         self.selected_T1files = []
+        self.selected_DQMQfile = []
         self.dq_t2 = {}
         self.tau_dictionary ={}
 
@@ -67,6 +68,11 @@ class MainWindow(QMainWindow):
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
         self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
+        self.ui.btn_SelectFilesDQMQ.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.pushButton_DQMQ_1.clicked.connect(self.plot_original)
+        self.ui.pushButton_DQMQ_4.clicked.connect(self.plot_norm)
+        self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
+        self.ui.pushButton_DQMQ_3.clicked.connect(self.plot_nDQ)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -80,6 +86,7 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQ_Widget_6, "Name", "FWHM", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time, μs", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, μs", "")
+        self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
         
 
         # Table setup
@@ -112,6 +119,10 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_Log_2.clicked.connect(self.update_DQ_comparison_plot) # this is a bad coding
         self.ui.comboBox_5.currentIndexChanged.connect(self.update_DQ_comparison_plot)
         self.ui.comboBox_4.currentIndexChanged.connect(self.update_file)
+
+        self.ui.dq_min_3.valueChanged.connect(self.plot_diff)
+        self.ui.dq_max_3.valueChanged.connect(self.plot_diff)
+        self.ui.power.valueChanged.connect(self.plot_diff)
 
         # Disable buttons initially
         self.disable_buttons()
@@ -240,6 +251,9 @@ class MainWindow(QMainWindow):
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
                 self.update_T12_table()
+            elif current_tab_index == 4:
+                self.selected_DQMQfile = dlg.selectedFiles()
+                self.dq_mq_analysis()
             
     def open_select_dialog(self):
         dlg = OpenFilesDialog(self)
@@ -288,6 +302,10 @@ class MainWindow(QMainWindow):
         self.ui.dq_max_2.setEnabled(False)
         self.ui.btn_Launch.setEnabled(False)
         self.ui.btn_Plot1.setEnabled(False)
+        self.ui.pushButton_DQMQ_1.setEnabled(False)
+        self.ui.pushButton_DQMQ_2.setEnabled(False)
+        self.ui.pushButton_DQMQ_3.setEnabled(False)
+        self.ui.pushButton_DQMQ_4.setEnabled(False)
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -717,6 +735,113 @@ class MainWindow(QMainWindow):
 
         # Display R2, Xo and FWHM
         self.ui.textEdit_4.setText(f"R\u00B2: {round(R, 4)} \nX\u2080: {round(cen, 4)} \nFWHM: {round(fwhm, 4)} \nFraction (Lorenz): {round(w,2)}")
+
+    # DQ MQ section
+    def dq_mq_analysis(self):
+        figure = self.ui.DQMQ_Widget
+        figure.clear()
+        legend = figure.addLegend()
+        legend.clear()
+        table = self.ui.table_DQMQ
+        file_path = self.selected_DQMQfile[0]
+
+        Time, DQ, Ref = Cal.read_data(file_path, 1)
+        num_rows  = len(Time)
+        table.setRowCount(num_rows)
+
+        for row in range(num_rows):
+            table.setItem(row, 0, QTableWidgetItem(str(Time[row])))
+            table.setItem(row, 1, QTableWidgetItem(str(DQ[row])))
+            table.setItem(row, 2, QTableWidgetItem(str(Ref[row])))
+
+        table.resizeColumnsToContents() # TODO ADD THIS EVERYWHERE!!!!
+        self.ui.pushButton_DQMQ_1.setEnabled(True)
+        self.ui.pushButton_DQMQ_2.setEnabled(False)
+        self.ui.pushButton_DQMQ_3.setEnabled(False)
+        self.ui.pushButton_DQMQ_4.setEnabled(True)
+
+    def plot_original(self):
+        file_path = self.selected_DQMQfile[0]
+        # fit_from = self.ui.dq_min_3.value()
+        # fit_to = self.ui.dq_max_3.value()
+        # p = self.ui.power.value()
+
+        figure = self.ui.DQMQ_Widget
+        figure.clear()
+        legend = figure.addLegend()
+        legend.clear()
+        legend = figure.addLegend()
+
+        Time, DQ, Ref = Cal.read_data(file_path, 1)
+
+        figure.plot(Time, DQ, pen='r', name = 'DQ')
+        figure.plot(Time, Ref, pen='b', name = 'Ref')
+
+    def plot_norm(self):
+        file_path = self.selected_DQMQfile[0]
+        figure = self.ui.DQMQ_Widget
+        figure.clear()
+        legend = figure.addLegend()
+        legend.clear()
+        legend = figure.addLegend()
+
+        Time, DQ_norm, Ref_norm, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1)
+
+        figure.plot(Time, DQ_norm, pen='r', name = 'DQ')
+        figure.plot(Time, Ref_norm, pen='b', name = 'Ref')
+
+        self.ui.pushButton_DQMQ_2.setEnabled(True)
+        self.ui.pushButton_DQMQ_3.setEnabled(True)     
+        self.ui.dq_min_3.setEnabled(True)
+        self.ui.dq_max_3.setEnabled(True)
+        self.ui.power.setEnabled(True)
+    
+    def plot_diff(self):
+        file_path = self.selected_DQMQfile[0]
+        fit_from = self.ui.dq_min_3.value()
+        fit_to = self.ui.dq_max_3.value()
+        p = self.ui.power.value()
+
+        figure = self.ui.DQMQ_Widget
+        figure.clear()
+        legend = figure.addLegend()
+        legend.clear()
+        legend = figure.addLegend()
+
+        Time, DQ_norm, Ref_norm, Diff, _, _, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p)
+
+        figure.plot(Time, DQ_norm, pen='r', name = 'DQ')
+        figure.plot(Time, Ref_norm, pen='b', name = 'Ref')
+        figure.plot(Time, Diff, pen='k', name = 'Diff')
+        figure.plot(Time, fitted_curve, pen='m', name = 'fitting')
+
+        self.ui.pushButton_DQMQ_2.setEnabled(True)
+        self.ui.pushButton_DQMQ_3.setEnabled(True)    
+
+    def plot_nDQ(self):
+        file_path = self.selected_DQMQfile[0]
+        fit_from = self.ui.dq_min_3.value()
+        fit_to = self.ui.dq_max_3.value()
+        p = self.ui.power.value()
+        table = self.ui.table_DQMQ
+
+        figure = self.ui.DQMQ_Widget
+        figure.clear()
+        legend = figure.addLegend()
+        legend.clear()
+        legend = figure.addLegend()
+
+        Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p)
+
+        figure.plot(Time, DQ_normal, pen='r', name = 'DQ')
+        figure.plot(Time, MQ_normal, pen='b', name = 'Ref')
+        figure.plot(Time0, nDQ, pen='k', symbol='o', symbolPen='k', symbolSize=5, name='nDQ')
+
+        num_rows  = len(Time)
+        for row in range(num_rows):
+            table.setItem(row, 3, QTableWidgetItem(str(round(nDQ[row+1],4))))
+        table.resizeColumnsToContents()
+        
 
 
     # Relaxation time section
