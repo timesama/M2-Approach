@@ -66,6 +66,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
+        self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -117,18 +118,6 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setHidden(True)
         self.ui.textEdit_5.setHidden(True)
         self.ui.textEdit_6.setHidden(True)
-
-
-    def hide_FFT_progress(self):
-        if self.ui.radioButton_3.isChecked():
-            self.ui.progressBar.setHidden(True)
-            self.ui.textEdit_5.setHidden(True)
-            self.ui.textEdit_6.setHidden(True)
-        else:
-            self.ui.progressBar.setHidden(False)
-            self.ui.textEdit_5.setHidden(False)
-            self.ui.textEdit_6.setHidden(False)
-
 
     def update_file(self):
         i = self.ui.comboBox_4.currentIndex() + 1
@@ -182,7 +171,6 @@ class MainWindow(QMainWindow):
             self.ui.comboBox_6.removeItem(0)
         self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
 
-
     def terminate(self):
         self.disable_buttons()
         self.selected_files = []
@@ -215,7 +203,6 @@ class MainWindow(QMainWindow):
 
         #for row in range(table.rowCount()):
         #table.selectRow(row_selected-1)
-
 
         for col in range(table.columnCount()):
             for row in range(table.rowCount()):
@@ -261,10 +248,10 @@ class MainWindow(QMainWindow):
             self.selected_files.extend(fileNames)
         self.ui.btn_Start.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
-
-           
+ 
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self)
+        dlg.setWindowTitle("Select Reference Files")
         if dlg.exec():
             fileNames_gly = dlg.selectedFiles()
             self.selected_files_gly.extend(fileNames_gly)
@@ -302,7 +289,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_Launch.setEnabled(False)
         self.ui.btn_Plot1.setEnabled(False)
 
-
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
         self.ui.btn_Start.setEnabled(True)
@@ -313,10 +299,30 @@ class MainWindow(QMainWindow):
         self.ui.dq_max.setEnabled(True)
         self.ui.comboBox.setEnabled(True)
         self.ui.comboBox_2.setEnabled(True)
-        #self.ui.checkBox.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
     
+    def hide_FFT_progress(self):
+        if self.ui.radioButton_3.isChecked():
+            self.ui.progressBar.setHidden(True)
+            self.ui.textEdit_5.setHidden(True)
+            self.ui.textEdit_6.setHidden(True)
+        else:
+            self.ui.progressBar.setHidden(False)
+            self.ui.textEdit_5.setHidden(False)
+            self.ui.textEdit_6.setHidden(False)
+    
+    def default_folder(self):
+        folder_path = str(QFileDialog.getExistingDirectory(self, "Select Default Directory"))
+
+        if os.path.exists("selected_folder.txt"):
+            os.remove("selected_folder.txt")
+
+        if folder_path:
+            # Write the selected folder's full path to a text file
+            with open("selected_folder.txt", "w") as file:
+                file.write(folder_path)
+
     # All these functions refer to the general analysis where FFT and FID are produced
     def analysis(self):
         # Clear Combobox
@@ -1261,17 +1267,14 @@ class OpenFilesDialog(QFileDialog):
         self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
         self.setNameFilter(str("Data (*.dat *.txt *.csv)"))
 
-        initial_directory = "C:/Mega/NMR/003_Temperature"
+        initial_directory = "selected_folder.txt"
         if not os.path.exists(initial_directory):
             exe_dir = os.path.dirname(sys.argv[0])
             self.setDirectory(str(exe_dir))
         else:
             self.setDirectory(str(initial_directory))                  
 
-        
         self.selected_files = []  # Variable to store selected file paths
-
-        
 
     def on_file_selected(self):
         options = QFileDialog.Options()
