@@ -87,7 +87,7 @@
      </sizepolicy>
     </property>
     <property name="currentIndex">
-     <number>5</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -98,7 +98,7 @@
        <rect>
         <x>20</x>
         <y>20</y>
-        <width>361</width>
+        <width>481</width>
         <height>400</height>
        </rect>
       </property>
@@ -219,7 +219,7 @@
      <widget class="QPushButton" name="btn_DeleteRow_1">
       <property name="geometry">
        <rect>
-        <x>400</x>
+        <x>540</x>
         <y>20</y>
         <width>90</width>
         <height>20</height>
