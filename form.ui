@@ -1455,7 +1455,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <string>Baseline</string>
        </property>
       </widget>
-      <widget class="QCheckBox" name="checkBox_3">
+      <widget class="QCheckBox" name="checkBox_2">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -1551,25 +1551,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <property name="title">
      <string/>
     </property>
-    <widget class="QCheckBox" name="checkBox_2">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>530</x>
-       <y>270</y>
-       <width>171</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Subtract long component</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-    </widget>
     <widget class="QTextEdit" name="textEdit_2">
      <property name="geometry">
       <rect>

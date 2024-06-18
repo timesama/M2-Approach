@@ -93,7 +93,8 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_6.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_16.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_17.clicked.connect(self.calculate_relaxation_time)
-
+        self.ui.radioButton_3.clicked.connect(self.hide_FFT_progress)
+        self.ui.radioButton_2.clicked.connect(self.hide_FFT_progress)
         # Connect combobox signals to slots
         self.ui.comboBox.currentIndexChanged.connect(self.update_yaxis)
         self.ui.comboBox_3.currentIndexChanged.connect(self.update_yaxis)
@@ -113,6 +114,21 @@ class MainWindow(QMainWindow):
 
         # Disable buttons initially
         self.disable_buttons()
+        self.ui.progressBar.setHidden(True)
+        self.ui.textEdit_5.setHidden(True)
+        self.ui.textEdit_6.setHidden(True)
+
+
+    def hide_FFT_progress(self):
+        if self.ui.radioButton_3.isChecked():
+            self.ui.progressBar.setHidden(True)
+            self.ui.textEdit_5.setHidden(True)
+            self.ui.textEdit_6.setHidden(True)
+        else:
+            self.ui.progressBar.setHidden(False)
+            self.ui.textEdit_5.setHidden(False)
+            self.ui.textEdit_6.setHidden(False)
+
 
     def update_file(self):
         i = self.ui.comboBox_4.currentIndex() + 1
