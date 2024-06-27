@@ -241,13 +241,13 @@ class MainWindow(QMainWindow):
 
     def open_select_comparison_files_dialog(self):
         global State_multiple_files
-        dlg = OpenFilesDialog(self)
-
         current_tab_index = self.ui.tabWidget.currentIndex()
         if current_tab_index == 4:
             State_multiple_files = False
         else:
             State_multiple_files = True
+            
+        dlg = OpenFilesDialog(self)
         if dlg.exec():
             
             if current_tab_index == 2:
@@ -265,9 +265,9 @@ class MainWindow(QMainWindow):
                 self.dq_mq_analysis()
             
     def open_select_dialog(self):
-        dlg = OpenFilesDialog(self)
         global State_multiple_files
         State_multiple_files = True
+        dlg = OpenFilesDialog(self)
         if dlg.exec():
             fileNames = dlg.selectedFiles()
             self.selected_files.extend(fileNames)
