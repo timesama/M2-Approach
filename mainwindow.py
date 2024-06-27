@@ -56,6 +56,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Add.clicked.connect(self.open_select_dialog)
         self.ui.btn_Start.clicked.connect(self.analysis)
         self.ui.btn_Save.clicked.connect(self.save_data)
+        self.ui.btn_Save_2.clicked.connect(self.save_data)
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
         self.ui.radioButton_Log.clicked.connect(self.plot_fit)
@@ -1226,7 +1227,10 @@ class MainWindow(QMainWindow):
 
     # Save and load data
     def save_data(self):
-        parent_folder = os.path.dirname(self.selected_files[0])
+        try:
+            parent_folder = os.path.dirname(self.selected_files[0])
+        except:
+            parent_folder = os.path.dirname(self.selected_DQMQfile[0])
 
         current_tab_index = self.ui.tabWidget.currentIndex()
      
@@ -1235,17 +1239,20 @@ class MainWindow(QMainWindow):
 
         SE_table = self.ui.table_SE
         DQ_table = self.ui.table_DQ
+        DQMQ_table = self.ui.table_DQMQ
 
         os.makedirs(parent_folder + '/Result/', exist_ok=True)
         basefolder = os.path.dirname(parent_folder)
         os.makedirs(basefolder + '/DQ_table/', exist_ok=True)
+        os.makedirs(basefolder + '/DQMQ_Result/', exist_ok=True)
         if current_tab_index == 0:
             table_file_path = os.path.join(parent_folder, 'Result', f"SE_table.csv")
         elif current_tab_index == 1:
             graph_file_path = os.path.join(parent_folder, 'Result', f"DQ_points.png")
             graph_file_path_2 = os.path.join(parent_folder, 'Result', f"DQ_distribution.png")
             table_file_path = os.path.join(basefolder, 'DQ_table', f"DQ_table_{os.path.basename(parent_folder)}.csv")
-
+        elif current_tab_index == 4:
+            table_file_path = os.path.join(basefolder,'DQMQ_Result', f"DQMQ_Result_{os.path.basename(parent_folder)}.csv")
         pg.QtGui.QGuiApplication.processEvents()  # Make sure all events are processed before exporting
 
             # Check if the file already exists, if so, append an index to the filename
@@ -1271,6 +1278,10 @@ class MainWindow(QMainWindow):
 
             #Table
             self.save_table_to_csv(table_file_path, DQ_table)
+        elif current_tab_index == 4:
+            self.save_table_to_csv(table_file_path, DQMQ_table)
+
+
 
     def save_table_to_csv(self, path, table):
         with open(path, 'w') as f:
