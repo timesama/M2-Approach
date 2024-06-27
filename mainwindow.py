@@ -20,6 +20,7 @@ pg.CONFIG_OPTIONS['foreground'] = 'k'
 Frequency = []
 Re_spectra = []
 Im_spectra = []
+State_multiple_files = None
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -238,9 +239,16 @@ class MainWindow(QMainWindow):
             table_widget.setColumnWidth(i, width)
 
     def open_select_comparison_files_dialog(self):
+        global State_multiple_files
         dlg = OpenFilesDialog(self)
+
+        current_tab_index = self.ui.tabWidget.currentIndex()
+        if current_tab_index == 4:
+            State_multiple_files = False
+        else:
+            State_multiple_files = True
         if dlg.exec():
-            current_tab_index = self.ui.tabWidget.currentIndex()
+            
             if current_tab_index == 2:
                 DQfileNames = dlg.selectedFiles()
                 self.selected_DQfiles.extend(DQfileNames)
@@ -257,6 +265,8 @@ class MainWindow(QMainWindow):
             
     def open_select_dialog(self):
         dlg = OpenFilesDialog(self)
+        global State_multiple_files
+        State_multiple_files = True
         if dlg.exec():
             fileNames = dlg.selectedFiles()
             self.selected_files.extend(fileNames)
@@ -899,7 +909,10 @@ class MainWindow(QMainWindow):
         for row, file in zip(range(table.rowCount()), selected_files):
             Folder = QTableWidgetItem(file)
             file_name = os.path.basename(file)
-            x_axis = re.search(pattern,file).group(1)
+            try:
+                x_axis = re.search(pattern,file).group(1)
+            except:
+                x_axis = row
 
             Filename = QTableWidgetItem(file_name)
             Temp = QTableWidgetItem(x_axis)
@@ -1388,8 +1401,16 @@ class MainWindow(QMainWindow):
 
 class OpenFilesDialog(QFileDialog):
     def __init__(self, parent=None):
+        global State_multiple_files
+        print(State_multiple_files)
         super().__init__(parent)
-        self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
+
+        if State_multiple_files:
+            self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
+            print('I hate this debugger')
+        else:
+            pass
+
         self.setNameFilter(str("Data (*.dat *.txt *.csv)"))
 
         initial_directory = "selected_folder.txt"
