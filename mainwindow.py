@@ -853,8 +853,6 @@ class MainWindow(QMainWindow):
             table.setItem(row, 3, QTableWidgetItem(str(round(nDQ[row+1],4))))
         table.resizeColumnsToContents()
         
-
-
     # Relaxation time section
     def update_T12_table(self):
         selected_files = self.selected_T1files
@@ -1281,7 +1279,7 @@ class MainWindow(QMainWindow):
         elif current_tab_index == 4:
             self.save_table_to_csv(table_file_path, DQMQ_table)
 
-
+        QMessageBox.information(self, "Data Saved", f"The data have been saved to {parent_folder}", QMessageBox.Ok)
 
     def save_table_to_csv(self, path, table):
         with open(path, 'w') as f:
