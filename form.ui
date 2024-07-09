@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1376</width>
-    <height>889</height>
+    <height>1000</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -67,8 +67,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>1280</width>
-     <height>700</height>
+     <width>1300</width>
+     <height>830</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -284,6 +284,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <width>301</width>
            <height>30</height>
           </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: none</string>
          </property>
          <property name="placeholderText">
           <string>Choose File for Analysis</string>
@@ -544,7 +547,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           </sizepolicy>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_1">
           <attribute name="title">
@@ -618,6 +621,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <height>23</height>
              </rect>
             </property>
+            <property name="styleSheet">
+             <string notr="true">background: none</string>
+            </property>
             <property name="currentText">
              <string/>
             </property>
@@ -651,6 +657,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <width>63</width>
               <height>23</height>
              </rect>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background: none</string>
             </property>
             <property name="currentText">
              <string>T, C</string>
@@ -916,6 +925,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
              <width>81</width>
              <height>23</height>
             </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: none</string>
            </property>
            <property name="currentText">
             <string/>
@@ -1224,6 +1236,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
              <height>23</height>
             </rect>
            </property>
+           <property name="styleSheet">
+            <string notr="true">background: none</string>
+           </property>
            <property name="currentText">
             <string>Gauss</string>
            </property>
@@ -1462,6 +1477,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
              <width>161</width>
              <height>30</height>
             </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: none</string>
            </property>
            <property name="placeholderText">
             <string>Choose File for Analysis</string>
