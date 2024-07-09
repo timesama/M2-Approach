@@ -1,6 +1,6 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox, QScrollArea, QWidget
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor, QIcon
 import numpy as np
@@ -29,17 +29,31 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.setWindowIcon(QIcon('BrandIcon.ico'))
 
-        # # Set window geometry
-        # screen = QApplication.primaryScreen()
+        # Set window geometry
+        screen = QApplication.primaryScreen()
 
-        # if screen:
-        #     available_geometry = screen.availableGeometry()
-        #     left = top = 10
-        #     width = available_geometry.width() - left
-        #     height = available_geometry.height() - 3 * top
-        #     self.setMaximumSize(width, height)
-        #     self.showMaximized()
+        if screen:
+            available_geometry = screen.availableGeometry()
+            left = top = 0
+            width = available_geometry.width() - left
+            height = available_geometry.height() - 15 * top
+            self.resize(width, height)
+
+        self.scroll = QScrollArea(self)
+        self.scroll.setWidget(self.ui.centralwidget)
+        #self.scroll.setWidgetResizable(True)
+
         
+        self.setCentralWidget(self.scroll)
+
+        # Maximize minimize
+        self.setWindowFlags(self.windowFlags() | self.windowFlags().WindowMaximizeButtonHint)
+
+        # Ensure window is resizable
+        self.setMinimumSize(500, 500)  # Set a reasonable minimum size
+        self.setMaximumSize(16777215, 16777215)  # Set a large maximum size
+
+
 
         self.selected_files = []
         self.selected_folders = []
