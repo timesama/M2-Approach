@@ -2,42 +2,45 @@
 <ui version="4.0">
  <class>NMR</class>
  <widget class="QMainWindow" name="NMR">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
-    <height>800</height>
+    <width>1376</width>
+    <height>889</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>1</horstretch>
+    <verstretch>1</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
     <width>1000</width>
-    <height>580</height>
+    <height>500</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1280</width>
-    <height>800</height>
+    <width>2000</width>
+    <height>1000</height>
    </size>
   </property>
   <property name="sizeIncrement">
    <size>
-    <width>0</width>
-    <height>0</height>
+    <width>2</width>
+    <height>2</height>
    </size>
   </property>
   <property name="baseSize">
    <size>
-    <width>0</width>
-    <height>0</height>
+    <width>1</width>
+    <height>1</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -56,344 +59,798 @@
    <property name="enabled">
     <bool>true</bool>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>1</horstretch>
+     <verstretch>1</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
-     <width>1100</width>
+     <width>1280</width>
      <height>700</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
-     <width>1280</width>
-     <height>800</height>
+     <width>1500</width>
+     <height>1000</height>
     </size>
    </property>
-   <widget class="QTabWidget" name="tabWidget">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
+   <property name="sizeIncrement">
+    <size>
+     <width>2</width>
+     <height>2</height>
+    </size>
+   </property>
+   <widget class="QScrollArea" name="scrollArea">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>310</y>
-      <width>1251</width>
-      <height>481</height>
+      <x>0</x>
+      <y>0</y>
+      <width>1301</width>
+      <height>831</height>
      </rect>
     </property>
     <property name="sizePolicy">
-     <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
+     <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+      <horstretch>1</horstretch>
+      <verstretch>1</verstretch>
      </sizepolicy>
     </property>
-    <property name="currentIndex">
-     <number>0</number>
+    <property name="minimumSize">
+     <size>
+      <width>1</width>
+      <height>1</height>
+     </size>
     </property>
-    <widget class="QWidget" name="tab_1">
-     <attribute name="title">
-      <string>SE</string>
-     </attribute>
-     <widget class="QTableWidget" name="table_SE">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>20</y>
-        <width>481</width>
-        <height>400</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::CurrentChanged</set>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="columnCount">
-       <number>5</number>
-      </property>
-      <column>
-       <property name="text">
-        <string>T, C</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>SFC</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>M2</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>T2*</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>File name</string>
-       </property>
-      </column>
-     </widget>
-     <widget class="PlotWidget" name="SEWidget" native="true">
-      <property name="geometry">
-       <rect>
-        <x>690</x>
-        <y>20</y>
-        <width>541</width>
-        <height>411</height>
-       </rect>
-      </property>
-      <widget class="QComboBox" name="comboBox">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>0</y>
-         <width>63</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="currentText">
-        <string/>
-       </property>
-       <property name="currentIndex">
-        <number>-1</number>
-       </property>
-       <property name="placeholderText">
-        <string>Set y:</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>SFC</string>
+    <property name="sizeIncrement">
+     <size>
+      <width>1</width>
+      <height>1</height>
+     </size>
+    </property>
+    <property name="baseSize">
+     <size>
+      <width>1</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents_2">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>1299</width>
+       <height>829</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>M₂</string>
+        <property name="maximumSize">
+         <size>
+          <width>2000</width>
+          <height>300</height>
+         </size>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>T₂*</string>
+        <property name="sizeIncrement">
+         <size>
+          <width>1</width>
+          <height>1</height>
+         </size>
         </property>
-       </item>
-      </widget>
-      <widget class="QComboBox" name="comboBox_3">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>63</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="currentText">
-        <string>T, C</string>
-       </property>
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <property name="placeholderText">
-        <string/>
-       </property>
-       <item>
-        <property name="text">
-         <string>T, C</string>
+        <property name="baseSize">
+         <size>
+          <width>1</width>
+          <height>1</height>
+         </size>
         </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>XS, %</string>
+        <property name="title">
+         <string/>
         </property>
-       </item>
-      </widget>
-     </widget>
-     <widget class="QPushButton" name="btn_DeleteRow_1">
-      <property name="geometry">
-       <rect>
-        <x>540</x>
-        <y>20</y>
-        <width>90</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Delete row</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_2">
-     <attribute name="title">
-      <string>DQ</string>
-     </attribute>
-     <widget class="PlotWidget" name="DQ_Widget_1" native="true">
-      <property name="geometry">
-       <rect>
-        <x>570</x>
-        <y>20</y>
-        <width>311</width>
-        <height>351</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QTableWidget" name="table_DQ">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>20</y>
-        <width>521</width>
-        <height>400</height>
-       </rect>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::AllEditTriggers</set>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="columnCount">
-       <number>4</number>
-      </property>
-      <column>
-       <property name="text">
-        <string>DQ time</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>DQ amp</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>M₂</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>T₂*</string>
-       </property>
-      </column>
-     </widget>
-     <widget class="PlotWidget" name="DQ_Widget_2" native="true">
-      <property name="geometry">
-       <rect>
-        <x>910</x>
-        <y>20</y>
-        <width>311</width>
-        <height>351</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="radioButton_Log">
-      <property name="geometry">
-       <rect>
-        <x>940</x>
-        <y>380</y>
-        <width>83</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Logarithm</string>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="dq_min">
-      <property name="geometry">
-       <rect>
-        <x>660</x>
-        <y>390</y>
-        <width>81</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="prefix">
-       <string/>
-      </property>
-      <property name="suffix">
-       <string> musec</string>
-      </property>
-      <property name="decimals">
-       <number>1</number>
-      </property>
-      <property name="minimum">
-       <double>0.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>2.000000000000000</double>
-      </property>
-      <property name="value">
-       <double>0.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="dq_max">
-      <property name="geometry">
-       <rect>
-        <x>780</x>
-        <y>390</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="prefix">
-       <string/>
-      </property>
-      <property name="suffix">
-       <string> musec</string>
-      </property>
-      <property name="decimals">
-       <number>1</number>
-      </property>
-      <property name="minimum">
-       <double>0.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>2.000000000000000</double>
-      </property>
-      <property name="value">
-       <double>20.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_7">
-      <property name="geometry">
-       <rect>
-        <x>560</x>
-        <y>390</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <widget class="QTextEdit" name="textEdit_2">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>100</y>
+           <width>161</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="mouseTracking">
+          <bool>false</bool>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: transparent</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContents</enum>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2. Press Start for Analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::NoTextInteraction</set>
+         </property>
+        </widget>
+        <widget class="PlotWidget" name="FFTWidget" native="true">
+         <property name="geometry">
+          <rect>
+           <x>830</x>
+           <y>60</y>
+           <width>400</width>
+           <height>200</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_Save">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>250</y>
+           <width>80</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="radioButton">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>220</y>
+           <width>161</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Save intermediate results</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_SelectFiles">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>80</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Select Files</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_Start">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>140</y>
+           <width>80</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Start</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="comboBox_4">
+         <property name="geometry">
+          <rect>
+           <x>410</x>
+           <y>10</y>
+           <width>301</width>
+           <height>30</height>
+          </rect>
+         </property>
+         <property name="placeholderText">
+          <string>Choose File for Analysis</string>
+         </property>
+        </widget>
+        <widget class="PlotWidget" name="FidWidget" native="true">
+         <property name="geometry">
+          <rect>
+           <x>410</x>
+           <y>60</y>
+           <width>400</width>
+           <height>200</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QTextEdit" name="textEdit_6">
+         <property name="geometry">
+          <rect>
+           <x>829</x>
+           <y>10</y>
+           <width>201</width>
+           <height>30</height>
+          </rect>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_Load">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>250</y>
+           <width>80</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Load</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_Phasing">
+         <property name="geometry">
+          <rect>
+           <x>980</x>
+           <y>270</y>
+           <width>121</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Manual Phasing</string>
+         </property>
+        </widget>
+        <widget class="QTextEdit" name="textEdit_3">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>190</y>
+           <width>161</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="mouseTracking">
+          <bool>false</bool>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: transparent</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContents</enum>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;3. Save Result&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::NoTextInteraction</set>
+         </property>
+        </widget>
+        <widget class="QProgressBar" name="progressBar">
+         <property name="geometry">
+          <rect>
+           <x>1120</x>
+           <y>10</y>
+           <width>111</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="btn_Add">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>50</y>
+           <width>80</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Add</string>
+         </property>
+        </widget>
+        <widget class="QTextEdit" name="textEdit_5">
+         <property name="geometry">
+          <rect>
+           <x>1040</x>
+           <y>10</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: transparent</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;FFT Progress:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+        <widget class="QTextEdit" name="textEdit">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>161</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="mouseTracking">
+          <bool>false</bool>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: transparent</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContents</enum>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;1. Select Files for Analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::NoTextInteraction</set>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_5">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>2</horstretch>
+          <verstretch>2</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>2</width>
+          <height>2</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>2000</width>
+          <height>500</height>
+         </size>
+        </property>
+        <property name="sizeIncrement">
+         <size>
+          <width>2</width>
+          <height>2</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>2</width>
+          <height>2</height>
+         </size>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <widget class="QTabWidget" name="tabWidget">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>10</y>
+           <width>1251</width>
+           <height>481</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tab_1">
+          <attribute name="title">
+           <string>SE</string>
+          </attribute>
+          <widget class="QTableWidget" name="table_SE">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>20</y>
+             <width>481</width>
+             <height>400</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::CurrentChanged</set>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="columnCount">
+            <number>5</number>
+           </property>
+           <column>
+            <property name="text">
+             <string>T, C</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>SFC</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>M2</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>T2*</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>File name</string>
+            </property>
+           </column>
+          </widget>
+          <widget class="PlotWidget" name="SEWidget" native="true">
+           <property name="geometry">
+            <rect>
+             <x>690</x>
+             <y>20</y>
+             <width>541</width>
+             <height>411</height>
+            </rect>
+           </property>
+           <widget class="QComboBox" name="comboBox">
+            <property name="geometry">
+             <rect>
+              <x>70</x>
+              <y>0</y>
+              <width>63</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="currentText">
+             <string/>
+            </property>
+            <property name="currentIndex">
+             <number>-1</number>
+            </property>
+            <property name="placeholderText">
+             <string>Set y:</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>SFC</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>M₂</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>T₂*</string>
+             </property>
+            </item>
+           </widget>
+           <widget class="QComboBox" name="comboBox_3">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>63</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="currentText">
+             <string>T, C</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <property name="placeholderText">
+             <string/>
+            </property>
+            <item>
+             <property name="text">
+              <string>T, C</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>XS, %</string>
+             </property>
+            </item>
+           </widget>
+          </widget>
+          <widget class="QPushButton" name="btn_DeleteRow_1">
+           <property name="geometry">
+            <rect>
+             <x>540</x>
+             <y>20</y>
+             <width>90</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Delete row</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tab_2">
+          <attribute name="title">
+           <string>DQ</string>
+          </attribute>
+          <widget class="PlotWidget" name="DQ_Widget_1" native="true">
+           <property name="geometry">
+            <rect>
+             <x>570</x>
+             <y>20</y>
+             <width>311</width>
+             <height>351</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QTableWidget" name="table_DQ">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>20</y>
+             <width>521</width>
+             <height>400</height>
+            </rect>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::AllEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="columnCount">
+            <number>4</number>
+           </property>
+           <column>
+            <property name="text">
+             <string>DQ time</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>DQ amp</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>M₂</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>T₂*</string>
+            </property>
+           </column>
+          </widget>
+          <widget class="PlotWidget" name="DQ_Widget_2" native="true">
+           <property name="geometry">
+            <rect>
+             <x>910</x>
+             <y>20</y>
+             <width>311</width>
+             <height>351</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QRadioButton" name="radioButton_Log">
+           <property name="geometry">
+            <rect>
+             <x>940</x>
+             <y>380</y>
+             <width>83</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Logarithm</string>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="dq_min">
+           <property name="geometry">
+            <rect>
+             <x>660</x>
+             <y>390</y>
+             <width>81</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string> musec</string>
+           </property>
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>2.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="dq_max">
+           <property name="geometry">
+            <rect>
+             <x>780</x>
+             <y>390</y>
+             <width>91</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string> musec</string>
+           </property>
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>2.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>20.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_7">
+           <property name="geometry">
+            <rect>
+             <x>560</x>
+             <y>390</y>
+             <width>91</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -401,43 +858,43 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Filter DQ times&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_8">
-      <property name="geometry">
-       <rect>
-        <x>750</x>
-        <y>390</y>
-        <width>31</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_8">
+           <property name="geometry">
+            <rect>
+             <x>750</x>
+             <y>390</y>
+             <width>31</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -446,91 +903,91 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;to&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBox_2">
-      <property name="geometry">
-       <rect>
-        <x>940</x>
-        <y>410</y>
-        <width>81</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="currentText">
-       <string/>
-      </property>
-      <property name="currentIndex">
-       <number>-1</number>
-      </property>
-      <property name="maxVisibleItems">
-       <number>10</number>
-      </property>
-      <property name="placeholderText">
-       <string>Function:</string>
-      </property>
-      <item>
-       <property name="text">
-        <string>Gauss</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Lorenz</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Pseudo Voigt</string>
-       </property>
-      </item>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_4">
-      <property name="geometry">
-       <rect>
-        <x>1120</x>
-        <y>380</y>
-        <width>121</width>
-        <height>61</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>7</pointsize>
-       </font>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="acceptDrops">
-       <bool>false</bool>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="undoRedoEnabled">
-       <bool>false</bool>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="comboBox_2">
+           <property name="geometry">
+            <rect>
+             <x>940</x>
+             <y>410</y>
+             <width>81</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="currentText">
+            <string/>
+           </property>
+           <property name="currentIndex">
+            <number>-1</number>
+           </property>
+           <property name="maxVisibleItems">
+            <number>10</number>
+           </property>
+           <property name="placeholderText">
+            <string>Function:</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Gauss</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Lorenz</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Pseudo Voigt</string>
+            </property>
+           </item>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_4">
+           <property name="geometry">
+            <rect>
+             <x>1120</x>
+             <y>380</y>
+             <width>121</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>7</pointsize>
+            </font>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="undoRedoEnabled">
+            <bool>false</bool>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -538,128 +995,128 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:7pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_3">
-     <attribute name="title">
-      <string>DQ (Temp)</string>
-     </attribute>
-     <widget class="PlotWidget" name="DQ_Widget_3" native="true">
-      <property name="geometry">
-       <rect>
-        <x>250</x>
-        <y>0</y>
-        <width>310</width>
-        <height>331</height>
-       </rect>
-      </property>
-      <property name="sizeIncrement">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-     </widget>
-     <widget class="PlotWidget" name="DQ_Widget_4" native="true">
-      <property name="geometry">
-       <rect>
-        <x>580</x>
-        <y>0</y>
-        <width>310</width>
-        <height>331</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="PlotWidget" name="DQ_Widget_5" native="true">
-      <property name="geometry">
-       <rect>
-        <x>910</x>
-        <y>0</y>
-        <width>330</width>
-        <height>200</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_SelectFilesDQ">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>400</y>
-        <width>90</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Select Files</string>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="dq_min_2">
-      <property name="geometry">
-       <rect>
-        <x>360</x>
-        <y>350</y>
-        <width>81</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="prefix">
-       <string/>
-      </property>
-      <property name="suffix">
-       <string> musec</string>
-      </property>
-      <property name="decimals">
-       <number>1</number>
-      </property>
-      <property name="minimum">
-       <double>0.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>2.000000000000000</double>
-      </property>
-      <property name="value">
-       <double>0.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_9">
-      <property name="geometry">
-       <rect>
-        <x>440</x>
-        <y>350</y>
-        <width>31</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tab_3">
+          <attribute name="title">
+           <string>DQ (Temp)</string>
+          </attribute>
+          <widget class="PlotWidget" name="DQ_Widget_3" native="true">
+           <property name="geometry">
+            <rect>
+             <x>250</x>
+             <y>0</y>
+             <width>310</width>
+             <height>331</height>
+            </rect>
+           </property>
+           <property name="sizeIncrement">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+          </widget>
+          <widget class="PlotWidget" name="DQ_Widget_4" native="true">
+           <property name="geometry">
+            <rect>
+             <x>580</x>
+             <y>0</y>
+             <width>310</width>
+             <height>331</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="PlotWidget" name="DQ_Widget_5" native="true">
+           <property name="geometry">
+            <rect>
+             <x>910</x>
+             <y>0</y>
+             <width>330</width>
+             <height>200</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btn_SelectFilesDQ">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>400</y>
+             <width>90</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Select Files</string>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="dq_min_2">
+           <property name="geometry">
+            <rect>
+             <x>360</x>
+             <y>350</y>
+             <width>81</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string> musec</string>
+           </property>
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>2.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_9">
+           <property name="geometry">
+            <rect>
+             <x>440</x>
+             <y>350</y>
+             <width>31</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -668,71 +1125,71 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;to&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="dq_max_2">
-      <property name="geometry">
-       <rect>
-        <x>460</x>
-        <y>350</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="prefix">
-       <string/>
-      </property>
-      <property name="suffix">
-       <string> musec</string>
-      </property>
-      <property name="decimals">
-       <number>1</number>
-      </property>
-      <property name="minimum">
-       <double>0.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>2.000000000000000</double>
-      </property>
-      <property name="value">
-       <double>20.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_10">
-      <property name="geometry">
-       <rect>
-        <x>260</x>
-        <y>350</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="dq_max_2">
+           <property name="geometry">
+            <rect>
+             <x>460</x>
+             <y>350</y>
+             <width>91</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string> musec</string>
+           </property>
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>2.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>20.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_10">
+           <property name="geometry">
+            <rect>
+             <x>260</x>
+             <y>350</y>
+             <width>91</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -740,381 +1197,381 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Filter DQ times&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="radioButton_Log_2">
-      <property name="geometry">
-       <rect>
-        <x>700</x>
-        <y>350</y>
-        <width>83</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Logarithm</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBox_5">
-      <property name="geometry">
-       <rect>
-        <x>790</x>
-        <y>350</y>
-        <width>91</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="currentText">
-       <string>Gauss</string>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <property name="maxVisibleItems">
-       <number>10</number>
-      </property>
-      <property name="placeholderText">
-       <string>Gauss</string>
-      </property>
-      <item>
-       <property name="text">
-        <string>Gauss</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Lorenz</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Pseudo Voigt</string>
-       </property>
-      </item>
-     </widget>
-     <widget class="QTableWidget" name="table_DQ_2">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>20</y>
-        <width>220</width>
-        <height>360</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::CurrentChanged</set>
-      </property>
-      <property name="alternatingRowColors">
-       <bool>true</bool>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="columnCount">
-       <number>2</number>
-      </property>
-      <column>
-       <property name="text">
-        <string>Folder</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Name</string>
-       </property>
-      </column>
-     </widget>
-     <widget class="QPushButton" name="btn_ClearTable">
-      <property name="geometry">
-       <rect>
-        <x>120</x>
-        <y>400</y>
-        <width>90</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Clear Table</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_Launch">
-      <property name="geometry">
-       <rect>
-        <x>220</x>
-        <y>400</y>
-        <width>90</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Launch</string>
-      </property>
-     </widget>
-     <widget class="PlotWidget" name="DQ_Widget_6" native="true">
-      <property name="geometry">
-       <rect>
-        <x>910</x>
-        <y>220</y>
-        <width>330</width>
-        <height>200</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab">
-     <attribute name="title">
-      <string>T₁ T₂</string>
-     </attribute>
-     <widget class="PlotWidget" name="T1_Widget_1" native="true">
-      <property name="geometry">
-       <rect>
-        <x>470</x>
-        <y>40</y>
-        <width>311</width>
-        <height>331</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_ClearTable_2">
-      <property name="geometry">
-       <rect>
-        <x>120</x>
-        <y>400</y>
-        <width>90</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Clear Table</string>
-      </property>
-     </widget>
-     <widget class="QTableWidget" name="table_T1">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>20</y>
-        <width>441</width>
-        <height>360</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::CurrentChanged</set>
-      </property>
-      <property name="alternatingRowColors">
-       <bool>true</bool>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="columnCount">
-       <number>6</number>
-      </property>
-      <column>
-       <property name="text">
-        <string>Folder</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>File name</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>X Axis</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>tau (1)</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>tau (2)</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>tau (3)</string>
-       </property>
-      </column>
-     </widget>
-     <widget class="QPushButton" name="btn_SelectFiles_T1">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>400</y>
-        <width>90</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Select Files</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_Plot1">
-      <property name="geometry">
-       <rect>
-        <x>810</x>
-        <y>170</y>
-        <width>71</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Plot</string>
-      </property>
-     </widget>
-     <widget class="PlotWidget" name="T1_Widget_2" native="true">
-      <property name="geometry">
-       <rect>
-        <x>920</x>
-        <y>40</y>
-        <width>311</width>
-        <height>331</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="comboBox_6">
-      <property name="geometry">
-       <rect>
-        <x>470</x>
-        <y>20</y>
-        <width>161</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="placeholderText">
-       <string>Choose File for Analysis</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_DeleteRow">
-      <property name="geometry">
-       <rect>
-        <x>220</x>
-        <y>400</y>
-        <width>90</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Delete row</string>
-      </property>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_equations_3">
-      <property name="geometry">
-       <rect>
-        <x>810</x>
-        <y>200</y>
-        <width>81</width>
-        <height>91</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string/>
-      </property>
-      <widget class="QRadioButton" name="radioButton_10">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>61</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>1ˢᵗ Exp</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_11">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>61</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>2ⁿᵈ Exp</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_12">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>61</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>3ⁿᵈ Exp</string>
-       </property>
-      </widget>
-      <widget class="QTextEdit" name="textEdit_T2_4">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>51</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="mouseTracking">
-        <bool>false</bool>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="acceptDrops">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background: transparent</string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustToContents</enum>
-       </property>
-       <property name="undoRedoEnabled">
-        <bool>false</bool>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+          <widget class="QRadioButton" name="radioButton_Log_2">
+           <property name="geometry">
+            <rect>
+             <x>700</x>
+             <y>350</y>
+             <width>83</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Logarithm</string>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="comboBox_5">
+           <property name="geometry">
+            <rect>
+             <x>790</x>
+             <y>350</y>
+             <width>91</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="currentText">
+            <string>Gauss</string>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <property name="maxVisibleItems">
+            <number>10</number>
+           </property>
+           <property name="placeholderText">
+            <string>Gauss</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Gauss</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Lorenz</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Pseudo Voigt</string>
+            </property>
+           </item>
+          </widget>
+          <widget class="QTableWidget" name="table_DQ_2">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>20</y>
+             <width>220</width>
+             <height>360</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::CurrentChanged</set>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="columnCount">
+            <number>2</number>
+           </property>
+           <column>
+            <property name="text">
+             <string>Folder</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </column>
+          </widget>
+          <widget class="QPushButton" name="btn_ClearTable">
+           <property name="geometry">
+            <rect>
+             <x>120</x>
+             <y>400</y>
+             <width>90</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Clear Table</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btn_Launch">
+           <property name="geometry">
+            <rect>
+             <x>220</x>
+             <y>400</y>
+             <width>90</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Launch</string>
+           </property>
+          </widget>
+          <widget class="PlotWidget" name="DQ_Widget_6" native="true">
+           <property name="geometry">
+            <rect>
+             <x>910</x>
+             <y>220</y>
+             <width>330</width>
+             <height>200</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tab">
+          <attribute name="title">
+           <string>T₁ T₂</string>
+          </attribute>
+          <widget class="PlotWidget" name="T1_Widget_1" native="true">
+           <property name="geometry">
+            <rect>
+             <x>470</x>
+             <y>40</y>
+             <width>311</width>
+             <height>331</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btn_ClearTable_2">
+           <property name="geometry">
+            <rect>
+             <x>120</x>
+             <y>400</y>
+             <width>90</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Clear Table</string>
+           </property>
+          </widget>
+          <widget class="QTableWidget" name="table_T1">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>20</y>
+             <width>441</width>
+             <height>360</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::CurrentChanged</set>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="columnCount">
+            <number>6</number>
+           </property>
+           <column>
+            <property name="text">
+             <string>Folder</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>File name</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>X Axis</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>tau (1)</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>tau (2)</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>tau (3)</string>
+            </property>
+           </column>
+          </widget>
+          <widget class="QPushButton" name="btn_SelectFiles_T1">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>400</y>
+             <width>90</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Select Files</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btn_Plot1">
+           <property name="geometry">
+            <rect>
+             <x>810</x>
+             <y>170</y>
+             <width>71</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Plot</string>
+           </property>
+          </widget>
+          <widget class="PlotWidget" name="T1_Widget_2" native="true">
+           <property name="geometry">
+            <rect>
+             <x>920</x>
+             <y>40</y>
+             <width>311</width>
+             <height>331</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="comboBox_6">
+           <property name="geometry">
+            <rect>
+             <x>470</x>
+             <y>20</y>
+             <width>161</width>
+             <height>30</height>
+            </rect>
+           </property>
+           <property name="placeholderText">
+            <string>Choose File for Analysis</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btn_DeleteRow">
+           <property name="geometry">
+            <rect>
+             <x>220</x>
+             <y>400</y>
+             <width>90</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Delete row</string>
+           </property>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_equations_3">
+           <property name="geometry">
+            <rect>
+             <x>810</x>
+             <y>200</y>
+             <width>81</width>
+             <height>91</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string/>
+           </property>
+           <widget class="QRadioButton" name="radioButton_10">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>30</y>
+              <width>61</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>1ˢᵗ Exp</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_11">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>50</y>
+              <width>61</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>2ⁿᵈ Exp</string>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_12">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>70</y>
+              <width>61</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>3ⁿᵈ Exp</string>
+            </property>
+           </widget>
+           <widget class="QTextEdit" name="textEdit_T2_4">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>51</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="mouseTracking">
+             <bool>false</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background: transparent</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+            <property name="undoRedoEnabled">
+             <bool>false</bool>
+            </property>
+            <property name="html">
+             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -1122,96 +1579,96 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Plot:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="textInteractionFlags">
-        <set>Qt::NoTextInteraction</set>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_equations_4">
-      <property name="geometry">
-       <rect>
-        <x>470</x>
-        <y>370</y>
-        <width>71</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string/>
-      </property>
-      <widget class="QRadioButton" name="radioButton_16">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>61</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>ms</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_17">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>61</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>μs</string>
-       </property>
-      </widget>
-      <widget class="QTextEdit" name="textEdit_T2_3">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>71</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>6</pointsize>
-        </font>
-       </property>
-       <property name="mouseTracking">
-        <bool>false</bool>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="acceptDrops">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background: transparent</string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustToContents</enum>
-       </property>
-       <property name="undoRedoEnabled">
-        <bool>false</bool>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::NoTextInteraction</set>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_equations_4">
+           <property name="geometry">
+            <rect>
+             <x>470</x>
+             <y>370</y>
+             <width>71</width>
+             <height>71</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string/>
+           </property>
+           <widget class="QRadioButton" name="radioButton_16">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>30</y>
+              <width>61</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>ms</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_17">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>50</y>
+              <width>61</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>μs</string>
+            </property>
+           </widget>
+           <widget class="QTextEdit" name="textEdit_T2_3">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>71</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>6</pointsize>
+             </font>
+            </property>
+            <property name="mouseTracking">
+             <bool>false</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background: transparent</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+            <property name="undoRedoEnabled">
+             <bool>false</bool>
+            </property>
+            <property name="html">
+             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -1219,50 +1676,50 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:6pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;Original Units:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="textInteractionFlags">
-        <set>Qt::NoTextInteraction</set>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_error">
-      <property name="geometry">
-       <rect>
-        <x>560</x>
-        <y>370</y>
-        <width>201</width>
-        <height>61</height>
-       </rect>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="acceptDrops">
-       <bool>false</bool>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="undoRedoEnabled">
-       <bool>false</bool>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::NoTextInteraction</set>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_error">
+           <property name="geometry">
+            <rect>
+             <x>560</x>
+             <y>370</y>
+             <width>201</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="undoRedoEnabled">
+            <bool>false</bool>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -1270,103 +1727,103 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_equations_2">
-      <property name="geometry">
-       <rect>
-        <x>810</x>
-        <y>40</y>
-        <width>71</width>
-        <height>101</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string/>
-      </property>
-      <widget class="QRadioButton" name="radioButton_4">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>51</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>1 Exp</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_5">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>50</y>
-         <width>51</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>2 Exp</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_6">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>51</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>3 Exp</string>
-       </property>
-      </widget>
-      <widget class="QTextEdit" name="textEdit_T2_5">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>71</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="mouseTracking">
-        <bool>false</bool>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="acceptDrops">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">background: transparent</string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustToContents</enum>
-       </property>
-       <property name="undoRedoEnabled">
-        <bool>false</bool>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_equations_2">
+           <property name="geometry">
+            <rect>
+             <x>810</x>
+             <y>40</y>
+             <width>71</width>
+             <height>101</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string/>
+           </property>
+           <widget class="QRadioButton" name="radioButton_4">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>30</y>
+              <width>51</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>1 Exp</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_5">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>50</y>
+              <width>51</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>2 Exp</string>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_6">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>70</y>
+              <width>51</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>3 Exp</string>
+            </property>
+           </widget>
+           <widget class="QTextEdit" name="textEdit_T2_5">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>71</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="mouseTracking">
+             <bool>false</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background: transparent</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+            <property name="undoRedoEnabled">
+             <bool>false</bool>
+            </property>
+            <property name="html">
+             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -1374,129 +1831,129 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Fit with:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="textInteractionFlags">
-        <set>Qt::NoTextInteraction</set>
-       </property>
-      </widget>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_4">
-     <attribute name="title">
-      <string>DQ MQ</string>
-     </attribute>
-     <widget class="QPushButton" name="btn_SelectFilesDQMQ">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>420</y>
-        <width>90</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Select Files</string>
-      </property>
-     </widget>
-     <widget class="PlotWidget" name="DQMQ_Widget" native="true">
-      <property name="geometry">
-       <rect>
-        <x>650</x>
-        <y>10</y>
-        <width>561</width>
-        <height>401</height>
-       </rect>
-      </property>
-      <property name="sizeIncrement">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-     </widget>
-     <widget class="QTableWidget" name="table_DQMQ">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>361</width>
-        <height>401</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::CurrentChanged</set>
-      </property>
-      <property name="alternatingRowColors">
-       <bool>true</bool>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="columnCount">
-       <number>4</number>
-      </property>
-      <column>
-       <property name="text">
-        <string>Time</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>DQ</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Ref</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>nDQ</string>
-       </property>
-      </column>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_12">
-      <property name="geometry">
-       <rect>
-        <x>510</x>
-        <y>30</y>
-        <width>31</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::NoTextInteraction</set>
+            </property>
+           </widget>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tab_4">
+          <attribute name="title">
+           <string>DQ MQ</string>
+          </attribute>
+          <widget class="QPushButton" name="btn_SelectFilesDQMQ">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>420</y>
+             <width>90</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Select Files</string>
+           </property>
+          </widget>
+          <widget class="PlotWidget" name="DQMQ_Widget" native="true">
+           <property name="geometry">
+            <rect>
+             <x>650</x>
+             <y>10</y>
+             <width>561</width>
+             <height>401</height>
+            </rect>
+           </property>
+           <property name="sizeIncrement">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+          </widget>
+          <widget class="QTableWidget" name="table_DQMQ">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>361</width>
+             <height>401</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::CurrentChanged</set>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="columnCount">
+            <number>4</number>
+           </property>
+           <column>
+            <property name="text">
+             <string>Time</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>DQ</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Ref</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>nDQ</string>
+            </property>
+           </column>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_12">
+           <property name="geometry">
+            <rect>
+             <x>510</x>
+             <y>30</y>
+             <width>31</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -1505,77 +1962,77 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;to&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="dq_max_3">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>530</x>
-        <y>30</y>
-        <width>51</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="prefix">
-       <string/>
-      </property>
-      <property name="suffix">
-       <string/>
-      </property>
-      <property name="decimals">
-       <number>0</number>
-      </property>
-      <property name="minimum">
-       <double>0.000000000000000</double>
-      </property>
-      <property name="maximum">
-       <double>700.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>2.000000000000000</double>
-      </property>
-      <property name="value">
-       <double>100.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_13">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>30</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="dq_max_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>530</x>
+             <y>30</y>
+             <width>51</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string/>
+           </property>
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>700.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>2.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>100.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_13">
+           <property name="geometry">
+            <rect>
+             <x>390</x>
+             <y>30</y>
+             <width>91</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -1583,74 +2040,74 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Fit tail from:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="dq_min_3">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>460</x>
-        <y>30</y>
-        <width>51</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="prefix">
-       <string/>
-      </property>
-      <property name="suffix">
-       <string/>
-      </property>
-      <property name="decimals">
-       <number>0</number>
-      </property>
-      <property name="minimum">
-       <double>0.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>2.000000000000000</double>
-      </property>
-      <property name="value">
-       <double>60.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_14">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>80</y>
-        <width>151</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent</string>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="dq_min_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>460</x>
+             <y>30</y>
+             <width>51</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string/>
+           </property>
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>2.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>60.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_14">
+           <property name="geometry">
+            <rect>
+             <x>390</x>
+             <y>80</y>
+             <width>151</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="mouseTracking">
+            <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: transparent</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -1658,139 +2115,139 @@ li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Power of fitting function:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="textInteractionFlags">
-       <set>Qt::NoTextInteraction</set>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="power">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>530</x>
-        <y>80</y>
-        <width>51</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="prefix">
-       <string/>
-      </property>
-      <property name="suffix">
-       <string/>
-      </property>
-      <property name="decimals">
-       <number>0</number>
-      </property>
-      <property name="minimum">
-       <double>0.000000000000000</double>
-      </property>
-      <property name="maximum">
-       <double>5.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>2.000000000000000</double>
-      </property>
-      <property name="value">
-       <double>1.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_DQMQ_1">
-      <property name="geometry">
-       <rect>
-        <x>400</x>
-        <y>160</y>
-        <width>91</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Plot Original</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_DQMQ_2">
-      <property name="geometry">
-       <rect>
-        <x>400</x>
-        <y>220</y>
-        <width>91</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Plot Difference</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_DQMQ_3">
-      <property name="geometry">
-       <rect>
-        <x>400</x>
-        <y>250</y>
-        <width>91</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Get nDQ</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_DQMQ_4">
-      <property name="geometry">
-       <rect>
-        <x>400</x>
-        <y>190</y>
-        <width>91</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Normalize</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_Save_2">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>420</y>
-        <width>80</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Save</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_Extra">
-     <attribute name="title">
-      <string>Extra</string>
-     </attribute>
-     <widget class="QLineEdit" name="lineEdit_2">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>240</y>
-        <width>191</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Your advertisment could be here...</string>
-      </property>
-     </widget>
-     <widget class="QTextEdit" name="textEdit_11">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>20</y>
-        <width>501</width>
-        <height>191</height>
-       </rect>
-      </property>
-      <property name="html">
-       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+          <widget class="QDoubleSpinBox" name="power">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>530</x>
+             <y>80</y>
+             <width>51</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string/>
+           </property>
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>5.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>2.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_DQMQ_1">
+           <property name="geometry">
+            <rect>
+             <x>400</x>
+             <y>160</y>
+             <width>91</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Plot Original</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_DQMQ_2">
+           <property name="geometry">
+            <rect>
+             <x>400</x>
+             <y>220</y>
+             <width>91</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Plot Difference</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_DQMQ_3">
+           <property name="geometry">
+            <rect>
+             <x>400</x>
+             <y>250</y>
+             <width>91</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Get nDQ</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton_DQMQ_4">
+           <property name="geometry">
+            <rect>
+             <x>400</x>
+             <y>190</y>
+             <width>91</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Normalize</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="btn_Save_2">
+           <property name="geometry">
+            <rect>
+             <x>110</x>
+             <y>420</y>
+             <width>80</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tab_Extra">
+          <attribute name="title">
+           <string>Extra</string>
+          </attribute>
+          <widget class="QLineEdit" name="lineEdit_2">
+           <property name="geometry">
+            <rect>
+             <x>40</x>
+             <y>240</y>
+             <width>191</width>
+             <height>81</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Your advertisment could be here...</string>
+           </property>
+          </widget>
+          <widget class="QTextEdit" name="textEdit_11">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>20</y>
+             <width>501</width>
+             <height>191</height>
+            </rect>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
@@ -1811,458 +2268,120 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#000000;&quot;&gt;9. Make &amp;quot;Start&amp;quot; button - Analyze or smth and blinking green until pressed&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#000000;&quot;&gt;10. Add notification about saved files - opening window&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="geometry">
-       <rect>
-        <x>790</x>
-        <y>110</y>
-        <width>141</width>
-        <height>181</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Analysis preferences</string>
-      </property>
-      <widget class="QCheckBox" name="checkBox">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>70</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Baseline</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="checkBox_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>70</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Glycerol</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_3">
-      <property name="geometry">
-       <rect>
-        <x>960</x>
-        <y>10</y>
-        <width>271</width>
-        <height>281</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Software settings</string>
-      </property>
-      <widget class="QPushButton" name="pushButton_DefaultFolder">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>121</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Set Default Folder</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_4">
-      <property name="geometry">
-       <rect>
-        <x>790</x>
-        <y>10</y>
-        <width>141</width>
-        <height>91</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>FFT Procedure</string>
-      </property>
-      <widget class="QRadioButton" name="radioButton_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>83</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Hand-made</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_3">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>111</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Python function</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </widget>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>1251</width>
-      <height>301</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string/>
-    </property>
-    <widget class="QTextEdit" name="textEdit_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>100</y>
-       <width>161</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="mouseTracking">
-      <bool>false</bool>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background: transparent</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContents</enum>
-     </property>
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2. Press Start for Analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::NoTextInteraction</set>
-     </property>
-    </widget>
-    <widget class="PlotWidget" name="FFTWidget" native="true">
-     <property name="geometry">
-      <rect>
-       <x>830</x>
-       <y>60</y>
-       <width>400</width>
-       <height>200</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btn_Save">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>250</y>
-       <width>80</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Save</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButton">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>220</y>
-       <width>161</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Save intermediate results</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <property name="autoExclusive">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btn_SelectFiles">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
-       <width>80</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Select Files</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btn_Start">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>140</y>
-       <width>80</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Start</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="comboBox_4">
-     <property name="geometry">
-      <rect>
-       <x>410</x>
-       <y>10</y>
-       <width>301</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="placeholderText">
-      <string>Choose File for Analysis</string>
-     </property>
-    </widget>
-    <widget class="PlotWidget" name="FidWidget" native="true">
-     <property name="geometry">
-      <rect>
-       <x>410</x>
-       <y>60</y>
-       <width>400</width>
-       <height>200</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QTextEdit" name="textEdit_6">
-     <property name="geometry">
-      <rect>
-       <x>829</x>
-       <y>10</y>
-       <width>201</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btn_Load">
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>250</y>
-       <width>80</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Load</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btn_Phasing">
-     <property name="geometry">
-      <rect>
-       <x>980</x>
-       <y>270</y>
-       <width>121</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Manual Phasing</string>
-     </property>
-    </widget>
-    <widget class="QTextEdit" name="textEdit_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>190</y>
-       <width>161</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="mouseTracking">
-      <bool>false</bool>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background: transparent</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContents</enum>
-     </property>
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;3. Save Result&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::NoTextInteraction</set>
-     </property>
-    </widget>
-    <widget class="QProgressBar" name="progressBar">
-     <property name="geometry">
-      <rect>
-       <x>1120</x>
-       <y>10</y>
-       <width>111</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="value">
-      <number>0</number>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btn_Add">
-     <property name="geometry">
-      <rect>
-       <x>100</x>
-       <y>50</y>
-       <width>80</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Add</string>
-     </property>
-    </widget>
-    <widget class="QTextEdit" name="textEdit_5">
-     <property name="geometry">
-      <rect>
-       <x>1040</x>
-       <y>10</y>
-       <width>81</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background: transparent</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;FFT Progress:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-    <widget class="QTextEdit" name="textEdit">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>161</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="mouseTracking">
-      <bool>false</bool>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background: transparent</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContents</enum>
-     </property>
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;1. Select Files for Analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::NoTextInteraction</set>
-     </property>
+           </property>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="geometry">
+            <rect>
+             <x>790</x>
+             <y>110</y>
+             <width>141</width>
+             <height>181</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>Analysis preferences</string>
+           </property>
+           <widget class="QCheckBox" name="checkBox">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>30</y>
+              <width>70</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Baseline</string>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="checkBox_2">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>60</y>
+              <width>70</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Glycerol</string>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="geometry">
+            <rect>
+             <x>960</x>
+             <y>10</y>
+             <width>271</width>
+             <height>281</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>Software settings</string>
+           </property>
+           <widget class="QPushButton" name="pushButton_DefaultFolder">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>30</y>
+              <width>121</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Set Default Folder</string>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_4">
+           <property name="geometry">
+            <rect>
+             <x>790</x>
+             <y>10</y>
+             <width>141</width>
+             <height>91</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>FFT Procedure</string>
+           </property>
+           <widget class="QRadioButton" name="radioButton_2">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>30</y>
+              <width>83</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Hand-made</string>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_3">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>60</y>
+              <width>111</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Python function</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </widget>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>

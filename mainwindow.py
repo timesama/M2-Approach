@@ -29,16 +29,16 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.setWindowIcon(QIcon('BrandIcon.ico'))
 
-        # Set window geometry
-        screen = QApplication.primaryScreen()
+        # # Set window geometry
+        # screen = QApplication.primaryScreen()
 
-        if screen:
-            available_geometry = screen.availableGeometry()
-            left = top = 10
-            width = available_geometry.width() - left
-            height = available_geometry.height() - 3 * top
-            self.setMaximumSize(width, height)
-            self.showMaximized()
+        # if screen:
+        #     available_geometry = screen.availableGeometry()
+        #     left = top = 10
+        #     width = available_geometry.width() - left
+        #     height = available_geometry.height() - 3 * top
+        #     self.setMaximumSize(width, height)
+        #     self.showMaximized()
         
 
         self.selected_files = []
