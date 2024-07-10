@@ -1425,7 +1425,7 @@ class OpenFilesDialog(QFileDialog):
         else:
             pass
 
-        self.setNameFilter(str("Data (*.dat *.txt *.csv)"))
+        self.setNameFilter(str("Data (*.dat *.txt *.csv *.sef)"))
 
         initial_directory_file = "selected_folder.txt"
         if os.path.exists(initial_directory_file):
