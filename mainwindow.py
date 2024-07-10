@@ -1428,12 +1428,19 @@ class OpenFilesDialog(QFileDialog):
 
         self.setNameFilter(str("Data (*.dat *.txt *.csv)"))
 
-        initial_directory = "selected_folder.txt"
-        if not os.path.exists(initial_directory):
-            exe_dir = os.path.dirname(sys.argv[0])
-            self.setDirectory(str(exe_dir))
+        initial_directory_file = "selected_folder.txt"
+        if os.path.exists(initial_directory_file):
+            with open(initial_directory_file, 'r') as file:
+                initial_directory = file.read().strip()
+            if os.path.isdir(initial_directory):
+                self.setDirectory(initial_directory)
+            else:
+                # Fallback if the content of the file is not a valid directory
+                exe_dir = os.path.dirname(sys.argv[0])
+                self.setDirectory(exe_dir)
         else:
-            self.setDirectory(str(initial_directory))                  
+            exe_dir = os.path.dirname(sys.argv[0])
+            self.setDirectory(exe_dir)
 
         self.selected_files = []  # Variable to store selected file paths
 
