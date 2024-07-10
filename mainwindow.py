@@ -278,6 +278,7 @@ class MainWindow(QMainWindow):
             fileNames = dlg.selectedFiles()
             self.selected_files.extend(fileNames)
         self.ui.btn_Start.setEnabled(True)
+        self.ui.btn_Start.setStyleSheet("background-color: green")
         self.ui.btn_Add.setEnabled(True)
  
     def open_select_dialog_glycerol(self):
@@ -425,6 +426,7 @@ class MainWindow(QMainWindow):
                     return
                     
         self.finalize_analysis(legend, current_tab_index)
+        self.ui.btn_Start.setStyleSheet("background-color: none")
 
     def analysis_error(self, file_path):
         QMessageBox.warning(self, "Invalid Data", f"Error in {file_path}. Restarting analysis", QMessageBox.Ok)
