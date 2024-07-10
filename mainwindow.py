@@ -255,7 +255,6 @@ class MainWindow(QMainWindow):
             
         dlg = OpenFilesDialog(self)
         if dlg.exec():
-            
             if current_tab_index == 2:
                 DQfileNames = dlg.selectedFiles()
                 self.selected_DQfiles.extend(DQfileNames)
@@ -277,10 +276,10 @@ class MainWindow(QMainWindow):
         if dlg.exec():
             fileNames = dlg.selectedFiles()
             self.selected_files.extend(fileNames)
-        self.ui.btn_Start.setEnabled(True)
-        self.ui.btn_Start.setStyleSheet("background-color: green")
-        self.ui.btn_Add.setEnabled(True)
- 
+            self.ui.btn_Start.setEnabled(True)
+            self.ui.btn_Start.setStyleSheet("background-color: green")
+            self.ui.btn_Add.setEnabled(True)
+    
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self)
         dlg.setWindowTitle("Select Reference Files")
@@ -299,7 +298,7 @@ class MainWindow(QMainWindow):
 
     def groupBox_status(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
-        if current_tab_index == 2 or current_tab_index == 3 or current_tab_index == 4:
+        if current_tab_index == 2 or current_tab_index == 3 or current_tab_index == 4 or current_tab_index == 5:
             self.ui.BOX_up.setEnabled(False)
         else:
             self.ui.BOX_up.setEnabled(True)
