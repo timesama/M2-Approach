@@ -34,27 +34,14 @@ class MainWindow(QMainWindow):
         screen = QApplication.primaryScreen()
 
         if screen:
-            available_geometry = screen.availableGeometry()
-            left = top = 1
-            width = available_geometry.width() - left
-            height = available_geometry.height() - 3 * top
-            self.resize(width, height)
+            self.showMaximized()
 
         self.scroll = QScrollArea(self)
         self.scroll.setWidget(self.ui.centralwidget)
-        #self.scroll.setWidgetResizable(True)
-
-        
+        self.scroll.setWidgetResizable(True)
         self.setCentralWidget(self.scroll)
-
         # Maximize minimize
         self.setWindowFlags(self.windowFlags() | self.windowFlags().WindowMaximizeButtonHint)
-
-        # Ensure window is resizable
-        self.setMinimumSize(500, 500)  # Set a reasonable minimum size
-        self.setMaximumSize(16777215, 16777215)  # Set a large maximum size
-
-
 
         self.selected_files = []
         self.selected_folders = []
@@ -97,7 +84,7 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.FidWidget, "Time, μs", "Amplitude", "FID")
         self.setup_graph(self.ui.SEWidget, "Temperature, °C", "Choose", "")
         self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T₂*", "")
-        self.setup_graph(self.ui.DQ_Widget_2, "", "Norm. DQ Intensity", "")
+        self.setup_graph(self.ui.DQ_Widget_2, "X axis", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQ_Widget_3, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_4, "", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQ_Widget_5, "", "Center", "")
@@ -312,9 +299,9 @@ class MainWindow(QMainWindow):
     def groupBox_status(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
         if current_tab_index == 2 or current_tab_index == 3 or current_tab_index == 4:
-            self.ui.groupBox.setEnabled(False)
+            self.ui.BOX_up.setEnabled(False)
         else:
-            self.ui.groupBox.setEnabled(True)
+            self.ui.BOX_up.setEnabled(True)
 
     def disable_buttons(self):
         self.ui.btn_Start.setEnabled(False)
@@ -1430,12 +1417,10 @@ class MainWindow(QMainWindow):
 class OpenFilesDialog(QFileDialog):
     def __init__(self, parent=None):
         global State_multiple_files
-        print(State_multiple_files)
         super().__init__(parent)
 
         if State_multiple_files:
             self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
-            print('I hate this debugger')
         else:
             pass
 
