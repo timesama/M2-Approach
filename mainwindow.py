@@ -6,6 +6,7 @@ from PySide6.QtGui import QColor, QIcon
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
+from webbrowser import open as open_application
 import pyqtgraph as pg
 from pyqtgraph.exporters import ImageExporter
 from ui_Form import Ui_NMR
@@ -89,6 +90,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_4.clicked.connect(self.plot_norm)
         self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.plot_nDQ)
+        self.ui.commandLinkButton.clicked.connect(self.open_url)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -145,6 +147,9 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setHidden(True)
         self.ui.textEdit_5.setHidden(True)
         self.ui.textEdit_6.setHidden(True)
+
+    def open_url(self):
+        open_application('https://github.com/timesama/M2-Approach/releases')
 
     def update_file(self):
         i = self.ui.comboBox_4.currentIndex() + 1

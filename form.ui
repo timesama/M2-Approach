@@ -534,10 +534,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
          </property>
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>10</y>
-           <width>1251</width>
-           <height>481</height>
+           <x>0</x>
+           <y>0</y>
+           <width>1281</width>
+           <height>501</height>
           </rect>
          </property>
          <property name="sizePolicy">
@@ -546,8 +546,29 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="tabPosition">
+          <enum>QTabWidget::North</enum>
+         </property>
+         <property name="tabShape">
+          <enum>QTabWidget::Rounded</enum>
+         </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>5</number>
+         </property>
+         <property name="elideMode">
+          <enum>Qt::ElideLeft</enum>
+         </property>
+         <property name="documentMode">
+          <bool>false</bool>
+         </property>
+         <property name="tabsClosable">
+          <bool>false</bool>
+         </property>
+         <property name="tabBarAutoHide">
+          <bool>false</bool>
          </property>
          <widget class="QWidget" name="tab_1">
           <attribute name="title">
@@ -685,8 +706,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <widget class="QPushButton" name="btn_DeleteRow_1">
            <property name="geometry">
             <rect>
-             <x>540</x>
-             <y>20</y>
+             <x>20</x>
+             <y>430</y>
              <width>90</width>
              <height>20</height>
             </rect>
@@ -2395,17 +2416,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
             </property>
            </widget>
           </widget>
-          <widget class="QLineEdit" name="lineEdit_3">
+          <widget class="QCommandLinkButton" name="commandLinkButton">
            <property name="geometry">
             <rect>
              <x>40</x>
              <y>330</y>
-             <width>441</width>
+             <width>311</width>
              <height>41</height>
             </rect>
            </property>
            <property name="text">
-            <string>Check for new version: https://github.com/timesama/M2-Approach/releases</string>
+            <string>Check for the newest version</string>
            </property>
           </widget>
          </widget>
