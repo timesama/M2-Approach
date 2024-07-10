@@ -34,9 +34,9 @@ class MainWindow(QMainWindow):
 
         if screen:
             available_geometry = screen.availableGeometry()
-            left = top = 0
+            left = top = 1
             width = available_geometry.width() - left
-            height = available_geometry.height() - 15 * top
+            height = available_geometry.height() - 3 * top
             self.resize(width, height)
 
         self.scroll = QScrollArea(self)
