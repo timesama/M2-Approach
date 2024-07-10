@@ -30,7 +30,6 @@ def normalize_mq(DQ, MQ, state):
 
     return DQ_norm, MQ_norm, End
 
-
 def dqmq(file_path, fit_from, fit_to, p):
 
     def exponent(x, a, b, c):
@@ -470,8 +469,29 @@ def lorenz(x, amp, cen, wid, y0):
     return (amp * (wid**2)) / ((x - cen)**2 + (wid**2)) + y0
 
 def voigt(x, amp, cen, wid, frac, y0):
-    # NoClass
     lorentzian = amp *(2 * wid) / (np.pi * (4 * (x - cen)**2 + wid**2))
     gaussian = amp *(np.exp((-4 * np.log(2) * (x - cen)**2) / wid**2)) / (wid * np.sqrt(np.pi / (4 * np.log(2))))
     return  (frac * lorentzian + (1 - frac) * gaussian) + y0
 
+def twod_model(x, CDD, tauc, A, Ctrans, tautrans, taures):
+    term1 = tauc / (1 + (6.28 * x * tauc) ** 2)
+    term2 = 4 * tauc / (1 + (2 * 6.28 * x * tauc) ** 2)
+    log_term1 = np.log((1 + (6.28 * x * tautrans) ** 2) / ((tautrans / taures) ** 2 + (6.28 * x * tautrans) ** 2))
+    log_term2 = np.log((1 + (6.28 * 2 * x * tautrans) ** 2) / ((tautrans / taures) ** 2 + (6.28 * 2 * x * tautrans) ** 2))
+    
+    result = CDD * (term1 + term2) + A + Ctrans * tautrans * (log_term1 + 4 * log_term2)
+    
+    return result
+    #return CDD*(tauc/(1+(6.28*x*tauc)^2)+4*tauc/(1+(2*6.28*x*tauc)^2)) +A+Ctrans*tautrans*(np.log((1+(6.28*x*tautrans)^2)/((tautrans/taures)^2+(6.28*x*tautrans)^2))+4*np.log((1+(6.28*2*x*tautrans)^2)/((tautrans/taures)^2+(6.28*2*x*tautrans)^2)))
+
+def fit_model(Omega, Rate):
+    Omega_fit = np.arange(min(Omega), max(Omega) + 0.01, 0.1)
+    
+    #p = [10e+05,  1,  1,  6e+04, -2e-06,  2e-09] 
+    popt, _ = curve_fit(twod_model, Omega, Rate, maxfev=10000000)
+    fitted_curve = twod_model(Omega_fit, *popt)
+
+    r2_curve = twod_model(Omega, *popt)
+    R2 = round(calculate_r_squared(Rate, r2_curve),4)
+
+    return Omega_fit, fitted_curve, popt, R2

@@ -7,6 +7,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 from webbrowser import open as open_application
+from itertools import islice
 import pyqtgraph as pg
 from pyqtgraph.exporters import ImageExporter
 from ui_Form import Ui_NMR
@@ -48,9 +49,11 @@ class MainWindow(QMainWindow):
         self.selected_files_gly = []
         self.selected_DQfiles = []
         self.selected_T1files = []
+        self.selected_FFCfiles = []
         self.selected_DQMQfile = []
         self.dq_t2 = {}
-        self.tau_dictionary ={}
+        self.tau_dictionary = {}
+        self.ffc_dictionary = {}
 
         # Connect buttons to their respective slots
         self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
@@ -73,6 +76,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
         self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
         self.ui.btn_SelectFilesDQMQ.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.btn_SelectFiles_FFC.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.pushButton_DQMQ_1.clicked.connect(self.plot_original)
         self.ui.pushButton_DQMQ_4.clicked.connect(self.plot_norm)
         self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
@@ -92,11 +96,14 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.T1_Widget_1, "Time, μs", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, μs", "")
         self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
+        self.setup_graph(self.ui.FFC_Widget_1,"Frequency, MHz", "1/T₁", "")
+        self.setup_graph(self.ui.FFC_Widget_2, "X axis", "Y Axis", "")
         
 
         # Table setup
-        self.setup_table(self.ui.table_SE)
-        self.setup_table(self.ui.table_DQ)
+        # self.setup_table(self.ui.table_SE)
+        # self.setup_table(self.ui.table_DQ)table.resizeColumnsToContents()
+
 
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
@@ -113,6 +120,8 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_3.currentIndexChanged.connect(self.update_yaxis)
         self.ui.comboBox_2.currentIndexChanged.connect(self.plot_fit)
         self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
+        self.ui.comboBox_8.currentIndexChanged.connect(self.calculate_23_model)
+        
 
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
@@ -268,7 +277,13 @@ class MainWindow(QMainWindow):
             elif current_tab_index == 4:
                 self.selected_DQMQfile = dlg.selectedFiles()
                 self.dq_mq_analysis()
-            
+            elif current_tab_index == 5:
+                while self.ui.comboBox_8.count()>0:
+                    self.ui.comboBox_8.removeItem(0)
+                FFCfileNames = dlg.selectedFiles()
+                self.selected_FFCfiles.extend(FFCfileNames)
+                self.update_FFC_table()
+
     def open_select_dialog(self):
         global State_multiple_files
         State_multiple_files = True
@@ -298,7 +313,8 @@ class MainWindow(QMainWindow):
 
     def groupBox_status(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
-        if current_tab_index == 2 or current_tab_index == 3 or current_tab_index == 4 or current_tab_index == 5:
+        if not (current_tab_index == 0 or current_tab_index ==1):
+        #if current_tab_index == 2 or current_tab_index == 3 or current_tab_index == 4 or current_tab_index == 5:
             self.ui.BOX_up.setEnabled(False)
         else:
             self.ui.BOX_up.setEnabled(True)
@@ -1062,6 +1078,8 @@ class MainWindow(QMainWindow):
 
             table.setItem(row, 0, item)
             table.setItem(row, 1, default_name)
+        
+        table.resizeColumnsToContents()
 
     def launch(self):
         self.ui.radioButton_Log_2.setEnabled(True)
@@ -1219,6 +1237,8 @@ class MainWindow(QMainWindow):
         table.setItem(j, 1, QTableWidgetItem(str(c2)))
         table.setItem(j, 2, QTableWidgetItem(str(c3)))
         table.setItem(j, 3, QTableWidgetItem(str(c4)))
+
+        table.resizeColumnsToContents()
     
     def read_column_values(self, table, column_index):
         column_values = []
@@ -1396,6 +1416,83 @@ class MainWindow(QMainWindow):
                 return False
             else:
                 return False
+
+    # FFC analysis
+    def update_FFC_table(self):
+        selected_files = self.selected_FFCfiles
+        table = self.ui.table_FFC_1
+        combobox = self.ui.comboBox_8
+
+        dictionary = self.ffc_dictionary
+
+        file_name = []
+        
+        for file in selected_files:
+            current_file = [os.path.basename(file)]
+
+            Omega = []
+            Rate = []
+
+            try:
+                with open(file, "r") as data:
+                    for line in islice(data, 4, None):
+                        columns = line.split()
+                        Omega.append(columns[0])
+                        Rate.append(columns[2])
+            except Exception:
+                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file}, removing file from the table and file list.", QMessageBox.Ok)
+                    for file_to_delete in selected_files:
+                        if file_to_delete == file:
+                            selected_files.remove(file)
+
+            dictionary[file] = {"File": [], "Freq": [], "Rate": []}
+            dictionary[file]["File"].append(current_file)
+            dictionary[file]["Freq"].extend(Omega)
+            dictionary[file]["Rate"].extend(Rate)
+
+            
+            table.setColumnCount(len(selected_files))
+            self.ui.btn_Plot1_2.setEnabled(True)            
+        
+        for column, file in zip(range(table.columnCount()), selected_files):
+            Folder = QTableWidgetItem(file)
+            file_name = os.path.basename(file)
+
+            Filename = QTableWidgetItem(file_name)
+
+            table.setItem(0, column, Folder)
+            table.setItem(1, column, Filename)
+
+            combobox.addItem(f"{file_name}")
+            combobox.setCurrentIndex(-1)
+
+    def calculate_23_model(self):
+        table = self.ui.table_FFC_1
+        figure = self.ui.FFC_Widget_1
+        selected_file_idx = self.ui.comboBox_8.currentIndex()
+        dictionary = self.ffc_dictionary
+
+        if selected_file_idx == -1:
+            return
+        
+        value_from_row = table.item(0, selected_file_idx).text()
+        Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
+        #Omega = Omeg * 10**6
+        Rate = np.array(dictionary[value_from_row]['Rate'], dtype=float)
+
+        Omega_fit, fitted_curve, popt, R2= Cal.fit_model(Omega, Rate)
+        
+        self.ui.textEdit_error_2.setText(f"R² {R2}") 
+        print(value_from_row)
+        print(popt)
+          
+        # tau_str = str(tau1)
+        # item = QTableWidgetItem(tau_str)
+        # table.setItem(selected_file_idx,3,item)
+
+        figure.clear()
+        figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        figure.plot(Omega_fit, fitted_curve, pen='b')
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):
