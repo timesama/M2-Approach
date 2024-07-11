@@ -1483,12 +1483,23 @@ class MainWindow(QMainWindow):
         Omega_fit, fitted_curve, popt, R2= Cal.fit_model(Omega, Rate)
         
         self.ui.textEdit_error_2.setText(f"R² {R2}") 
-        print(value_from_row)
-        print(popt)
-          
-        # tau_str = str(tau1)
-        # item = QTableWidgetItem(tau_str)
-        # table.setItem(selected_file_idx,3,item)
+        #print(value_from_row)
+        print(f'filename: {value_from_row}\nCDD: {popt[0]}\ntauc: {popt[1]}\nA: {popt[2]}\nCtrans: {popt[3]}\ntautrans: {popt[4]}\ntaures: {popt[5]}\n')
+        #print(popt)
+
+        CDD         = QTableWidgetItem(str("{:.5e}".format(popt[0])))
+        tau_c       = QTableWidgetItem(str("{:.5e}".format(popt[1])))
+        A           = QTableWidgetItem(str("{:.5e}".format(popt[2])))
+        C_trans     = QTableWidgetItem(str("{:.5e}".format(popt[3])))
+        tau_trans   = QTableWidgetItem(str("{:.5e}".format(popt[4])))
+        tau_res     = QTableWidgetItem(str("{:.5e}".format(popt[5])))
+
+        table.setItem(3, selected_file_idx,CDD)
+        table.setItem(5, selected_file_idx,tau_c)
+        table.setItem(2, selected_file_idx,A)
+        table.setItem(4, selected_file_idx,C_trans)
+        table.setItem(6, selected_file_idx,tau_trans)
+        table.setItem(7, selected_file_idx,tau_res)
 
         figure.clear()
         figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
