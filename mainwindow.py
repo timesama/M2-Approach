@@ -441,25 +441,18 @@ class MainWindow(QMainWindow):
             self.ui.textEdit_6.setText(f"Analysing file {i} out of {len(self.selected_files)}")                
             
             if self.ui.checkBox_2.isChecked():
-                if len(self.selected_files_gly) != len(self.selected_files) and self.ui.tabWidget.currentIndex() == 0:
-                    QMessageBox.warning(self, "Invalid Data", f"The amount of reference files is not the same as sample files. Terminate analysis.", QMessageBox.Ok)
-                    self.terminate()
-                    self.ui.btn_SelectFiles.setEnabled(True)
+                if len(self.selected_files_gly) < len(self.selected_files):
+                    QMessageBox.warning(self, "Invalid Data", f"The amount of reference files is not the same as sample files. Adding glycerol files automatically.", QMessageBox.Ok)
+                    last_file = self.selected_files_gly[-1]
+                    num_to_add = len(self.selected_files) - len(self.selected_files_gly)
+                    self.selected_files_gly.extend([last_file] * num_to_add)
+                
+                file_path_gly = self.selected_files_gly[0]
+                try:
+                    self.process_file_data(file_path, file_path_gly, i)
+                except:
+                    self.analysis_error(file_path)
                     return
-                elif self.ui.tabWidget.currentIndex() == 1:
-                    file_path_gly = self.selected_files_gly[0]
-                    try:
-                        self.process_file_data(file_path, file_path_gly, i)
-                    except:
-                        self.analysis_error(file_path)
-                        return
-                else: 
-                    file_path_gly = self.selected_files_gly[i-1]
-                    try:
-                        self.process_file_data(file_path, file_path_gly, i)
-                    except:
-                        self.analysis_error(file_path)
-                        return
             else:
                 try:
                     self.process_file_data(file_path, [], i)
@@ -609,10 +602,10 @@ class MainWindow(QMainWindow):
 
         if axis_x == "T, C":
             self.ui.SEWidget.getAxis('bottom').setLabel("Temperature, °C")
-            self.ui.table_SE.setHorizontalHeaderLabels(["Temp.", "SFC", "M₂", "T₂*"])
+            self.ui.table_SE.setHorizontalHeaderLabels(["Temp.", "SC", "M₂", "T₂*"])
         elif axis_x == "XS, %":
             self.ui.SEWidget.getAxis('bottom').setLabel("XS, %")
-            self.ui.table_SE.setHorizontalHeaderLabels(["XS", "SFC", "M₂", "T₂*"])
+            self.ui.table_SE.setHorizontalHeaderLabels(["XS", "SC", "M₂", "T₂*"])
         else:
             return
         
@@ -620,9 +613,9 @@ class MainWindow(QMainWindow):
 
         text = self.ui.comboBox.currentText()
 
-        if text == "SFC":  
+        if text == "SC":  
             y =  self.read_column_values(self.ui.table_SE, 1)
-            self.ui.SEWidget.getAxis('left').setLabel("SFC")
+            self.ui.SEWidget.getAxis('left').setLabel("SC")
             
         elif text == "M₂":  
             y =  self.read_column_values(self.ui.table_SE, 2)
@@ -1415,6 +1408,7 @@ class MainWindow(QMainWindow):
                 self.ui.radioButton.setEnabled(True)
                 self.selected_files.clear()
                 return False
+            return True
 
         except:
             QMessageBox.warning(self, "Invalid Data", f"I can't read the {filename} file, deleting it.", QMessageBox.Ok)
