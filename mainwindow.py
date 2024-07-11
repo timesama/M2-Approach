@@ -56,6 +56,8 @@ class MainWindow(QMainWindow):
         self.ffc_dictionary = {}
         self.tab = None
 
+        self.state()
+
         # Connect buttons to their respective slots
         self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
         self.ui.commandLinkButton.clicked.connect(self.open_url)
@@ -107,12 +109,6 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
         self.setup_graph(self.ui.FFC_Widget_1,"Frequency, MHz", "1/T₁", "")
         self.setup_graph(self.ui.FFC_Widget_2, "X axis", "Y Axis", "")
-        
-
-        # Table setup
-        # self.setup_table(self.ui.table_SE)
-        # self.setup_table(self.ui.table_DQ)table.resizeColumnsToContents()
-
 
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
@@ -131,7 +127,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
         self.ui.comboBox_8.currentIndexChanged.connect(self.calculate_23_model)
         
-
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
         self.ui.dq_max.valueChanged.connect(self.update_dq_graphs)
@@ -176,11 +171,9 @@ class MainWindow(QMainWindow):
             
         # Update general figures
         if self.tab == 'DQ':
-        #current_tab_index == 1:
             self.highlight_row(self.ui.table_DQ, i) 
             self.update_dq_graphs()
         elif self.tab == 'SE':
-        #current_tab_index == 0:
             self.highlight_row(self.ui.table_SE, i)
             self.update_yaxis()
 
@@ -540,7 +533,6 @@ class MainWindow(QMainWindow):
             M2, T2 = Cal.calculate_M2(Real_apod, Frequency)
 
             if self.tab == 'SE':
-                print(self.tab)
                 match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
                 temperature = self.extract_info(match)
 
@@ -571,7 +563,6 @@ class MainWindow(QMainWindow):
         global Frequency, Re_spectra, Im_spectra
 
         i = self.ui.comboBox_4.currentIndex()
-        current_tab_index =  self.ui.tabWidget.currentIndex()
 
         Real_apod   = Cal.calculate_apodization(Re_spectra, Frequency) #(math procedure)
         Amp_spectra = Cal.calculate_amplitude(Re_spectra, Im_spectra)
@@ -583,23 +574,19 @@ class MainWindow(QMainWindow):
         M2_r = round(M2, 6)
         T2_r = round(T2, 6)
 
-        if current_tab_index == 0:
+        if self.tab == 'SE':
             table = self.ui.table_SE
-
-            table.setItem(i, 2, QTableWidgetItem(str(M2_r)))
-            table.setItem(i, 3, QTableWidgetItem(str(T2_r)))
-
-            self.update_yaxis()
-
-        elif current_tab_index == 1:
+        elif self.tab == 'DQ':
             table = self.ui.table_DQ
 
-            table.setItem(i, 2, QTableWidgetItem(str(M2_r)))
-            table.setItem(i, 3, QTableWidgetItem(str(T2_r)))
 
-            #self.update_dq_graphs()
+        table.setItem(i, 2, QTableWidgetItem(str(M2_r)))
+        table.setItem(i, 3, QTableWidgetItem(str(T2_r)))
 
-        # update table
+        if self.tab == 'SE':
+            self.update_yaxis()
+        elif self.tab == 'DQ':
+            self.update_dq_graphs()
 
     def extract_info(self, pattern):
         if pattern:
@@ -1290,8 +1277,6 @@ class MainWindow(QMainWindow):
             parent_folder = os.path.dirname(self.selected_files[0])
         except:
             parent_folder = os.path.dirname(self.selected_DQMQfile[0])
-
-        current_tab_index = self.ui.tabWidget.currentIndex()
      
         DQ_points = self.ui.DQ_Widget_1
         DQ_distribution = self.ui.DQ_Widget_2
@@ -1304,13 +1289,13 @@ class MainWindow(QMainWindow):
         basefolder = os.path.dirname(parent_folder)
         os.makedirs(basefolder + '/DQ_table/', exist_ok=True)
         os.makedirs(basefolder + '/DQMQ_Result/', exist_ok=True)
-        if current_tab_index == 0:
+        if self.tab == 'SE':
             table_file_path = os.path.join(parent_folder, 'Result', f"SE_table.csv")
-        elif current_tab_index == 1:
+        elif self.tab == 'DQ':
             graph_file_path = os.path.join(parent_folder, 'Result', f"DQ_points.png")
             graph_file_path_2 = os.path.join(parent_folder, 'Result', f"DQ_distribution.png")
             table_file_path = os.path.join(basefolder, 'DQ_table', f"DQ_table_{os.path.basename(parent_folder)}.csv")
-        elif current_tab_index == 4:
+        elif self.tab == 'DQMQ':
             table_file_path = os.path.join(basefolder,'DQMQ_Result', f"DQMQ_Result_{os.path.basename(parent_folder)}.csv")
         pg.QtGui.QGuiApplication.processEvents()  # Make sure all events are processed before exporting
 
@@ -1321,11 +1306,11 @@ class MainWindow(QMainWindow):
                 index += 1
             table_file_path = f"{table_file_path[:-4]} ({index}).csv"
 
-        if current_tab_index == 0:
+        if self.tab == 'SE':
             #Table
             self.save_table_to_csv(table_file_path, SE_table)
 
-        elif current_tab_index == 1:
+        elif self.tab == 'DQ':
             #Image
             exporter_dq1 = pg.exporters.ImageExporter(DQ_points.plotItem)
             exporter_dq1.parameters()['width'] = 1000
@@ -1337,7 +1322,7 @@ class MainWindow(QMainWindow):
 
             #Table
             self.save_table_to_csv(table_file_path, DQ_table)
-        elif current_tab_index == 4:
+        elif self.tab == 'DQMQ':
             self.save_table_to_csv(table_file_path, DQMQ_table)
 
         QMessageBox.information(self, "Data Saved", f"The data have been saved to {parent_folder}", QMessageBox.Ok)
@@ -1364,10 +1349,9 @@ class MainWindow(QMainWindow):
             self.load_table_from_csv(tableName)
 
     def load_table_from_csv(self, tableName):
-        current_tab_index = self.ui.tabWidget.currentIndex()
-        if current_tab_index == 0:
+        if self.tab == 'SE':
             table = self.ui.table_SE
-        elif current_tab_index == 1:
+        elif self.tab == 'DQ':
             table = self.ui.table_DQ
 
         file_path = tableName[0]
@@ -1386,9 +1370,9 @@ class MainWindow(QMainWindow):
                     item = QTableWidgetItem(value)
                     table.setItem(row, col, item)
 
-        if current_tab_index == 0:
+        if self.tab == 'SE':
             self.update_yaxis()
-        elif current_tab_index == 1:
+        elif self.tab == 'DQ':
             self.selected_files = [
                 "AmIanIdiot.txt",
                 "Yes.txt"
@@ -1424,7 +1408,6 @@ class MainWindow(QMainWindow):
         try: 
             data = np.loadtxt(file_path)
             filename = os.path.basename(file_path)
-
             # Check that there are 3 columns
             if data.shape[1] != 3:
                 QMessageBox.warning(self, "Invalid Data Format", f"I can't read the {filename} file, it should have 3 columns exactly, deleting it.", QMessageBox.Ok)
@@ -1432,15 +1415,7 @@ class MainWindow(QMainWindow):
                 self.ui.radioButton.setEnabled(True)
                 self.selected_files.clear()
                 return False
-                
-            # elif not ((filename.startswith("SE") or filename.startswith("XS")) and current_tab_index == 0) and \
-            #     not (filename.startswith("DQ") and current_tab_index == 1) and not current_tab_index == 2:
-            #     dialog = NotificationDialog()
-            #     if dialog.exec() == QDialog.Rejected:
-            #         self.ui.btn_SelectFiles.setEnabled(True)
-            #         self.ui.radioButton.setEnabled(True)
-            #         return False
-            return True
+
         except:
             QMessageBox.warning(self, "Invalid Data", f"I can't read the {filename} file, deleting it.", QMessageBox.Ok)
             self.selected_files.remove(file_path)
