@@ -54,12 +54,13 @@ class MainWindow(QMainWindow):
         self.dq_t2 = {}
         self.tau_dictionary = {}
         self.ffc_dictionary = {}
+        self.tab = None
 
         # Connect buttons to their respective slots
         self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
         self.ui.commandLinkButton.clicked.connect(self.open_url)
 
-        self.ui.tabWidget.currentChanged.connect(self.groupBox_status)
+        self.ui.tabWidget.currentChanged.connect(self.state)
         
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.btn_Save_2.clicked.connect(self.save_data)
@@ -319,13 +320,31 @@ class MainWindow(QMainWindow):
 
         self.phasing_manual_window.closed.connect(self.after_phasing)
 
-    def groupBox_status(self):
+    def state(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
-        if not (current_tab_index == 0 or current_tab_index ==1):
-        #if current_tab_index == 2 or current_tab_index == 3 or current_tab_index == 4 or current_tab_index == 5:
-            self.ui.BOX_up.setEnabled(False)
+
+        if current_tab_index == 0:
+            self.tab = 'SE'
+        elif current_tab_index == 1:
+            self.tab = 'DQ'
+        elif current_tab_index == 2:
+            self.tab = 'DQ_Temp'
+        elif current_tab_index == 3:
+            self.tab = 'T1T2'
+        elif current_tab_index == 4:
+            self.tab = 'DQMQ'
+        elif current_tab_index == 5:
+            self.tab = '23Model'
+        elif current_tab_index == 6:
+            self.tab = 'Extra'
+
+        print(f"state: {self.tab}")
+
+
+        if not (self.tab == 'SE' or self.tab == 'DQ'):
+            self.ui.BOX_up.setHidden(True)
         else:
-            self.ui.BOX_up.setEnabled(True)
+            self.ui.BOX_up.setHidden(False)
 
     def disable_buttons(self):
         self.ui.btn_Start.setEnabled(False)
