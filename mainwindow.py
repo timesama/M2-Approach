@@ -56,32 +56,40 @@ class MainWindow(QMainWindow):
         self.ffc_dictionary = {}
 
         # Connect buttons to their respective slots
-        self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
-        self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
-        self.ui.btn_Add.clicked.connect(self.open_select_dialog)
-        self.ui.btn_Start.clicked.connect(self.analysis)
+        self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
+        self.ui.commandLinkButton.clicked.connect(self.open_url)
+
+        self.ui.tabWidget.currentChanged.connect(self.groupBox_status)
+        
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.btn_Save_2.clicked.connect(self.save_data)
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
-        self.ui.radioButton_Log.clicked.connect(self.plot_fit)
-        self.ui.tabWidget.currentChanged.connect(self.groupBox_status)
-        self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
-        self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
-        self.ui.btn_ClearTable.clicked.connect(self.clear_list)
-        self.ui.btn_Launch.clicked.connect(self.launch)
+        
+        self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
+        self.ui.btn_Add.clicked.connect(self.open_select_dialog)
         self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
-        self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
-        self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
-        self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
-        self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
         self.ui.btn_SelectFilesDQMQ.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFiles_FFC.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
+        
+        self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
+        self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
+        self.ui.btn_ClearTable.clicked.connect(self.clear_list)
+        self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
+        self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
+        self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
+
+        self.ui.btn_Start.clicked.connect(self.analysis)
+        self.ui.btn_Launch.clicked.connect(self.launch)
+        
         self.ui.pushButton_DQMQ_1.clicked.connect(self.plot_original)
+        self.ui.radioButton_Log.clicked.connect(self.plot_fit)
         self.ui.pushButton_DQMQ_4.clicked.connect(self.plot_norm)
         self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.plot_nDQ)
-        self.ui.commandLinkButton.clicked.connect(self.open_url)
+        self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
+        
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -1483,9 +1491,8 @@ class MainWindow(QMainWindow):
         Omega_fit, fitted_curve, popt, R2= Cal.fit_model(Omega, Rate)
         
         self.ui.textEdit_error_2.setText(f"R² {R2}") 
-        #print(value_from_row)
         print(f'filename: {value_from_row}\nCDD: {popt[0]}\ntauc: {popt[1]}\nA: {popt[2]}\nCtrans: {popt[3]}\ntautrans: {popt[4]}\ntaures: {popt[5]}\n')
-        #print(popt)
+
 
         CDD         = QTableWidgetItem(str("{:.5e}".format(popt[0])))
         tau_c       = QTableWidgetItem(str("{:.5e}".format(popt[1])))
