@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_SelectFiles_FFC.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
         
-        self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
+        #self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
@@ -158,28 +158,29 @@ class MainWindow(QMainWindow):
 
     def update_file(self):
         i = self.ui.comboBox_4.currentIndex() + 1
-        current_tab_index =  self.ui.tabWidget.currentIndex()
+
         try:
             file_path = self.selected_files[i-1]
         except:
             return
         
-        
         if self.ui.checkBox_2.isChecked():
             try:
                 file_path_gly = self.selected_files_gly[i-1]
-                self.process_file_data(file_path, file_path_gly, current_tab_index, i)
+                self.process_file_data(file_path, file_path_gly, i)
             except:
                 return
         else:
-            self.process_file_data(file_path, [], current_tab_index, i)
+            self.process_file_data(file_path, [], i)
 
             
         # Update general figures
-        if current_tab_index == 1:
+        if self.tab == 'DQ':
+        #current_tab_index == 1:
             self.highlight_row(self.ui.table_DQ, i) 
             self.update_dq_graphs()
-        elif current_tab_index == 0:
+        elif self.tab == 'SE':
+        #current_tab_index == 0:
             self.highlight_row(self.ui.table_SE, i)
             self.update_yaxis()
 
@@ -227,11 +228,18 @@ class MainWindow(QMainWindow):
         self.ui.FidWidget.clear()
 
     def delete_row(self):
-        current_tab_index = self.ui.tabWidget.currentIndex()
-        if current_tab_index == 0:
+
+        if self.tab == 'SE':
             table = self.ui.table_SE
-        if current_tab_index == 3:
+        elif self.tab == 'DQ':
+            table = self.ui.table_DQ
+        elif self.tab =='T1T2':
             table = self.ui.table_T1
+        elif self.tab == '23Model':
+            table = self.ui.table_FFC_1
+        else:
+            return
+
 
         row = table.currentRow()
         table.removeRow(row)
@@ -265,28 +273,28 @@ class MainWindow(QMainWindow):
 
     def open_select_comparison_files_dialog(self):
         global State_multiple_files
-        current_tab_index = self.ui.tabWidget.currentIndex()
-        if current_tab_index == 4:
+
+        if self.tab == 'DQMQ':
             State_multiple_files = False
         else:
             State_multiple_files = True
             
         dlg = OpenFilesDialog(self)
         if dlg.exec():
-            if current_tab_index == 2:
+            if self.tab == 'DQ_Temp':
                 DQfileNames = dlg.selectedFiles()
                 self.selected_DQfiles.extend(DQfileNames)
                 self.update_DQ_comparison()
-            elif current_tab_index == 3:
+            elif self.tab == 'T1T2':
                 while self.ui.comboBox_6.count()>0:
                     self.ui.comboBox_6.removeItem(0)
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
                 self.update_T12_table()
-            elif current_tab_index == 4:
+            elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
                 self.dq_mq_analysis()
-            elif current_tab_index == 5:
+            elif self.tab == '23Model':
                 while self.ui.comboBox_8.count()>0:
                     self.ui.comboBox_8.removeItem(0)
                 FFCfileNames = dlg.selectedFiles()
@@ -298,6 +306,7 @@ class MainWindow(QMainWindow):
         State_multiple_files = True
         dlg = OpenFilesDialog(self)
         if dlg.exec():
+            self.selected_files = []
             fileNames = dlg.selectedFiles()
             self.selected_files.extend(fileNames)
             self.ui.btn_Start.setEnabled(True)
@@ -339,7 +348,6 @@ class MainWindow(QMainWindow):
             self.tab = 'Extra'
 
         print(f"state: {self.tab}")
-
 
         if not (self.tab == 'SE' or self.tab == 'DQ'):
             self.ui.BOX_up.setHidden(True)
@@ -417,11 +425,10 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_2.setCurrentIndex(-1)
         self.ui.textEdit_4.setText("")
 
-        current_tab_index = self.ui.tabWidget.currentIndex()
 
         legend = pg.LegendItem(offset=(300, 10), parent=self.ui.FidWidget.graphicsItem())
 
-        if not self.load_data_and_check_validity((self.selected_files[0]), current_tab_index):
+        if not self.load_data_and_check_validity((self.selected_files[0])):
             return
         
         if self.ui.checkBox_2.isChecked():
@@ -449,25 +456,25 @@ class MainWindow(QMainWindow):
                 elif self.ui.tabWidget.currentIndex() == 1:
                     file_path_gly = self.selected_files_gly[0]
                     try:
-                        self.process_file_data(file_path, file_path_gly, current_tab_index, i)
+                        self.process_file_data(file_path, file_path_gly, i)
                     except:
                         self.analysis_error(file_path)
                         return
                 else: 
                     file_path_gly = self.selected_files_gly[i-1]
                     try:
-                        self.process_file_data(file_path, file_path_gly, current_tab_index, i)
+                        self.process_file_data(file_path, file_path_gly, i)
                     except:
                         self.analysis_error(file_path)
                         return
             else:
                 try:
-                    self.process_file_data(file_path, [], current_tab_index, i)
+                    self.process_file_data(file_path, [], i)
                 except:
                     self.analysis_error(file_path)
                     return
                     
-        self.finalize_analysis(legend, current_tab_index)
+        self.finalize_analysis(legend)
         self.ui.btn_Start.setStyleSheet("background-color: none")
 
     def analysis_error(self, file_path):
@@ -476,7 +483,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_SelectFiles.setEnabled(True)
         self.analysis()
 
-    def finalize_analysis(self, legend, current_tab_index):
+    def finalize_analysis(self, legend):
         self.ui.textEdit_6.setText(f"Finished")
         legend.removeItem('Amplitude')
         legend.removeItem('Re')
@@ -486,10 +493,10 @@ class MainWindow(QMainWindow):
         legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[2], name='Im')
         self.enable_buttons()
 
-        if current_tab_index == 1:
+        if self.tab == 'DQ':
             self.update_dq_graphs()
 
-    def process_file_data(self, file_path, file_path_gly, current_tab_index, i):
+    def process_file_data(self, file_path, file_path_gly, i):
         global Frequency, Re_spectra, Im_spectra
 
         # Read data
@@ -506,8 +513,7 @@ class MainWindow(QMainWindow):
             # longcomponent
             Time_r, Re_r, Im_r = Cal.analysis_time_domain(file_path_gly)
             Time_s, Re_s, Im_s = Cal.analysis_time_domain(file_path)
-            Time, Re, Im = Cal.long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r)
-            
+            Time, Re, Im = Cal.long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r) 
         else:
             Time, Re, Im = Cal.analysis_time_domain(file_path)
         
@@ -533,7 +539,8 @@ class MainWindow(QMainWindow):
         if self.ui.comboBox_4.currentIndex() == -1:
             M2, T2 = Cal.calculate_M2(Real_apod, Frequency)
 
-            if current_tab_index == 0:
+            if self.tab == 'SE':
+                print(self.tab)
                 match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
                 temperature = self.extract_info(match)
 
@@ -546,7 +553,7 @@ class MainWindow(QMainWindow):
                 if self.ui.radioButton.isChecked():
                     self.save_figures(file_path, filename)
 
-            elif current_tab_index == 1:
+            elif self.tab == 'DQ':
                 match = re.search(r'_(\d+\.\d+)_', filename)
                 dq_time = self.extract_info(match)
 
@@ -1413,7 +1420,7 @@ class MainWindow(QMainWindow):
         exporter_fid.parameters()['width'] = 1000
         exporter_fid.export(fid_file_path)
 
-    def load_data_and_check_validity(self, file_path, current_tab_index):
+    def load_data_and_check_validity(self, file_path):
         try: 
             data = np.loadtxt(file_path)
             filename = os.path.basename(file_path)
@@ -1426,13 +1433,13 @@ class MainWindow(QMainWindow):
                 self.selected_files.clear()
                 return False
                 
-            elif not ((filename.startswith("SE") or filename.startswith("XS")) and current_tab_index == 0) and \
-                not (filename.startswith("DQ") and current_tab_index == 1) and not current_tab_index == 2:
-                dialog = NotificationDialog()
-                if dialog.exec() == QDialog.Rejected:
-                    self.ui.btn_SelectFiles.setEnabled(True)
-                    self.ui.radioButton.setEnabled(True)
-                    return False
+            # elif not ((filename.startswith("SE") or filename.startswith("XS")) and current_tab_index == 0) and \
+            #     not (filename.startswith("DQ") and current_tab_index == 1) and not current_tab_index == 2:
+            #     dialog = NotificationDialog()
+            #     if dialog.exec() == QDialog.Rejected:
+            #         self.ui.btn_SelectFiles.setEnabled(True)
+            #         self.ui.radioButton.setEnabled(True)
+            #         return False
             return True
         except:
             QMessageBox.warning(self, "Invalid Data", f"I can't read the {filename} file, deleting it.", QMessageBox.Ok)

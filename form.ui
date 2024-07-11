@@ -757,7 +757,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>5</number>
+              <number>0</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -829,7 +829,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </column>
                    <column>
                     <property name="text">
-                     <string>SFC</string>
+                     <string>Solid Content</string>
                     </property>
                    </column>
                    <column>
@@ -891,7 +891,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </property>
                     <item>
                      <property name="text">
-                      <string>SFC</string>
+                      <string>SC</string>
                      </property>
                     </item>
                     <item>
@@ -2940,7 +2940,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </widget>
              <widget class="QWidget" name="z_Extra">
               <attribute name="title">
-               <string>Extra</string>
+               <string>Settings</string>
               </attribute>
               <widget class="QTextEdit" name="textEdit_11">
                <property name="geometry">
