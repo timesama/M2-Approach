@@ -78,6 +78,7 @@ class MainWindow(QMainWindow):
         
         #self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
+        self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
@@ -121,11 +122,11 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_3.clicked.connect(self.hide_FFT_progress)
         self.ui.radioButton_2.clicked.connect(self.hide_FFT_progress)
         # Connect combobox signals to slots
-        self.ui.comboBox.currentIndexChanged.connect(self.update_yaxis)
-        self.ui.comboBox_3.currentIndexChanged.connect(self.update_yaxis)
-        self.ui.comboBox_2.currentIndexChanged.connect(self.plot_fit)
-        self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
-        self.ui.comboBox_8.currentIndexChanged.connect(self.calculate_23_model)
+        self.ui.comboBox.activated.connect(self.update_yaxis)
+        self.ui.comboBox_3.activated.connect(self.update_yaxis)
+        self.ui.comboBox_2.activated.connect(self.plot_fit)
+        self.ui.comboBox_6.activated.connect(self.calculate_relaxation_time)
+        self.ui.comboBox_8.activated.connect(self.calculate_23_model)
         
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
@@ -135,8 +136,8 @@ class MainWindow(QMainWindow):
         self.ui.dq_max_2.valueChanged.connect(self.update_DQ_comparison_plot)
 
         self.ui.radioButton_Log_2.clicked.connect(self.update_DQ_comparison_plot) # this is a bad coding
-        self.ui.comboBox_5.currentIndexChanged.connect(self.update_DQ_comparison_plot)
-        self.ui.comboBox_4.currentIndexChanged.connect(self.update_file)
+        self.ui.comboBox_5.activated.connect(self.update_DQ_comparison_plot)
+        self.ui.comboBox_4.activated.connect(self.update_file)
 
         self.ui.dq_min_3.valueChanged.connect(self.plot_diff)
         self.ui.dq_max_3.valueChanged.connect(self.plot_diff)
@@ -183,24 +184,35 @@ class MainWindow(QMainWindow):
             
     def clear_list(self):
         self.selected_files = []
+        self.selected_folders = []
         self.selected_files_gly = []
         self.selected_DQfiles = []
         self.selected_T1files = []
-        self.selected_T2files = []
-        self.selected_folders = []
+        self.selected_FFCfiles = []
+        self.selected_DQMQfile = []
+        self.dq_t2 = {}
         self.tau_dictionary = {}
+        self.ffc_dictionary = {}
+
         self.ui.table_SE.setRowCount(0)
         self.ui.table_DQ.setRowCount(0)
         self.ui.table_DQ_2.setRowCount(0)
         self.ui.table_T1.setRowCount(0)
+        self.ui.table_FFC_1.setColumnCount(0)
 
         self.ui.T1_Widget_1.clear()
         self.ui.T1_Widget_2.clear()
-        self.ui.comboBox_6.currentIndexChanged.disconnect(self.calculate_relaxation_time)
+        #self.ui.comboBox_6.currentIndexChanged.disconnect(self.calculate_relaxation_time)
 
-        while self.ui.comboBox_6.count()>0:          
-            self.ui.comboBox_6.removeItem(0)
-        self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
+        if self.tab == 'T1T2':
+            combobox = self.ui.comboBox_6
+        elif self.tab == '23Model':
+            combobox = self.ui.comboBox_8
+
+        while combobox.count()>0:          
+            combobox.removeItem(0)
+        
+        #self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
 
     def terminate(self):
         self.disable_buttons()
@@ -1481,9 +1493,15 @@ class MainWindow(QMainWindow):
         value_from_row = table.item(0, selected_file_idx).text()
         Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
         #Omega = Omeg * 10**6
+
         Rate = np.array(dictionary[value_from_row]['Rate'], dtype=float)
 
-        Omega_fit, fitted_curve, popt, R2= Cal.fit_model(Omega, Rate)
+        if self.ui.checkBox_3.isChecked():
+            fixed_CDD = self.ui.doubleSpinBox.value()
+        else:
+            fixed_CDD = None
+
+        Omega_fit, fitted_curve, popt, R2= Cal.fit_model(Omega, Rate, fixed_CDD)
         
         self.ui.textEdit_error_2.setText(f"R² {R2}") 
         print(f'filename: {value_from_row}\nCDD: {popt[0]}\ntauc: {popt[1]}\nA: {popt[2]}\nCtrans: {popt[3]}\ntautrans: {popt[4]}\ntaures: {popt[5]}\n')

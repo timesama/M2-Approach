@@ -484,11 +484,20 @@ def twod_model(x, CDD, tauc, A, Ctrans, tautrans, taures):
     return result
     #return CDD*(tauc/(1+(6.28*x*tauc)^2)+4*tauc/(1+(2*6.28*x*tauc)^2)) +A+Ctrans*tautrans*(np.log((1+(6.28*x*tautrans)^2)/((tautrans/taures)^2+(6.28*x*tautrans)^2))+4*np.log((1+(6.28*2*x*tautrans)^2)/((tautrans/taures)^2+(6.28*2*x*tautrans)^2)))
 
-def fit_model(Omega, Rate):
+def fit_model(Omega, Rate, fixed_CDD):
     Omega_fit = np.arange(min(Omega), max(Omega) + 0.01, 0.1)
-    
+
+    if fixed_CDD is not None:
+        # If CDD is fixed, adjust the initial guess and bounds
+        def twod_model_fixed(x, tauc, A, Ctrans, tautrans, taures):
+            return twod_model(x, fixed_CDD, tauc, A, Ctrans, tautrans, taures)
+        
+        popt, _ = curve_fit(twod_model_fixed, Omega, Rate, maxfev=10000000)
+        popt = [fixed_CDD] + popt.tolist()
+    else:
     #p = [10e+05,  1,  1,  6e+04, -2e-06,  2e-09] 
-    popt, _ = curve_fit(twod_model, Omega, Rate, maxfev=10000000)
+        popt, _ = curve_fit(twod_model, Omega, Rate, maxfev=10000000)
+        
     fitted_curve = twod_model(Omega_fit, *popt)
 
     r2_curve = twod_model(Omega, *popt)

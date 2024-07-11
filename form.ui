@@ -757,7 +757,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>5</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -2010,6 +2010,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  </item>
                  <item row="3" column="2">
                   <widget class="QPushButton" name="btn_DeleteRow">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="text">
                     <string>Delete row</string>
                    </property>
@@ -2643,8 +2646,76 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <property name="verticalSpacing">
                   <number>10</number>
                  </property>
-                 <item row="0" column="3">
-                  <widget class="PlotWidget" name="FFC_Widget_1" native="true">
+                 <item row="0" column="0" colspan="3">
+                  <widget class="QTableWidget" name="table_FFC_1">
+                   <property name="maximumSize">
+                    <size>
+                     <width>1000</width>
+                     <height>1000</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::CurrentChanged</set>
+                   </property>
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionMode">
+                    <enum>QAbstractItemView::ExtendedSelection</enum>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="columnCount">
+                    <number>0</number>
+                   </property>
+                   <row>
+                    <property name="text">
+                     <string>Folder</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>File name</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>A</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>CDD</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>C(trans)</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>τ(corr)</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>τ(trans)</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>τ(residual)</string>
+                    </property>
+                   </row>
+                  </widget>
+                 </item>
+                 <item row="0" column="5">
+                  <widget class="PlotWidget" name="FFC_Widget_2" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>300</width>
@@ -2654,22 +2725,20 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
-                   <widget class="QComboBox" name="comboBox_8">
-                    <property name="geometry">
-                     <rect>
-                      <x>90</x>
-                      <y>10</y>
-                      <width>201</width>
-                      <height>24</height>
-                     </rect>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">background: none</string>
-                    </property>
-                    <property name="placeholderText">
-                     <string>Choose File for Analysis</string>
-                    </property>
-                   </widget>
+                  </widget>
+                 </item>
+                 <item row="2" column="4">
+                  <widget class="QPushButton" name="btn_Plot1_2">
+                   <property name="text">
+                    <string>Plot</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QPushButton" name="btn_SelectFiles_FFC">
+                   <property name="text">
+                    <string>Select Files</string>
+                   </property>
                   </widget>
                  </item>
                  <item row="0" column="4">
@@ -2775,116 +2844,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </layout>
                   </widget>
                  </item>
-                 <item row="1" column="4">
-                  <widget class="QPushButton" name="btn_Plot1_2">
-                   <property name="text">
-                    <string>Plot</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QPushButton" name="btn_SelectFiles_FFC">
-                   <property name="text">
-                    <string>Select Files</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0" colspan="3">
-                  <widget class="QTableWidget" name="table_FFC_1">
-                   <property name="maximumSize">
-                    <size>
-                     <width>1000</width>
-                     <height>1000</height>
-                    </size>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::CurrentChanged</set>
-                   </property>
-                   <property name="alternatingRowColors">
-                    <bool>true</bool>
-                   </property>
-                   <property name="selectionMode">
-                    <enum>QAbstractItemView::ExtendedSelection</enum>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="columnCount">
-                    <number>0</number>
-                   </property>
-                   <row>
-                    <property name="text">
-                     <string>Folder</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>File name</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>A</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>CDD</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>C(trans)</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>τ(corr)</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>τ(trans)</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>τ(residual)</string>
-                    </property>
-                   </row>
-                  </widget>
-                 </item>
-                 <item row="0" column="5">
-                  <widget class="PlotWidget" name="FFC_Widget_2" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="2">
-                  <widget class="QPushButton" name="btn_DeleteRow_2">
-                   <property name="text">
-                    <string>Delete row</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QPushButton" name="btn_ClearTable_3">
-                   <property name="text">
-                    <string>Clear Table</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="3">
+                 <item row="2" column="3">
                   <widget class="QTextEdit" name="textEdit_error_2">
                    <property name="maximumSize">
                     <size>
@@ -2931,6 +2891,69 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                    <property name="textInteractionFlags">
                     <set>Qt::NoTextInteraction</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QPushButton" name="btn_ClearTable_3">
+                   <property name="text">
+                    <string>Clear Table</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="3">
+                  <widget class="PlotWidget" name="FFC_Widget_1" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>300</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <widget class="QComboBox" name="comboBox_8">
+                    <property name="geometry">
+                     <rect>
+                      <x>90</x>
+                      <y>10</y>
+                      <width>201</width>
+                      <height>24</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background: none</string>
+                    </property>
+                    <property name="placeholderText">
+                     <string>Choose File for Analysis</string>
+                    </property>
+                   </widget>
+                  </widget>
+                 </item>
+                 <item row="2" column="2">
+                  <widget class="QPushButton" name="btn_DeleteRow_2">
+                   <property name="text">
+                    <string>Delete row</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QCheckBox" name="checkBox_3">
+                   <property name="text">
+                    <string>Fix CDD</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1" colspan="2">
+                  <widget class="QDoubleSpinBox" name="doubleSpinBox">
+                   <property name="decimals">
+                    <number>10</number>
+                   </property>
+                   <property name="minimum">
+                    <double>-10000000000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>10000000000.000000000000000</double>
                    </property>
                   </widget>
                  </item>
