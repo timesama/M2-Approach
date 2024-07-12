@@ -757,7 +757,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>5</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -2939,8 +2939,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  </item>
                  <item row="1" column="0">
                   <widget class="QCheckBox" name="checkBox_3">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
                    <property name="text">
                     <string>Fix CDD</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
