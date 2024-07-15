@@ -483,22 +483,22 @@ def twod_model(x, CDD, tauc, A, Ctrans, tautrans, taures):
     
     return result
     
-
-def fit_model(Omega, Rate, fixed_CDD):
-    Omega_fit = np.arange(min(Omega), max(Omega) + 0.01, 0.1)
+def fit_model(Omega, Rate, fixed_CDD, initial_parameters):
+    Omega_fit = np.arange(min(Omega), max(Omega) + 0.1, 0.05)
 
     bs = ([0, 0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
 
-    if fixed_CDD is not None:
+    if fixed_CDD is not None and initial_parameters is not None:
+        initial_parameter = initial_parameters[1:]
         b = bs[0][1:],bs[1][1:]
         def twod_model_fixed(x, tauc, A, Ctrans, tautrans, taures):
             return twod_model(x, fixed_CDD, tauc, A, Ctrans, tautrans, taures)
-        
-        popt, _ = curve_fit(twod_model_fixed, Omega, Rate, bounds = b, maxfev=10000)
+        popt, _ = curve_fit(twod_model_fixed, Omega, Rate, p0 = initial_parameter, bounds = b, maxfev=100000080)
         popt = [fixed_CDD] + popt.tolist()
+        print(initial_parameter)
     else:
-    #p = [10e+05,  1,  1,  6e+04, -2e-06,  2e-09] 
-        popt, _ = curve_fit(twod_model, Omega, Rate, bounds = bs, maxfev=10000)
+        popt, _ = curve_fit(twod_model, Omega, Rate, bounds = bs, maxfev=100000000)
+
         
     fitted_curve = twod_model(Omega_fit, *popt)
 
@@ -506,3 +506,30 @@ def fit_model(Omega, Rate, fixed_CDD):
     R2 = round(calculate_r_squared(Rate, r2_curve),4)
 
     return Omega_fit, fitted_curve, popt, R2
+
+def repeating_part(t, x):
+    return t / (1 + (np.pi * 2 * x * t)**2) + 4 * t / (1 + (np.pi * 4 * x * t)**2)
+
+def simplified_expression(x, C1, C2, C3, A, t1, t2, t3):
+    return C1 * repeating_part(t1, x) + C2 * repeating_part(t2, x) + C3 * repeating_part(t3, x) + A
+
+def simulation(Omega, Rate):
+    initial = [1, 0.1, 0.01, 1, 0.01, 0.1, 1]
+    ba = ([0, 0, 0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
+
+    popt, _ = curve_fit(simplified_expression, Omega, Rate, p0=initial, bounds=ba)
+    fitting = simplified_expression(Omega, *popt)
+
+    C1 = popt[0]
+    C2 = popt[1]
+    C3 = popt[2]
+    A  = popt[3]
+    t1 = popt[4]
+    t2 = popt[5]
+    t3 = popt[6]
+
+    short = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0)
+    middle = simplified_expression(Omega, 0, C2, 0, A, 0, t2, 0)
+    long = simplified_expression(Omega, 0, 0, C3, A, 0, 0, t3)
+
+    return fitting, short, middle, long, popt

@@ -93,7 +93,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.plot_nDQ)
         self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
-        
+        self.ui.btn_Plot1_2.clicked.connect(self.simulation)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -199,9 +199,12 @@ class MainWindow(QMainWindow):
         self.ui.table_DQ_2.setRowCount(0)
         self.ui.table_T1.setRowCount(0)
         self.ui.table_FFC_1.setColumnCount(0)
-
+        
         self.ui.T1_Widget_1.clear()
         self.ui.T1_Widget_2.clear()
+
+        self.ui.checkBox_3.setEnabled(False)
+        self.ui.checkBox_3.setChecked(False)
         #self.ui.comboBox_6.currentIndexChanged.disconnect(self.calculate_relaxation_time)
 
         if self.tab == 'T1T2':
@@ -1460,11 +1463,10 @@ class MainWindow(QMainWindow):
                         if file_to_delete == file:
                             selected_files.remove(file)
 
-            dictionary[file] = {"File": [], "Freq": [], "Rate": []}
+            dictionary[file] = {"File": [], "Freq": [], "Rate": [], "popt": None}
             dictionary[file]["File"].append(current_file)
             dictionary[file]["Freq"].extend(Omega)
             dictionary[file]["Rate"].extend(Rate)
-
             
             table.setColumnCount(len(selected_files))
             self.ui.btn_Plot1_2.setEnabled(True)            
@@ -1488,6 +1490,7 @@ class MainWindow(QMainWindow):
         dictionary = self.ffc_dictionary
 
         if selected_file_idx == -1:
+            print('does it ever happen?')
             return
         
         value_from_row = table.item(0, selected_file_idx).text()
@@ -1495,19 +1498,33 @@ class MainWindow(QMainWindow):
         #Omega = Omeg * 10**6
 
         Rate = np.array(dictionary[value_from_row]['Rate'], dtype=float)
+        Initial_coefficients = dictionary[value_from_row]['popt']
 
         if self.ui.checkBox_3.isChecked():
             fixed_CDD = self.ui.doubleSpinBox.value()
         else:
             fixed_CDD = None
 
-        Omega_fit, fitted_curve, popt, R2= Cal.fit_model(Omega, Rate, fixed_CDD)
+        difference = 1
+
+        try: 
+            while difference > 1e-10:
+                Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
+                difference = max(np.array(Initial_coefficients) - np.array(popt))
+                Initial_coefficients = popt
+                print('I use python as calculator, nahnahnah')
+        except:
+            Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
+            Initial_coefficients = popt
+
+
+        Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
+        Initial_coefficients = popt    
+        dictionary[value_from_row]['popt'] = popt
         
         self.ui.textEdit_error_2.setText(f"R² {R2}") 
-        print(f'filename: {value_from_row}\nCDD: {popt[0]}\ntauc: {popt[1]}\nA: {popt[2]}\nCtrans: {popt[3]}\ntautrans: {popt[4]}\ntaures: {popt[5]}\n')
 
-
-        CDD         = QTableWidgetItem(str("{:.5e}".format(popt[0])))
+        CDD         = QTableWidgetItem(str(popt[0]))
         tau_c       = QTableWidgetItem(str("{:.5e}".format(popt[1])))
         A           = QTableWidgetItem(str("{:.5e}".format(popt[2])))
         C_trans     = QTableWidgetItem(str("{:.5e}".format(popt[3])))
@@ -1521,9 +1538,35 @@ class MainWindow(QMainWindow):
         table.setItem(6, selected_file_idx,tau_trans)
         table.setItem(7, selected_file_idx,tau_res)
 
+        width = CDD.sizeHint().width()
+        for col in range(table.columnCount()):
+            table.setColumnWidth(col, 120)
+
         figure.clear()
         figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
         figure.plot(Omega_fit, fitted_curve, pen='b')
+
+        self.ui.checkBox_3.setEnabled(True)
+
+    def simulation(self):
+        table = self.ui.table_FFC_1
+        figure = self.ui.FFC_Widget_2
+        selected_file_idx = self.ui.comboBox_8.currentIndex()
+        dictionary = self.ffc_dictionary
+        
+        value_from_row = table.item(0, selected_file_idx).text()
+
+        Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
+        Rate = np.array(dictionary[value_from_row]['Rate'], dtype=float)
+
+        fitting, short, middle, long, popt = Cal.simulation(Omega, Rate)
+        
+        figure.clear()
+        figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        figure.plot(Omega, fitting, pen='b')
+        figure.plot(Omega, short, pen='m')
+        figure.plot(Omega, middle, pen='g')
+        figure.plot(Omega, long, pen='c')
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):

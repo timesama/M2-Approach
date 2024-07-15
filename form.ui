@@ -2630,7 +2630,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,1,4,0,4">
+                <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,1,3,0,3">
                  <property name="leftMargin">
                   <number>0</number>
                  </property>
@@ -2646,7 +2646,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <property name="verticalSpacing">
                   <number>10</number>
                  </property>
-                 <item row="0" column="0" colspan="3">
+                 <item row="0" column="0" rowspan="2" colspan="3">
                   <widget class="QTableWidget" name="table_FFC_1">
                    <property name="maximumSize">
                     <size>
@@ -2714,8 +2714,58 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </row>
                   </widget>
                  </item>
-                 <item row="0" column="5">
-                  <widget class="PlotWidget" name="FFC_Widget_2" native="true">
+                 <item row="6" column="3">
+                  <widget class="QTextEdit" name="textEdit_error_2">
+                   <property name="maximumSize">
+                    <size>
+                     <width>200</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="mouseTracking">
+                    <bool>false</bool>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
+                   <property name="acceptDrops">
+                    <bool>false</bool>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background: transparent</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                   </property>
+                   <property name="verticalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="horizontalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="sizeAdjustPolicy">
+                    <enum>QAbstractScrollArea::AdjustToContents</enum>
+                   </property>
+                   <property name="undoRedoEnabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="html">
+                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="textInteractionFlags">
+                    <set>Qt::NoTextInteraction</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="3" rowspan="6">
+                  <widget class="PlotWidget" name="FFC_Widget_1" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>300</width>
@@ -2725,23 +2775,35 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
+                   <widget class="QComboBox" name="comboBox_8">
+                    <property name="geometry">
+                     <rect>
+                      <x>90</x>
+                      <y>10</y>
+                      <width>201</width>
+                      <height>24</height>
+                     </rect>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background: none</string>
+                    </property>
+                    <property name="placeholderText">
+                     <string>Choose File for Analysis</string>
+                    </property>
+                   </widget>
                   </widget>
                  </item>
-                 <item row="2" column="4">
-                  <widget class="QPushButton" name="btn_Plot1_2">
+                 <item row="6" column="2">
+                  <widget class="QPushButton" name="btn_DeleteRow_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="text">
-                    <string>Plot</string>
+                    <string>Delete row</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QPushButton" name="btn_SelectFiles_FFC">
-                   <property name="text">
-                    <string>Select Files</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="4">
+                 <item row="0" column="4" rowspan="5">
                   <widget class="QGroupBox" name="groupBox_equations_5">
                    <property name="minimumSize">
                     <size>
@@ -2844,65 +2906,154 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </layout>
                   </widget>
                  </item>
-                 <item row="2" column="3">
-                  <widget class="QTextEdit" name="textEdit_error_2">
-                   <property name="maximumSize">
+                 <item row="4" column="0" rowspan="2" colspan="3">
+                  <widget class="QGroupBox" name="groupBox_equations_6">
+                   <property name="minimumSize">
                     <size>
-                     <width>200</width>
-                     <height>40</height>
+                     <width>50</width>
+                     <height>50</height>
                     </size>
                    </property>
-                   <property name="mouseTracking">
-                    <bool>false</bool>
+                   <property name="maximumSize">
+                    <size>
+                     <width>400</width>
+                     <height>400</height>
+                    </size>
                    </property>
-                   <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
+                   <property name="title">
+                    <string/>
                    </property>
-                   <property name="acceptDrops">
-                    <bool>false</bool>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">background: transparent</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="verticalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
-                   </property>
-                   <property name="horizontalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
-                   </property>
-                   <property name="sizeAdjustPolicy">
-                    <enum>QAbstractScrollArea::AdjustToContents</enum>
-                   </property>
-                   <property name="undoRedoEnabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="html">
-                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
-                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_10">
+                    <property name="leftMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>10</number>
+                    </property>
+                    <item>
+                     <widget class="QCheckBox" name="checkBox_5">
+                      <property name="text">
+                       <string>t1</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+                      <property name="showGroupSeparator" stdset="0">
+                       <bool>true</bool>
+                      </property>
+                      <property name="decimals">
+                       <number>21</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>10000000000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.001000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                      <property name="value">
+                       <double>0.000001000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="checkBox_4">
+                      <property name="text">
+                       <string>t2</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+                      <property name="showGroupSeparator" stdset="0">
+                       <bool>true</bool>
+                      </property>
+                      <property name="decimals">
+                       <number>21</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>10000000000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.001000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                      <property name="value">
+                       <double>0.000001000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="checkBox_6">
+                      <property name="text">
+                       <string>t3</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+                      <property name="showGroupSeparator" stdset="0">
+                       <bool>true</bool>
+                      </property>
+                      <property name="decimals">
+                       <number>21</number>
+                      </property>
+                      <property name="minimum">
+                       <double>0.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>10000000000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.001000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                      <property name="value">
+                       <double>0.000001000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
-                 <item row="2" column="1">
-                  <widget class="QPushButton" name="btn_ClearTable_3">
+                 <item row="6" column="4">
+                  <widget class="QPushButton" name="btn_Plot1_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="text">
-                    <string>Clear Table</string>
+                    <string>Plot</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="3">
-                  <widget class="PlotWidget" name="FFC_Widget_1" native="true">
+                 <item row="6" column="0">
+                  <widget class="QPushButton" name="btn_SelectFiles_FFC">
+                   <property name="text">
+                    <string>Select Files</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="5" rowspan="6">
+                  <widget class="PlotWidget" name="FFC_Widget_2" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>300</width>
@@ -2912,55 +3063,76 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
-                   <widget class="QComboBox" name="comboBox_8">
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QPushButton" name="btn_ClearTable_3">
+                   <property name="text">
+                    <string>Clear Table</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0" rowspan="2" colspan="3">
+                  <widget class="QGroupBox" name="groupBox_6">
+                   <property name="maximumSize">
+                    <size>
+                     <width>400</width>
+                     <height>400</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <widget class="QDoubleSpinBox" name="doubleSpinBox">
                     <property name="geometry">
                      <rect>
-                      <x>90</x>
-                      <y>10</y>
-                      <width>201</width>
-                      <height>24</height>
+                      <x>10</x>
+                      <y>40</y>
+                      <width>251</width>
+                      <height>20</height>
                      </rect>
                     </property>
-                    <property name="styleSheet">
-                     <string notr="true">background: none</string>
+                    <property name="maximumSize">
+                     <size>
+                      <width>400</width>
+                      <height>20</height>
+                     </size>
                     </property>
-                    <property name="placeholderText">
-                     <string>Choose File for Analysis</string>
+                    <property name="showGroupSeparator" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <property name="decimals">
+                     <number>21</number>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>10000000000.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.001000000000000</double>
                     </property>
                    </widget>
-                  </widget>
-                 </item>
-                 <item row="2" column="2">
-                  <widget class="QPushButton" name="btn_DeleteRow_2">
-                   <property name="text">
-                    <string>Delete row</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QCheckBox" name="checkBox_3">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="text">
-                    <string>Fix CDD</string>
-                   </property>
-                   <property name="checked">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1" colspan="2">
-                  <widget class="QDoubleSpinBox" name="doubleSpinBox">
-                   <property name="decimals">
-                    <number>10</number>
-                   </property>
-                   <property name="minimum">
-                    <double>0.000000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>10000000000.000000000000000</double>
-                   </property>
+                   <widget class="QCheckBox" name="checkBox_3">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>8</y>
+                      <width>80</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Fix CDD</string>
+                    </property>
+                    <property name="checked">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
                   </widget>
                  </item>
                 </layout>
