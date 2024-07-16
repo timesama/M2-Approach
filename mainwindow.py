@@ -45,7 +45,6 @@ class MainWindow(QMainWindow):
         self.setWindowFlags(self.windowFlags() | self.windowFlags().WindowMaximizeButtonHint)
 
         self.selected_files = []
-        self.selected_folders = []
         self.selected_files_gly = []
         self.selected_DQfiles = []
         self.selected_T1files = []
@@ -187,33 +186,37 @@ class MainWindow(QMainWindow):
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
             
     def clear_list(self):
+        if self.tab == 'SE' or self.tab == 'DQ':
+            self.selected_files = []
+            self.selected_files_gly = []
+            self.selected_files = []  
+            self.selected_files_gly = []
+            self.ui.table_SE.setRowCount(0)
+            self.ui.table_DQ.setRowCount(0)      
+        elif self.tab == 'DQ_Temp':
+            self.selected_DQfiles = []
+            self.dq_t2 = {}
+            self.ui.table_DQ_2.setRowCount(0)
+        elif self.tab == 'T1T2':
+            self.selected_T1files = []
+            self.tau_dictionary = {}
+            self.ui.table_T1.setRowCount(0)
+            self.ui.T1_Widget_1.clear()
+            self.ui.T1_Widget_2.clear()
+        elif self.tab == 'DQMQ':
+            self.selected_DQMQfile = []
+        elif self.tab == '23Model':
+            self.selected_FFCfiles = []
+            self.ffc_dictionary = {}
+            self.ui.table_FFC_1.setColumnCount(0)
+            self.ui.btn_Plot1_2.setEnabled(False)
+            self.ui.groupBox_7.setEnabled(False)
+            self.ui.groupBox_6.setEnabled(False)
+            self.ui.checkBox_3.setEnabled(False)
+            self.ui.checkBox_3.setChecked(False)
+        elif self.tab == 'Extra':
+            pass
         #if self.state TODO
-        self.selected_files = []
-        self.selected_folders = []
-        self.selected_files_gly = []
-        self.selected_DQfiles = []
-        self.selected_T1files = []
-        self.selected_FFCfiles = []
-        self.selected_DQMQfile = []
-        self.dq_t2 = {}
-        self.tau_dictionary = {}
-        self.ffc_dictionary = {}
-
-        self.ui.table_SE.setRowCount(0)
-        self.ui.table_DQ.setRowCount(0)
-        self.ui.table_DQ_2.setRowCount(0)
-        self.ui.table_T1.setRowCount(0)
-        self.ui.table_FFC_1.setColumnCount(0)
-        
-        self.ui.T1_Widget_1.clear()
-        self.ui.T1_Widget_2.clear()
-
-        self.ui.checkBox_3.setEnabled(False)
-        self.ui.checkBox_3.setChecked(False)
-
-        self.ui.btn_Plot1_2.setEnabled(False)
-        self.ui.groupBox_7.setEnabled(False)
-        self.ui.groupBox_6.setEnabled(False)
 
         if self.tab == 'T1T2':
             combobox = self.ui.comboBox_6
@@ -222,25 +225,6 @@ class MainWindow(QMainWindow):
 
         while combobox.count()>0:          
             combobox.removeItem(0)
-        
-
-    def terminate(self):
-        self.disable_buttons()
-        self.selected_files = []
-        self.selected_files_gly = []
-        self.selected_DQfiles = []
-        self.ui.table_SE.setRowCount(0)
-        self.ui.table_DQ.setRowCount(0)
-        self.ui.table_DQ_2.setRowCount(0)
-        self.ui.DQ_Widget_1.clear()
-        self.ui.DQ_Widget_2.clear()
-        self.ui.DQ_Widget_3.clear()
-        self.ui.DQ_Widget_4.clear()
-        self.ui.DQ_Widget_5.clear()
-        self.ui.DQ_Widget_6.clear()
-        self.ui.SEWidget.clear()
-        self.ui.FFTWidget.clear()
-        self.ui.FidWidget.clear()
 
     def delete_row(self):
 
@@ -280,11 +264,6 @@ class MainWindow(QMainWindow):
         graph_widget.getAxis('left').setLabel(ylabel)
         graph_widget.getAxis('bottom').setLabel(xlabel)
         graph_widget.setTitle(title)
-
-    def setup_table(self, table_widget):
-        column_widths = [70] * 4
-        for i, width in enumerate(column_widths):
-            table_widget.setColumnWidth(i, width)
 
     def open_select_comparison_files_dialog(self):
         global State_multiple_files
