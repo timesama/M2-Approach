@@ -143,6 +143,10 @@ class MainWindow(QMainWindow):
         self.ui.dq_max_3.valueChanged.connect(self.plot_diff)
         self.ui.power.valueChanged.connect(self.plot_diff)
 
+        self.ui.checkBox_tau_1.clicked.connect(self.simulation)
+        self.ui.checkBox_tau_2.clicked.connect(self.simulation)
+        self.ui.checkBox_tau_3.clicked.connect(self.simulation)
+
         # Disable buttons initially
         self.disable_buttons()
         self.ui.progressBar.setHidden(True)
@@ -183,6 +187,7 @@ class MainWindow(QMainWindow):
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
             
     def clear_list(self):
+        #if self.state TODO
         self.selected_files = []
         self.selected_folders = []
         self.selected_files_gly = []
@@ -205,7 +210,10 @@ class MainWindow(QMainWindow):
 
         self.ui.checkBox_3.setEnabled(False)
         self.ui.checkBox_3.setChecked(False)
-        #self.ui.comboBox_6.currentIndexChanged.disconnect(self.calculate_relaxation_time)
+
+        self.ui.btn_Plot1_2.setEnabled(False)
+        self.ui.groupBox_7.setEnabled(False)
+        self.ui.groupBox_6.setEnabled(False)
 
         if self.tab == 'T1T2':
             combobox = self.ui.comboBox_6
@@ -215,7 +223,6 @@ class MainWindow(QMainWindow):
         while combobox.count()>0:          
             combobox.removeItem(0)
         
-        #self.ui.comboBox_6.currentIndexChanged.connect(self.calculate_relaxation_time)
 
     def terminate(self):
         self.disable_buttons()
@@ -354,8 +361,6 @@ class MainWindow(QMainWindow):
             self.tab = '23Model'
         elif current_tab_index == 6:
             self.tab = 'Extra'
-
-        print(f"state: {self.tab}")
 
         if not (self.tab == 'SE' or self.tab == 'DQ'):
             self.ui.BOX_up.setHidden(True)
@@ -1488,6 +1493,10 @@ class MainWindow(QMainWindow):
         figure = self.ui.FFC_Widget_1
         selected_file_idx = self.ui.comboBox_8.currentIndex()
         dictionary = self.ffc_dictionary
+        legend = figure.addLegend()  
+
+        if legend is not None:
+            legend.clear()
 
         if selected_file_idx == -1:
             print('does it ever happen?')
@@ -1521,52 +1530,112 @@ class MainWindow(QMainWindow):
         Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
         Initial_coefficients = popt    
         dictionary[value_from_row]['popt'] = popt
-        
-        self.ui.textEdit_error_2.setText(f"R² {R2}") 
 
-        CDD         = QTableWidgetItem(str(popt[0]))
-        tau_c       = QTableWidgetItem(str("{:.5e}".format(popt[1])))
-        A           = QTableWidgetItem(str("{:.5e}".format(popt[2])))
-        C_trans     = QTableWidgetItem(str("{:.5e}".format(popt[3])))
-        tau_trans   = QTableWidgetItem(str("{:.5e}".format(popt[4])))
-        tau_res     = QTableWidgetItem(str("{:.5e}".format(popt[5])))
+        CDD         = popt[0]
+        tauc       = popt[1]
+        A           = popt[2]
+        C_trans     = popt[3]
+        tau_trans   = popt[4]
+        tau_res     = popt[5]
 
-        table.setItem(3, selected_file_idx,CDD)
-        table.setItem(5, selected_file_idx,tau_c)
-        table.setItem(2, selected_file_idx,A)
-        table.setItem(4, selected_file_idx,C_trans)
-        table.setItem(6, selected_file_idx,tau_trans)
-        table.setItem(7, selected_file_idx,tau_res)
+        tau_c_rate      = Cal.twod_model(Omega_fit, CDD, tauc, A, 0, tau_trans, tau_res)
+        tau_trans_rate  = Cal.twod_model(Omega_fit, 0, 0, A, C_trans, tau_trans, tau_res)
 
-        width = CDD.sizeHint().width()
+
+        CDD_t         = QTableWidgetItem(str(popt[0]))
+        tau_c_t       = QTableWidgetItem(str("{:.5e}".format(popt[1])))
+        A_t           = QTableWidgetItem(str("{:.5e}".format(popt[2])))
+        C_trans_t     = QTableWidgetItem(str("{:.5e}".format(popt[3])))
+        tau_trans_t   = QTableWidgetItem(str("{:.5e}".format(popt[4])))
+        tau_res_t     = QTableWidgetItem(str("{:.5e}".format(popt[5])))
+
+        table.setItem(3, selected_file_idx,CDD_t)
+        table.setItem(5, selected_file_idx,tau_c_t)
+        table.setItem(2, selected_file_idx,A_t)
+        table.setItem(4, selected_file_idx,C_trans_t)
+        table.setItem(6, selected_file_idx,tau_trans_t)
+        table.setItem(7, selected_file_idx,tau_res_t)
+
         for col in range(table.columnCount()):
             table.setColumnWidth(col, 120)
 
         figure.clear()
         figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
-        figure.plot(Omega_fit, fitted_curve, pen='b')
+        figure.plot(Omega_fit, fitted_curve, pen='b', name = 'Original data')
+        figure.plot(Omega_fit, tau_c_rate, pen = 'c',name='tau c')
+        figure.plot(Omega_fit, tau_trans_rate, pen = 'm', name = 'tau trans')
+        legend = figure.addLegend()  
+
+
 
         self.ui.checkBox_3.setEnabled(True)
+        self.ui.btn_Plot1_2.setEnabled(True)
+        self.ui.groupBox_7.setEnabled(True)
+        self.ui.groupBox_6.setEnabled(True)
+
+        self.ui.textEdit_error_2.setText(f"R² {R2}") 
 
     def simulation(self):
         table = self.ui.table_FFC_1
         figure = self.ui.FFC_Widget_2
         selected_file_idx = self.ui.comboBox_8.currentIndex()
         dictionary = self.ffc_dictionary
-        
+
         value_from_row = table.item(0, selected_file_idx).text()
 
         Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
         Rate = np.array(dictionary[value_from_row]['Rate'], dtype=float)
 
-        fitting, short, middle, long, popt = Cal.simulation(Omega, Rate)
+        state = self.get_checkbox_state()
+
+        if state == 'None':
+            figure.clear()
+            self.ui.textEdit_error_3.setText(f"No Data")     
+        else:
+            fitting, short, middle, long, popt, R2 = Cal.simulation(Omega, Rate, state)
+            figure.clear()
+            figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+            figure.plot(Omega, fitting, pen='b')
+            if state == 'Two':
+                figure.plot(Omega, short, pen='m')
+                figure.plot(Omega, middle, pen='g')
+                C1, C2, A, t1, t2= np.round(popt, decimals=5)
+                C3=0
+                t3 = 0
+            elif state == 'Three':
+                figure.plot(Omega, short, pen='m')
+                figure.plot(Omega, middle, pen='g')
+                figure.plot(Omega, long, pen='c')
+                C1, C2, C3, A, t1, t2, t3 = np.round(popt, decimals=5)
+            elif state == 'One':
+                self.ui.textEdit_error_3.setText(f"R² {R2}")
+                C1,A,t1 = np.round(popt, decimals=5)
+                C2 = 0
+                C3 = 0
+                t2 = 0 
+                t3 = 0
+            else:
+                return
+
+            self.ui.textEdit_error_3.setText(f"R² {R2}\nA = {A}\nCDD = {C1}\tτ = {t1}\nCDD = {C2}\tτ = {t2}\nCDD = {C3}\tτ = {t3}") 
+
+    def get_checkbox_state(self):
+        checked_count = sum([self.ui.checkBox_tau_1.isChecked(),
+                            self.ui.checkBox_tau_2.isChecked(),
+                            self.ui.checkBox_tau_3.isChecked()])
         
-        figure.clear()
-        figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
-        figure.plot(Omega, fitting, pen='b')
-        figure.plot(Omega, short, pen='m')
-        figure.plot(Omega, middle, pen='g')
-        figure.plot(Omega, long, pen='c')
+        if checked_count == 0:
+            state = 'None'
+        elif checked_count == 1:
+            state = 'One'
+        elif checked_count == 2:
+            state = 'Two'
+        elif checked_count == 3:
+            state = 'Three'
+        else:
+            state = 'Unknown'  # This case should technically never occur
+        
+        return state
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):
