@@ -143,7 +143,7 @@ def final_analysis_time_domain(Time, Real, Imaginary):
     Re_ap, Im_ap = apodization(Time, Real, Imaginary)
     
     # 6. Add zeros
-    Tim, Fid = add_zeros(Time, Re_ap, Im_ap, 16383)
+    Tim, Fid = add_zeros(Time, Re_ap, Im_ap, 65536)
 
     #stophere
     return Tim, Fid

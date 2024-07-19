@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
         
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
-        self.ui.btn_Add.clicked.connect(self.open_select_dialog)
+        self.ui.btn_Add.clicked.connect(self.add_select_dialog)
         self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQMQ.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFiles_FFC.clicked.connect(self.open_select_comparison_files_dialog)
@@ -78,6 +78,8 @@ class MainWindow(QMainWindow):
         #self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
+        self.ui.btn_ClearTable_4.clicked.connect(self.clear_list)
+        self.ui.btn_ClearTable_5.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
@@ -220,6 +222,8 @@ class MainWindow(QMainWindow):
 
         if self.tab == 'T1T2':
             combobox = self.ui.comboBox_6
+        elif self.tab == 'SE' or 'DQ':
+            combobox = self.ui.comboBox_4
         elif self.tab == '23Model':
             combobox = self.ui.comboBox_8
 
@@ -301,6 +305,17 @@ class MainWindow(QMainWindow):
         dlg = OpenFilesDialog(self)
         if dlg.exec():
             self.selected_files = []
+            fileNames = dlg.selectedFiles()
+            self.selected_files.extend(fileNames)
+            self.ui.btn_Start.setEnabled(True)
+            self.ui.btn_Start.setStyleSheet("background-color: green")
+            self.ui.btn_Add.setEnabled(True)
+
+    def add_select_dialog(self):
+        global State_multiple_files
+        State_multiple_files = True
+        dlg = OpenFilesDialog(self)
+        if dlg.exec():
             fileNames = dlg.selectedFiles()
             self.selected_files.extend(fileNames)
             self.ui.btn_Start.setEnabled(True)
@@ -891,6 +906,11 @@ class MainWindow(QMainWindow):
         
     # Relaxation time section
     def update_T12_table(self):
+        def clean_line(line):
+            while '\t\t' in line:
+                line = line.replace('\t\t', '\t')
+            return line.strip()
+        
         selected_files = self.selected_T1files
         table = self.ui.table_T1
         combobox = self.ui.comboBox_6
@@ -910,11 +930,13 @@ class MainWindow(QMainWindow):
             Time = []
             Signal = []
 
+
+
             try:
                 # Read files as I create them from excel in spintrack
                 with open(file, "r") as data:
-                    lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
-
+                    #lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
+                    lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
                 for line in lines[1:]:  # Skip the first line !!!
                     parts = line.split('\t')
                     time_value = float(parts[0])
