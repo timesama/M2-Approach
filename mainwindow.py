@@ -194,7 +194,15 @@ class MainWindow(QMainWindow):
             self.selected_files = []  
             self.selected_files_gly = []
             self.ui.table_SE.setRowCount(0)
-            self.ui.table_DQ.setRowCount(0)      
+            self.ui.table_DQ.setRowCount(0)
+            self.ui.SEWidget.clear()
+            self.ui.DQ_Widget_1.clear()
+            self.ui.DQ_Widget_2.clear()
+            self.ui.DQ_Widget_3.clear()
+            self.ui.DQ_Widget_4.clear()   
+            self.ui.FFTWidget.clear()
+            self.ui.FidWidget.clear()
+            # TODO: clear FID, FFT, and three graphs
         elif self.tab == 'DQ_Temp':
             self.selected_DQfiles = []
             self.dq_t2 = {}
