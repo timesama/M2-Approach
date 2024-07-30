@@ -203,7 +203,6 @@ class MainWindow(QMainWindow):
             self.ui.DQ_Widget_4.clear()   
             self.ui.FFTWidget.clear()
             self.ui.FidWidget.clear()
-            # TODO: clear FID, FFT, and three graphs
         elif self.tab == 'DQ_Temp':
             self.selected_DQfiles = []
             self.dq_t2 = {}
@@ -529,9 +528,14 @@ class MainWindow(QMainWindow):
         Amp = Cal.calculate_amplitude(Re, Im)
         self.update_graphs(Time, Amp, Re, Im, self.ui.FidWidget)
 
-        Time_fid, Fid =  Cal.final_analysis_time_domain(Time, Re, Im)
+        if self.ui.radioButton_2.isChecked():
+            number_of_points = 2**14
+        else:
+            number_of_points = 2**16
 
+        Time_fid, Fid =  Cal.final_analysis_time_domain(Time, Re, Im, number_of_points)
         Frequency = Cal.calculate_frequency_scale(Time_fid)
+
         if self.ui.radioButton_2.isChecked():
             FFT = self.FFT_handmade(Fid, Time_fid, Frequency)  #(math procedure)
         else:
@@ -814,6 +818,7 @@ class MainWindow(QMainWindow):
         legend = figure.addLegend()
         legend.clear()
         table = self.ui.table_DQMQ
+        table.clear()
         file_path = self.selected_DQMQfile[0]
 
         Time, DQ, Ref = Cal.read_data(file_path, 1)

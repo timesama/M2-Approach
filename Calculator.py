@@ -138,12 +138,12 @@ def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
 
     return Time_cropped, Re_n, Im_n
 
-def final_analysis_time_domain(Time, Real, Imaginary):
+def final_analysis_time_domain(Time, Real, Imaginary, number_of_points):
     # 5. Apodize the time-domain
     Re_ap, Im_ap = apodization(Time, Real, Imaginary)
     
     # 6. Add zeros
-    Tim, Fid = add_zeros(Time, Re_ap, Im_ap, 65536)
+    Tim, Fid = add_zeros(Time, Re_ap, Im_ap, number_of_points)
 
     #stophere
     return Tim, Fid
