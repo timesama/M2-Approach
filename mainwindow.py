@@ -120,6 +120,7 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_6.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_16.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_17.clicked.connect(self.calculate_relaxation_time)
+        self.ui.T1T2_fit_from.valueChanged.connect(self.calculate_relaxation_time)
         self.ui.radioButton_3.clicked.connect(self.hide_FFT_progress)
         self.ui.radioButton_2.clicked.connect(self.hide_FFT_progress)
         # Connect combobox signals to slots
@@ -993,6 +994,7 @@ class MainWindow(QMainWindow):
         figure = self.ui.T1_Widget_1
         selected_file_idx = self.ui.comboBox_6.currentIndex()
         dictionary = self.tau_dictionary
+        starting_point = int(self.ui.T1T2_fit_from.value())
 
         if self.ui.radioButton_16.isChecked():
         # milisec units
@@ -1005,8 +1007,11 @@ class MainWindow(QMainWindow):
             return
         
         value_from_row = table.item(selected_file_idx, 0).text()
-        Time = np.array(dictionary[value_from_row]['Time'])/denominator
-        Signal = np.array(dictionary[value_from_row]['Signal'])
+        Time_original = np.array(dictionary[value_from_row]['Time'])/denominator
+        Signal_original = np.array(dictionary[value_from_row]['Signal'])
+
+        Time = Time_original[starting_point:]
+        Signal = Signal_original[starting_point:]
 
         Time_fit = np.arange(min(Time), max(Time) + 1, 1)
 
@@ -1049,7 +1054,7 @@ class MainWindow(QMainWindow):
         
         
         figure.clear()
-        figure.plot(Time, Signal, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
         figure.plot(Time_fit, fitted_curve, pen='b')
 
     def plot_relaxation_time(self):
