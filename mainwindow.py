@@ -1305,72 +1305,16 @@ class MainWindow(QMainWindow):
 
     # Save and load data
     def save_data(self):
-        try:
-            parent_folder = os.path.dirname(self.selected_files[0])
-        except:
-            parent_folder = os.path.dirname(self.selected_DQMQfile[0])
-     
-        DQ_points = self.ui.DQ_Widget_1
-        DQ_distribution = self.ui.DQ_Widget_2
-
-        SE_table = self.ui.table_SE
-        DQ_table = self.ui.table_DQ
-        DQMQ_table = self.ui.table_DQMQ
-
-        os.makedirs(parent_folder + '/Result/', exist_ok=True)
-        basefolder = os.path.dirname(parent_folder)
-        os.makedirs(basefolder + '/DQ_table/', exist_ok=True)
-        os.makedirs(basefolder + '/DQMQ_Result/', exist_ok=True)
         if self.tab == 'SE':
-            table_file_path = os.path.join(parent_folder, 'Result', f"SE_table.csv")
+            table = self.ui.table_SE
         elif self.tab == 'DQ':
-            graph_file_path = os.path.join(parent_folder, 'Result', f"DQ_points.png")
-            graph_file_path_2 = os.path.join(parent_folder, 'Result', f"DQ_distribution.png")
-            table_file_path = os.path.join(basefolder, 'DQ_table', f"DQ_table_{os.path.basename(parent_folder)}.csv")
+            table = self.ui.table_DQ
         elif self.tab == 'DQMQ':
-            table_file_path = os.path.join(basefolder,'DQMQ_Result', f"DQMQ_Result_{os.path.basename(parent_folder)}.csv")
-        pg.QtGui.QGuiApplication.processEvents()  # Make sure all events are processed before exporting
+            table = self.ui.table_DQMQ
 
-            # Check if the file already exists, if so, append an index to the filename
-        if os.path.exists(table_file_path):
-            index = 1
-            while os.path.exists(f"{table_file_path[:-4]} ({index}).csv"):
-                index += 1
-            table_file_path = f"{table_file_path[:-4]} ({index}).csv"
 
-        if self.tab == 'SE':
-            #Table
-            self.save_table_to_csv(table_file_path, SE_table)
-
-        elif self.tab == 'DQ':
-            #Image
-            exporter_dq1 = pg.exporters.ImageExporter(DQ_points.plotItem)
-            exporter_dq1.parameters()['width'] = 1000
-            exporter_dq1.export(graph_file_path)
-
-            exporter_dq2 = pg.exporters.ImageExporter(DQ_distribution.plotItem)
-            exporter_dq2.parameters()['width'] = 1000
-            exporter_dq2.export(graph_file_path_2)
-
-            #Table
-            self.save_table_to_csv(table_file_path, DQ_table)
-        elif self.tab == 'DQMQ':
-            self.save_table_to_csv(table_file_path, DQMQ_table)
-
-        QMessageBox.information(self, "Data Saved", f"The data have been saved to {parent_folder}", QMessageBox.Ok)
-
-    def save_table_to_csv(self, path, table):
-        with open(path, 'w') as f:
-            # Write data row by row
-            for row in range(table.rowCount()):
-                row_values = []
-                for col in range(table.columnCount()):
-                    item = table.item(row, col)
-                    if item is not None:
-                        row_values.append(item.text())
-                    else:
-                        row_values.append("")  # Handle empty cells
-                f.write(','.join(row_values) + '\n')
+        dialog = SaveFilesDialog(self)
+        dialog.save_data_as_csv(self, table)
 
     def load_data(self):
         dlg = OpenFilesDialog(self)
@@ -1673,6 +1617,41 @@ class MainWindow(QMainWindow):
             Fur[i] = np.sum(Fid * (cos_values[:, i] - 1j * sin_values[:, i]))
         QCoreApplication.processEvents()
         return Fur
+    
+class SaveFilesDialog(QFileDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        #self.setFileMode(QFileDialog.AnyFile)  # Allow selecting any file for saving
+        self.setAcceptMode(QFileDialog.AcceptSave)  # Set the dialog to save mode
+
+    def save_data_as_csv(self, directory, table, default_filename='Result_'):
+        initial_directory_file = "selected_folder.txt"
+        try:
+            with open(initial_directory_file, 'r') as file:
+                directory = file.read().strip()
+        except:
+            directory = os.path.dirname(sys.argv[0])
+            print('gotohell')
+
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save File As", directory + '/' + default_filename, "CSV files (*.csv)", options=options)
+        if file_path:
+            try:
+                with open(file_path, 'w') as f:
+                    for row in range(table.rowCount()):
+                        row_values = []
+                        for col in range(table.columnCount()):
+                            item = table.item(row, col)
+                            if item is not None:
+                                row_values.append(item.text())
+                            else:
+                                row_values.append("")  # Handle empty cells
+                        f.write(','.join(row_values) + '\n')
+                print(f"File saved as {file_path}")
+            except Exception as e:
+                print(f"Failed to save file as CSV: {e}")
+
 
 class OpenFilesDialog(QFileDialog):
     def __init__(self, parent=None):
@@ -1687,18 +1666,13 @@ class OpenFilesDialog(QFileDialog):
         self.setNameFilter(str("Data (*.dat *.txt *.csv *.sef)"))
 
         initial_directory_file = "selected_folder.txt"
-        if os.path.exists(initial_directory_file):
+        try:
             with open(initial_directory_file, 'r') as file:
-                initial_directory = file.read().strip()
-            if os.path.isdir(initial_directory):
-                self.setDirectory(initial_directory)
-            else:
-                # Fallback if the content of the file is not a valid directory
-                exe_dir = os.path.dirname(sys.argv[0])
-                self.setDirectory(exe_dir)
-        else:
-            exe_dir = os.path.dirname(sys.argv[0])
-            self.setDirectory(exe_dir)
+                directory = file.read().strip()
+        except:
+            directory = os.path.dirname(sys.argv[0])
+
+        self.setDirectory(directory)
 
         self.selected_files = []  # Variable to store selected file paths
 
