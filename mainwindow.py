@@ -840,7 +840,6 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_3.setEnabled(False)
         self.ui.pushButton_DQMQ_4.setEnabled(True)
         
-
     def plot_original(self):
         file_path = self.selected_DQMQfile[0]
         # fit_from = self.ui.dq_min_3.value()
