@@ -834,10 +834,12 @@ class MainWindow(QMainWindow):
             table.setItem(row, 2, QTableWidgetItem(str(Ref[row])))
 
         table.resizeColumnsToContents() # TODO ADD THIS EVERYWHERE!!!!
+        table.setHorizontalHeaderLabels(['Time','DQ','Ref','nDQ']) # I don't know why i need this, but otherwise the columns get 1234 headres.
         self.ui.pushButton_DQMQ_1.setEnabled(True)
         self.ui.pushButton_DQMQ_2.setEnabled(False)
         self.ui.pushButton_DQMQ_3.setEnabled(False)
         self.ui.pushButton_DQMQ_4.setEnabled(True)
+        
 
     def plot_original(self):
         file_path = self.selected_DQMQfile[0]
@@ -1630,6 +1632,7 @@ class SaveFilesDialog(QFileDialog):
         self.setAcceptMode(QFileDialog.AcceptSave)  # Set the dialog to save mode
 
     def save_data_as_csv(self, directory, table, default_filename='Result_'):
+        # I have no fucjing idea, why the hell this function takes these arguments, but it doesn't work otherwise.
         initial_directory_file = "selected_folder.txt"
         try:
             with open(initial_directory_file, 'r') as file:
@@ -1641,6 +1644,7 @@ class SaveFilesDialog(QFileDialog):
 
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File As", directory + '/' + default_filename, "CSV files (*.csv)", options=options)
+
         if file_path:
             try:
                 with open(file_path, 'w') as f:
@@ -1655,7 +1659,6 @@ class SaveFilesDialog(QFileDialog):
                         f.write(','.join(row_values) + '\n')
             except Exception as e:
                 print(f"Failed to save file as CSV: {e}")
-
 
 class OpenFilesDialog(QFileDialog):
     def __init__(self, parent=None):
