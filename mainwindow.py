@@ -485,6 +485,9 @@ class MainWindow(QMainWindow):
         self.finalize_analysis(legend)
         self.ui.btn_Start.setStyleSheet("background-color: none")
 
+        if self.ui.radioButton.isChecked():
+            QMessageBox.information(self, "Data Saved", f"The figures have been saved to {os.path.dirname(file_path) + '/Result'}", QMessageBox.Ok)
+
     def analysis_error(self, file_path):
         QMessageBox.warning(self, "Invalid Data", f"Error in {file_path}. Restarting analysis", QMessageBox.Ok)
         self.selected_files.remove(file_path)
@@ -1362,7 +1365,8 @@ class MainWindow(QMainWindow):
 
     def save_figures(self, file_path, variable):
         # Set names
-        parent_folder = os.path.dirname(file_path)  
+        parent_folder = os.path.dirname(file_path)
+        os.makedirs(parent_folder + '/Result/', exist_ok=True)  
 
         graph_fft = self.ui.FFTWidget
         graph_fid = self.ui.FidWidget
