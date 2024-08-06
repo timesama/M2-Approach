@@ -1630,9 +1630,10 @@ class SaveFilesDialog(QFileDialog):
         try:
             with open(initial_directory_file, 'r') as file:
                 directory = file.read().strip()
-        except:
+        except Exception as e:
+            print(f"Couldn't read the initial directory: {e}")
             directory = os.path.dirname(sys.argv[0])
-            print('gotohell')
+
 
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File As", directory + '/' + default_filename, "CSV files (*.csv)", options=options)
@@ -1648,7 +1649,6 @@ class SaveFilesDialog(QFileDialog):
                             else:
                                 row_values.append("")  # Handle empty cells
                         f.write(','.join(row_values) + '\n')
-                print(f"File saved as {file_path}")
             except Exception as e:
                 print(f"Failed to save file as CSV: {e}")
 
@@ -1669,12 +1669,13 @@ class OpenFilesDialog(QFileDialog):
         try:
             with open(initial_directory_file, 'r') as file:
                 directory = file.read().strip()
-        except:
+        except Exception as e:
+            print(f"Couldn't read the initial directory: {e}")
             directory = os.path.dirname(sys.argv[0])
 
         self.setDirectory(directory)
 
-        self.selected_files = []  # Variable to store selected file paths
+        self.selected_files = []  # dictionary to store selected file paths
 
     def on_file_selected(self):
         options = QFileDialog.Options()
