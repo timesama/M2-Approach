@@ -65,6 +65,9 @@ class MainWindow(QMainWindow):
         
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.btn_Save_2.clicked.connect(self.save_data)
+        self.ui.btn_Save_6.clicked.connect(self.save_data)
+        self.ui.btn_Save_3.clicked.connect(self.save_data)
+        self.ui.btn_Save_7.clicked.connect(self.save_data)
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
         
@@ -662,7 +665,7 @@ class MainWindow(QMainWindow):
             return            
             
         self.ui.SEWidget.clear()
-        self.ui.SEWidget.plot(x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=5)
+        self.ui.SEWidget.plot(x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
 
     # Working with DQ graphs
     def update_dq_graphs(self):
@@ -676,7 +679,7 @@ class MainWindow(QMainWindow):
         x = self.read_column_values(self.ui.table_DQ, 0)
         y= self.read_column_values(self.ui.table_DQ, 3)
         self.ui.DQ_Widget_1.clear()
-        self.ui.DQ_Widget_1.plot(x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=5)
+        self.ui.DQ_Widget_1.plot(x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
 
     def linearization(self):
         # Calculate line
@@ -750,7 +753,7 @@ class MainWindow(QMainWindow):
             graph_DQ_distr.getAxis('bottom').setLabel("T₂*")
 
         graph_DQ_distr.clear()
-        graph_DQ_distr.plot(new_x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=5)
+        graph_DQ_distr.plot(new_x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
 
     def plot_fit(self):        
         _x = self.read_column_values(self.ui.table_DQ, 4)
@@ -915,7 +918,7 @@ class MainWindow(QMainWindow):
 
         figure.plot(Time, DQ_normal, pen='r', name = 'DQ')
         figure.plot(Time, MQ_normal, pen='b', name = 'Ref')
-        figure.plot(Time0, nDQ, pen='k', symbol='o', symbolPen='k', symbolSize=5, name='nDQ')
+        figure.plot(Time0, nDQ, pen='k', symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
 
         num_rows  = len(Time)
         for row in range(num_rows):
@@ -1063,7 +1066,7 @@ class MainWindow(QMainWindow):
         
         
         figure.clear()
-        figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
         figure.plot(Time_fit, fitted_curve, pen='b')
 
     def plot_relaxation_time(self):
@@ -1100,7 +1103,7 @@ class MainWindow(QMainWindow):
             number = number + 1
                     
 
-        graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
 
     # Working with tables
     def update_DQ_comparison(self):
@@ -1266,8 +1269,8 @@ class MainWindow(QMainWindow):
 
             # Draw a graph
             color = tuple(cmap.map(key))
-            self.ui.DQ_Widget_3.plot(dq_time, t2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
-            self.ui.DQ_Widget_4.plot(t2_lin, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=5, name=file_name)
+            self.ui.DQ_Widget_3.plot(dq_time, t2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=10, name=file_name)
+            self.ui.DQ_Widget_4.plot(t2_lin, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=10, name=file_name)
             self.ui.DQ_Widget_4.plot(dq_fit, y_fit, pen=color)
 
             if coeff is not None:
@@ -1313,9 +1316,14 @@ class MainWindow(QMainWindow):
             table = self.ui.table_SE
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
+        elif self.tab == 'DQ_Temp':
+            table = self.ui.table_DQ_2
+        elif self.tab == 'T1T2':
+            table = self.ui.table_T1
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
-
+        elif self.tab == '23Model':
+            table = self.ui.table_FFC_1
 
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table)
@@ -1528,7 +1536,7 @@ class MainWindow(QMainWindow):
             table.setColumnWidth(col, 120)
 
         figure.clear()
-        figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+        figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
         figure.plot(Omega_fit, fitted_curve, pen='b', name = 'Original data')
         figure.plot(Omega_fit, tau_c_rate, pen = 'c',name='tau c')
         figure.plot(Omega_fit, tau_trans_rate, pen = 'm', name = 'tau trans')
@@ -1562,7 +1570,7 @@ class MainWindow(QMainWindow):
         else:
             fitting, short, middle, long, popt, R2 = Cal.simulation(Omega, Rate, state)
             figure.clear()
-            figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=5)
+            figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
             figure.plot(Omega, fitting, pen='b')
             if state == 'Two':
                 figure.plot(Omega, short, pen='m')
