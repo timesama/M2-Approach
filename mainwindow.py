@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidg
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor, QIcon
 import numpy as np
+import json
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 from webbrowser import open as open_application
@@ -69,6 +70,10 @@ class MainWindow(QMainWindow):
         self.ui.btn_Save_3.clicked.connect(self.save_data)
         self.ui.btn_Save_7.clicked.connect(self.save_data)
         self.ui.btn_Load.clicked.connect(self.load_data)
+        self.ui.btn_Load_2.clicked.connect(self.load_data)
+        self.ui.btn_Load_3.clicked.connect(self.load_data)
+        self.ui.btn_Load_4.clicked.connect(self.load_data)
+        self.ui.btn_Load_5.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
         
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
@@ -163,6 +168,7 @@ class MainWindow(QMainWindow):
 
     def update_file(self):
         i = self.ui.comboBox_4.currentIndex() + 1
+        self.ui.btn_Phasing.setEnabled(True)
 
         try:
             file_path = self.selected_files[i-1]
@@ -187,7 +193,7 @@ class MainWindow(QMainWindow):
             self.highlight_row(self.ui.table_SE, i)
             self.update_yaxis()
 
-        self.ui.btn_Phasing.setEnabled(True)
+        
 
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
             
@@ -210,6 +216,10 @@ class MainWindow(QMainWindow):
             self.selected_DQfiles = []
             self.dq_t2 = {}
             self.ui.table_DQ_2.setRowCount(0)
+            self.ui.DQ_Widget_3.clear()
+            self.ui.DQ_Widget_4.clear()
+            self.ui.DQ_Widget_5.clear()
+            self.ui.DQ_Widget_6.clear()
         elif self.tab == 'T1T2':
             self.selected_T1files = []
             self.tau_dictionary = {}
@@ -227,9 +237,10 @@ class MainWindow(QMainWindow):
             self.ui.groupBox_6.setEnabled(False)
             self.ui.checkBox_3.setEnabled(False)
             self.ui.checkBox_3.setChecked(False)
+            self.ui.table_FFC_1.clear()
         elif self.tab == 'Extra':
             pass
-        #if self.state TODO
+
 
         if self.tab == 'T1T2':
             combobox = self.ui.comboBox_6
@@ -513,13 +524,22 @@ class MainWindow(QMainWindow):
     def process_file_data(self, file_path, file_path_gly, i):
         global Frequency, Re_spectra, Im_spectra
 
-        # Read data
-        data = np.loadtxt(file_path)
-        x, y, z = data[:, 0], data[:, 1], data[:, 2]
-
         # Read name of filename
         filename = os.path.basename(file_path)
 
+        # Read data
+        try: 
+            data = np.loadtxt(file_path)
+            x, y, z = data[:, 0], data[:, 1], data[:, 2]
+    
+        except Exception as e:
+            QMessageBox.warning(self, "Corrupt File", f"Couldn't read the {filename} beacuse {e} Only table data is available", QMessageBox.Ok)
+            self.ui.FidWidget.clear()
+            self.ui.FFTWidget.clear()
+            self.ui.btn_Phasing.setEnabled(False)
+            return
+
+    
         if self.ui.checkBox_2.isChecked():
             # Read data
             data = np.loadtxt(file_path)
@@ -819,15 +839,16 @@ class MainWindow(QMainWindow):
 
     # DQ MQ section
     def dq_mq_analysis(self):
-        figure = self.ui.DQMQ_Widget
-        figure.clear()
-        legend = figure.addLegend()
-        legend.clear()
+
         table = self.ui.table_DQMQ
         table.clear()
-        file_path = self.selected_DQMQfile[0]
 
-        Time, DQ, Ref = Cal.read_data(file_path, 1)
+        try:
+            Time, DQ, Ref = self.plot_original()
+        except Exception as e:
+            QMessageBox.warning(self, "Corrupt File", f"Couldn't read the file beacuse {e}", QMessageBox.Ok)
+            self.clear_list()
+            return
         num_rows  = len(Time)
         table.setRowCount(num_rows)
 
@@ -845,9 +866,6 @@ class MainWindow(QMainWindow):
         
     def plot_original(self):
         file_path = self.selected_DQMQfile[0]
-        # fit_from = self.ui.dq_min_3.value()
-        # fit_to = self.ui.dq_max_3.value()
-        # p = self.ui.power.value()
 
         figure = self.ui.DQMQ_Widget
         figure.clear()
@@ -855,10 +873,16 @@ class MainWindow(QMainWindow):
         legend.clear()
         legend = figure.addLegend()
 
-        Time, DQ, Ref = Cal.read_data(file_path, 1)
+        try:
+            Time, DQ, Ref = Cal.read_data(file_path, 1)
+        except:
+            Time, DQ, Ref = Cal.read_data(file_path, 0)
+    
 
         figure.plot(Time, DQ, pen='r', name = 'DQ')
         figure.plot(Time, Ref, pen='b', name = 'Ref')
+
+        return Time, DQ, Ref
 
     def plot_norm(self):
         file_path = self.selected_DQMQfile[0]
@@ -940,18 +964,25 @@ class MainWindow(QMainWindow):
 
         file_name = []
         x_axis = []
-        
-        for file in selected_files:
-            current_file = [os.path.basename(file)]
-            try:
-                x_axis += [re.search(pattern,file).group(1)]
-            except:
-                x_axis += ['0']
 
+        for row, file in zip(range(table.rowCount()), selected_files):
+            Folder = QTableWidgetItem(file)
+
+            current_file = os.path.basename(file)
+
+            try:
+                x_axis = re.search(pattern,file).group(1)
+            except:
+                x_axis = row
+
+            Filename = QTableWidgetItem(current_file)
+            Temp = QTableWidgetItem(x_axis)
+            table.setItem(row, 0, Folder)
+            table.setItem(row, 1, Filename)
+            table.setItem(row, 2, Temp)
+        
             Time = []
             Signal = []
-
-
 
             try:
                 # Read files as I create them from excel in spintrack
@@ -964,13 +995,20 @@ class MainWindow(QMainWindow):
                     signal_value = float(parts[1])
                     Time.append(time_value)
                     Signal.append(signal_value)
+
+                combobox.addItem(f"{current_file}")
             except:
                 try:
                     # read files regularly
                     data = np.loadtxt(file)
                     Time, Signal = data[:, 0], data[:, 1]
-                except Exception:
-                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file}, removing file from the table and file list.", QMessageBox.Ok)
+
+                    combobox.addItem(f"{current_file}")
+                except FileNotFoundError as fnf_error:
+                    QMessageBox.warning(self, "File Not Found", f"The file {file} was not found. Only table data is available.", QMessageBox.Ok)
+
+                except Exception as e:
+                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} because {e} Removing file from the table and file list.", QMessageBox.Ok)
                     for file_to_delete in selected_files:
                         if file_to_delete == file:
                             selected_files.remove(file)
@@ -980,26 +1018,10 @@ class MainWindow(QMainWindow):
             dictionary[file]["Time"].extend(Time)
             dictionary[file]["Signal"].extend(Signal)
 
-            
-            table.setRowCount(len(selected_files))
-            self.ui.btn_Plot1.setEnabled(True)            
         
-        for row, file in zip(range(table.rowCount()), selected_files):
-            Folder = QTableWidgetItem(file)
-            file_name = os.path.basename(file)
-            try:
-                x_axis = re.search(pattern,file).group(1)
-            except:
-                x_axis = row
-
-            Filename = QTableWidgetItem(file_name)
-            Temp = QTableWidgetItem(x_axis)
-            table.setItem(row, 0, Folder)
-            table.setItem(row, 1, Filename)
-            table.setItem(row, 2, Temp)
-
-            combobox.addItem(f"{file_name}")
-            combobox.setCurrentIndex(-1)
+        table.setRowCount(len(selected_files))
+        self.ui.btn_Plot1.setEnabled(True)            
+        combobox.setCurrentIndex(-1)
 
     def calculate_relaxation_time(self):
         table = self.ui.table_T1
@@ -1122,8 +1144,8 @@ class MainWindow(QMainWindow):
                     table.removeRow(row)
                     del self.selected_DQfiles[row]
 
-            except: 
-                QMessageBox.warning(self, "Invalid Data", f"The file {foldername} does not have , as delimiter and will be removed from the table and file list.", QMessageBox.Ok)
+            except Exception as e: 
+                QMessageBox.warning(self, "Invalid Data", f"The file {foldername} {e} Removed from the table and file list.", QMessageBox.Ok)
                 table.removeRow(row)
                 del self.selected_DQfiles[row]
 
@@ -1142,20 +1164,23 @@ class MainWindow(QMainWindow):
         table.resizeColumnsToContents()
 
     def launch(self):
-        self.ui.radioButton_Log_2.setEnabled(True)
-        self.ui.comboBox_5.setEnabled(True)
-        self.ui.dq_min_2.setEnabled(True)
-        self.ui.dq_max_2.setEnabled(True)
+        try:
+            self.ui.radioButton_Log_2.setEnabled(True)
+            self.ui.comboBox_5.setEnabled(True)
+            self.ui.dq_min_2.setEnabled(True)
+            self.ui.dq_max_2.setEnabled(True)
 
-        self.dq_t2 = {}
-        for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
-            # Read data from file
-            data = np.loadtxt(parent_folder, delimiter=',')
+            self.dq_t2 = {}
+            for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
+                # Read data from file
+                data = np.loadtxt(parent_folder, delimiter=',')
 
-            # Read the DQ filtering time, DQ amlitude and corresponding T2*
-            dq_t2 = data[:, [0, 1, 3]]
-            self.dq_t2[row] = dq_t2
-        self.update_DQ_comparison_plot()
+                # Read the DQ filtering time, DQ amlitude and corresponding T2*
+                dq_t2 = data[:, [0, 1, 3]]
+                self.dq_t2[row] = dq_t2
+            self.update_DQ_comparison_plot()
+        except Exception as e:
+            QMessageBox.warning(self, "Corrupted file", f"Couldn't analyse the {os.path.dirname(parent_folder)} because {e}", QMessageBox.Ok)
 
     def update_DQ_comparison_plot(self):
         cmap = pg.ColorMap([0, len(self.dq_t2)], [pg.mkColor('b'), pg.mkColor('r')])  # Blue to red
@@ -1314,39 +1339,67 @@ class MainWindow(QMainWindow):
     def save_data(self):
         if self.tab == 'SE':
             table = self.ui.table_SE
+            files = self.selected_files
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
+            files = self.selected_files
         elif self.tab == 'DQ_Temp':
             table = self.ui.table_DQ_2
+            files = self.selected_DQfiles
         elif self.tab == 'T1T2':
             table = self.ui.table_T1
+            files = self.selected_T1files
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
+            files = self.selected_DQMQfile
         elif self.tab == '23Model':
             table = self.ui.table_FFC_1
+            files = self.selected_FFCfiles
 
         dialog = SaveFilesDialog(self)
-        dialog.save_data_as_csv(self, table)
+        dialog.save_data_as_csv(self, table, files)
 
     def load_data(self):
         dlg = OpenFilesDialog(self)
         self.ui.btn_Save.setEnabled(False)
         if dlg.exec():
             tableName = dlg.selectedFiles()
-            self.selected_table = tableName
             self.load_table_from_csv(tableName)
 
     def load_table_from_csv(self, tableName):
-        if self.tab == 'SE':
-            table = self.ui.table_SE
-        elif self.tab == 'DQ':
-            table = self.ui.table_DQ
+
+        self.clear_list()
+        self.enable_buttons()
 
         file_path = tableName[0]
-
-        while self.ui.comboBox_4.count()>0:
-            self.ui.comboBox_4.removeItem(0)
-            self.ui.comboBox_4.setCurrentIndex(-1)
+        try:
+            files_list = file_path.strip().split('.')[0] + '_files.json'
+            with open(files_list, 'r') as file:
+                files = json.load(file)
+        except Exception as e:  
+            QMessageBox.warning(self, "File missing", f"Didn't find file list, only the tabular result is available", QMessageBox.Ok)
+            files = None
+            self.ui.comboBox_4.setEnabled(False)
+            self.ui.btn_Phasing.setEnabled(False)
+        
+        if self.tab == 'SE':
+            table = self.ui.table_SE
+            self.selected_files = files
+        elif self.tab == 'DQ':
+            table = self.ui.table_DQ
+            self.selected_files = files
+        elif self.tab == 'DQ_Temp':
+            table = self.ui.table_DQ_2
+            self.selected_DQfiles = files
+        elif self.tab == 'T1T2':
+            table = self.ui.table_T1
+            self.selected_T1files = files
+        elif self.tab == 'DQMQ':
+            table = self.ui.table_DQMQ
+            self.selected_DQMQfile = files
+        elif self.tab == '23Model':
+            table = self.ui.table_FFC_1
+            self.selected_FFCfiles = files
 
         with open(file_path, 'r') as f:
             lines = f.readlines()
@@ -1361,16 +1414,21 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             self.update_yaxis()
         elif self.tab == 'DQ':
-            self.selected_files = [
-                "AmIanIdiot.txt",
-                "Yes.txt"
-            ]
-            self.update_dq_graphs()  
+            self.update_dq_graphs()
+        elif self.tab == 'DQ_Temp':
+            self.update_DQ_comparison()
+        elif self.tab == 'T1T2':
+            self.update_T12_table()
+        elif self.tab == 'DQMQ':
+            self.dq_mq_analysis()
+            self.ui.pushButton_DQMQ_2.setEnabled(True)
+            self.ui.pushButton_DQMQ_3.setEnabled(True)     
+            self.ui.dq_min_3.setEnabled(True)
+            self.ui.dq_max_3.setEnabled(True)
+            self.ui.power.setEnabled(True)
+        elif self.tab == '23Model':
+            self.update_FFC_table()
 
-        self.enable_buttons()
-        self.ui.comboBox_4.setEnabled(False)
-        #self.ui.checkBox.setEnabled(False)
-        self.ui.btn_Phasing.setEnabled(False)
 
     def save_figures(self, file_path, variable):
         # Set names
@@ -1638,7 +1696,7 @@ class SaveFilesDialog(QFileDialog):
         #self.setFileMode(QFileDialog.AnyFile)  # Allow selecting any file for saving
         self.setAcceptMode(QFileDialog.AcceptSave)  # Set the dialog to save mode
 
-    def save_data_as_csv(self, directory, table, default_filename='Result_'):
+    def save_data_as_csv(self, directory, table, files, default_filename='Result_'):
         # I have no fucjing idea, why the hell this function takes these arguments, but it doesn't work otherwise.
         initial_directory_file = "selected_folder.txt"
         try:
@@ -1664,6 +1722,13 @@ class SaveFilesDialog(QFileDialog):
                             else:
                                 row_values.append("")  # Handle empty cells
                         f.write(','.join(row_values) + '\n')
+
+                files_list_path = os.path.splitext(file_path)[0] + '_files.json'
+
+                with open(files_list_path, 'w') as file_list:
+                    json.dump(files, file_list)
+                    print('olalala')
+
             except Exception as e:
                 print(f"Failed to save file as CSV: {e}")
 

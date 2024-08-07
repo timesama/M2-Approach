@@ -1382,7 +1382,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0" columnstretch="1,1,0,2,2,3,3,2,2">
+                <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0" columnstretch="1,1,0,2,2,3,3,2,2">
                  <property name="leftMargin">
                   <number>0</number>
                  </property>
@@ -1398,50 +1398,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <property name="verticalSpacing">
                   <number>10</number>
                  </property>
-                 <item row="0" column="5" rowspan="2" colspan="2">
-                  <widget class="PlotWidget" name="DQ_Widget_4" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>200</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="4">
-                  <widget class="QDoubleSpinBox" name="dq_min_2">
-                   <property name="prefix">
-                    <string/>
-                   </property>
-                   <property name="suffix">
-                    <string> musec</string>
-                   </property>
-                   <property name="decimals">
-                    <number>1</number>
-                   </property>
-                   <property name="minimum">
-                    <double>0.000000000000000</double>
-                   </property>
-                   <property name="singleStep">
-                    <double>2.000000000000000</double>
-                   </property>
-                   <property name="value">
-                    <double>0.000000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="7" colspan="2">
-                  <widget class="PlotWidget" name="DQ_Widget_5" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>200</width>
-                     <height>200</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QPushButton" name="btn_SelectFilesDQ">
+                 <item row="3" column="1" colspan="2">
+                  <widget class="QPushButton" name="btn_Launch">
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
@@ -1449,67 +1407,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </size>
                    </property>
                    <property name="text">
-                    <string>Select Files</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="7" colspan="2">
-                  <widget class="PlotWidget" name="DQ_Widget_6" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>200</width>
-                     <height>200</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="3">
-                  <widget class="QTextEdit" name="textEdit_10">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>30</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>100</width>
-                     <height>30</height>
-                    </size>
-                   </property>
-                   <property name="mouseTracking">
-                    <bool>false</bool>
-                   </property>
-                   <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">background: transparent</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="verticalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
-                   </property>
-                   <property name="horizontalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
-                   </property>
-                   <property name="sizeAdjustPolicy">
-                    <enum>QAbstractScrollArea::AdjustToContents</enum>
-                   </property>
-                   <property name="html">
-                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Filter DQ times&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::NoTextInteraction</set>
+                    <string>Launch</string>
                    </property>
                   </widget>
                  </item>
@@ -1532,55 +1430,43 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="1" colspan="2">
-                  <widget class="QPushButton" name="btn_ClearTable">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
+                 <item row="3" column="4">
+                  <widget class="QDoubleSpinBox" name="dq_max_2">
+                   <property name="prefix">
+                    <string/>
                    </property>
-                   <property name="text">
-                    <string>Clear Table</string>
+                   <property name="suffix">
+                    <string> musec</string>
+                   </property>
+                   <property name="decimals">
+                    <number>1</number>
+                   </property>
+                   <property name="minimum">
+                    <double>0.000000000000000</double>
+                   </property>
+                   <property name="singleStep">
+                    <double>2.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>20.000000000000000</double>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="0" rowspan="2" colspan="3">
-                  <widget class="QTableWidget" name="table_DQ_2">
-                   <property name="maximumSize">
+                 <item row="0" column="5" rowspan="2" colspan="2">
+                  <widget class="PlotWidget" name="DQ_Widget_4" native="true">
+                   <property name="minimumSize">
                     <size>
-                     <width>300</width>
-                     <height>16777215</height>
+                     <width>200</width>
+                     <height>0</height>
                     </size>
                    </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
+                  </widget>
+                 </item>
+                 <item row="3" column="5" colspan="2">
+                  <widget class="QRadioButton" name="radioButton_Log_2">
+                   <property name="text">
+                    <string>Logarithm</string>
                    </property>
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::CurrentChanged</set>
-                   </property>
-                   <property name="alternatingRowColors">
-                    <bool>true</bool>
-                   </property>
-                   <property name="selectionMode">
-                    <enum>QAbstractItemView::ExtendedSelection</enum>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="columnCount">
-                    <number>2</number>
-                   </property>
-                   <column>
-                    <property name="text">
-                     <string>Folder</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Name</string>
-                    </property>
-                   </column>
                   </widget>
                  </item>
                  <item row="3" column="3">
@@ -1634,8 +1520,58 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="4">
-                  <widget class="QDoubleSpinBox" name="dq_max_2">
+                 <item row="2" column="3">
+                  <widget class="QTextEdit" name="textEdit_10">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>30</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>30</height>
+                    </size>
+                   </property>
+                   <property name="mouseTracking">
+                    <bool>false</bool>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background: transparent</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                   </property>
+                   <property name="verticalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="horizontalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="sizeAdjustPolicy">
+                    <enum>QAbstractScrollArea::AdjustToContents</enum>
+                   </property>
+                   <property name="html">
+                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Filter DQ times&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="textInteractionFlags">
+                    <set>Qt::NoTextInteraction</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="4">
+                  <widget class="QDoubleSpinBox" name="dq_min_2">
                    <property name="prefix">
                     <string/>
                    </property>
@@ -1652,18 +1588,34 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <double>2.000000000000000</double>
                    </property>
                    <property name="value">
-                    <double>20.000000000000000</double>
+                    <double>0.000000000000000</double>
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="5">
-                  <widget class="QRadioButton" name="radioButton_Log_2">
+                 <item row="0" column="7" colspan="2">
+                  <widget class="PlotWidget" name="DQ_Widget_5" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1" colspan="2">
+                  <widget class="QPushButton" name="btn_ClearTable">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
                    <property name="text">
-                    <string>Logarithm</string>
+                    <string>Clear Table</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="6">
+                 <item row="2" column="5" colspan="2">
                   <widget class="QComboBox" name="comboBox_5">
                    <property name="styleSheet">
                     <string notr="true">background: none</string>
@@ -1697,12 +1649,35 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </item>
                   </widget>
                  </item>
+                 <item row="2" column="0">
+                  <widget class="QPushButton" name="btn_SelectFilesDQ">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Select Files</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="7" colspan="2">
+                  <widget class="PlotWidget" name="DQ_Widget_6" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="3" column="0">
                   <widget class="QPushButton" name="btn_Save_6">
                    <property name="minimumSize">
                     <size>
-                     <width>100</width>
-                     <height>25</height>
+                     <width>0</width>
+                     <height>0</height>
                     </size>
                    </property>
                    <property name="maximumSize">
@@ -1716,16 +1691,60 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1" colspan="2">
-                  <widget class="QPushButton" name="btn_Launch">
+                 <item row="0" column="0" rowspan="2" colspan="3">
+                  <widget class="QTableWidget" name="table_DQ_2">
                    <property name="maximumSize">
                     <size>
-                     <width>16777215</width>
+                     <width>300</width>
                      <height>16777215</height>
                     </size>
                    </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::CurrentChanged</set>
+                   </property>
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionMode">
+                    <enum>QAbstractItemView::ExtendedSelection</enum>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="columnCount">
+                    <number>2</number>
+                   </property>
+                   <column>
+                    <property name="text">
+                     <string>Folder</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>Name</string>
+                    </property>
+                   </column>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QPushButton" name="btn_Load_2">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>25</height>
+                    </size>
+                   </property>
                    <property name="text">
-                    <string>Launch</string>
+                    <string>Load</string>
                    </property>
                   </widget>
                  </item>
@@ -1754,7 +1773,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout_5" rowstretch="0,0,0,0,0,0" columnstretch="1,1,2,0,2">
+                <layout class="QGridLayout" name="gridLayout_5" rowstretch="0,0,0,0,0,0,0" columnstretch="1,1,2,0,2">
                  <property name="spacing">
                   <number>5</number>
                  </property>
@@ -1762,8 +1781,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <widget class="QPushButton" name="btn_Save_3">
                    <property name="minimumSize">
                     <size>
-                     <width>100</width>
-                     <height>25</height>
+                     <width>0</width>
+                     <height>0</height>
                     </size>
                    </property>
                    <property name="maximumSize">
@@ -1948,6 +1967,120 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <property name="text">
                     <string>Select Files</string>
                    </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="3">
+                  <widget class="QPushButton" name="btn_Plot1">
+                   <property name="text">
+                    <string>Plot</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="3" rowspan="2">
+                  <widget class="QGroupBox" name="groupBox_equations_3">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>50</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_6">
+                    <property name="leftMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>10</number>
+                    </property>
+                    <item>
+                     <widget class="QTextEdit" name="textEdit_T2_4">
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="mouseTracking">
+                       <bool>false</bool>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
+                      <property name="acceptDrops">
+                       <bool>false</bool>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: transparent</string>
+                      </property>
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                      <property name="verticalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOff</enum>
+                      </property>
+                      <property name="horizontalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOff</enum>
+                      </property>
+                      <property name="sizeAdjustPolicy">
+                       <enum>QAbstractScrollArea::AdjustToContents</enum>
+                      </property>
+                      <property name="undoRedoEnabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="html">
+                       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Plot:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="textInteractionFlags">
+                       <set>Qt::NoTextInteraction</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_10">
+                      <property name="text">
+                       <string>1ˢᵗ Exp</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_11">
+                      <property name="text">
+                       <string>2ⁿᵈ Exp</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_12">
+                      <property name="text">
+                       <string>3ⁿᵈ Exp</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
                  <item row="4" column="1">
@@ -2260,117 +2393,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </widget>
                   </widget>
                  </item>
-                 <item row="2" column="3" rowspan="2">
-                  <widget class="QGroupBox" name="groupBox_equations_3">
+                 <item row="6" column="0">
+                  <widget class="QPushButton" name="btn_Load_3">
                    <property name="minimumSize">
                     <size>
-                     <width>70</width>
-                     <height>50</height>
+                     <width>0</width>
+                     <height>0</height>
                     </size>
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>100</width>
-                     <height>200</height>
+                     <width>16777215</width>
+                     <height>25</height>
                     </size>
                    </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_6">
-                    <property name="leftMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>10</number>
-                    </property>
-                    <item>
-                     <widget class="QTextEdit" name="textEdit_T2_4">
-                      <property name="maximumSize">
-                       <size>
-                        <width>16777215</width>
-                        <height>30</height>
-                       </size>
-                      </property>
-                      <property name="mouseTracking">
-                       <bool>false</bool>
-                      </property>
-                      <property name="focusPolicy">
-                       <enum>Qt::NoFocus</enum>
-                      </property>
-                      <property name="acceptDrops">
-                       <bool>false</bool>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">background: transparent</string>
-                      </property>
-                      <property name="frameShape">
-                       <enum>QFrame::NoFrame</enum>
-                      </property>
-                      <property name="verticalScrollBarPolicy">
-                       <enum>Qt::ScrollBarAlwaysOff</enum>
-                      </property>
-                      <property name="horizontalScrollBarPolicy">
-                       <enum>Qt::ScrollBarAlwaysOff</enum>
-                      </property>
-                      <property name="sizeAdjustPolicy">
-                       <enum>QAbstractScrollArea::AdjustToContents</enum>
-                      </property>
-                      <property name="undoRedoEnabled">
-                       <bool>false</bool>
-                      </property>
-                      <property name="html">
-                       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Plot:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                      </property>
-                      <property name="textInteractionFlags">
-                       <set>Qt::NoTextInteraction</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="radioButton_10">
-                      <property name="text">
-                       <string>1ˢᵗ Exp</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="radioButton_11">
-                      <property name="text">
-                       <string>2ⁿᵈ Exp</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="radioButton_12">
-                      <property name="text">
-                       <string>3ⁿᵈ Exp</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item row="4" column="3">
-                  <widget class="QPushButton" name="btn_Plot1">
                    <property name="text">
-                    <string>Plot</string>
+                    <string>Load</string>
                    </property>
                   </widget>
                  </item>
@@ -2399,7 +2437,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout_6" rowstretch="1,0,0,0,0,0,0" columnstretch="0,0,0,0,0">
+                <layout class="QGridLayout" name="gridLayout_6" rowstretch="1,0,0,0,0,0,0" columnstretch="2,2,1,1,3" columnminimumwidth="2,2,1,1,3">
                  <property name="leftMargin">
                   <number>0</number>
                  </property>
@@ -2438,7 +2476,99 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="3" rowspan="7">
+                 <item row="0" column="0" rowspan="4" colspan="2">
+                  <widget class="QTableWidget" name="table_DQMQ">
+                   <property name="minimumSize">
+                    <size>
+                     <width>370</width>
+                     <height>300</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::CurrentChanged</set>
+                   </property>
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionMode">
+                    <enum>QAbstractItemView::ExtendedSelection</enum>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="columnCount">
+                    <number>4</number>
+                   </property>
+                   <column>
+                    <property name="text">
+                     <string>Time</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>DQ</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>Ref</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>nDQ</string>
+                    </property>
+                   </column>
+                  </widget>
+                 </item>
+                 <item row="4" column="1" rowspan="3">
+                  <widget class="QPushButton" name="btn_Save_2">
+                   <property name="text">
+                    <string>Save</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2" rowspan="4">
+                  <widget class="QGroupBox" name="groupBox_5">
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_9">
+                    <item>
+                     <widget class="QPushButton" name="pushButton_DQMQ_1">
+                      <property name="text">
+                       <string>Plot Original</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pushButton_DQMQ_4">
+                      <property name="text">
+                       <string>Normalize</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pushButton_DQMQ_2">
+                      <property name="text">
+                       <string>Plot Difference</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pushButton_DQMQ_3">
+                      <property name="text">
+                       <string>Get nDQ</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="0" column="3" rowspan="4">
                   <widget class="QGroupBox" name="groupBox">
                    <property name="minimumSize">
                     <size>
@@ -2704,95 +2834,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </widget>
                   </widget>
                  </item>
-                 <item row="0" column="2" rowspan="7">
-                  <widget class="QGroupBox" name="groupBox_5">
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_9">
-                    <item>
-                     <widget class="QPushButton" name="pushButton_DQMQ_1">
-                      <property name="text">
-                       <string>Plot Original</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_DQMQ_4">
-                      <property name="text">
-                       <string>Normalize</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_DQMQ_2">
-                      <property name="text">
-                       <string>Plot Difference</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_DQMQ_3">
-                      <property name="text">
-                       <string>Get nDQ</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item row="0" column="0" rowspan="4" colspan="2">
-                  <widget class="QTableWidget" name="table_DQMQ">
+                 <item row="4" column="2" rowspan="3" colspan="2">
+                  <widget class="QPushButton" name="btn_Load_4">
                    <property name="minimumSize">
                     <size>
-                     <width>370</width>
-                     <height>300</height>
+                     <width>0</width>
+                     <height>0</height>
                     </size>
                    </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>25</height>
+                    </size>
                    </property>
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::CurrentChanged</set>
-                   </property>
-                   <property name="alternatingRowColors">
-                    <bool>true</bool>
-                   </property>
-                   <property name="selectionMode">
-                    <enum>QAbstractItemView::ExtendedSelection</enum>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="columnCount">
-                    <number>4</number>
-                   </property>
-                   <column>
-                    <property name="text">
-                     <string>Time</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>DQ</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Ref</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>nDQ</string>
-                    </property>
-                   </column>
-                  </widget>
-                 </item>
-                 <item row="4" column="1" rowspan="3">
-                  <widget class="QPushButton" name="btn_Save_2">
                    <property name="text">
-                    <string>Save</string>
+                    <string>Load</string>
                    </property>
                   </widget>
                  </item>
@@ -2821,7 +2878,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,1,0,0,0,0,0,0" columnstretch="0,0,0,0,0,0" rowminimumheight="0,0,0,0,0,0,0,0,0,0" columnminimumwidth="1,1,0,2,0,2">
+                <layout class="QGridLayout" name="gridLayout" rowstretch="1,1,1,1,0,0,0,0,0,0,0" columnstretch="0,0,0,0,0,0" rowminimumheight="0,0,0,0,0,0,0,0,0,0,0" columnminimumwidth="1,1,0,2,0,2">
                  <property name="leftMargin">
                   <number>0</number>
                  </property>
@@ -2837,10 +2894,162 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <property name="verticalSpacing">
                   <number>10</number>
                  </property>
+                 <item row="10" column="5">
+                  <widget class="QTextEdit" name="textEdit_error_3">
+                   <property name="minimumSize">
+                    <size>
+                     <width>300</width>
+                     <height>100</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>400</width>
+                     <height>300</height>
+                    </size>
+                   </property>
+                   <property name="mouseTracking">
+                    <bool>false</bool>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
+                   <property name="acceptDrops">
+                    <bool>false</bool>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background: transparent</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                   </property>
+                   <property name="verticalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="horizontalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="sizeAdjustPolicy">
+                    <enum>QAbstractScrollArea::AdjustToContents</enum>
+                   </property>
+                   <property name="undoRedoEnabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="html">
+                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="textInteractionFlags">
+                    <set>Qt::TextSelectableByMouse</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="5" rowspan="3">
+                  <widget class="QTextEdit" name="textEdit_16">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                   <property name="html">
+                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;t&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;erm = (τ /(1 + (2π · ω · τ))&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;  + 4 · (τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; /(1 + (4π · ω · τ))&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;R&lt;/span&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; = A + CDD&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;f&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; · term(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;f&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;) + CDD&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;i&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; · term(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;i&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;) + CDD&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;s&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; · term(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;s&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="textInteractionFlags">
+                    <set>Qt::TextSelectableByMouse</set>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="8" column="0">
                   <widget class="QPushButton" name="btn_SelectFiles_FFC">
                    <property name="text">
                     <string>Select Files</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="9" column="0">
+                  <widget class="QPushButton" name="btn_Save_7">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Save</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="10" column="3">
+                  <widget class="QTextEdit" name="textEdit_error_2">
+                   <property name="maximumSize">
+                    <size>
+                     <width>200</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                   <property name="mouseTracking">
+                    <bool>false</bool>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
+                   <property name="acceptDrops">
+                    <bool>false</bool>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background: transparent</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                   </property>
+                   <property name="verticalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="horizontalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOff</enum>
+                   </property>
+                   <property name="sizeAdjustPolicy">
+                    <enum>QAbstractScrollArea::AdjustToContents</enum>
+                   </property>
+                   <property name="undoRedoEnabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="html">
+                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="textInteractionFlags">
+                    <set>Qt::TextSelectableByMouse</set>
                    </property>
                   </widget>
                  </item>
@@ -2871,6 +3080,93 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <string>Lorentzian fit</string>
                     </property>
                    </widget>
+                  </widget>
+                 </item>
+                 <item row="10" column="0">
+                  <widget class="QPushButton" name="btn_Load_5">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>25</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Load</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0" rowspan="7" colspan="3">
+                  <widget class="QTableWidget" name="table_FFC_1">
+                   <property name="maximumSize">
+                    <size>
+                     <width>1000</width>
+                     <height>1000</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::CurrentChanged</set>
+                   </property>
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionMode">
+                    <enum>QAbstractItemView::ExtendedSelection</enum>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="columnCount">
+                    <number>0</number>
+                   </property>
+                   <row>
+                    <property name="text">
+                     <string>Folder</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>File name</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>A</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>CDD</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>C(trans)</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>τ(corr)</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>τ(trans)</string>
+                    </property>
+                   </row>
+                   <row>
+                    <property name="text">
+                     <string>τ(residual)</string>
+                    </property>
+                   </row>
                   </widget>
                  </item>
                  <item row="7" column="0" colspan="3">
@@ -2949,6 +3245,34 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                   </widget>
                  </item>
+                 <item row="7" column="3" rowspan="3">
+                  <widget class="QTextEdit" name="textEdit_11">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="html">
+                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;t&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;erm1 = (τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; /(1 + (2π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)) &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;term2 = 4 · (τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/(1 + (4π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)) &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;term3 = ln{(1 + (2π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2 &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/[(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;res&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; + (2π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;]}&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;term4 = 4 · ln{(1 + (4π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2 &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/[(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;res&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; + (4π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;]}&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;R&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; = A + CDD · (term1 + term2) + C&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;·&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;(term3 + term4)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="textInteractionFlags">
+                    <set>Qt::TextSelectableByMouse</set>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="0" column="3" rowspan="7">
                   <widget class="PlotWidget" name="FFC_Widget_1" native="true">
                    <property name="minimumSize">
@@ -2978,235 +3302,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </widget>
                   </widget>
                  </item>
-                 <item row="0" column="0" rowspan="7" colspan="3">
-                  <widget class="QTableWidget" name="table_FFC_1">
-                   <property name="maximumSize">
-                    <size>
-                     <width>1000</width>
-                     <height>1000</height>
-                    </size>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::CurrentChanged</set>
-                   </property>
-                   <property name="alternatingRowColors">
-                    <bool>true</bool>
-                   </property>
-                   <property name="selectionMode">
-                    <enum>QAbstractItemView::ExtendedSelection</enum>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="columnCount">
-                    <number>0</number>
-                   </property>
-                   <row>
-                    <property name="text">
-                     <string>Folder</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>File name</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>A</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>CDD</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>C(trans)</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>τ(corr)</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>τ(trans)</string>
-                    </property>
-                   </row>
-                   <row>
-                    <property name="text">
-                     <string>τ(residual)</string>
-                    </property>
-                   </row>
-                  </widget>
-                 </item>
-                 <item row="9" column="3">
-                  <widget class="QTextEdit" name="textEdit_error_2">
-                   <property name="maximumSize">
-                    <size>
-                     <width>200</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                   <property name="mouseTracking">
-                    <bool>false</bool>
-                   </property>
-                   <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
-                   </property>
-                   <property name="acceptDrops">
-                    <bool>false</bool>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">background: transparent</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="verticalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
-                   </property>
-                   <property name="horizontalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
-                   </property>
-                   <property name="sizeAdjustPolicy">
-                    <enum>QAbstractScrollArea::AdjustToContents</enum>
-                   </property>
-                   <property name="undoRedoEnabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="html">
-                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::TextSelectableByMouse</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="9" column="5">
-                  <widget class="QTextEdit" name="textEdit_error_3">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>100</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>400</width>
-                     <height>300</height>
-                    </size>
-                   </property>
-                   <property name="mouseTracking">
-                    <bool>false</bool>
-                   </property>
-                   <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
-                   </property>
-                   <property name="acceptDrops">
-                    <bool>false</bool>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">background: transparent</string>
-                   </property>
-                   <property name="frameShape">
-                    <enum>QFrame::NoFrame</enum>
-                   </property>
-                   <property name="verticalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
-                   </property>
-                   <property name="horizontalScrollBarPolicy">
-                    <enum>Qt::ScrollBarAlwaysOff</enum>
-                   </property>
-                   <property name="sizeAdjustPolicy">
-                    <enum>QAbstractScrollArea::AdjustToContents</enum>
-                   </property>
-                   <property name="undoRedoEnabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="html">
-                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::TextSelectableByMouse</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="7" column="5" rowspan="2">
-                  <widget class="QTextEdit" name="textEdit_16">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>120</height>
-                    </size>
-                   </property>
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                   <property name="html">
-                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;t&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;erm = (τ /(1 + (2π · ω · τ))&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;  + 4 · (τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; /(1 + (4π · ω · τ))&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;R&lt;/span&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; = A + CDD&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;f&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; · term(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;f&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;) + CDD&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;i&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; · term(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;i&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;) + CDD&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;s&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; · term(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;s&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::TextSelectableByMouse</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="7" column="3" rowspan="2">
-                  <widget class="QTextEdit" name="textEdit_11">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>120</height>
-                    </size>
-                   </property>
-                   <property name="html">
-                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;t&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;erm1 = (τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; /(1 + (2π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)) &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;term2 = 4 · (τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/(1 + (4π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;c&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)) &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;term3 = ln{(1 + (2π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2 &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/[(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;res&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; + (2π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;]}&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;term4 = 4 · ln{(1 + (4π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2 &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/[(τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;/τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;res&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; + (4π · ω · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;)&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:super;&quot;&gt;2&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;]}&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;equation&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;R&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;1&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; = A + CDD · (term1 + term2) + C&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt; · τ&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt;trans &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;·&lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt; vertical-align:sub;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-family:'Arial','sans-serif'; font-size:12pt;&quot;&gt;(term3 + term4)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="textInteractionFlags">
-                    <set>Qt::TextSelectableByMouse</set>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="9" column="1" colspan="2">
                   <widget class="QPushButton" name="btn_DeleteRow_2">
                    <property name="enabled">
@@ -3217,26 +3312,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                   </widget>
                  </item>
-                 <item row="9" column="0">
-                  <widget class="QPushButton" name="btn_Save_7">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Save</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="8" column="4">
+                 <item row="2" column="4" rowspan="5">
                   <widget class="QGroupBox" name="groupBox_equations_5">
                    <property name="minimumSize">
                     <size>
@@ -3339,7 +3415,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </layout>
                   </widget>
                  </item>
-                 <item row="7" column="4">
+                 <item row="1" column="4">
                   <widget class="QGroupBox" name="groupBox_7">
                    <property name="enabled">
                     <bool>false</bool>
