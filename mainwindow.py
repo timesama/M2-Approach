@@ -959,10 +959,10 @@ class MainWindow(QMainWindow):
         selected_files = self.selected_T1files
         table = self.ui.table_T1
         combobox = self.ui.comboBox_6
-        pattern = r'(T1_.*\.dat|T2_.*\.dat)'
+        pattern = r'T1_(.*)\.dat|T2_(.*)\.dat'
         dictionary = self.tau_dictionary
+        table.setRowCount(len(selected_files))
 
-        file_name = []
         x_axis = []
 
         for row, file in zip(range(table.rowCount()), selected_files):
@@ -1019,7 +1019,7 @@ class MainWindow(QMainWindow):
             dictionary[file]["Signal"].extend(Signal)
 
         
-        table.setRowCount(len(selected_files))
+        
         self.ui.btn_Plot1.setEnabled(True)            
         combobox.setCurrentIndex(-1)
 
@@ -1152,7 +1152,7 @@ class MainWindow(QMainWindow):
                 
             item = QTableWidgetItem(filename)
 
-            pattern = r'DQ_table_(\d+)(?!\([^)]*\))(?![A-Za-z])'
+            pattern = r'DQ_table_(-?[0-9]+).csv'
             try:
                 default_name = QTableWidgetItem(str(re.search(pattern, filename).group(1)))
             except:
