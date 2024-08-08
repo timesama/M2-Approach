@@ -1821,7 +1821,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <enum>QAbstractItemView::SelectRows</enum>
                    </property>
                    <property name="columnCount">
-                    <number>6</number>
+                    <number>9</number>
                    </property>
                    <column>
                     <property name="text">
@@ -1845,12 +1845,27 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </column>
                    <column>
                     <property name="text">
+                     <string>A (1)</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
                      <string>tau (2)</string>
                     </property>
                    </column>
                    <column>
                     <property name="text">
+                     <string>A (2)</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
                      <string>tau (3)</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>A (3)</string>
                     </property>
                    </column>
                   </widget>

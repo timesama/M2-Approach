@@ -370,58 +370,64 @@ def fit_exponent(Time, Signal, order):
     if order == 1:
         p = [-10, 100, 15]
         b = ([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
-        popt, _ = curve_fit(decaying_exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
-        fitted_curve = decaying_exponential(Time_fit, *popt)
-        tau1 = round(popt[1],4)
+        popt_, _ = curve_fit(decaying_exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
+        fitted_curve = decaying_exponential(Time_fit, *popt_)
+        popt = np.round(popt_, 3)
+
+        tau1 = popt[1]
+        A1   = popt[0]
 
         tau2 = 0
         tau3 = 0
+        A2   = 0
+        A3   = 0
         decrease_order = False
 
-        r2_curve = decaying_exponential(Time, *popt)
+        r2_curve = decaying_exponential(Time, *popt_)
         R2 = round(calculate_r_squared(Signal, r2_curve),4)
 
     elif order == 2:
         # p = [-10, 10, -10, 100, 15]
         b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf])
         # popt, pcov = curve_fit(decaying_2exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
-        popt, _ = curve_fit(decaying_2exponential, Time, Signal,bounds = b, maxfev=10000000)
-        fitted_curve = decaying_2exponential(Time_fit, *popt)
+        popt_, _ = curve_fit(decaying_2exponential, Time, Signal,bounds = b, maxfev=10000000)
+        fitted_curve = decaying_2exponential(Time_fit, *popt_)
+        popt = np.round(popt_, 3)
 
-        tau1_ = round(popt[1],3)
-        tau2_ = round(popt[3],3)
+        A1_, tau1_, A2_, tau2_ = popt[0:4]
+        tau_A_pairs = sorted([(tau1_, A1_), (tau2_, A2_)])
+        tau1, A1 = tau_A_pairs[0]
+        tau2, A2 = tau_A_pairs[1]
 
-        taus = sorted([tau1_,tau2_])
-        tau1 = taus[0]
-        tau2 = taus[1]
         tau3 = 0
+        A3   = 0
 
         decrease_order = check_tau_values(tau1, tau2, tau3)
 
-        r2_curve = decaying_2exponential(Time, *popt)
+        r2_curve = decaying_2exponential(Time, *popt_)
         R2 = round(calculate_r_squared(Signal, r2_curve),4)
 
     elif order ==3:
         # p = [-10, 10, -10, 50, -10, 100, 15]
         b=([-np.inf, 0, -np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf, 50000, np.inf])
         # popt, pcov = curve_fit(decaying_3exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
-        popt, _ = curve_fit(decaying_3exponential, Time, Signal, bounds = b, maxfev=10000000)
-        fitted_curve = decaying_3exponential(Time_fit, *popt)
-        tau1_ = round(popt[1],3)
-        tau2_ = round(popt[3],3)
-        tau3_ = round(popt[5],3)
+        popt_, _ = curve_fit(decaying_3exponential, Time, Signal, bounds = b, maxfev=10000000)
 
-        taus = sorted([tau1_,tau2_,tau3_])
-        tau1 = taus[0]
-        tau2 = taus[1]
-        tau3 = taus[2]
+        fitted_curve = decaying_3exponential(Time_fit, *popt_)
+
+        popt = np.round(popt_, 3)
+        A1_, tau1_, A2_, tau2_ , A3_, tau3_ = popt[0:6]
+        tau_A_pairs = sorted([(tau1_, A1_), (tau2_, A2_), (tau3_, A3_)])
+        tau1, A1 = tau_A_pairs[0]
+        tau2, A2 = tau_A_pairs[1]
+        tau3, A3 = tau_A_pairs[2]
 
         decrease_order = check_tau_values(tau1, tau2, tau3)
 
-        r2_curve = decaying_3exponential(Time, *popt)
+        r2_curve = decaying_3exponential(Time, *popt_)
         R2 = round(calculate_r_squared(Signal, r2_curve),4)
 
-    return Time_fit, fitted_curve, tau1, tau2, tau3, R2, decrease_order
+    return Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3, decrease_order
 
 def check_tau_values(tau1, tau2, tau3):
     decrease_order = False

@@ -1052,39 +1052,44 @@ class MainWindow(QMainWindow):
         try: 
             if self.ui.radioButton_4.isChecked():
                 order = 1
-                Time_fit, fitted_curve, tau1, _, _, R2, decrease_order = Cal.fit_exponent(Time, Signal, order)
+                # Time_fit, fitted_curve, tau1, _, _, R2, decrease_order = Cal.fit_exponent(Time, Signal, order)
                 tau2 = 0
                 tau3 = 0
 
             elif self.ui.radioButton_5.isChecked():
                 order = 2
-                Time_fit, fitted_curve, tau1, tau2, _, R2, decrease_order = Cal.fit_exponent(Time, Signal, order)
+                # Time_fit, fitted_curve, tau1, tau2, _, R2, decrease_order = Cal.fit_exponent(Time, Signal, order)
                 tau3 = 0
 
-            
             else: 
                 order = 3
-                Time_fit, fitted_curve, tau1, tau2, tau3, R2, decrease_order = Cal.fit_exponent(Time, Signal, order)
+                # Time_fit, fitted_curve, tau1, tau2, tau3, R2, decrease_order = Cal.fit_exponent(Time, Signal, order)
 
         except:
             QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with {order} exponents. Fitting with one.", QMessageBox.Ok)
             order = 1
-            Time_fit, fitted_curve, tau1, _, _, R2, decrease_order = Cal.fit_exponent(Time, Signal, order)
+            # Time_fit, fitted_curve, tau1, _, _, R2, decrease_order = Cal.fit_exponent(Time, Signal, order)
             tau2 = 0
             tau3 = 0
+        
+        Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3, decrease_order = Cal.fit_exponent(Time, Signal, order)
         
         self.ui.textEdit_error.setText(f"R² {R2}") 
         
         
-        tau_str = str(tau1)
-        tau_str2 = str(tau2)
-        tau_str3 = str(tau3)
-        item = QTableWidgetItem(tau_str)
-        item2 = QTableWidgetItem(tau_str2)
-        item3 = QTableWidgetItem(tau_str3)
-        table.setItem(selected_file_idx,3,item)
-        table.setItem(selected_file_idx,4,item2)
-        table.setItem(selected_file_idx,5,item3)
+        item1 = QTableWidgetItem(str(tau1))
+        item2 = QTableWidgetItem(str(tau2))
+        item3 = QTableWidgetItem(str(tau3))
+        item11 = QTableWidgetItem(str(A1))
+        item22 = QTableWidgetItem(str(A2))
+        item33 = QTableWidgetItem(str(A3))
+
+        table.setItem(selected_file_idx,3,item1)
+        table.setItem(selected_file_idx,5,item2)
+        table.setItem(selected_file_idx,7,item3)
+        table.setItem(selected_file_idx,4,item11)
+        table.setItem(selected_file_idx,6,item22)
+        table.setItem(selected_file_idx,8,item33)
         
         
         figure.clear()
