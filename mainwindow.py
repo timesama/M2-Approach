@@ -1,6 +1,6 @@
 # This Python file uses the following encoding: utf-8
-import sys, os, re, csv
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea, QHeaderView
+import sys, os, re, csv, requests
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor, QIcon
 import numpy as np
@@ -63,9 +63,10 @@ class MainWindow(QMainWindow):
         # Connect buttons to their respective slots
         self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
         self.ui.commandLinkButton.clicked.connect(self.open_url)
+        self.check_for_updates()
 
         self.ui.tabWidget.currentChanged.connect(self.state)
-        
+    
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.btn_Save_2.clicked.connect(self.save_data)
         self.ui.btn_Save_6.clicked.connect(self.save_data)
@@ -122,7 +123,6 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.FFC_Widget_1,"Frequency, MHz", "1/T₁", "")
         self.setup_graph(self.ui.FFC_Widget_2, "X axis", "Y Axis", "")
 
-
         # Table Headers
         self.ui.table_SE.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=0: self.renameSection(self.ui.table_SE, index=0)
@@ -171,10 +171,29 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setHidden(True)
         self.ui.textEdit_5.setHidden(True)
         self.ui.textEdit_6.setHidden(True)
+
+    def check_for_updates(self):
+        current_version = '0.0.3'
+        url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
+        try:
+            # Make a GET request to fetch the latest release data
+            response = requests.get(url)
+            response.raise_for_status()  # Raise an error for bad status codes
+            latest_release = response.json()
+            latest_version = latest_release['tag_name']
+
+            # Compare the versions
+            if latest_version != current_version:
+                result = QMessageBox.information(self, "New Relaxyzer Available", f"A new version (Relaxyzer {latest_version}) is available.\nWould you like to update?", QMessageBox.Yes | QMessageBox.No)
+                if result == QMessageBox.Yes:
+                    self.open_url()
                 
+        except requests.RequestException as e:
+            print(f"Failed to check for updates: {e}")
+
     def open_url(self):
         open_application('https://github.com/timesama/M2-Approach/releases')
-
+    
     def update_file(self):
         i = self.ui.comboBox_4.currentIndex() + 1
         self.ui.btn_Phasing.setEnabled(True)
