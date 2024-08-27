@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-import sys, os, re
+import sys, os, re, csv
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox, QScrollArea, QWidget
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor, QIcon
@@ -10,7 +10,7 @@ from scipy.signal import savgol_filter
 from webbrowser import open as open_application
 from itertools import islice
 import pyqtgraph as pg
-from pyqtgraph.exporters import ImageExporter
+import pyqtgraph.exporters
 from ui_Form import Ui_NMR
 from ui_Notification import Ui_Note
 from ui_PhasingManual import Ui_Phasing as Ui_PhasingManual
@@ -52,6 +52,8 @@ class MainWindow(QMainWindow):
         self.selected_FFCfiles = []
         self.selected_DQMQfile = []
         self.dq_t2 = {}
+        self.dq_comparison_linear = {}
+        self.dq_comparison_distribution = {}
         self.tau_dictionary = {}
         self.ffc_dictionary = {}
         self.tab = None
@@ -1178,6 +1180,10 @@ class MainWindow(QMainWindow):
 
     def update_DQ_comparison_plot(self):
         cmap = pg.ColorMap([0, len(self.dq_t2)], [pg.mkColor('b'), pg.mkColor('r')])  # Blue to red
+    
+        self.dq_comparison_distribution = {'File name': [], 
+                'X axis': [], 'Center': [], 'FWHM': [], 'Lorentz ratio': [], 
+                'Fitting type': [], 'T2 limit': []}
 
         #legend = self.ui.DQ_Widget_3.addLegend()
         legend1 = self.ui.DQ_Widget_4.addLegend()  # Get the legend object
@@ -1201,8 +1207,10 @@ class MainWindow(QMainWindow):
         comparison_par = []
         for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.dq_t2.items()):
             file_name_item = self.ui.table_DQ_2.item(row, 1)
+            file_item = self.ui.table_DQ_2.item(row, 0)
             if file_name_item is not None:
                 file_name = file_name_item.text()
+                file = file_item.text()
                 if file_name != 'hide':
                     try:
                         _comp_par = float(file_name)
@@ -1298,10 +1306,32 @@ class MainWindow(QMainWindow):
                 
                 self.ui.DQ_Widget_3.plot(x_line, y_line, pen=color) 
 
+            self.dq_comparison_distribution['File name'].append(file)
+            self.dq_comparison_distribution['X axis'].append(file_name)
+            self.dq_comparison_distribution['Center'].append(cen)
+            self.dq_comparison_distribution['FWHM'].append(fwhm)
+            self.dq_comparison_distribution['Lorentz ratio'].append(w)
+            self.dq_comparison_distribution['Fitting type'].append(text)
+            self.dq_comparison_distribution['T2 limit'].append(time_max)
+
 
         self.ui.DQ_Widget_5.plot(comparison_par, center, pen='r', symbolPen=None, symbol='o', symbolBrush='r')
         self.ui.DQ_Widget_6.plot(comparison_par, weight, pen='b', symbolPen=None, symbol='o', symbolBrush='b')
 
+    def write_collective_dictionary(self, dictionary, save_path_name):
+        # file = name of the file 
+        data = dictionary
+        headers = data.keys()
+
+        max_len = max(len(v) for v in data.values() if isinstance(v, list))
+        rows = zip(*[v + v[-1:]*(max_len-len(v)) if len(v) < max_len else v for v in data.values()])
+
+        # Write to CSV
+        with open(save_path_name, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(headers)
+            writer.writerows(rows)
+        
     def nan_value(self, table, row, column_index):
         table.setItem(row, column_index, QTableWidgetItem('NaN'))
 
@@ -1334,24 +1364,36 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             table = self.ui.table_SE
             files = self.selected_files
+            default_name = 'SE_'
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             files = self.selected_files
+            default_name = 'Table_DQ_' + os.path.split(os.path.dirname(files[0]))[1]
         elif self.tab == 'DQ_Temp':
             table = self.ui.table_DQ_2
             files = self.selected_DQfiles
+            path = os.path.dirname(files[0]) + '/Table_DQ_comparison_parametrs'
+            self.write_collective_dictionary(self.dq_comparison_distribution, path)
+            default_name = 'Table_DQ_comparison'
+
         elif self.tab == 'T1T2':
             table = self.ui.table_T1
             files = self.selected_T1files
+            default_name = 'T'
+
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
             files = self.selected_DQMQfile
+            pattern = r'.*_(.*)'
+            default_name = 'DQMQ_data_' + re.search(pattern, os.path.split(os.path.dirname(files[0]))[1] ).group(1)
+
         elif self.tab == '23Model':
             table = self.ui.table_FFC_1
             files = self.selected_FFCfiles
+            default_name = 'FFC_'
 
         dialog = SaveFilesDialog(self)
-        dialog.save_data_as_csv(self, table, files)
+        dialog.save_data_as_csv(self, table, files, default_name)
 
     def load_data(self):
         dlg = OpenFilesDialog(self)
@@ -1422,7 +1464,6 @@ class MainWindow(QMainWindow):
             self.ui.power.setEnabled(True)
         elif self.tab == '23Model':
             self.update_FFC_table()
-
 
     def save_figures(self, file_path, variable):
         # Set names
@@ -1690,7 +1731,7 @@ class SaveFilesDialog(QFileDialog):
         #self.setFileMode(QFileDialog.AnyFile)  # Allow selecting any file for saving
         self.setAcceptMode(QFileDialog.AcceptSave)  # Set the dialog to save mode
 
-    def save_data_as_csv(self, directory, table, files, default_filename='Result_'):
+    def save_data_as_csv(self, directory, table, files, default_filename):
         # I have no fucjing idea, why the hell this function takes these arguments, but it doesn't work otherwise.
         initial_directory_file = "selected_folder.txt"
         try:
@@ -1721,7 +1762,6 @@ class SaveFilesDialog(QFileDialog):
 
                 with open(files_list_path, 'w') as file_list:
                     json.dump(files, file_list)
-                    print('olalala')
 
             except Exception as e:
                 print(f"Failed to save file as CSV: {e}")
