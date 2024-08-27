@@ -817,7 +817,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <string notr="true"/>
                    </property>
                    <property name="editTriggers">
-                    <set>QAbstractItemView::CurrentChanged</set>
+                    <set>QAbstractItemView::CurrentChanged|QAbstractItemView::SelectedClicked</set>
+                   </property>
+                   <property name="dragDropMode">
+                    <enum>QAbstractItemView::NoDragDrop</enum>
+                   </property>
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
                    </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -828,6 +834,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <property name="columnCount">
                     <number>5</number>
                    </property>
+                   <attribute name="horizontalHeaderCascadingSectionResizes">
+                    <bool>true</bool>
+                   </attribute>
                    <column>
                     <property name="text">
                      <string>T, C</string>
@@ -890,8 +899,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <widget class="QComboBox" name="comboBox">
                     <property name="geometry">
                      <rect>
-                      <x>170</x>
-                      <y>10</y>
+                      <x>50</x>
+                      <y>0</y>
                       <width>63</width>
                       <height>23</height>
                      </rect>
@@ -921,38 +930,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <item>
                      <property name="text">
                       <string>T₂*</string>
-                     </property>
-                    </item>
-                   </widget>
-                   <widget class="QComboBox" name="comboBox_3">
-                    <property name="geometry">
-                     <rect>
-                      <x>100</x>
-                      <y>10</y>
-                      <width>63</width>
-                      <height>23</height>
-                     </rect>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">background: none</string>
-                    </property>
-                    <property name="currentText">
-                     <string>T, C</string>
-                    </property>
-                    <property name="currentIndex">
-                     <number>0</number>
-                    </property>
-                    <property name="placeholderText">
-                     <string/>
-                    </property>
-                    <item>
-                     <property name="text">
-                      <string>T, C</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>XS, %</string>
                      </property>
                     </item>
                    </widget>

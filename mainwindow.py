@@ -1,6 +1,6 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re, csv
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QDialog, QMessageBox, QScrollArea, QWidget
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea, QHeaderView
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor, QIcon
 import numpy as np
@@ -122,9 +122,17 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.FFC_Widget_1,"Frequency, MHz", "1/T₁", "")
         self.setup_graph(self.ui.FFC_Widget_2, "X axis", "Y Axis", "")
 
+
+        # Table Headers
+        self.ui.table_SE.horizontalHeader().sectionDoubleClicked.connect(
+    lambda index=0: self.renameSection(self.ui.table_SE, index=0)
+)
+        self.ui.table_T1.horizontalHeader().sectionDoubleClicked.connect(
+    lambda index=2: self.renameSection(self.ui.table_T1, index=2)
+)
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
-        self.ui.table_SE.currentItemChanged.connect(self.update_yaxis)
+        #self.ui.table_SE.currentItemChanged.connect(self.update_xaxis)
         self.ui.radioButton_4.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_5.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_6.clicked.connect(self.calculate_relaxation_time)
@@ -134,8 +142,7 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_3.clicked.connect(self.hide_FFT_progress)
         self.ui.radioButton_2.clicked.connect(self.hide_FFT_progress)
         # Connect combobox signals to slots
-        self.ui.comboBox.activated.connect(self.update_yaxis)
-        self.ui.comboBox_3.activated.connect(self.update_yaxis)
+        self.ui.comboBox.activated.connect(self.update_se_graphs)
         self.ui.comboBox_2.activated.connect(self.plot_fit)
         self.ui.comboBox_6.activated.connect(self.calculate_relaxation_time)
         self.ui.comboBox_8.activated.connect(self.calculate_23_model)
@@ -164,7 +171,7 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setHidden(True)
         self.ui.textEdit_5.setHidden(True)
         self.ui.textEdit_6.setHidden(True)
-
+                
     def open_url(self):
         open_application('https://github.com/timesama/M2-Approach/releases')
 
@@ -185,15 +192,14 @@ class MainWindow(QMainWindow):
                 return
         else:
             self.process_file_data(file_path, [], i)
-
-            
+     
         # Update general figures
         if self.tab == 'DQ':
             self.highlight_row(self.ui.table_DQ, i) 
             self.update_dq_graphs()
         elif self.tab == 'SE':
             self.highlight_row(self.ui.table_SE, i)
-            self.update_yaxis()
+            self.update_se_graphs()
 
         
 
@@ -440,6 +446,14 @@ class MainWindow(QMainWindow):
             with open("selected_folder.txt", "w") as file:
                 file.write(folder_path)
 
+    def renameSection(self, table, index):
+        current_header = table.horizontalHeaderItem(index).text()
+        new_header, ok = QInputDialog.getText(self, "Rename Column", 
+                                            f"Enter new name for the column '{current_header}':")
+        if ok and new_header:
+            table.horizontalHeaderItem(index).setText(new_header)
+            self.update_xaxis(table, index)
+            
     # All these functions refer to the general analysis where FFT and FID are produced
     def analysis(self):
         # Clear Combobox
@@ -632,7 +646,7 @@ class MainWindow(QMainWindow):
         table.setItem(i, 3, QTableWidgetItem(str(T2_r)))
 
         if self.tab == 'SE':
-            self.update_yaxis()
+            self.update_se_graphs()
         elif self.tab == 'DQ':
             self.update_dq_graphs()
 
@@ -643,6 +657,19 @@ class MainWindow(QMainWindow):
             info = '0'
         return info
 
+    # Changed table name -> changed x axis #TODO add figure
+    def update_xaxis(self, table, index):
+
+        if self.tab == 'SE':
+            figure = self.ui.SEWidget
+        elif self.tab == 'T1T2':
+            figure = self.ui.T1_Widget_2
+        else:
+            return
+
+        name = table.horizontalHeaderItem(index).text()
+        figure.getAxis('bottom').setLabel(name)
+
     # Working with graphs
     def update_graphs(self, x, y1, y2, y3, graph):
         graph.clear()
@@ -651,21 +678,9 @@ class MainWindow(QMainWindow):
         graph.plot(x, y3, pen='b')
 
     # Working with SE graphs
-    def update_yaxis(self):
-
-        axis_x = self.ui.comboBox_3.currentText()
-
-        if axis_x == "T, C":
-            self.ui.SEWidget.getAxis('bottom').setLabel("Temperature, °C")
-            self.ui.table_SE.setHorizontalHeaderLabels(["Temp.", "SC", "M₂", "T₂*"])
-        elif axis_x == "XS, %":
-            self.ui.SEWidget.getAxis('bottom').setLabel("XS, %")
-            self.ui.table_SE.setHorizontalHeaderLabels(["XS", "SC", "M₂", "T₂*"])
-        else:
-            return
+    def update_se_graphs(self):
         
         x = self.read_column_values(self.ui.table_SE, 0)
-
         text = self.ui.comboBox.currentText()
 
         if text == "SC":  
@@ -1448,7 +1463,7 @@ class MainWindow(QMainWindow):
                     table.setItem(row, col, item)
 
         if self.tab == 'SE':
-            self.update_yaxis()
+            self.update_se_graphs()
         elif self.tab == 'DQ':
             self.update_dq_graphs()
         elif self.tab == 'DQ_Temp':
@@ -1989,7 +2004,6 @@ class PhasingManual(QDialog):
         self.ui.verticalSlider_c.valueChanged.connect(self.value_changed)
         self.ui.verticalSlider_d.valueChanged.connect(self.value_changed)
         self.ui.dial.valueChanged.connect(self.smoothing_changed)
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
