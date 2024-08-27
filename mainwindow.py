@@ -239,7 +239,7 @@ class MainWindow(QMainWindow):
         elif self.tab == '23Model':
             self.selected_FFCfiles = []
             self.ffc_dictionary = {}
-            self.ui.table_FFC_1.setColumnCount(0)
+            self.ui.table_FFC_1.setRowCount(0)
             self.ui.btn_Plot1_2.setEnabled(False)
             self.ui.groupBox_7.setEnabled(False)
             self.ui.groupBox_6.setEnabled(False)
@@ -1557,17 +1557,17 @@ class MainWindow(QMainWindow):
             dictionary[file]["Freq"].extend(Omega)
             dictionary[file]["Rate"].extend(Rate)
             
-            table.setColumnCount(len(selected_files))
+            table.setRowCount(len(selected_files))
             self.ui.btn_Plot1_2.setEnabled(True)            
         
-        for column, file in zip(range(table.columnCount()), selected_files):
+        for row, file in zip(range(table.rowCount()), selected_files):
             Folder = QTableWidgetItem(file)
             file_name = os.path.basename(file)
 
             Filename = QTableWidgetItem(file_name)
 
-            table.setItem(0, column, Folder)
-            table.setItem(1, column, Filename)
+            table.setItem(row, 0, Folder)
+            table.setItem(row, 1, Filename)
 
             combobox.addItem(f"{file_name}")
             combobox.setCurrentIndex(-1)
@@ -1586,7 +1586,7 @@ class MainWindow(QMainWindow):
             print('does it ever happen?')
             return
         
-        value_from_row = table.item(0, selected_file_idx).text()
+        value_from_row = table.item(selected_file_idx, 0).text()
         Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
         #Omega = Omeg * 10**6
 
@@ -1633,12 +1633,12 @@ class MainWindow(QMainWindow):
         tau_trans_t   = QTableWidgetItem(str("{:.5e}".format(popt[4])))
         tau_res_t     = QTableWidgetItem(str("{:.5e}".format(popt[5])))
 
-        table.setItem(3, selected_file_idx,CDD_t)
-        table.setItem(5, selected_file_idx,tau_c_t)
-        table.setItem(2, selected_file_idx,A_t)
-        table.setItem(4, selected_file_idx,C_trans_t)
-        table.setItem(6, selected_file_idx,tau_trans_t)
-        table.setItem(7, selected_file_idx,tau_res_t)
+        table.setItem(selected_file_idx, 3, CDD_t)
+        table.setItem(selected_file_idx, 5, tau_c_t)
+        table.setItem(selected_file_idx, 2, A_t)
+        table.setItem(selected_file_idx, 4, C_trans_t)
+        table.setItem(selected_file_idx, 6, tau_trans_t)
+        table.setItem(selected_file_idx, 7, tau_res_t)
 
         for col in range(table.columnCount()):
             table.setColumnWidth(col, 120)
@@ -1649,8 +1649,6 @@ class MainWindow(QMainWindow):
         figure.plot(Omega_fit, tau_c_rate, pen = 'c',name='tau c')
         figure.plot(Omega_fit, tau_trans_rate, pen = 'm', name = 'tau trans')
         legend = figure.addLegend()  
-
-
 
         self.ui.checkBox_3.setEnabled(True)
         self.ui.btn_Plot1_2.setEnabled(True)
@@ -1665,7 +1663,7 @@ class MainWindow(QMainWindow):
         selected_file_idx = self.ui.comboBox_8.currentIndex()
         dictionary = self.ffc_dictionary
 
-        value_from_row = table.item(0, selected_file_idx).text()
+        value_from_row = table.item(selected_file_idx, 0).text()
 
         Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
         Rate = np.array(dictionary[value_from_row]['Rate'], dtype=float)
