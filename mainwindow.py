@@ -283,18 +283,22 @@ class MainWindow(QMainWindow):
 
         if self.tab == 'SE':
             table = self.ui.table_SE
+            combobox = self.ui.comboBox_4
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
+            combobox = self.ui.comboBox_4
         elif self.tab =='T1T2':
             table = self.ui.table_T1
+            combobox = self.ui.comboBox_6
         elif self.tab == '23Model':
             table = self.ui.table_FFC_1
+            combobox = self.ui.comboBox_8
         else:
             return
 
-
         row = table.currentRow()
         table.removeRow(row)
+        combobox.removeItem(row)
             
     def highlight_row(self, table, row_selected):
 
@@ -1053,8 +1057,6 @@ class MainWindow(QMainWindow):
             dictionary[file]["X Axis"].append(x_axis)
             dictionary[file]["Time"].extend(Time)
             dictionary[file]["Signal"].extend(Signal)
-
-        
         
         self.ui.btn_Plot1.setEnabled(True)            
         combobox.setCurrentIndex(-1)
