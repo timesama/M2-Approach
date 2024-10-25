@@ -130,6 +130,9 @@ class MainWindow(QMainWindow):
         self.ui.table_T1.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=2: self.renameSection(self.ui.table_T1, index=2)
 )
+        self.ui.table_DQ_2.horizontalHeader().sectionDoubleClicked.connect(
+    lambda index=2: self.renameSection(self.ui.table_DQ_2, index=1)
+)
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
         #self.ui.table_SE.currentItemChanged.connect(self.update_xaxis)
@@ -219,8 +222,6 @@ class MainWindow(QMainWindow):
         elif self.tab == 'SE':
             self.highlight_row(self.ui.table_SE, i)
             self.update_se_graphs()
-
-        
 
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
             
@@ -687,6 +688,8 @@ class MainWindow(QMainWindow):
             figure = self.ui.SEWidget
         elif self.tab == 'T1T2':
             figure = self.ui.T1_Widget_2
+        elif self.tab == 'DQ_Temp':
+            figure = self.ui.DQ_Widget_6
         else:
             return
 
