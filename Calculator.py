@@ -314,7 +314,6 @@ def find_nearest(array, value):
     return idx
 
 def calculate_M2(FFT_real, Frequency):
-    # NoClass
     # Take the integral of the REAL PART OF FFT by counts
     Integral = np.trapz(np.real(FFT_real))
     

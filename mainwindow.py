@@ -1949,6 +1949,7 @@ class PhasingManual(QDialog):
         self.ui.PhasingGraph.plot(Frequency, self.Real_freq_phased, pen='b', name = 'Phased') #Real phased
 
     def update_text(self):
+        global Frequency
         Integral = np.trapz(self.Real_freq_phased)
         left_mean = np.mean(self.Real_freq_phased[:100])
         right_mean = np.mean(self.Real_freq_phased[-100:])
@@ -1956,6 +1957,12 @@ class PhasingManual(QDialog):
 
         self.ui.Integral.setText(f"Integral: {round(Integral,3)}")
         self.ui.Delta.setText(f"Delta: {round(delta,7)}")
+
+        Real_apod   = Cal.calculate_apodization(self.Real_freq_phased, Frequency)
+        M2, T2 = Cal.calculate_M2(Real_apod, Frequency)
+
+        self.ui.M2.setText(f"M₂: {round(M2,5)}")
+        self.ui.T2.setText(f"T₂*: {round(T2,3)}")
 
     def value_changed(self):
         global Frequency, Re_spectra, Im_spectra
