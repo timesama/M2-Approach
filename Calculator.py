@@ -30,7 +30,7 @@ def normalize_mq(DQ, MQ, state):
 
     return DQ_norm, MQ_norm, End
 
-def dqmq(file_path, fit_from, fit_to, p):
+def dqmq(file_path, fit_from, fit_to, p, noise_level):
 
     def exponent(x, a, b, c):
         return a * np.exp(-power*(x/b)) + c
@@ -52,9 +52,10 @@ def dqmq(file_path, fit_from, fit_to, p):
     # Subtract difference function from Ref
     MQ = Ref_norm - fitted_curve
 
-    DQ_normal, MQ_normal, Sum = normalize_mq(DQ_norm, MQ, 'plus')
+    DQ_normal, MQ_normal, _ = normalize_mq(DQ_norm, MQ, 'plus')
 
-    nDQ = (DQ_normal)/Sum
+    additive_function = exp_apodization(Time)
+    nDQ = (DQ_normal+noise_level*additive_function)/(DQ_normal+MQ+2*noise_level*additive_function)
 
     nDQ = np.insert(nDQ, 0, 0)
     Time0 = np.insert(Time, 0, 0)
@@ -250,6 +251,12 @@ def apodization(Time, Real, Imaginary):
     Re_ap = Real * apodization_function
     Im_ap = Imaginary * apodization_function
     return Re_ap, Im_ap
+
+def exp_apodization(Time):
+    Time_end = Time[-1]+10
+    noise = Time_end*0.3
+    additive_function =  0.5*np.exp(((Time - Time_end) / noise) ** 3)
+    return additive_function
 
 def add_zeros(Time, Real, Imaginary, number_of_points):
     length_diff = number_of_points - len(Time)

@@ -578,7 +578,6 @@ class MainWindow(QMainWindow):
             self.ui.FFTWidget.clear()
             self.ui.btn_Phasing.setEnabled(False)
             return
-
     
         if self.ui.checkBox_2.isChecked():
             # Read data
@@ -934,8 +933,9 @@ class MainWindow(QMainWindow):
         legend = figure.addLegend()
         legend.clear()
         legend = figure.addLegend()
+        noise_level = self.ui.noise.value()
 
-        Time, DQ_norm, Ref_norm, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1)
+        Time, DQ_norm, Ref_norm, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1, noise_level)
 
         figure.plot(Time, DQ_norm, pen='r', name = 'DQ')
         figure.plot(Time, Ref_norm, pen='b', name = 'Ref')
@@ -951,6 +951,7 @@ class MainWindow(QMainWindow):
         fit_from = self.ui.dq_min_3.value()
         fit_to = self.ui.dq_max_3.value()
         p = self.ui.power.value()
+        noise_level = self.ui.noise.value()
 
         figure = self.ui.DQMQ_Widget
         figure.clear()
@@ -958,7 +959,7 @@ class MainWindow(QMainWindow):
         legend.clear()
         legend = figure.addLegend()
 
-        Time, DQ_norm, Ref_norm, Diff, _, _, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p)
+        Time, DQ_norm, Ref_norm, Diff, _, _, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level)
 
         figure.plot(Time, DQ_norm, pen='r', name = 'DQ')
         figure.plot(Time, Ref_norm, pen='b', name = 'Ref')
@@ -980,8 +981,9 @@ class MainWindow(QMainWindow):
         legend = figure.addLegend()
         legend.clear()
         legend = figure.addLegend()
+        noise_level = self.ui.noise.value()
 
-        Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p)
+        Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level)
 
         figure.plot(Time, DQ_normal, pen='r', name = 'DQ')
         figure.plot(Time, MQ_normal, pen='b', name = 'Ref')
