@@ -1,4 +1,3 @@
-*.spec
 ui_*.py
 build/*
 dist/*
