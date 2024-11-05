@@ -1136,9 +1136,9 @@ class MainWindow(QMainWindow):
         if self.ui.radioButton_10.isChecked():
             column = 3
         elif self.ui.radioButton_11.isChecked():
-            column = 4
-        elif self.ui.radioButton_12.isChecked():
             column = 5
+        elif self.ui.radioButton_12.isChecked():
+            column = 7
 
         graph.clear()
         if table.rowCount() < 1:
