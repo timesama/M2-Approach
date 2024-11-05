@@ -2184,6 +2184,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </item>
                     <item>
                      <widget class="QRadioButton" name="radioButton_16">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
                       <property name="text">
                        <string>ms</string>
                       </property>
@@ -2196,6 +2199,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <widget class="QRadioButton" name="radioButton_17">
                       <property name="text">
                        <string>μs</string>
+                      </property>
+                      <property name="checked">
+                       <bool>false</bool>
                       </property>
                      </widget>
                     </item>
