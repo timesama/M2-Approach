@@ -1700,32 +1700,36 @@ class MainWindow(QMainWindow):
             figure.clear()
             self.ui.textEdit_error_3.setText(f"No Data")     
         else:
-            fitting, short, middle, long, popt, R2 = Cal.simulation(Omega, Rate, state)
-            figure.clear()
-            figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
-            figure.plot(Omega, fitting, pen='b')
-            if state == 'Two':
-                figure.plot(Omega, short, pen='m')
-                figure.plot(Omega, middle, pen='g')
-                C1, C2, A, t1, t2= np.round(popt, decimals=5)
-                C3=0
-                t3 = 0
-            elif state == 'Three':
-                figure.plot(Omega, short, pen='m')
-                figure.plot(Omega, middle, pen='g')
-                figure.plot(Omega, long, pen='c')
-                C1, C2, C3, A, t1, t2, t3 = np.round(popt, decimals=5)
-            elif state == 'One':
-                self.ui.textEdit_error_3.setText(f"R² {R2}")
-                C1,A,t1 = np.round(popt, decimals=5)
-                C2 = 0
-                C3 = 0
-                t2 = 0 
-                t3 = 0
-            else:
-                return
+            try:
+                fitting, short, middle, long, popt, R2 = Cal.simulation(Omega, Rate, state)
+                figure.clear()
+                figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+                figure.plot(Omega, fitting, pen='b')
+                if state == 'Two':
+                    figure.plot(Omega, short, pen='m')
+                    figure.plot(Omega, middle, pen='g')
+                    C1, C2, A, t1, t2= np.round(popt, decimals=5)
+                    C3=0
+                    t3 = 0
+                elif state == 'Three':
+                    figure.plot(Omega, short, pen='m')
+                    figure.plot(Omega, middle, pen='g')
+                    figure.plot(Omega, long, pen='c')
+                    C1, C2, C3, A, t1, t2, t3 = np.round(popt, decimals=5)
+                elif state == 'One':
+                    self.ui.textEdit_error_3.setText(f"R² {R2}")
+                    C1,A,t1 = np.round(popt, decimals=5)
+                    C2 = 0
+                    C3 = 0
+                    t2 = 0 
+                    t3 = 0
+                else:
+                    return
+                
+                self.ui.textEdit_error_3.setText(f"R² {R2}\nA = {A}\nCDD = {C1}\tτ = {t1}\nCDD = {C2}\tτ = {t2}\nCDD = {C3}\tτ = {t3}") 
 
-            self.ui.textEdit_error_3.setText(f"R² {R2}\nA = {A}\nCDD = {C1}\tτ = {t1}\nCDD = {C2}\tτ = {t2}\nCDD = {C3}\tτ = {t3}") 
+            except:
+                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit the data, try unchecking τ.", QMessageBox.Ok)
 
     def get_checkbox_state(self):
         checked_count = sum([self.ui.checkBox_tau_1.isChecked(),
