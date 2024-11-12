@@ -1004,7 +1004,7 @@ class MainWindow(QMainWindow):
         selected_files = self.selected_T1files
         table = self.ui.table_T1
         combobox = self.ui.comboBox_6
-        pattern = r'(T1|T2)_(.*)\.dat'
+        pattern = r'(T1|T2)_(-?\d+)_(.*)\.dat'
         dictionary = self.tau_dictionary
         table.setRowCount(len(selected_files))
 
