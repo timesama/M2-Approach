@@ -1004,7 +1004,7 @@ class MainWindow(QMainWindow):
         selected_files = self.selected_T1files
         table = self.ui.table_T1
         combobox = self.ui.comboBox_6
-        pattern = r'T1_(.*)\.dat|T2_(.*)\.dat'
+        pattern = r'(T1|T2)_(.*)\.dat'
         dictionary = self.tau_dictionary
         table.setRowCount(len(selected_files))
 
@@ -1016,7 +1016,7 @@ class MainWindow(QMainWindow):
             current_file = os.path.basename(file)
 
             try:
-                x_axis = re.search(pattern,file).group(1)
+                x_axis = re.search(pattern,current_file).group(2)
             except:
                 x_axis = row
 
