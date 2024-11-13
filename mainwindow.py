@@ -291,12 +291,13 @@ class MainWindow(QMainWindow):
         elif self.tab =='T1T2':
             table = self.ui.table_T1
             combobox = self.ui.comboBox_6
+            files = self.selected_T1files
         elif self.tab == '23Model':
             table = self.ui.table_FFC_1
             combobox = self.ui.comboBox_8
         else:
             return
-
+        
         row = table.currentRow()
         table.removeRow(row)
         combobox.removeItem(row)
@@ -1004,7 +1005,7 @@ class MainWindow(QMainWindow):
         selected_files = self.selected_T1files
         table = self.ui.table_T1
         combobox = self.ui.comboBox_6
-        pattern = r'(T1|T2)_(-?\d+)(_.*)\.dat'
+        pattern = r'(T1|T2)_(\s?-?\d+)(_.*)?\.dat'
         dictionary = self.tau_dictionary
         table.setRowCount(len(selected_files))
 
