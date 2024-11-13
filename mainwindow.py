@@ -287,6 +287,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             combobox = self.ui.comboBox_4
+            files = self.selected_files
         elif self.tab =='T1T2':
             table = self.ui.table_T1
             combobox = self.ui.comboBox_6
@@ -294,6 +295,7 @@ class MainWindow(QMainWindow):
         elif self.tab == '23Model':
             table = self.ui.table_FFC_1
             combobox = self.ui.comboBox_8
+            files = self.selected_FFCfiles
         else:
             return
         
