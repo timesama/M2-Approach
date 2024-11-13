@@ -229,8 +229,6 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE' or self.tab == 'DQ':
             self.selected_files = []
             self.selected_files_gly = []
-            self.selected_files = []  
-            self.selected_files_gly = []
             self.ui.table_SE.setRowCount(0)
             self.ui.table_DQ.setRowCount(0)
             self.ui.SEWidget.clear()
@@ -285,6 +283,7 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             table = self.ui.table_SE
             combobox = self.ui.comboBox_4
+            files = self.selected_files
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             combobox = self.ui.comboBox_4
@@ -301,6 +300,10 @@ class MainWindow(QMainWindow):
         row = table.currentRow()
         table.removeRow(row)
         combobox.removeItem(row)
+        item = table.item(row,0).text()
+        for file_to_delete in files:
+            if file_to_delete == item:
+                files.remove(item)
             
     def highlight_row(self, table, row_selected):
 
