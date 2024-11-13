@@ -95,6 +95,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
+        self.ui.btn_DeleteRow_3.clicked.connect(self.delete_row)
 
         self.ui.btn_Start.clicked.connect(self.analysis)
         self.ui.btn_Launch.clicked.connect(self.launch)
@@ -283,11 +284,9 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             table = self.ui.table_SE
             combobox = self.ui.comboBox_4
-            files = self.selected_files
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             combobox = self.ui.comboBox_4
-            files = self.selected_files
         elif self.tab =='T1T2':
             table = self.ui.table_T1
             combobox = self.ui.comboBox_6
@@ -300,12 +299,17 @@ class MainWindow(QMainWindow):
             return
         
         row = table.currentRow()
+        item = table.item(row,0).text()
         table.removeRow(row)
         combobox.removeItem(row)
-        item = table.item(row,0).text()
-        for file_to_delete in files:
-            if file_to_delete == item:
-                files.remove(item)
+        
+        try:
+            for file_to_delete in files:
+                if file_to_delete == item:
+                    files.remove(item)
+        except:
+            QMessageBox.warning(self, "Hidden", f"The row is hidden, but the file is not deleted.", QMessageBox.Ok)
+    
             
     def highlight_row(self, table, row_selected):
 

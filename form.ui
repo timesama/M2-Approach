@@ -960,7 +960,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout_3" rowstretch="2,0,0,0" columnstretch="0,0,0">
+                <layout class="QGridLayout" name="gridLayout_3" rowstretch="2,0,0,0,0" columnstretch="0,0,0">
                  <property name="horizontalSpacing">
                   <number>5</number>
                  </property>
@@ -977,7 +977,70 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="1" rowspan="2">
+                 <item row="3" column="0">
+                  <widget class="QPushButton" name="btn_ClearTable_5">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Clear Table</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0" rowspan="3">
+                  <widget class="QTableWidget" name="table_DQ">
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::AllEditTriggers</set>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="columnCount">
+                    <number>4</number>
+                   </property>
+                   <column>
+                    <property name="text">
+                     <string>DQ time</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>DQ amp</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>M₂</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>T₂*</string>
+                    </property>
+                   </column>
+                  </widget>
+                 </item>
+                 <item row="0" column="1" rowspan="2">
+                  <widget class="PlotWidget" name="DQ_Widget_1" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>100</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QPushButton" name="btn_DeleteRow_3">
+                   <property name="text">
+                    <string>Delete row</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1" rowspan="3">
                   <layout class="QFormLayout" name="Filter">
                    <property name="horizontalSpacing">
                     <number>0</number>
@@ -1208,63 +1271,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </item>
                   </layout>
                  </item>
-                 <item row="0" column="1" rowspan="2">
-                  <widget class="PlotWidget" name="DQ_Widget_1" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>100</width>
-                     <height>100</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QPushButton" name="btn_ClearTable_5">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Clear Table</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0" rowspan="3">
-                  <widget class="QTableWidget" name="table_DQ">
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::AllEditTriggers</set>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="columnCount">
-                    <number>4</number>
-                   </property>
-                   <column>
-                    <property name="text">
-                     <string>DQ time</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>DQ amp</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>M₂</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>T₂*</string>
-                    </property>
-                   </column>
-                  </widget>
-                 </item>
-                 <item row="2" column="2" rowspan="2">
+                 <item row="2" column="2" rowspan="3">
                   <layout class="QVBoxLayout" name="Log">
                    <property name="leftMargin">
                     <number>30</number>
