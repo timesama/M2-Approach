@@ -264,7 +264,7 @@ class MainWindow(QMainWindow):
             self.ui.groupBox_6.setEnabled(False)
             self.ui.checkBox_3.setEnabled(False)
             self.ui.checkBox_3.setChecked(False)
-            self.ui.table_FFC_1.clear()
+            #self.ui.table_FFC_1.clear()
         elif self.tab == 'Extra':
             pass
 
@@ -299,6 +299,9 @@ class MainWindow(QMainWindow):
             return
         
         row = table.currentRow()
+        if row == -1:
+            QMessageBox.warning(self, "Cricket sounds", f"Select the row.", QMessageBox.Ok)
+            return
         item = table.item(row,0).text()
         table.removeRow(row)
         combobox.removeItem(row)
