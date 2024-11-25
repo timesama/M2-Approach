@@ -312,8 +312,7 @@ class MainWindow(QMainWindow):
                     files.remove(item)
         except:
             QMessageBox.warning(self, "Hidden", f"The row is hidden, but the file is not deleted.", QMessageBox.Ok)
-    
-            
+                
     def highlight_row(self, table, row_selected):
 
         #for row in range(table.rowCount()):
