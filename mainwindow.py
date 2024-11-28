@@ -1050,13 +1050,6 @@ class MainWindow(QMainWindow):
 
                     self.tau_dictionary = dictionary
                     self.state_bad_code = True
-
-
-
-
-
-
-
                 except:
                     QMessageBox.warning(self, "Error", f"Something went wrong.\nLoad two files: Magnetization and Profile.", QMessageBox.Ok)
                     for file_to_delete in selected_files:
@@ -1242,6 +1235,10 @@ class MainWindow(QMainWindow):
         figure.clear()
         figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
         figure.plot(Time_fit, fitted_curve, pen='b')
+
+        dictionary[value_from_row]['T1 1'] = tau1
+        dictionary[value_from_row]['T1 2'] = tau2
+        dictionary[value_from_row]['T1 3'] = tau3
 
     def plot_relaxation_time(self):
 
@@ -1536,6 +1533,8 @@ class MainWindow(QMainWindow):
             table = self.ui.table_T1
             files = self.selected_T1files
             default_name = 'T'
+            if self.state_bad_code == True:
+                self.bad_code_makes_more_bad_code()
 
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
@@ -1666,6 +1665,44 @@ class MainWindow(QMainWindow):
                 return False
 
     # FFC analysis
+
+    def bad_code_makes_more_bad_code(self):
+        dictionary = self.tau_dictionary
+
+        file_path1 = (list(dictionary.keys())[0]).split()[0] + 'recalculated_tau1.sef'
+        file_path2 = (list(dictionary.keys())[0]).split()[0] + 'recalculated_tau2.sef'
+        file_path3 = (list(dictionary.keys())[0]).split()[0] + 'recalculated_tau3.sef'
+
+        with open(file_path1, 'w') as f:
+            f.write('STELAR Export File\n')  
+            f.write('\n')  
+            f.write('_BRLX______\t_T1________\t_R1________\t____%err___\t+-err(R1)__\tZone\tFile\n')  
+            f.write('\n')
+            # T1_1 = dictionary[key]['T1 1']
+            # T1_2 = dictionary[key]['T1 2']
+            # T1_3 = dictionary[key]['T1 3']
+            # Omega_1 = 1000/T1_1
+            # Omega_2 = 1000/T1_1
+            # Omega_3 = 1000/T1_1
+            for key in dictionary:
+                Frequency = dictionary[key]['X Axis']
+                T1_1 = dictionary[key]['T1 1']
+                Omega_1 = 1000/T1_1
+                f.write(f'{Frequency}\t{T1_1}\t{Omega_1}\n')
+
+
+
+
+                    # for row in range(table.rowCount()):
+                    #     row_values = []
+                    #     for col in range(table.columnCount()):
+                    #         item = table.item(row, col)
+                    #         if item is not None:
+                    #             row_values.append(item.text())
+                    #         else:
+                    #             row_values.append("")  # Handle empty cells
+                    #     f.write(','.join(row_values) + '\n')
+
     def update_FFC_table(self):
         selected_files = self.selected_FFCfiles
         table = self.ui.table_FFC_1
