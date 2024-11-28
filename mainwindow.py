@@ -1057,6 +1057,10 @@ class MainWindow(QMainWindow):
                             selected_files.remove(file)
 
             elif os.path.splitext(selected_files[0])[1] == '.txt': # Reading T1 recorded at different time regions
+                #TODO: reads 4 columns from the file
+                # The first is overall magnetization
+                # 2,3,4 are by regions.
+                # These should go as additional rows or something?
                 pass
             else: # Normal reading
                 table.setRowCount(len(selected_files))
@@ -1066,7 +1070,6 @@ class MainWindow(QMainWindow):
 
                     Time = []
                     Signal = []
-                    table.setRowCount(len(selected_files))
                     Folder = QTableWidgetItem(file)
 
                     current_file = os.path.basename(file)
@@ -1210,12 +1213,10 @@ class MainWindow(QMainWindow):
         except:
             QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with {order} exponents. Fitting with one.", QMessageBox.Ok)
             order = 1
-
         
         Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3, decrease_order = Cal.fit_exponent(Time, Signal, order)
         
         self.ui.textEdit_error.setText(f"R² {R2}") 
-        
         
         item1 = QTableWidgetItem(str(tau1))
         item2 = QTableWidgetItem(str(tau2))
@@ -1230,7 +1231,6 @@ class MainWindow(QMainWindow):
         table.setItem(selected_file_idx,4,item11)
         table.setItem(selected_file_idx,6,item22)
         table.setItem(selected_file_idx,8,item33)
-        
         
         figure.clear()
         figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
@@ -1533,8 +1533,6 @@ class MainWindow(QMainWindow):
             table = self.ui.table_T1
             files = self.selected_T1files
             default_name = 'T'
-            if self.state_bad_code == True:
-                self.bad_code_makes_more_bad_code()
 
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
@@ -1549,6 +1547,9 @@ class MainWindow(QMainWindow):
 
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
+
+        if self.state_bad_code == True:
+            self.bad_code_makes_more_bad_code()
 
     def load_data(self):
         dlg = OpenFilesDialog(self)
@@ -1668,40 +1669,17 @@ class MainWindow(QMainWindow):
 
     def bad_code_makes_more_bad_code(self):
         dictionary = self.tau_dictionary
+        dialog = SaveFilesDialog(self)
+        basename = os.path.basename(self.selected_T1files[0])
 
-        file_path1 = (list(dictionary.keys())[0]).split()[0] + 'recalculated_tau1.sef'
-        file_path2 = (list(dictionary.keys())[0]).split()[0] + 'recalculated_tau2.sef'
-        file_path3 = (list(dictionary.keys())[0]).split()[0] + 'recalculated_tau3.sef'
+        save = not all(data.get('T1 1', 0) == 0 for data in dictionary.values())
+        dialog.save_file_in_sef(self, dictionary, 'T1 1', 1, basename, save)
 
-        with open(file_path1, 'w') as f:
-            f.write('STELAR Export File\n')  
-            f.write('\n')  
-            f.write('_BRLX______\t_T1________\t_R1________\t____%err___\t+-err(R1)__\tZone\tFile\n')  
-            f.write('\n')
-            # T1_1 = dictionary[key]['T1 1']
-            # T1_2 = dictionary[key]['T1 2']
-            # T1_3 = dictionary[key]['T1 3']
-            # Omega_1 = 1000/T1_1
-            # Omega_2 = 1000/T1_1
-            # Omega_3 = 1000/T1_1
-            for key in dictionary:
-                Frequency = dictionary[key]['X Axis']
-                T1_1 = dictionary[key]['T1 1']
-                Omega_1 = 1000/T1_1
-                f.write(f'{Frequency}\t{T1_1}\t{Omega_1}\n')
+        save = not all(data.get('T1 2', 0) ==0 for data in dictionary.values())
+        dialog.save_file_in_sef(self, dictionary, 'T1 2', 2, basename, save)
 
-
-
-
-                    # for row in range(table.rowCount()):
-                    #     row_values = []
-                    #     for col in range(table.columnCount()):
-                    #         item = table.item(row, col)
-                    #         if item is not None:
-                    #             row_values.append(item.text())
-                    #         else:
-                    #             row_values.append("")  # Handle empty cells
-                    #     f.write(','.join(row_values) + '\n')
+        save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
+        dialog.save_file_in_sef(self, dictionary, 'T1 3', 3, basename, save)
 
     def update_FFC_table(self):
         selected_files = self.selected_FFCfiles
@@ -1936,7 +1914,6 @@ class SaveFilesDialog(QFileDialog):
             print(f"Couldn't read the initial directory: {e}")
             directory = os.path.dirname(sys.argv[0])
 
-
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File As", directory + '/' + default_filename, "CSV files (*.csv)", options=options)
 
@@ -1960,6 +1937,42 @@ class SaveFilesDialog(QFileDialog):
 
             except Exception as e:
                 print(f"Failed to save file as CSV: {e}")
+    
+    def save_file_in_sef(self, wtf, dictionary, tau, n, begin, save):
+        if save == False:
+            return
+        
+        initial_directory_file = "selected_folder.txt"
+        try:
+            with open(initial_directory_file, 'r') as file:
+                directory = file.read().strip()
+        except Exception as e:
+            print(f"Couldn't read the initial directory: {e}")
+            directory = os.path.dirname(sys.argv[0])
+
+        try:
+            options = QFileDialog.Options()
+            default_add = '_recalculated_tau_' + str(n)
+            file_path, _ = QFileDialog.getSaveFileName(self, "Save File As", directory + '/'+ begin + default_add, "SEF files (*.sef)", options=options)
+            with open(file_path, 'w') as f:
+                f.write('STELAR Export File\n')  
+                f.write('\n')  
+                f.write('_BRLX______\t_T1________\t_R1________\t____%err___\t+-err(R1)__\tZone\tFile\n')  
+                f.write('\n')
+                for key in dictionary:
+                    Frequency = dictionary[key]['X Axis']
+                    T1 = dictionary[key][tau]
+                    if T1 == 0:
+                        Omega_1 = 0
+                    else:
+                        Omega_1 = 1000/T1
+                    f.write(f'{Frequency}\t{T1}\t{Omega_1}\n')
+        except:
+            QMessageBox.warning(self, "Save failed", f"Sorry, couldn't save the separate file in .sef for magnetization.", QMessageBox.Ok)
+            return
+        #TODO: try to find reasons fpr that maybe? 
+        # When the load happends, there is no key T1 1 created in dictionary
+        # So ppb should read value from the table
 
 class OpenFilesDialog(QFileDialog):
     def __init__(self, parent=None):
