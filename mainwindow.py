@@ -143,6 +143,7 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_16.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_17.clicked.connect(self.calculate_relaxation_time)
         self.ui.T1T2_fit_from.valueChanged.connect(self.calculate_relaxation_time)
+        self.ui.T1T2_fit_to.valueChanged.connect(self.calculate_relaxation_time)
         self.ui.radioButton_3.clicked.connect(self.hide_FFT_progress)
         self.ui.radioButton_2.clicked.connect(self.hide_FFT_progress)
         # Connect combobox signals to slots
@@ -1040,35 +1041,45 @@ class MainWindow(QMainWindow):
         
             Time = []
             Signal = []
-
-            try:
-                # Read files as I create them from excel in spintrack
-                with open(file, "r") as data:
-                    #lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
-                    lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
-                for line in lines[1:]:  # Skip the first line !!!
-                    parts = line.split('\t')
-                    time_value = float(parts[0])
-                    signal_value = float(parts[1])
-                    Time.append(time_value)
-                    Signal.append(signal_value)
-
-                combobox.addItem(f"{current_file}")
-            except:
+           
+            # Read data aqcuired from Evaluation of FFC machine version1  
+            if os.path.splitext(file)[1] == '.sef':
                 try:
-                    # read files regularly
-                    data = np.loadtxt(file)
-                    Time, Signal = data[:, 0], data[:, 1]
+                    pass
+                except:
+                    QMessageBox.warning(self, "Error", f"Something went wrong.\nLoad two files: Magnetization and Profile.", QMessageBox.Ok)
+            elif os.path.splitext(file)[1] == '.txt':
+                # Reading T1 recorded at different time regions
+                pass
+            else:
+                try:
+                # Read files as I create them from excel in spintrack
+                    with open(file, "r") as data:
+                        #lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
+                        lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
+                    for line in lines[1:]:  # Skip the first line !!!
+                        parts = line.split('\t')
+                        time_value = float(parts[0])
+                        signal_value = float(parts[1])
+                        Time.append(time_value)
+                        Signal.append(signal_value)
 
                     combobox.addItem(f"{current_file}")
-                except FileNotFoundError as fnf_error:
-                    QMessageBox.warning(self, "File Not Found", f"The file {file} was not found. Only table data is available.", QMessageBox.Ok)
+                except:
+                    try:
+                        # read files regularly
+                        data = np.loadtxt(file)
+                        Time, Signal = data[:, 0], data[:, 1]
 
-                except Exception as e:
-                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} because {e} Removing file from the table and file list.", QMessageBox.Ok)
-                    for file_to_delete in selected_files:
-                        if file_to_delete == file:
-                            selected_files.remove(file)
+                        combobox.addItem(f"{current_file}")
+                    except FileNotFoundError:
+                        QMessageBox.warning(self, "File Not Found", f"The file {file} was not found. Only table data is available.", QMessageBox.Ok)
+
+                    except Exception as e:
+                        QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} because {e} Removing file from the table and file list.", QMessageBox.Ok)
+                        for file_to_delete in selected_files:
+                            if file_to_delete == file:
+                                selected_files.remove(file)
 
             dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
             dictionary[file]["X Axis"].append(x_axis)
@@ -1084,6 +1095,9 @@ class MainWindow(QMainWindow):
         selected_file_idx = self.ui.comboBox_6.currentIndex()
         dictionary = self.tau_dictionary
         starting_point = int(self.ui.T1T2_fit_from.value())
+        ending_point = -(int(self.ui.T1T2_fit_to.value()))
+        if ending_point == 0:
+            ending_point = None
 
         if self.ui.radioButton_16.isChecked():
         # milisec units
@@ -1099,8 +1113,8 @@ class MainWindow(QMainWindow):
         Time_original = np.array(dictionary[value_from_row]['Time'])/denominator
         Signal_original = np.array(dictionary[value_from_row]['Signal'])
 
-        Time = Time_original[starting_point:]
-        Signal = Signal_original[starting_point:]
+        Time = Time_original[starting_point:ending_point]
+        Signal = Signal_original[starting_point:ending_point]
 
         Time_fit = np.arange(min(Time), max(Time) + 1, 1)
 
