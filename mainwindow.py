@@ -57,6 +57,7 @@ class MainWindow(QMainWindow):
         self.tau_dictionary = {}
         self.ffc_dictionary = {}
         self.tab = None
+        self.state_bad_code = False
 
         self.state()
 
@@ -1019,75 +1020,159 @@ class MainWindow(QMainWindow):
         combobox = self.ui.comboBox_6
         pattern = r'(T1|T2)_(\s?-?\d+)(_.*)?\.dat'
         dictionary = self.tau_dictionary
-        table.setRowCount(len(selected_files))
-
-        x_axis = []
-
-        for row, file in zip(range(table.rowCount()), selected_files):
-            Folder = QTableWidgetItem(file)
-
-            current_file = os.path.basename(file)
-
-            try:
-                x_axis = re.search(pattern,current_file).group(2)
-            except:
-                x_axis = row
-
-            Filename = QTableWidgetItem(current_file)
-            Temp = QTableWidgetItem(x_axis)
-            table.setItem(row, 0, Folder)
-            table.setItem(row, 1, Filename)
-            table.setItem(row, 2, Temp)
         
-            Time = []
-            Signal = []
-           
-            # Read data aqcuired from Evaluation of FFC machine version1  
-            if os.path.splitext(file)[1] == '.sef':
+        try:
+            if os.path.splitext(selected_files[0])[1] and os.path.splitext(selected_files[1])[1] == '.sef': # Read data aqcuired from Evaluation of FFC machine version1  
                 try:
-                    pass
+                    if os.stat(selected_files[0]).st_size > os.stat(selected_files[1]).st_size:
+                        filetoreadzones  = selected_files[1]
+                        filetoreaddata   = selected_files[0]
+                    else:
+                        filetoreadzones = selected_files[0]
+                        filetoreaddata  = selected_files[1]
+                    dictionary = self.process_files(filetoreadzones, filetoreaddata)
+
+                    # Fill the table
+                    table.setRowCount(len(dictionary))
+
+
+                    for row, key in zip(range(table.rowCount()), dictionary):
+                        x_axis = dictionary[key]["X Axis"]
+                        Temp = QTableWidgetItem(x_axis)
+                        Folder  = QTableWidgetItem(filetoreaddata)
+                        Filename   = QTableWidgetItem(os.path.basename(filetoreaddata))
+                        table.setItem(row, 0, Folder)
+                        table.setItem(row, 1, Filename)
+
+
+                        table.setItem(row, 2, Temp)
+                        combobox.addItem(f"{x_axis}")
+
+                    self.tau_dictionary = dictionary
+                    self.state_bad_code = True
+
+
+
+
+
+
+
                 except:
                     QMessageBox.warning(self, "Error", f"Something went wrong.\nLoad two files: Magnetization and Profile.", QMessageBox.Ok)
-            elif os.path.splitext(file)[1] == '.txt':
-                # Reading T1 recorded at different time regions
-                pass
-            else:
-                try:
-                # Read files as I create them from excel in spintrack
-                    with open(file, "r") as data:
-                        #lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
-                        lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
-                    for line in lines[1:]:  # Skip the first line !!!
-                        parts = line.split('\t')
-                        time_value = float(parts[0])
-                        signal_value = float(parts[1])
-                        Time.append(time_value)
-                        Signal.append(signal_value)
+                    for file_to_delete in selected_files:
+                        if file_to_delete == file:
+                            selected_files.remove(file)
 
-                    combobox.addItem(f"{current_file}")
-                except:
+            elif os.path.splitext(selected_files[0])[1] == '.txt': # Reading T1 recorded at different time regions
+                pass
+            else: # Normal reading
+                table.setRowCount(len(selected_files))
+                x_axis = []
+                for row, file in zip(range(table.rowCount()), selected_files):
+                    dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
+
+                    Time = []
+                    Signal = []
+                    table.setRowCount(len(selected_files))
+                    Folder = QTableWidgetItem(file)
+
+                    current_file = os.path.basename(file)
+
                     try:
-                        # read files regularly
-                        data = np.loadtxt(file)
-                        Time, Signal = data[:, 0], data[:, 1]
+                        x_axis = re.search(pattern,current_file).group(2)
+                    except:
+                        x_axis = row
+
+                    Filename = QTableWidgetItem(current_file)
+                    Temp = QTableWidgetItem(x_axis)
+                    table.setItem(row, 0, Folder)
+                    table.setItem(row, 1, Filename)
+                    table.setItem(row, 2, Temp)
+                    try:
+                    # Read files as I create them from excel in spintrack
+                        with open(file, "r") as data:
+                            #lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
+                            lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
+                        for line in lines[1:]:  # Skip the first line !!!
+                            parts = line.split('\t')
+                            time_value = float(parts[0])
+                            signal_value = float(parts[1])
+                            Time.append(time_value)
+                            Signal.append(signal_value)
 
                         combobox.addItem(f"{current_file}")
-                    except FileNotFoundError:
-                        QMessageBox.warning(self, "File Not Found", f"The file {file} was not found. Only table data is available.", QMessageBox.Ok)
+                    except:
+                        try:
+                            # read files regularly
+                            data = np.loadtxt(file)
+                            Time, Signal = data[:, 0], data[:, 1]
 
-                    except Exception as e:
-                        QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} because {e} Removing file from the table and file list.", QMessageBox.Ok)
-                        for file_to_delete in selected_files:
-                            if file_to_delete == file:
-                                selected_files.remove(file)
+                            combobox.addItem(f"{current_file}")
+                        except FileNotFoundError:
+                            QMessageBox.warning(self, "File Not Found", f"The file {file} was not found. Only table data is available.", QMessageBox.Ok)
 
-            dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
-            dictionary[file]["X Axis"].append(x_axis)
-            dictionary[file]["Time"].extend(Time)
-            dictionary[file]["Signal"].extend(Signal)
-        
+                        except Exception as e:
+                            QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} because {e} Removing file from the table and file list.", QMessageBox.Ok)
+                            for file_to_delete in selected_files:
+                                if file_to_delete == file:
+                                    selected_files.remove(file)
+
+                    dictionary[file]["X Axis"].append(x_axis)
+                    dictionary[file]["Time"].extend(Time)
+                    dictionary[file]["Signal"].extend(Signal)
+                    self.state_bad_code = False
+        except:
+            QMessageBox.warning(self, "Error", f"Something went wrong. Try again.", QMessageBox.Ok)
+
         self.ui.btn_Plot1.setEnabled(True)            
         combobox.setCurrentIndex(-1)
+
+    def process_files(self, file1, file2):
+        # Step 1: Parse the first file to map Zones to Frequencies
+        zone_to_frequency = {}
+        with open(file1, 'r') as f1:
+            for line in islice(f1, 4, None):
+                parts = line.split()
+                frequency = parts[0]
+                zone = parts[-2]
+                zone_to_frequency[zone] = frequency
+
+        # Step 2: Parse the second file to extract Time and Signal data
+        dictionary = {}
+        current_zone = None
+        with open(file2, 'r') as f2:
+            for line in f2:
+                line = line.strip()
+
+                # Detect new Zone block
+                if line.startswith("Zone"):
+                    current_zone = line.split()[1]
+                    continue
+
+                # Skip header and empty lines
+                if not line or line.startswith("TAU") or line.startswith("---"):
+                    continue
+
+                # Extract Time and Signal data
+                if current_zone in zone_to_frequency:
+                    try:
+                        parts = line.split()
+                        time = float(parts[0])  # Time column
+                        signal = float(parts[1])  # Signal column
+                        frequency = zone_to_frequency[current_zone]
+
+                        # Initialize dictionary entry if not exists
+                        name = file2 + ' at freq:' + str(frequency)
+                        if name not in dictionary:
+                            dictionary[name] = {"X Axis": frequency, "Time": [], "Signal": []}
+
+                        # Append data
+                        dictionary[name]["Time"].append(time)
+                        dictionary[name]["Signal"].append(signal)
+                    except (ValueError, IndexError):
+                        continue
+
+        return dictionary
 
     def calculate_relaxation_time(self):
         table = self.ui.table_T1
@@ -1109,7 +1194,11 @@ class MainWindow(QMainWindow):
         if selected_file_idx == -1:
             return
         
-        value_from_row = table.item(selected_file_idx, 0).text()
+        if self.state_bad_code == True:
+            value_from_row = table.item(selected_file_idx, 0).text() + ' at freq:' + table.item(selected_file_idx, 2).text()
+            denominator = 0.001
+        else:
+            value_from_row = table.item(selected_file_idx, 0).text()
         Time_original = np.array(dictionary[value_from_row]['Time'])/denominator
         Signal_original = np.array(dictionary[value_from_row]['Signal'])
 
