@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
         self.ui.textEdit_6.setHidden(True)
 
     def check_for_updates(self):
-        current_version = '0.0.4'
+        current_version = '0.0.5'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             # Make a GET request to fetch the latest release data
@@ -1108,7 +1108,6 @@ class MainWindow(QMainWindow):
                         dictionary = create_dictionary(dictionary, file, '_long', x_axis, Time, Signal_long)
 
                 for row, entry in zip(range(table.rowCount()), dictionary):
-
                     Folder = QTableWidgetItem(entry)
                     current_file = os.path.basename(entry)
                     Filename = QTableWidgetItem(current_file)
@@ -1122,7 +1121,6 @@ class MainWindow(QMainWindow):
                     table.setItem(row, 1, Filename)
                     table.setItem(row, 2, Temp)
                     combobox.addItem(f"{current_file}")
-                print('DONE')
             else: # Normal reading
                 table.setRowCount(len(selected_files))
                 x_axis = []
