@@ -393,10 +393,16 @@ def fit_exponent(Time, Signal, order):
         R2 = round(calculate_r_squared(Signal, r2_curve),4)
 
     elif order == 2:
-        # p = [-10, 10, -10, 100, 15]
         b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf])
-        # popt, pcov = curve_fit(decaying_2exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
-        popt_, _ = curve_fit(decaying_2exponential, Time, Signal,bounds = b, maxfev=10000000)
+        try:
+            p1 = [-10, 100, 15]
+            b1 = ([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
+            popt1, _ = curve_fit(decaying_exponential, Time, Signal, p0 = p1, bounds = b1, maxfev=10000000)
+            p = [popt1[0], popt1[1], 10, 10, popt1[2]]
+            popt_, _ = curve_fit(decaying_2exponential, Time, Signal, bounds = b, maxfev=10000000, p0=p)
+        except:
+            print('No covariance')
+            return
         fitted_curve = decaying_2exponential(Time_fit, *popt_)
         popt = np.round(popt_, 3)
 
