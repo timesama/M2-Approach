@@ -62,9 +62,25 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level):
 
     return Time, DQ_norm, Ref_norm, Diff, DQ_normal, MQ_normal, Time0, nDQ, fitted_curve
 
-def analysis_time_domain(file_path):
+def analysis_time_domain(file_path, file_empty, subtract):
     # 1. Read data
     Time, Real, Imag = read_data(file_path, 0)
+
+    if subtract == True:
+        Time_empty, Real_empty, Imag_empty = read_data(file_empty, 0)
+
+        if len(Time) < len (Time_empty):
+            Real = Real - Real_empty[:Real[-1:]]
+            Imag = Imag - Imag_empty[:Imag[-1:]]
+        elif len(Time)>len(Time_empty):
+            Real = Real[:Real_empty[-1:]] - Real_empty
+            Imag = Imag[:Imag_empty[-1:]] - Imag_empty
+        elif len(Time) == len(Time_empty):
+            Real = Real- Real_empty
+            Imag = Imag - Imag_empty
+        else:
+            print("Couldn't subtract")
+            return
     # 2. Crop time below zero
     T_cr, R_cr, I_cr = crop_time_zero(Time, Real, Imag)
 
@@ -219,6 +235,10 @@ def adjust_frequency(Frequency, Re, Im):
     # Find difference
     delta_index = index_max - index_zero
 
+    # To avoid over correction
+    if delta_index == 0:
+        return Re, Im
+
     # Shift the spectra (amplitude) by the difference in indices
     FFT_shifted = np.concatenate((FFT[delta_index:], FFT[:delta_index]))
 
@@ -351,7 +371,7 @@ def calculate_M2(FFT_real, Frequency):
     return M2, T2
 
 def calculate_SFC(Amplitude):
-    S = np.mean(Amplitude[1:4])
+    S = np.mean(Amplitude[2:10])
     L = np.mean(Amplitude[50:70])
     SFC = (S-L)/S
     return SFC
