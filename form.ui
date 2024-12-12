@@ -3826,7 +3826,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <customwidget>
    <class>PlotWidget</class>
    <extends>QWidget</extends>
-   <header location="global">pyqtgraph</header>
+   <header>pyqtgraph</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

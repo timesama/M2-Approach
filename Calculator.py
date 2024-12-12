@@ -62,6 +62,12 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level):
 
     return Time, DQ_norm, Ref_norm, Diff, DQ_normal, MQ_normal, Time0, nDQ, fitted_curve
 
+def cut_beginning(Time, Data, Data2):
+    Time_plot = Time[np.argmax(Data):]
+    Data_plot = Data[np.argmax(Data):]
+    Data_plot2 = Data2[np.argmax(Data):]
+    return Time_plot, Data_plot, Data_plot2
+
 def analysis_time_domain(file_path, file_empty, subtract):
     # 1. Read data
     Time, Real, Imag = read_data(file_path, 0)
@@ -83,6 +89,9 @@ def analysis_time_domain(file_path, file_empty, subtract):
             return
     # 2. Crop time below zero
     T_cr, R_cr, I_cr = crop_time_zero(Time, Real, Imag)
+
+    # 2.5 Crop the ascending part of FID
+    T_cr, R_cr, I_cr = cut_beginning(T_cr, R_cr, I_cr)
 
     # 3. Phase the data
     R_ph, I_ph = time_domain_phase(R_cr, I_cr)
@@ -158,7 +167,7 @@ def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
 def final_analysis_time_domain(Time, Real, Imaginary, number_of_points):
     # 5. Apodize the time-domain
     Re_ap, Im_ap = apodization(Time, Real, Imaginary)
-    
+
     # 6. Add zeros
     Tim, Fid = add_zeros(Time, Re_ap, Im_ap, number_of_points)
 
@@ -520,7 +529,7 @@ def twod_model(x, CDD, tauc, A, Ctrans, tautrans, taures):
     result = CDD * (term1 + term2) + A + Ctrans * tautrans * (log_term1 + log_term2)
     
     return result
-    
+
 def fit_model(Omega, Rate, fixed_CDD, initial_parameters):
     Omega_fit = np.arange(min(Omega), max(Omega) + 0.1, 0.05)
 

@@ -523,6 +523,7 @@ class MainWindow(QMainWindow):
         self.ui.comboBox.setCurrentIndex(-1)
         self.ui.comboBox_2.setCurrentIndex(-1)
         self.ui.textEdit_4.setText("")
+        file_path_empty = self.selected_files_empty
 
 
         legend = pg.LegendItem(offset=(300, 10), parent=self.ui.FidWidget.graphicsItem())
