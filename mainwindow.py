@@ -549,7 +549,7 @@ class MainWindow(QMainWindow):
 
             if self.ui.checkBox.isChecked():
                 if len(self.selected_files_empty) < len(self.selected_files):
-                    QMessageBox.warning(self, "Invalid Data", f"The amount of Empty files is not the same as sample files. Adding glycerol files automatically.", QMessageBox.Ok)
+                    QMessageBox.warning(self, "Invalid Data", f"The amount of Empty files is not the same as sample files. Adding files automatically.", QMessageBox.Ok)
                     last_file = self.selected_files_empty[-1]
                     num_to_add = len(self.selected_files) - len(self.selected_files_empty)
                     self.selected_files_empty.extend([last_file] * num_to_add)
