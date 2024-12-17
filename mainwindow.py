@@ -19,11 +19,11 @@ import Calculator as Cal # Mathematical procedures
 pg.CONFIG_OPTIONS['background'] = 'w'
 pg.CONFIG_OPTIONS['foreground'] = 'k'
 
-# IF you have ever wondered how bad code in Python looks like: 
+# IF you have ever wondered how bad code in Python looks like:
 # here is the generous example of the masterpiece in bad coding.
 # but it works and I don't care
 
-# Global 
+# Global
 Frequency = []
 Re_spectra = []
 Im_spectra = []
@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
         self.check_for_updates()
 
         self.ui.tabWidget.currentChanged.connect(self.state)
-    
+
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.btn_Save_2.clicked.connect(self.save_data)
         self.ui.btn_Save_6.clicked.connect(self.save_data)
@@ -84,14 +84,14 @@ class MainWindow(QMainWindow):
         self.ui.btn_Load_4.clicked.connect(self.load_data)
         self.ui.btn_Load_5.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
-        
+
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
         self.ui.btn_Add.clicked.connect(self.add_select_dialog)
         self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQMQ.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFiles_FFC.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
-        
+
         #self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
 
         self.ui.btn_Start.clicked.connect(self.analysis)
         self.ui.btn_Launch.clicked.connect(self.launch)
-        
+
         self.ui.pushButton_DQMQ_1.clicked.connect(self.plot_original)
         self.ui.radioButton_Log.clicked.connect(self.plot_fit)
         self.ui.pushButton_DQMQ_4.clicked.connect(self.plot_norm)
@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_2.activated.connect(self.plot_fit)
         self.ui.comboBox_6.activated.connect(self.calculate_relaxation_time)
         self.ui.comboBox_8.activated.connect(self.calculate_23_model)
-        
+
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
         self.ui.dq_max.valueChanged.connect(self.update_dq_graphs)
@@ -204,7 +204,7 @@ class MainWindow(QMainWindow):
 
     def open_url(self):
         open_application('https://github.com/timesama/M2-Approach/releases')
-    
+
     def update_file(self):
         i = self.ui.comboBox_4.currentIndex() + 1
         self.ui.btn_Phasing.setEnabled(True)
@@ -213,7 +213,7 @@ class MainWindow(QMainWindow):
             file_path = self.selected_files[i-1]
         except:
             return
-        
+
         if self.ui.checkBox_2.isChecked() or self.ui.checkBox.isChecked():
             try:
                 file_path_gly = self.selected_files_gly[i-1]
@@ -223,7 +223,7 @@ class MainWindow(QMainWindow):
                 return
         else:
             self.process_file_data(file_path, [], [], i)
-     
+
         # Update general figures
         if self.tab == 'DQ':
             self.highlight_row(self.ui.table_DQ, i) 
@@ -233,7 +233,7 @@ class MainWindow(QMainWindow):
             self.update_se_graphs()
 
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
-            
+
     def clear_list(self):
         if self.tab == 'SE' or self.tab == 'DQ':
             self.selected_files = []
@@ -245,9 +245,10 @@ class MainWindow(QMainWindow):
             self.ui.DQ_Widget_1.clear()
             self.ui.DQ_Widget_2.clear()
             self.ui.DQ_Widget_3.clear()
-            self.ui.DQ_Widget_4.clear()   
+            self.ui.DQ_Widget_4.clear()
             self.ui.FFTWidget.clear()
             self.ui.FidWidget.clear()
+            self.ui.btn_Start.setStyleSheet("background-color: none")
         elif self.tab == 'DQ_Temp':
             self.selected_DQfiles = []
             self.dq_t2 = {}
@@ -351,7 +352,7 @@ class MainWindow(QMainWindow):
             State_multiple_files = False
         else:
             State_multiple_files = True
-            
+
         dlg = OpenFilesDialog(self)
         if dlg.exec():
             if self.tab == 'DQ_Temp':
@@ -478,7 +479,7 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_2.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
-    
+
     def hide_FFT_progress(self):
         if self.ui.radioButton_3.isChecked():
             self.ui.progressBar.setHidden(True)
@@ -488,7 +489,7 @@ class MainWindow(QMainWindow):
             self.ui.progressBar.setHidden(False)
             self.ui.textEdit_5.setHidden(False)
             self.ui.textEdit_6.setHidden(False)
-    
+
     def default_folder(self):
         folder_path = str(QFileDialog.getExistingDirectory(self, "Select Default Directory"))
 
@@ -507,7 +508,7 @@ class MainWindow(QMainWindow):
         if ok and new_header:
             table.horizontalHeaderItem(index).setText(new_header)
             self.update_xaxis(table, index)
-            
+
     # All these functions refer to the general analysis where FFT and FID are produced
     def analysis(self):
         # Clear Combobox
@@ -525,12 +526,11 @@ class MainWindow(QMainWindow):
         self.ui.textEdit_4.setText("")
         file_path_empty = self.selected_files_empty
 
-
         legend = pg.LegendItem(offset=(300, 10), parent=self.ui.FidWidget.graphicsItem())
 
         if not self.load_data_and_check_validity((self.selected_files[0])):
             return
-        
+
         if self.ui.checkBox_2.isChecked():
             self.open_select_dialog_glycerol()
         if self.ui.checkBox.isChecked():
@@ -542,8 +542,6 @@ class MainWindow(QMainWindow):
             self.ui.btn_SelectFiles.setEnabled(False)
             self.ui.btn_Load.setEnabled(False)
             self.ui.radioButton.setEnabled(False)
-
-            self.ui.comboBox_4.addItem(f"{filename}")
             self.ui.comboBox_4.setCurrentIndex(-1)
 
             self.ui.textEdit_6.setText(f"Analysing file {i} out of {len(self.selected_files)}")
@@ -582,7 +580,7 @@ class MainWindow(QMainWindow):
                     self.analysis_error(file_path)
                     return
 
-        self.finalize_analysis(legend)
+        self.update_legends_and_dq_graphs(legend)
         self.ui.btn_Start.setStyleSheet("background-color: none")
 
         if self.ui.radioButton.isChecked():
@@ -592,16 +590,11 @@ class MainWindow(QMainWindow):
         QMessageBox.warning(self, "Invalid Data", f"Error in {file_path}. Restarting analysis", QMessageBox.Ok)
         self.selected_files.remove(file_path)
         self.ui.btn_SelectFiles.setEnabled(True)
+        self.ui.btn_Start.setStyleSheet("background-color: none")
         self.analysis()
 
-    def finalize_analysis(self, legend):
+    def update_legends_and_dq_graphs(self, legend):
         self.ui.textEdit_6.setText(f"Finished")
-        legend.removeItem('Amplitude')
-        legend.removeItem('Re')
-        legend.removeItem('Im')
-        legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[0], name='Amp')
-        legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[1], name='Re')
-        legend.addItem(self.ui.FidWidget.plotItem.listDataItems()[2], name='Im')
         self.enable_buttons()
 
         if self.tab == 'DQ':
@@ -623,6 +616,11 @@ class MainWindow(QMainWindow):
             self.ui.FidWidget.clear()
             self.ui.FFTWidget.clear()
             self.ui.btn_Phasing.setEnabled(False)
+            for file_to_delete in self.selected_files:
+                if file_to_delete == file_path:
+                    self.selected_files.remove(file_path)
+            self.enable_buttons()
+            self.ui.btn_Start.setStyleSheet("background-color: none")
             return
 
         subtract = False
@@ -663,6 +661,7 @@ class MainWindow(QMainWindow):
 
         # Update FFT graphs
         self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
+        self.ui.comboBox_4.addItem(f"{filename}")
 
         if self.ui.comboBox_4.currentIndex() == -1:
             M2, T2 = Cal.calculate_M2(Real_apod, Frequency)
@@ -672,7 +671,7 @@ class MainWindow(QMainWindow):
                 temperature = self.extract_info(match)
 
                 SFC = Cal.calculate_SFC(Amp)
-                self.ui.table_SE.setRowCount(len(self.selected_files))
+                self.ui.table_SE.setRowCount(i) # HERE to set the right amount of rows
                 self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
 
                 self.ui.table_SE.setItem(i-1, 4, QTableWidgetItem(filename))
@@ -685,8 +684,8 @@ class MainWindow(QMainWindow):
                 dq_time = self.extract_info(match)
 
                 Amplitude = Cal.calculate_amplitude(y, z)
-                DQ = Cal.calculate_DQ_intensity(x, Amplitude)     
-                self.ui.table_DQ.setRowCount(len(self.selected_files))       
+                DQ = Cal.calculate_DQ_intensity(x, Amplitude)
+                self.ui.table_DQ.setRowCount(i)
                 self.fill_table(self.ui.table_DQ, dq_time, DQ, M2, T2, i)
 
                 if self.ui.radioButton.isChecked():
@@ -1043,28 +1042,28 @@ class MainWindow(QMainWindow):
         for row in range(num_rows):
             table.setItem(row, 3, QTableWidgetItem(str(round(nDQ[row+1],4))))
         table.resizeColumnsToContents()
-        
+
     # Relaxation time section
     def update_T12_table(self):
         def clean_line(line):
             while '\t\t' in line:
                 line = line.replace('\t\t', '\t')
             return line.strip()
-        
+
         def create_dictionary(dictionary, file, addition, x_axis, Time, Signal):
             dictionary[file + addition]["X Axis"].append(x_axis)
             dictionary[file + addition]["Time"].extend(Time)
             dictionary[file + addition]["Signal"].extend(Signal)
             return dictionary
-        
+
         selected_files = self.selected_T1files
         table = self.ui.table_T1
         combobox = self.ui.comboBox_6
         pattern = r'(T1|T2)_(\s?-?\d+)(_.*)?\.dat'
         dictionary = self.tau_dictionary
-        
+
         try:
-            if os.path.splitext(selected_files[0])[1]  == '.sef': # Read data aqcuired from Evaluation of FFC machine version1  
+            if os.path.splitext(selected_files[0])[1]  == '.sef': # Read data aqcuired from Evaluation of FFC machine version1
                 if os.path.splitext(selected_files[1])[1] != '.sef':
                     QMessageBox.warning(self, "Error", f"Load two files: Magnetization and Profile in .sef format.", QMessageBox.Ok)
                     for file_to_delete in selected_files:
@@ -1216,7 +1215,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Error", f"Something went wrong. Try again.", QMessageBox.Ok)
             self.clear_list()
 
-        self.ui.btn_Plot1.setEnabled(True)            
+        self.ui.btn_Plot1.setEnabled(True)
         combobox.setCurrentIndex(-1)
 
     def process_files(self, file1, file2):
@@ -1285,7 +1284,7 @@ class MainWindow(QMainWindow):
 
         if selected_file_idx == -1:
             return
-        
+
         if self.state_bad_code == True:
             value_from_row = table.item(selected_file_idx, 0).text() + ' at freq:' + table.item(selected_file_idx, 2).text()
             denominator = 0.001
@@ -1299,21 +1298,21 @@ class MainWindow(QMainWindow):
 
         Time_fit = np.arange(min(Time), max(Time) + 1, 1)
 
-        try: 
+        try:
             if self.ui.radioButton_4.isChecked():
                 order = 1
             elif self.ui.radioButton_5.isChecked():
                 order = 2
-            else: 
+            else:
                 order = 3
         except:
             QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with {order} exponents. Fitting with one.", QMessageBox.Ok)
             order = 1
-        
+
         Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3, decrease_order = Cal.fit_exponent(Time, Signal, order)
-        
-        self.ui.textEdit_error.setText(f"R² {R2}") 
-        
+
+        self.ui.textEdit_error.setText(f"R² {R2}")
+
         item1 = QTableWidgetItem(str(tau1))
         item2 = QTableWidgetItem(str(tau2))
         item3 = QTableWidgetItem(str(tau3))
@@ -1327,7 +1326,7 @@ class MainWindow(QMainWindow):
         table.setItem(selected_file_idx,4,item11)
         table.setItem(selected_file_idx,6,item22)
         table.setItem(selected_file_idx,8,item33)
-        
+
         figure.clear()
         figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
         figure.plot(Time_fit, fitted_curve, pen='b')
@@ -1335,6 +1334,7 @@ class MainWindow(QMainWindow):
         dictionary[value_from_row]['T1 1'] = tau1
         dictionary[value_from_row]['T1 2'] = tau2
         dictionary[value_from_row]['T1 3'] = tau3
+        self.ui.btn_Plot1.setEnabled(True)
 
     def plot_relaxation_time(self):
 
@@ -1429,7 +1429,7 @@ class MainWindow(QMainWindow):
 
     def update_DQ_comparison_plot(self):
         cmap = pg.ColorMap([0, len(self.dq_t2)], [pg.mkColor('b'), pg.mkColor('r')])  # Blue to red
-    
+
         self.dq_comparison_distribution = {'File name': [], 
                 'X axis': [], 'Center': [], 'FWHM': [], 'Lorentz ratio': [], 
                 'Fitting type': [], 'T2 limit': []}
@@ -1580,7 +1580,7 @@ class MainWindow(QMainWindow):
             writer = csv.writer(csvfile)
             writer.writerow(headers)
             writer.writerows(rows)
-        
+
     def nan_value(self, table, row, column_index):
         table.setItem(row, column_index, QTableWidgetItem('NaN'))
 
@@ -1597,7 +1597,7 @@ class MainWindow(QMainWindow):
         table.setItem(j, 3, QTableWidgetItem(str(c4)))
 
         table.resizeColumnsToContents()
-    
+
     def read_column_values(self, table, column_index):
         column_values = []
         for row in range(table.rowCount()):
@@ -1669,7 +1669,7 @@ class MainWindow(QMainWindow):
             files = None
             self.ui.comboBox_4.setEnabled(False)
             self.ui.btn_Phasing.setEnabled(False)
-        
+
         if self.tab == 'SE':
             table = self.ui.table_SE
             self.selected_files = files
@@ -1992,12 +1992,10 @@ class MainWindow(QMainWindow):
             Fur[i] = np.sum(Fid * (cos_values[:, i] - 1j * sin_values[:, i]))
         QCoreApplication.processEvents()
         return Fur
-    
+
 class SaveFilesDialog(QFileDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-
-        #self.setFileMode(QFileDialog.AnyFile)  # Allow selecting any file for saving
         self.setAcceptMode(QFileDialog.AcceptSave)  # Set the dialog to save mode
 
     def save_data_as_csv(self, directory, table, files, default_filename):
@@ -2033,7 +2031,7 @@ class SaveFilesDialog(QFileDialog):
 
             except Exception as e:
                 print(f"Failed to save file as CSV: {e}")
-    
+
     def save_file_in_sef(self, wtf, dictionary, tau, n, begin, save):
         if save == False:
             return
