@@ -184,7 +184,7 @@ class MainWindow(QMainWindow):
         self.ui.textEdit_6.setHidden(True)
 
     def check_for_updates(self):
-        current_version = '0.0.5'
+        current_version = '0.1.0'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             # Make a GET request to fetch the latest release data
