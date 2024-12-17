@@ -307,7 +307,7 @@ class MainWindow(QMainWindow):
             files = self.selected_FFCfiles
         else:
             return
-        
+
         row = table.currentRow()
         if row == -1:
             QMessageBox.warning(self, "Cricket sounds", f"Select the row.", QMessageBox.Ok)
@@ -315,7 +315,7 @@ class MainWindow(QMainWindow):
         item = table.item(row,0).text()
         table.removeRow(row)
         combobox.removeItem(row)
-        
+
         try:
             for file_to_delete in files:
                 if file_to_delete == item:
@@ -670,7 +670,7 @@ class MainWindow(QMainWindow):
                 match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
                 temperature = self.extract_info(match)
 
-                SFC = Cal.calculate_SFC(Amp)
+                SFC = Cal.calculate_SC(Amp)
                 self.ui.table_SE.setRowCount(i) # HERE to set the right amount of rows
                 self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
 
@@ -1103,6 +1103,7 @@ class MainWindow(QMainWindow):
                             selected_files.remove(file)
 
             elif os.path.splitext(selected_files[0])[1] == '.txt': # Reading T1 recorded at different time regions
+                self.state_bad_code = False
                 table.setRowCount(len(selected_files*4))
                 x_axis = []
 
@@ -1157,6 +1158,7 @@ class MainWindow(QMainWindow):
                     table.setItem(row, 2, Temp)
                     combobox.addItem(f"{current_file}")
             else: # Normal reading
+                self.state_bad_code = False
                 table.setRowCount(len(selected_files))
                 x_axis = []
                 for row, file in zip(range(table.rowCount()), selected_files):
@@ -1201,7 +1203,7 @@ class MainWindow(QMainWindow):
                                 if file_to_delete == file:
                                     selected_files.remove(file)
                             return
-                    
+
                     Filename = QTableWidgetItem(current_file)
                     Temp = QTableWidgetItem(x_axis)
                     table.setItem(row, 0, Folder)
@@ -1210,7 +1212,7 @@ class MainWindow(QMainWindow):
                     dictionary[file]["X Axis"].append(x_axis)
                     dictionary[file]["Time"].extend(Time)
                     dictionary[file]["Signal"].extend(Signal)
-                    self.state_bad_code = False
+
         except:
             QMessageBox.warning(self, "Error", f"Something went wrong. Try again.", QMessageBox.Ok)
             self.clear_list()
@@ -1296,7 +1298,8 @@ class MainWindow(QMainWindow):
         Time = Time_original[starting_point:ending_point]
         Signal = Signal_original[starting_point:ending_point]
 
-        Time_fit = np.arange(min(Time), max(Time) + 1, 1)
+        # Time_fit = np.arange(min(Time), max(Time) + 1, min(Time) * 0.1)
+        # Time_fit = np.linspace(start=min(Time), stop=max(Time), num=60)
 
         try:
             if self.ui.radioButton_4.isChecked():
@@ -1739,7 +1742,7 @@ class MainWindow(QMainWindow):
         exporter_fid.export(fid_file_path)
 
     def load_data_and_check_validity(self, file_path):
-        try: 
+        try:
             data = np.loadtxt(file_path)
             filename = os.path.basename(file_path)
             # Check that there are 3 columns
@@ -1754,6 +1757,7 @@ class MainWindow(QMainWindow):
         except:
             QMessageBox.warning(self, "Invalid Data", f"I can't read the {filename} file, deleting it.", QMessageBox.Ok)
             self.selected_files.remove(file_path)
+            self.ui.btn_Start.setStyleSheet("background-color: none")
 
             if self.selected_files == []:
                 self.disable_buttons()

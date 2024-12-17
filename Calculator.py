@@ -352,21 +352,21 @@ def find_nearest(array, value):
 def calculate_M2(FFT_real, Frequency):
     # Take the integral of the REAL PART OF FFT by counts
     Integral = np.trapz(np.real(FFT_real))
-    
+
     # Normalize FFT to the Integral value
     Fur_normalized = np.real(FFT_real) / Integral
-    
+
     # Calculate the integral of normalized FFT to receive 1
     Integral_one = np.trapz(Fur_normalized)
-    
+
     # Multiplication (the power ^n will give the nth moment (here it is n=2)
     Multiplication = (Frequency ** 2) * Fur_normalized
-    
+
     # Calculate the integral of multiplication - the nth moment
     # The (2pi)^2 are the units to transform from rad/sec to Hz
     # ppbly it should be (2pi)^n for generalized moment calculation
     M2 = (np.trapz(Multiplication)) * 4 * np.pi ** 2
-    
+
     # Check the validity
     if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
         print('Apodization is wrong!')
@@ -376,14 +376,14 @@ def calculate_M2(FFT_real, Frequency):
         T2 = 0
     else:
         T2 = np.sqrt(2/M2)
-    
+
     return M2, T2
 
-def calculate_SFC(Amplitude):
+def calculate_SC(Amplitude):
     S = np.mean(Amplitude[2:10])
     L = np.mean(Amplitude[50:70])
-    SFC = (S-L)/S
-    return SFC
+    solid_content = (S-L)/S
+    return solid_content
 
 def calculate_DQ_intensity(Time, Amplitude):
     idx_time = np.argmin(np.abs(Time - 4))
@@ -400,7 +400,7 @@ def decaying_3exponential(x, a1, b1, a2, b2, a3, b3, c):
     return a1 * np.exp(-x/b1) + a2 * np.exp(-x/b2) + a3 * np.exp(-x/b3) + c
 
 def fit_exponent(Time, Signal, order):
-    Time_fit = np.arange(min(Time), max(Time) + 1, 1)
+    Time_fit = np.linspace(start=min(Time), stop=max(Time), num=60)
 
     if order == 1:
         p = [-10, 100, 15]
