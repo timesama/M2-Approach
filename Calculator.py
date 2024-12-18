@@ -113,19 +113,23 @@ def analysis_time_domain(file_path, file_empty, subtract):
 
 def reference_long_component(Time, Component, Amplitude_gly, coeff):
     # 2. Normalize (reference) components to Amplitude of the reference
-    Component_n = Component/Amplitude_gly
+    if Amplitude_gly is not None:
+        Component_n = Component/Amplitude_gly
+    else:
+        Component_n = Component
 
     # 3. Cut the ranges for fitting
-    minimum = find_nearest(Time, 60)
-    maximum = find_nearest(Time, 250)
+    minimum = find_nearest(Time, 80)
+    maximum = find_nearest(Time, 200)
     # TODO: The user can adjust these numbers
 
     Time_range = Time[minimum:maximum]
     Component_n_range = Component_n[minimum:maximum]
 
     # 7. Fit data to exponential decay
-    popt, _      = curve_fit(decaying_exponential, Time_range, Component_n_range, p0=coeff)
-    
+    b = ([-max(Component_n)*10, 50, -30], [max(Component_n)*10, 800, 30])
+    popt, _      = curve_fit(decaying_exponential, Time_range, Component_n_range, bounds = b, p0=coeff)
+
     # 8. Set the ranges for subtraction
     Time_cropped  = Time[0:maximum]
     Component_c   = Component_n[0:maximum]
@@ -138,6 +142,15 @@ def reference_long_component(Time, Component, Amplitude_gly, coeff):
 
     return Component_sub, Time_cropped
 
+def subtract_long_component(Time, Re, Im):
+    coeff_re = [max(Re), 500, 0.1]
+
+    Real_smooth = savgol_filter(Re, 30, 1)
+
+    Real_subtracted, Time_cropped   = reference_long_component(Time, Real_smooth, None, coeff_re)
+    Im_subtracted = np.zeros(len(Real_subtracted))
+    return Time_cropped, Real_subtracted, Im_subtracted
+
 def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     # r stands for reference, s stands for sample
     Amp_r = calculate_amplitude(Re_r, Im_r)
@@ -149,7 +162,7 @@ def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
         Amp_s   =   Amp_s[:len(Time_r)]
         Re_s    =   Re_s[:len(Time_r)]
         Im_s    =   Im_s[:len(Time_r)]
-    else:  
+    else:
         Time  =   Time_r[:len(Time_s)]
         Amp_r   =   Amp_r[:len(Time_s)]
 
@@ -157,8 +170,8 @@ def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     coeff_im = [1, 400, 0]
 
     Real_subtracted, Time_cropped   = reference_long_component(Time, Re_s, Amp_r, coeff_re)
-    Im_subtracted, _     = reference_long_component(Time, Im_s, Amp_r, coeff_im)
-    
+    Im_subtracted = np.zeros(len(Real_subtracted))
+
     # 11. Normalize
     Re_n, Im_n = normalize(Real_subtracted, Im_subtracted)
 
@@ -380,8 +393,8 @@ def calculate_M2(FFT_real, Frequency):
     return M2, T2
 
 def calculate_SC(Amplitude):
-    S = np.mean(Amplitude[2:10])
-    L = np.mean(Amplitude[50:70])
+    S = np.mean(Amplitude[2:20])
+    L = np.mean(Amplitude[100:140])
     solid_content = (S-L)/S
     return solid_content
 

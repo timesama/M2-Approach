@@ -198,7 +198,7 @@ class MainWindow(QMainWindow):
                 result = QMessageBox.information(self, "New Relaxyzer Available", f"A new version (Relaxyzer {latest_version}) is available.\nWould you like to update?", QMessageBox.Yes | QMessageBox.No)
                 if result == QMessageBox.Yes:
                     self.open_url()
-                
+
         except requests.RequestException as e:
             print(f"Failed to check for updates: {e}")
 
@@ -214,15 +214,23 @@ class MainWindow(QMainWindow):
         except:
             return
 
-        if self.ui.checkBox_2.isChecked() or self.ui.checkBox.isChecked():
-            try:
-                file_path_gly = self.selected_files_gly[i-1]
-                file_path_empty = self.selected_files_empty[i-1]
-                self.process_file_data(file_path, file_path_gly,file_path_empty, i)
-            except:
-                return
+        if self.ui.checkBox_2.isChecked() and self.ui.checkBox.isChecked():
+            file_path_gly = self.selected_files_gly[i-1]
+            file_path_empty = self.selected_files_empty[i-1]
+        elif self.ui.checkBox_2.isChecked():
+            file_path_gly = self.selected_files_gly[i-1]
+            file_path_empty=[]
+        elif self.ui.checkBox.isChecked():
+            file_path_gly = []
+            file_path_empty = self.selected_files_empty[i-1]
         else:
-            self.process_file_data(file_path, [], [], i)
+            file_path_gly = []
+            file_path_empty = []
+
+        try:
+            self.process_file_data(file_path, file_path_gly,file_path_empty, i)
+        except:
+            return
 
         # Update general figures
         if self.tab == 'DQ':
@@ -636,7 +644,11 @@ class MainWindow(QMainWindow):
             Time_s, Re_s, Im_s = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
             Time, Re, Im = Cal.long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r)
         else:
-            Time, Re, Im = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
+            if self.ui.checkBox_4.isChecked():
+                Time_o, Re_o, Im_o = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
+                Time, Re, Im = Cal.subtract_long_component(Time_o, Re_o, Im_o)
+            else:
+                Time, Re, Im = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
 
         Amp = Cal.calculate_amplitude(Re, Im)
         self.update_graphs(Time, Amp, Re, Im, self.ui.FidWidget)
