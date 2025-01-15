@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-import sys, os, re, csv, requests
+import sys, os, re, csv, requests, winreg
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtGui import QColor, QIcon
@@ -499,15 +499,16 @@ class MainWindow(QMainWindow):
             self.ui.textEdit_6.setHidden(False)
 
     def default_folder(self):
-        folder_path = str(QFileDialog.getExistingDirectory(self, "Select Default Directory"))
-
-        if os.path.exists("selected_folder.txt"):
-            os.remove("selected_folder.txt")
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Default Directory")
 
         if folder_path:
-            # Write the selected folder's full path to a text file
-            with open("selected_folder.txt", "w") as file:
-                file.write(folder_path)
+            try:
+                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\MyApp")
+                winreg.SetValueEx(key, "SelectedFolder", 0, winreg.REG_SZ, folder_path)
+                winreg.CloseKey(key)
+                print(f"Default folder saved to registry: {folder_path}")
+            except Exception as e:
+                print(f"Failed to save the default folder to the registry: {e}")
 
     def renameSection(self, table, index):
         current_header = table.horizontalHeaderItem(index).text()
@@ -2098,17 +2099,23 @@ class OpenFilesDialog(QFileDialog):
 
         self.setNameFilter(str("Data (*.dat *.txt *.csv *.sef)"))
 
-        initial_directory_file = "selected_folder.txt"
-        try:
-            with open(initial_directory_file, 'r') as file:
-                directory = file.read().strip()
-        except Exception as e:
-            print(f"Couldn't read the initial directory: {e}")
-            directory = os.path.dirname(sys.argv[0])
-
+        directory = self.get_initial_directory()
         self.setDirectory(directory)
 
         self.selected_files = []  # dictionary to store selected file paths
+
+    def get_initial_directory(self):
+        """Retrieve the initial directory from the registry."""
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\MyApp", 0, winreg.KEY_READ)
+            directory, _ = winreg.QueryValueEx(key, "SelectedFolder")
+            winreg.CloseKey(key)
+            return directory
+        except FileNotFoundError:
+            return os.path.dirname(sys.argv[0])
+        except Exception as e:
+            print(f"Couldn't read the initial directory: {e}")
+            return os.path.dirname(sys.argv[0])
 
     def on_file_selected(self):
         options = QFileDialog.Options()
