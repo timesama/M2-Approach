@@ -1916,14 +1916,15 @@ class MainWindow(QMainWindow):
         figure.plot(Omega_fit, fitted_curve, pen='b', name = 'Original data')
         figure.plot(Omega_fit, tau_c_rate, pen = 'c',name='tau c')
         figure.plot(Omega_fit, tau_trans_rate, pen = 'm', name = 'tau trans')
-        legend = figure.addLegend()  
+        legend = figure.addLegend()
+        figure.setLogMode(True, True)
 
         self.ui.checkBox_3.setEnabled(True)
         self.ui.btn_Plot1_2.setEnabled(True)
         self.ui.groupBox_7.setEnabled(True)
         self.ui.groupBox_6.setEnabled(True)
 
-        self.ui.textEdit_error_2.setText(f"R² {R2}") 
+        self.ui.textEdit_error_2.setText(f"R² {R2}")
 
     def simulation(self):
         table = self.ui.table_FFC_1
@@ -1940,7 +1941,7 @@ class MainWindow(QMainWindow):
 
         if state == 'None':
             figure.clear()
-            self.ui.textEdit_error_3.setText(f"No Data")     
+            self.ui.textEdit_error_3.setText(f"No Data")
         else:
             try:
                 fitting, short, middle, long, popt, R2 = Cal.simulation(Omega, Rate, state)
@@ -1950,25 +1951,26 @@ class MainWindow(QMainWindow):
                 if state == 'Two':
                     figure.plot(Omega, short, pen='m')
                     figure.plot(Omega, middle, pen='g')
-                    C1, C2, A, t1, t2= np.round(popt, decimals=5)
+                    C1, C2, A, t1, t2, alpha= np.round(popt, decimals=5)
                     C3=0
                     t3 = 0
                 elif state == 'Three':
                     figure.plot(Omega, short, pen='m')
                     figure.plot(Omega, middle, pen='g')
                     figure.plot(Omega, long, pen='c')
-                    C1, C2, C3, A, t1, t2, t3 = np.round(popt, decimals=5)
+                    C1, C2, C3, A, t1, t2, t3, alpha = np.round(popt, decimals=5)
                 elif state == 'One':
                     self.ui.textEdit_error_3.setText(f"R² {R2}")
-                    C1,A,t1 = np.round(popt, decimals=5)
+                    C1,A,t1, alpha = np.round(popt, decimals=5)
                     C2 = 0
                     C3 = 0
-                    t2 = 0 
+                    t2 = 0
                     t3 = 0
                 else:
                     return
-                
-                self.ui.textEdit_error_3.setText(f"R² {R2}\nA = {A}\nCDD = {C1}\tτ = {t1}\nCDD = {C2}\tτ = {t2}\nCDD = {C3}\tτ = {t3}") 
+
+                figure.setLogMode(True, False)
+                self.ui.textEdit_error_3.setText(f"R² {R2}\nA = {A}\nα = {alpha}\nCDD = {C1}\tτ = {t1}\nCDD = {C2}\tτ = {t2}\nCDD = {C3}\tτ = {t3}")
 
             except:
                 QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit the data, try unchecking τ.", QMessageBox.Ok)
