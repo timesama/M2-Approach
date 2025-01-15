@@ -7,6 +7,7 @@ from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 
 
+
 # Math procedures
 def find_nearest(array, value):
     array = np.asarray(array)
@@ -100,10 +101,10 @@ def analysis_time_domain(file_path, file_empty, subtract):
     # 4.1 Calculate Freq
     Frequency = calculate_frequency_scale(T_cr)
     # 4.2 Shift Freq
-    R_sh1, I_sh1 = adjust_frequency(Frequency, R_ph, I_ph)
+    R_sh, I_sh = adjust_frequency(Frequency, R_ph, I_ph)
 
     # 5 Again Phase
-    R_ph2, I_ph2 = time_domain_phase(R_sh1, I_sh1)
+    R_ph2, I_ph2 = time_domain_phase(R_sh, I_sh)
 
     # Again frequency
     R_sh, I_sh = adjust_frequency(Frequency, R_ph2, I_ph2)
@@ -394,8 +395,9 @@ def calculate_M2(FFT_real, Frequency):
 
 def calculate_SC(Amplitude):
     S = np.mean(Amplitude[2:20])
-    L = np.mean(Amplitude[100:140])
-    solid_content = (S-L)/S
+    L = np.mean(Amplitude[120:160])
+    # solid_content = (S-L)/S
+    solid_content = L
     return solid_content
 
 def calculate_DQ_intensity(Time, Amplitude):
@@ -569,39 +571,42 @@ def fit_model(Omega, Rate, fixed_CDD, initial_parameters):
 def repeating_part(t, x):
     return t / (1 + (np.pi * 2 * x * t)**2) + 4 * t / (1 + (np.pi * 4 * x * t)**2)
 
-def simplified_expression(x, C1, C2, C3, A, t1, t2, t3):
+def simplified_expression1(x, C1, C2, C3, A, t1, t2, t3):
     return C1 * repeating_part(t1, x) + C2 * repeating_part(t2, x) + C3 * repeating_part(t3, x) + A
+
+def simplified_expression(x, C1, C2, C3, A, t1, t2, t3, alpha):
+    return C1 * repeating_part(t1, x) + C2 * repeating_part(t2, x) + C3 * repeating_part(t3, x) + A * (x)**(-alpha)
 
 def simulation(Omega, Rate, state):
     if state == 'One':
-        initial = [1, 0.01, 1]  
-        bounds = ([0, 0, 0], [np.inf, np.inf, np.inf]) 
-        popt, _ = curve_fit(lambda x, C1, A, t1: simplified_expression(x, C1, 0, 0, A, t1, 0, 0), Omega, Rate, p0=initial, bounds=bounds)
-        C1, A, t1 = popt[0], popt[1], popt[2]
-        fitting = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0)
+        initial = [1, 0.01, 1, 0.5]
+        bounds = ([0, 0, 0, -2], [np.inf, np.inf, np.inf, 2])
+        popt, _ = curve_fit(lambda x, C1, A, t1, alpha: simplified_expression(x, C1, 0, 0, A, t1, 0, 0, alpha), Omega, Rate, p0=initial, bounds=bounds)
+        C1, A, t1, alpha = popt[0], popt[1], popt[2], popt[3]
+        fitting = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0, alpha)
         short, middle, long = 0, 0, 0
         R2 = round(calculate_r_squared(Rate, fitting), 4)
 
     elif state == 'Two':
-        initial = [1, 0.01, 1, 0.01, 0.1]  
-        bounds = ([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf, np.inf])  
-        popt, _ = curve_fit(lambda x, C1, C2, A, t1, t2: simplified_expression(x, C1, C2, 0, A, t1, t2, 0), Omega, Rate, p0=initial, bounds=bounds)
-        C1, C2, A, t1, t2 = popt[0], popt[1], popt[2], popt[3], popt[4]
-        fitting = simplified_expression(Omega, C1, C2, 0, A, t1, t2, 0)
-        short = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0)
-        middle = simplified_expression(Omega, 0, C2, 0, A, 0, t2, 0)
+        initial = [1, 0.01, 1, 0.01, 0.1, 0.5]
+        bounds = ([0, 0, 0, 0, 0, -2], [np.inf, np.inf, np.inf, np.inf, np.inf, 2])
+        popt, _ = curve_fit(lambda x, C1, C2, A, t1, t2, alpha: simplified_expression(x, C1, C2, 0, A, t1, t2, 0, alpha), Omega, Rate, p0=initial, bounds=bounds)
+        C1, C2, A, t1, t2, alpha = popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]
+        fitting = simplified_expression(Omega, C1, C2, 0, A, t1, t2, 0, alpha)
+        short = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0, alpha)
+        middle = simplified_expression(Omega, 0, C2, 0, A, 0, t2, 0, alpha)
         long = 0
         R2 = round(calculate_r_squared(Rate, fitting), 4)
 
     elif state == 'Three':
-        initial = [1, 0.1, 0.01, 1, 0.01, 0.1, 1]  
-        bounds = ([0, 0, 0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])  
+        initial = [1, 0.1, 0.01, 1, 0.01, 0.1, 1, 0.5]
+        bounds = ([0, 0, 0, 0, 0, 0, 0, -2], [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, 2])
         popt, _ = curve_fit(simplified_expression, Omega, Rate, p0=initial, bounds=bounds)
-        C1, C2, C3, A, t1, t2, t3 = popt
-        fitting = simplified_expression(Omega, C1, C2, C3, A, t1, t2, t3)
-        short = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0)
-        middle = simplified_expression(Omega, 0, C2, 0, A, 0, t2, 0)
-        long = simplified_expression(Omega, 0, 0, C3, A, 0, 0, t3)
+        C1, C2, C3, A, t1, t2, t3, alpha = popt
+        fitting = simplified_expression(Omega, C1, C2, C3, A, t1, t2, t3, alpha)
+        short = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0, alpha)
+        middle = simplified_expression(Omega, 0, C2, 0, A, 0, t2, 0, alpha)
+        long = simplified_expression(Omega, 0, 0, C3, A, 0, 0, t3, alpha)
         R2 = round(calculate_r_squared(Rate, fitting), 4)
 
     else:
