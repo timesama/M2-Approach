@@ -9,7 +9,8 @@ from scipy.signal import savgol_filter
 
 
 # Math procedures
-def find_nearest(array, value):
+def _find_nearest(array, value):
+    # private api
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
@@ -42,8 +43,8 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level):
 
     DQ_norm, Ref_norm, Diff = normalize_mq(DQ, Ref, 'minus')
 
-    idx_min = find_nearest(Time, fit_from)
-    idx_max = find_nearest(Time, fit_to)
+    idx_min = _find_nearest(Time, fit_from)
+    idx_max = _find_nearest(Time, fit_to)
     Time_cut = Time[idx_min:idx_max+1]
     Diff_cut = Diff[idx_min:idx_max+1]
 
@@ -55,7 +56,7 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level):
 
     DQ_normal, MQ_normal, _ = normalize_mq(DQ_norm, MQ, 'plus')
 
-    additive_function = exp_apodization(Time)
+    additive_function = _exp_apodization(Time)
     nDQ = (DQ_normal+noise_level*additive_function)/(DQ_normal+MQ+2*noise_level*additive_function)
 
     nDQ = np.insert(nDQ, 0, 0)
@@ -63,7 +64,8 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level):
 
     return Time, DQ_norm, Ref_norm, Diff, DQ_normal, MQ_normal, Time0, nDQ, fitted_curve
 
-def cut_beginning(Time, Data, Data2):
+def _cut_beginning(Time, Data, Data2):
+    # private api
     Time_plot = Time[np.argmax(Data):]
     Data_plot = Data[np.argmax(Data):]
     Data_plot2 = Data2[np.argmax(Data):]
@@ -89,30 +91,31 @@ def analysis_time_domain(file_path, file_empty, subtract):
             print("Couldn't subtract")
             return
     # 2. Crop time below zero
-    T_cr, R_cr, I_cr = crop_time_zero(Time, Real, Imag)
+    T_cr, R_cr, I_cr = _crop_time_zero(Time, Real, Imag)
 
     # 2.5 Crop the ascending part of FID
-    T_cr, R_cr, I_cr = cut_beginning(T_cr, R_cr, I_cr)
+    T_cr, R_cr, I_cr = _cut_beginning(T_cr, R_cr, I_cr)
 
     # 3. Phase the data
-    R_ph, I_ph = time_domain_phase(R_cr, I_cr)
+    R_ph, I_ph = _time_domain_phase(R_cr, I_cr)
 
     # 4. Adjust Frequency
     # 4.1 Calculate Freq
-    Frequency = calculate_frequency_scale(T_cr)
+    Frequency = _calculate_frequency_scale(T_cr)
     # 4.2 Shift Freq
-    R_sh, I_sh = adjust_frequency(Frequency, R_ph, I_ph)
+    R_sh, I_sh = _adjust_frequency(Frequency, R_ph, I_ph)
 
     # 5 Again Phase
-    R_ph2, I_ph2 = time_domain_phase(R_sh, I_sh)
+    R_ph2, I_ph2 = _time_domain_phase(R_sh, I_sh)
 
     # Again frequency
-    R_sh, I_sh = adjust_frequency(Frequency, R_ph2, I_ph2)
+    R_sh, I_sh = _adjust_frequency(Frequency, R_ph2, I_ph2)
 
 
     return T_cr, R_sh, I_sh
 
-def reference_long_component(Time, Component, Amplitude_gly, coeff):
+def _reference_long_component(Time, Component, Amplitude_gly, coeff):
+    # private api
     # 2. Normalize (reference) components to Amplitude of the reference
     if Amplitude_gly is not None:
         Component_n = Component/Amplitude_gly
@@ -120,8 +123,8 @@ def reference_long_component(Time, Component, Amplitude_gly, coeff):
         Component_n = Component
 
     # 3. Cut the ranges for fitting
-    minimum = find_nearest(Time, 80)
-    maximum = find_nearest(Time, 200)
+    minimum = _find_nearest(Time, 80)
+    maximum = _find_nearest(Time, 200)
     # TODO: The user can adjust these numbers
 
     Time_range = Time[minimum:maximum]
@@ -148,14 +151,14 @@ def subtract_long_component(Time, Re, Im):
 
     Real_smooth = savgol_filter(Re, 30, 1)
 
-    Real_subtracted, Time_cropped   = reference_long_component(Time, Real_smooth, None, coeff_re)
+    Real_subtracted, Time_cropped   = _reference_long_component(Time, Real_smooth, None, coeff_re)
     Im_subtracted = np.zeros(len(Real_subtracted))
     return Time_cropped, Real_subtracted, Im_subtracted
 
 def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     # r stands for reference, s stands for sample
-    Amp_r = calculate_amplitude(Re_r, Im_r)
-    Amp_s = calculate_amplitude(Re_s, Im_s)
+    Amp_r = _calculate_amplitude(Re_r, Im_r)
+    Amp_s = _calculate_amplitude(Re_s, Im_s)
 
     # 1. Crop the arrays together (they should be of the same length, but I know, I know...)
     if len(Time_s) > len(Time_r):
@@ -170,20 +173,20 @@ def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     coeff_re = [0.9, 400, 0.1]
     coeff_im = [1, 400, 0]
 
-    Real_subtracted, Time_cropped   = reference_long_component(Time, Re_s, Amp_r, coeff_re)
+    Real_subtracted, Time_cropped   = _reference_long_component(Time, Re_s, Amp_r, coeff_re)
     Im_subtracted = np.zeros(len(Real_subtracted))
 
     # 11. Normalize
-    Re_n, Im_n = normalize(Real_subtracted, Im_subtracted)
+    Re_n, Im_n = _normalize(Real_subtracted, Im_subtracted)
 
     return Time_cropped, Re_n, Im_n
 
 def final_analysis_time_domain(Time, Real, Imaginary, number_of_points):
     # 5. Apodize the time-domain
-    Re_ap, Im_ap = apodization(Time, Real, Imaginary)
+    Re_ap, Im_ap = _apodization(Time, Real, Imaginary)
 
     # 6. Add zeros
-    Tim, Fid = add_zeros(Time, Re_ap, Im_ap, number_of_points)
+    Tim, Fid = _add_zeros(Time, Re_ap, Im_ap, number_of_points)
 
     #stophere
     return Tim, Fid
@@ -191,13 +194,13 @@ def final_analysis_time_domain(Time, Real, Imaginary, number_of_points):
 def frequency_domain_analysis(FFT, Frequency):
 
     # 8. Simple baseline
-    _, Re, _ = simple_baseline_correction(FFT)
+    _, Re, _ = _simple_baseline_correction(FFT)
 
     # 9. Apodization
-    Real_apod = calculate_apodization(Re, Frequency)
+    Real_apod = _calculate_apodization(Re, Frequency)
 
     # 10. M2 & T2
-    M2, T2 = calculate_M2(Real_apod, Frequency)
+    M2, T2 = _calculate_M2(Real_apod, Frequency)
 
     return M2, T2
 
@@ -206,7 +209,8 @@ def read_data(file_path, header):
     x, y, z = data[:, 0], data[:, 1], data[:, 2]
     return x, y, z
 
-def crop_time_zero(Time, Real, Imaginary):
+def _crop_time_zero(Time, Real, Imaginary):
+    # private api
     if Time[0] < 0:
         Time_start = 0
         Time_crop_idx = np.where(Time >= Time_start)[0][0]
@@ -217,19 +221,20 @@ def crop_time_zero(Time, Real, Imaginary):
     else:
         return Time, Real, Imaginary
 
-def time_domain_phase(Real, Imaginary):
+def _time_domain_phase(Real, Imaginary):
+    # private api
     delta = np.zeros(360)
-    
+
     for phi in range(360):
         Re_phased = Real * np.cos(np.deg2rad(phi)) - Imaginary * np.sin(np.deg2rad(phi))
         Im_phased = Real * np.sin(np.deg2rad(phi)) + Imaginary * np.cos(np.deg2rad(phi))
-        Magnitude_phased = calculate_amplitude(Re_phased, Im_phased)
+        Magnitude_phased = _calculate_amplitude(Re_phased, Im_phased)
         
         Re_cut = Re_phased[:5]
         Ma_cut = Magnitude_phased[:5]
         
         delta[phi] = np.mean(Ma_cut - Re_cut)
-    
+
     idx = np.argmin(delta)
     #print(idx)
 
@@ -238,7 +243,8 @@ def time_domain_phase(Real, Imaginary):
 
     return Re, Im
 
-def adjust_frequency(Frequency, Re, Im):
+def _adjust_frequency(Frequency, Re, Im):
+    # private api
     # Create complex FID
     Fid_unshifted = np.array(Re + 1j * Im)
 
@@ -253,7 +259,7 @@ def adjust_frequency(Frequency, Re, Im):
     index_max = np.argmax(FFT)
 
     # Find index of zero (frequency)
-    index_zero = find_nearest(Frequency, 0)
+    index_zero = _find_nearest(Frequency, 0)
 
     # Find difference
     delta_index = index_max - index_zero
@@ -274,7 +280,8 @@ def adjust_frequency(Frequency, Re, Im):
 
     return Re_shifted, Im_shifted
 
-def normalize(Real, Imaginary):
+def _normalize(Real, Imaginary):
+    # private api
     Amplitude = np.sqrt(Real ** 2 + Imaginary ** 2)
     Amplitude_max = np.max(Amplitude)
     Amp = Amplitude/Amplitude_max
@@ -282,8 +289,9 @@ def normalize(Real, Imaginary):
     Im = Imaginary/Amplitude_max
     return Re, Im
 
-def apodization(Time, Real, Imaginary):
-    Amplitude = calculate_amplitude(Real, Imaginary)
+def _apodization(Time, Real, Imaginary):
+    # private api
+    Amplitude = _calculate_amplitude(Real, Imaginary)
     coeffs = np.polyfit(Time, Amplitude, 1)  # Fit an exponential decay function
     c = np.polyval(coeffs, Time)
     d = np.argmin(np.abs(c - 1e-5))
@@ -295,13 +303,15 @@ def apodization(Time, Real, Imaginary):
     Im_ap = Imaginary * apodization_function
     return Re_ap, Im_ap
 
-def exp_apodization(Time):
+def _exp_apodization(Time):
+    # private api
     Time_end = Time[-1]+10
     noise = Time_end*0.3
     additive_function =  0.5*np.exp(((Time - Time_end) / noise) ** 3)
     return additive_function
 
-def add_zeros(Time, Real, Imaginary, number_of_points):
+def _add_zeros(Time, Real, Imaginary, number_of_points):
+    # private api
     length_diff = number_of_points - len(Time)
     amount_to_add = np.zeros(length_diff+1)
 
@@ -317,16 +327,18 @@ def add_zeros(Time, Real, Imaginary, number_of_points):
 
     return Time, Fid
 
-def simple_baseline_correction(FFT):
+def _simple_baseline_correction(FFT):
+    # private api
     twentyperc = int(round(len(FFT) * 0.02))
     Baseline = np.mean(np.real(FFT[:twentyperc]))
     FFT_corrected = FFT - Baseline
     Re = np.real(FFT_corrected)
     Im = np.imag(FFT_corrected)
-    Amp = calculate_amplitude(Re, Im)
+    Amp = _calculate_amplitude(Re, Im)
     return Amp, Re, Im
 
-def calculate_apodization(Real, Freq):
+def _calculate_apodization(Real, Freq):
+    # private api
     # Find sigma at 2% from the max amplitude of the spectra
     Maximum = np.max(np.abs(Real))
     idx_max = np.argmax(np.abs(Real))
@@ -341,12 +353,13 @@ def calculate_apodization(Real, Freq):
     
     return Real_apod
 
-def calculate_amplitude(Real, Imaginary):
-    # NoClass
+def _calculate_amplitude(Real, Imaginary):
+    # private api
     Amp = np.sqrt(Real ** 2 + Imaginary ** 2)
     return Amp
 
-def calculate_frequency_scale(Time):
+def _calculate_frequency_scale(Time):
+    # private api
     numberp = len(Time)
 
     dt = Time[1] - Time[0]
@@ -358,12 +371,13 @@ def calculate_frequency_scale(Time):
 
     return Freq
 
-def find_nearest(array, value):
+def _find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
 
-def calculate_M2(FFT_real, Frequency):
+def _calculate_M2(FFT_real, Frequency):
+    # private api
     # Take the integral of the REAL PART OF FFT by counts
     Integral = np.trapz(np.real(FFT_real))
 

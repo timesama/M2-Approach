@@ -651,7 +651,7 @@ class MainWindow(QMainWindow):
             else:
                 Time, Re, Im = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
 
-        Amp = Cal.calculate_amplitude(Re, Im)
+        Amp = Cal._calculate_amplitude(Re, Im)
         self.update_graphs(Time, Amp, Re, Im, self.ui.FidWidget)
 
         if self.ui.radioButton_2.isChecked():
@@ -660,7 +660,7 @@ class MainWindow(QMainWindow):
             number_of_points = 2**16
 
         Time_fid, Fid =  Cal.final_analysis_time_domain(Time, Re, Im, number_of_points)
-        Frequency = Cal.calculate_frequency_scale(Time_fid)
+        Frequency = Cal._calculate_frequency_scale(Time_fid)
 
         if self.ui.radioButton_2.isChecked():
             FFT = self.FFT_handmade(Fid, Time_fid, Frequency)  #(math procedure)
@@ -668,16 +668,16 @@ class MainWindow(QMainWindow):
             FFT = np.fft.fftshift(np.fft.fft(Fid))
 
         # 8. Simple baseline
-        Amp_spectra, Re_spectra, Im_spectra = Cal.simple_baseline_correction(FFT)
+        Amp_spectra, Re_spectra, Im_spectra = Cal._simple_baseline_correction(FFT)
         # 9. Cal.apodization
-        Real_apod = Cal.calculate_apodization(Re_spectra, Frequency)
+        Real_apod = Cal._calculate_apodization(Re_spectra, Frequency)
 
         # Update FFT graphs
         self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
         self.ui.comboBox_4.addItem(f"{filename}")
 
         if self.ui.comboBox_4.currentIndex() == -1:
-            M2, T2 = Cal.calculate_M2(Real_apod, Frequency)
+            M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
 
             if self.tab == 'SE':
                 match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
@@ -696,7 +696,7 @@ class MainWindow(QMainWindow):
                 match = re.search(r'_(\d+\.\d+)_', filename)
                 dq_time = self.extract_info(match)
 
-                Amplitude = Cal.calculate_amplitude(y, z)
+                Amplitude = Cal._calculate_amplitude(y, z)
                 DQ = Cal.calculate_DQ_intensity(x, Amplitude)
                 self.ui.table_DQ.setRowCount(i)
                 self.fill_table(self.ui.table_DQ, dq_time, DQ, M2, T2, i)
@@ -711,13 +711,13 @@ class MainWindow(QMainWindow):
 
         i = self.ui.comboBox_4.currentIndex()
 
-        Real_apod   = Cal.calculate_apodization(Re_spectra, Frequency) #(math procedure)
+        Real_apod   = Cal._calculate_apodization(Re_spectra, Frequency) #(math procedure)
         Amp_spectra = Cal.calculate_amplditude(Re_spectra, Im_spectra)
 
         # Update FFT graph
         self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
 
-        M2, T2 = Cal.calculate_M2(Real_apod, Frequency)
+        M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
         M2_r = round(M2, 6)
         T2_r = round(T2, 6)
 
@@ -2248,8 +2248,8 @@ class PhasingManual(QDialog):
         self.ui.Integral.setText(f"Integral: {round(Integral,3)}")
         self.ui.Delta.setText(f"Delta: {round(delta,7)}")
 
-        Real_apod   = Cal.calculate_apodization(self.Real_freq_phased, Frequency)
-        M2, T2 = Cal.calculate_M2(Real_apod, Frequency)
+        Real_apod   = Cal._calculate_apodization(self.Real_freq_phased, Frequency)
+        M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
 
         self.ui.M2.setText(f"M₂: {round(M2,5)}")
         self.ui.T2.setText(f"T₂*: {round(T2,3)}")
