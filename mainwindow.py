@@ -1846,7 +1846,7 @@ class MainWindow(QMainWindow):
         figure = self.ui.FFC_Widget_1
         selected_file_idx = self.ui.comboBox_8.currentIndex()
         dictionary = self.ffc_dictionary
-        legend = figure.addLegend()  
+        legend = figure.addLegend()
 
         if legend is not None:
             legend.clear()
@@ -1854,7 +1854,7 @@ class MainWindow(QMainWindow):
         if selected_file_idx == -1:
             print('does it ever happen?')
             return
-        
+
         value_from_row = table.item(selected_file_idx, 0).text()
         Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
         #Omega = Omeg * 10**6
@@ -1869,19 +1869,19 @@ class MainWindow(QMainWindow):
 
         difference = 1
 
-        try: 
+        try:
             while difference > 1e-10:
                 Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
                 difference = max(np.array(Initial_coefficients) - np.array(popt))
                 Initial_coefficients = popt
-                print('I use python as calculator, nahnahnah')
         except:
             Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
             Initial_coefficients = popt
+            print(f'The fitting didnt work out. Setting initial coefficients as resulting coefficients.')
 
 
         Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
-        Initial_coefficients = popt    
+        Initial_coefficients = popt
         dictionary[value_from_row]['popt'] = popt
 
         CDD         = popt[0]

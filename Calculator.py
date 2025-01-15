@@ -445,7 +445,7 @@ def fit_exponent(Time, Signal, order):
             p = [popt1[0], popt1[1], 10, 10, popt1[2]]
             popt_, _ = curve_fit(decaying_2exponential, Time, Signal, bounds = b, maxfev=10000000, p0=p)
         except:
-            print('No covariance')
+            print('No covariance for exp fitting of the 2d order')
             return
         fitted_curve = decaying_2exponential(Time_fit, *popt_)
         popt = np.round(popt_, 3)
