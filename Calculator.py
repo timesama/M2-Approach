@@ -410,8 +410,7 @@ def _calculate_M2(FFT_real, Frequency):
 def calculate_SC(Amplitude):
     S = np.mean(Amplitude[2:20])
     L = np.mean(Amplitude[120:160])
-    # solid_content = (S-L)/S
-    solid_content = L
+    solid_content = (S-L)/S
     return solid_content
 
 def calculate_DQ_intensity(Time, Amplitude):
@@ -613,9 +612,9 @@ def simulation(Omega, Rate, state):
         R2 = round(calculate_r_squared(Rate, fitting), 4)
 
     elif state == 'Three':
-        initial = [1, 0.1, 0.01, 1, 0.01, 0.1, 1, 0.5]
+        initial = [1, 0.1, 0.01, 1, 0.01, 0.1, 1, 1]
         bounds = ([0, 0, 0, 0, 0, 0, 0, -2], [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, 2])
-        popt, _ = curve_fit(simplified_expression, Omega, Rate, p0=initial, bounds=bounds)
+        popt, _ = curve_fit(simplified_expression, Omega, Rate, p0=initial, bounds=bounds, maxfev=5000)
         C1, C2, C3, A, t1, t2, t3, alpha = popt
         fitting = simplified_expression(Omega, C1, C2, C3, A, t1, t2, t3, alpha)
         short = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0, alpha)
