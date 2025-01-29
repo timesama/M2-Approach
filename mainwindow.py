@@ -674,7 +674,8 @@ class MainWindow(QMainWindow):
 
         # Update FFT graphs
         self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
-        self.ui.comboBox_4.addItem(f"{filename}")
+        if self.ui.comboBox_4.findText(filename) == -1:
+            self.ui.comboBox_4.addItem(filename)
 
         if self.ui.comboBox_4.currentIndex() == -1:
             M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
