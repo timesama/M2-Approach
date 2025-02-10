@@ -713,7 +713,7 @@ class MainWindow(QMainWindow):
         i = self.ui.comboBox_4.currentIndex()
 
         Real_apod   = Cal._calculate_apodization(Re_spectra, Frequency) #(math procedure)
-        Amp_spectra = Cal.calculate_amplditude(Re_spectra, Im_spectra)
+        Amp_spectra = Cal._calculate_amplitude(Re_spectra, Im_spectra)
 
         # Update FFT graph
         self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
