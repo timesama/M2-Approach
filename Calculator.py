@@ -411,6 +411,7 @@ def calculate_SC(Amplitude):
     S = np.mean(Amplitude[2:20])
     L = np.mean(Amplitude[120:160])
     solid_content = (S-L)/S
+    # solid_content = L
     return solid_content
 
 def calculate_DQ_intensity(Time, Amplitude):

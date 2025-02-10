@@ -1073,7 +1073,8 @@ class MainWindow(QMainWindow):
         selected_files = self.selected_T1files
         table = self.ui.table_T1
         combobox = self.ui.comboBox_6
-        pattern = r'(T1|T2)_(\s?-?\d+)(_.*)?\.dat'
+        # pattern = r'(T1|T2)_(\s?-?\d+)(_.*)?\.dat'
+        pattern = r'(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))'
         dictionary = self.tau_dictionary
 
         try:
