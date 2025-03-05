@@ -66,9 +66,10 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level):
 
 def _cut_beginning(Time, Data, Data2):
     # private api
-    Time_plot = Time[np.argmax(Data):]
-    Data_plot = Data[np.argmax(Data):]
-    Data_plot2 = Data2[np.argmax(Data):]
+    Data_amp = _calculate_amplitude(Data, Data2)
+    Time_plot = Time[np.argmax(Data_amp):]
+    Data_plot = Data[np.argmax(Data_amp):]
+    Data_plot2 = Data2[np.argmax(Data_amp):]
     return Time_plot, Data_plot, Data_plot2
 
 def analysis_time_domain(file_path, file_empty, subtract):
