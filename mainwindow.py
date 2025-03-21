@@ -2021,13 +2021,16 @@ class SaveFilesDialog(QFileDialog):
 
     def save_data_as_csv(self, directory, table, files, default_filename):
         # I have no fucjing idea, why the hell this function takes these arguments, but it doesn't work otherwise.
-        initial_directory_file = "selected_folder.txt"
         try:
-            with open(initial_directory_file, 'r') as file:
-                directory = file.read().strip()
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\MyApp", 0, winreg.KEY_READ)
+            directory, _ = winreg.QueryValueEx(key, "SelectedFolder")
+            winreg.CloseKey(key)
+        except FileNotFoundError:
+            return os.path.dirname(sys.argv[0])
         except Exception as e:
             print(f"Couldn't read the initial directory: {e}")
-            directory = os.path.dirname(sys.argv[0])
+            return os.path.dirname(sys.argv[0])
+
 
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File As", directory + '/' + default_filename, "CSV files (*.csv)", options=options)
@@ -2056,14 +2059,16 @@ class SaveFilesDialog(QFileDialog):
     def save_file_in_sef(self, wtf, dictionary, tau, n, begin, save):
         if save == False:
             return
-        
-        initial_directory_file = "selected_folder.txt"
+
         try:
-            with open(initial_directory_file, 'r') as file:
-                directory = file.read().strip()
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\MyApp", 0, winreg.KEY_READ)
+            directory, _ = winreg.QueryValueEx(key, "SelectedFolder")
+            winreg.CloseKey(key)
+        except FileNotFoundError:
+            return os.path.dirname(sys.argv[0])
         except Exception as e:
             print(f"Couldn't read the initial directory: {e}")
-            directory = os.path.dirname(sys.argv[0])
+            return os.path.dirname(sys.argv[0])
 
         try:
             options = QFileDialog.Options()
@@ -2180,9 +2185,8 @@ class PhasingManual(QDialog):
 
         if self.Real_freq_phased is not None:
             Re_spectra = self.Real_freq_phased
-        else: 
+        else:
             Re_spectra = Re_spectra
-        
 
         self.close()
 
@@ -2211,12 +2215,12 @@ class PhasingManual(QDialog):
     def set_zero(self,slider,box):
         slider.setValue(0)
         box.setValue(0)
-    
+
     def process_data(self):
         self.Real_freq_phased = self.calculate_phase()
         self.update_plot()
         self.update_text()
-    
+
     def calculate_phase(self):
         global Frequency, Re_spectra, Im_spectra
         phi = self.a + self.b * Frequency + self.c * Frequency ** 2 + self.d * Frequency ** 3
@@ -2308,7 +2312,6 @@ class PhasingManual(QDialog):
         self.ui.verticalSlider_c.valueChanged.disconnect(self.value_changed)
         self.ui.verticalSlider_d.valueChanged.disconnect(self.value_changed)
         self.ui.dial.valueChanged.disconnect(self.smoothing_changed)
-        
 
         self.ui.dial.setValue(self.Smooth)
         self.ui.verticalSlider_a.setValue(self.a)
