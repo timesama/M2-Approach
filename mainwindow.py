@@ -54,13 +54,11 @@ class MainWindow(QMainWindow):
         self.selected_files_empty = []
         self.selected_DQfiles = []
         self.selected_T1files = []
-        self.selected_FFCfiles = []
         self.selected_DQMQfile = []
         self.dq_t2 = {}
         self.dq_comparison_linear = {}
         self.dq_comparison_distribution = {}
         self.tau_dictionary = {}
-        self.ffc_dictionary = {}
         self.tab = None
         self.state_bad_code = False
 
@@ -77,30 +75,25 @@ class MainWindow(QMainWindow):
         self.ui.btn_Save_2.clicked.connect(self.save_data)
         self.ui.btn_Save_6.clicked.connect(self.save_data)
         self.ui.btn_Save_3.clicked.connect(self.save_data)
-        self.ui.btn_Save_7.clicked.connect(self.save_data)
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.btn_Load_2.clicked.connect(self.load_data)
         self.ui.btn_Load_3.clicked.connect(self.load_data)
         self.ui.btn_Load_4.clicked.connect(self.load_data)
-        self.ui.btn_Load_5.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
 
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
         self.ui.btn_Add.clicked.connect(self.add_select_dialog)
         self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQMQ.clicked.connect(self.open_select_comparison_files_dialog)
-        self.ui.btn_SelectFiles_FFC.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
 
         #self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
-        self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_4.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_5.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
-        self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_3.clicked.connect(self.delete_row)
 
         self.ui.btn_Start.clicked.connect(self.analysis)
@@ -112,7 +105,6 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.plot_nDQ)
         self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
-        self.ui.btn_Plot1_2.clicked.connect(self.simulation)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -127,8 +119,6 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.T1_Widget_1, "Time, ms", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
-        self.setup_graph(self.ui.FFC_Widget_1,"Frequency, MHz", "1/T₁", "")
-        self.setup_graph(self.ui.FFC_Widget_2, "X axis", "Y Axis", "")
 
         # Table Headers
         self.ui.table_SE.horizontalHeader().sectionDoubleClicked.connect(
@@ -156,7 +146,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox.activated.connect(self.update_se_graphs)
         self.ui.comboBox_2.activated.connect(self.plot_fit)
         self.ui.comboBox_6.activated.connect(self.calculate_relaxation_time)
-        self.ui.comboBox_8.activated.connect(self.calculate_23_model)
 
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
@@ -172,10 +161,6 @@ class MainWindow(QMainWindow):
         self.ui.dq_min_3.valueChanged.connect(self.plot_diff)
         self.ui.dq_max_3.valueChanged.connect(self.plot_diff)
         self.ui.power.valueChanged.connect(self.plot_diff)
-
-        self.ui.checkBox_tau_1.clicked.connect(self.simulation)
-        self.ui.checkBox_tau_2.clicked.connect(self.simulation)
-        self.ui.checkBox_tau_3.clicked.connect(self.simulation)
 
         # Disable buttons initially
         self.disable_buttons()
@@ -273,16 +258,6 @@ class MainWindow(QMainWindow):
             self.ui.T1_Widget_2.clear()
         elif self.tab == 'DQMQ':
             self.selected_DQMQfile = []
-        elif self.tab == '23Model':
-            self.selected_FFCfiles = []
-            self.ffc_dictionary = {}
-            self.ui.table_FFC_1.setRowCount(0)
-            self.ui.btn_Plot1_2.setEnabled(False)
-            self.ui.groupBox_7.setEnabled(False)
-            self.ui.groupBox_6.setEnabled(False)
-            self.ui.checkBox_3.setEnabled(False)
-            self.ui.checkBox_3.setChecked(False)
-            #self.ui.table_FFC_1.clear()
         elif self.tab == 'Extra':
             pass
 
@@ -291,8 +266,7 @@ class MainWindow(QMainWindow):
             combobox = self.ui.comboBox_6
         elif self.tab == 'SE' or 'DQ':
             combobox = self.ui.comboBox_4
-        elif self.tab == '23Model':
-            combobox = self.ui.comboBox_8
+
 
         while combobox.count()>0:
             combobox.removeItem(0)
@@ -309,10 +283,6 @@ class MainWindow(QMainWindow):
             table = self.ui.table_T1
             combobox = self.ui.comboBox_6
             files = self.selected_T1files
-        elif self.tab == '23Model':
-            table = self.ui.table_FFC_1
-            combobox = self.ui.comboBox_8
-            files = self.selected_FFCfiles
         else:
             return
 
@@ -376,12 +346,7 @@ class MainWindow(QMainWindow):
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
                 self.dq_mq_analysis()
-            elif self.tab == '23Model':
-                while self.ui.comboBox_8.count()>0:
-                    self.ui.comboBox_8.removeItem(0)
-                FFCfileNames = dlg.selectedFiles()
-                self.selected_FFCfiles.extend(FFCfileNames)
-                self.update_FFC_table()
+
 
     def open_select_dialog(self):
         global State_multiple_files
@@ -445,8 +410,6 @@ class MainWindow(QMainWindow):
         elif current_tab_index == 4:
             self.tab = 'DQMQ'
         elif current_tab_index == 5:
-            self.tab = '23Model'
-        elif current_tab_index == 6:
             self.tab = 'Extra'
 
         if not (self.tab == 'SE' or self.tab == 'DQ'):
@@ -1654,11 +1617,6 @@ class MainWindow(QMainWindow):
             pattern = r'.*_(.*)'
             default_name = 'DQMQ_data_' + re.search(pattern, os.path.split(os.path.dirname(files[0]))[1] ).group(1)
 
-        elif self.tab == '23Model':
-            table = self.ui.table_FFC_1
-            files = self.selected_FFCfiles
-            default_name = 'FFC_'
-
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
 
@@ -1703,9 +1661,6 @@ class MainWindow(QMainWindow):
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
             self.selected_DQMQfile = files
-        elif self.tab == '23Model':
-            table = self.ui.table_FFC_1
-            self.selected_FFCfiles = files
 
         with open(file_path, 'r') as f:
             lines = f.readlines()
@@ -1732,8 +1687,7 @@ class MainWindow(QMainWindow):
             self.ui.dq_min_3.setEnabled(True)
             self.ui.dq_max_3.setEnabled(True)
             self.ui.power.setEnabled(True)
-        elif self.tab == '23Model':
-            self.update_FFC_table()
+
 
     def save_figures(self, file_path, variable):
         # Set names
@@ -1795,206 +1749,6 @@ class MainWindow(QMainWindow):
 
         save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
         dialog.save_file_in_sef(self, dictionary, 'T1 3', 3, basename, save)
-
-    def update_FFC_table(self):
-        selected_files = self.selected_FFCfiles
-        table = self.ui.table_FFC_1
-        combobox = self.ui.comboBox_8
-
-        dictionary = self.ffc_dictionary
-
-        file_name = []
-        
-        for file in selected_files:
-            current_file = [os.path.basename(file)]
-
-            Omega = []
-            Rate = []
-
-            try:
-                with open(file, "r") as data:
-                    for line in islice(data, 4, None):
-                        columns = line.split()
-                        Omega.append(columns[0])
-                        Rate.append(columns[2])
-            except Exception:
-                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file}, removing file from the table and file list.", QMessageBox.Ok)
-                    for file_to_delete in selected_files:
-                        if file_to_delete == file:
-                            selected_files.remove(file)
-
-            dictionary[file] = {"File": [], "Freq": [], "Rate": [], "popt": None}
-            dictionary[file]["File"].append(current_file)
-            dictionary[file]["Freq"].extend(Omega)
-            dictionary[file]["Rate"].extend(Rate)
-            
-            table.setRowCount(len(selected_files))
-            self.ui.btn_Plot1_2.setEnabled(True)            
-        
-        for row, file in zip(range(table.rowCount()), selected_files):
-            Folder = QTableWidgetItem(file)
-            file_name = os.path.basename(file)
-
-            Filename = QTableWidgetItem(file_name)
-
-            table.setItem(row, 0, Folder)
-            table.setItem(row, 1, Filename)
-
-            combobox.addItem(f"{file_name}")
-            combobox.setCurrentIndex(-1)
-
-    def calculate_23_model(self):
-        table = self.ui.table_FFC_1
-        figure = self.ui.FFC_Widget_1
-        selected_file_idx = self.ui.comboBox_8.currentIndex()
-        dictionary = self.ffc_dictionary
-        legend = figure.addLegend()
-
-        if legend is not None:
-            legend.clear()
-
-        if selected_file_idx == -1:
-            print('does it ever happen?')
-            return
-
-        value_from_row = table.item(selected_file_idx, 0).text()
-        Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
-        #Omega = Omeg * 10**6
-
-        Rate = np.array(dictionary[value_from_row]['Rate'], dtype=float)
-        Initial_coefficients = dictionary[value_from_row]['popt']
-
-        if self.ui.checkBox_3.isChecked():
-            fixed_CDD = self.ui.doubleSpinBox.value()
-        else:
-            fixed_CDD = None
-
-        difference = 1
-
-        try:
-            while difference > 1e-10:
-                Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
-                difference = max(np.array(Initial_coefficients) - np.array(popt))
-                Initial_coefficients = popt
-        except:
-            Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
-            Initial_coefficients = popt
-            print(f'The fitting didnt work out. Setting initial coefficients as resulting coefficients.')
-
-
-        Omega_fit, fitted_curve, popt, R2 = Cal.fit_model(Omega, Rate, fixed_CDD, Initial_coefficients)
-        Initial_coefficients = popt
-        dictionary[value_from_row]['popt'] = popt
-
-        CDD         = popt[0]
-        tauc       = popt[1]
-        A           = popt[2]
-        C_trans     = popt[3]
-        tau_trans   = popt[4]
-        tau_res     = popt[5]
-
-        tau_c_rate      = Cal.twod_model(Omega_fit, CDD, tauc, A, 0, tau_trans, tau_res)
-        tau_trans_rate  = Cal.twod_model(Omega_fit, 0, 0, A, C_trans, tau_trans, tau_res)
-
-
-        CDD_t         = QTableWidgetItem(str(popt[0]))
-        tau_c_t       = QTableWidgetItem(str("{:.5e}".format(popt[1])))
-        A_t           = QTableWidgetItem(str("{:.5e}".format(popt[2])))
-        C_trans_t     = QTableWidgetItem(str("{:.5e}".format(popt[3])))
-        tau_trans_t   = QTableWidgetItem(str("{:.5e}".format(popt[4])))
-        tau_res_t     = QTableWidgetItem(str("{:.5e}".format(popt[5])))
-
-        table.setItem(selected_file_idx, 3, CDD_t)
-        table.setItem(selected_file_idx, 5, tau_c_t)
-        table.setItem(selected_file_idx, 2, A_t)
-        table.setItem(selected_file_idx, 4, C_trans_t)
-        table.setItem(selected_file_idx, 6, tau_trans_t)
-        table.setItem(selected_file_idx, 7, tau_res_t)
-
-        for col in range(table.columnCount()):
-            table.setColumnWidth(col, 120)
-
-        figure.clear()
-        figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
-        figure.plot(Omega_fit, fitted_curve, pen='b', name = 'Original data')
-        figure.plot(Omega_fit, tau_c_rate, pen = 'c',name='tau c')
-        figure.plot(Omega_fit, tau_trans_rate, pen = 'm', name = 'tau trans')
-        legend = figure.addLegend()
-        figure.setLogMode(True, True)
-
-        self.ui.checkBox_3.setEnabled(True)
-        self.ui.btn_Plot1_2.setEnabled(True)
-        self.ui.groupBox_7.setEnabled(True)
-        self.ui.groupBox_6.setEnabled(True)
-
-        self.ui.textEdit_error_2.setText(f"R² {R2}")
-
-    def simulation(self):
-        table = self.ui.table_FFC_1
-        figure = self.ui.FFC_Widget_2
-        selected_file_idx = self.ui.comboBox_8.currentIndex()
-        dictionary = self.ffc_dictionary
-
-        value_from_row = table.item(selected_file_idx, 0).text()
-
-        Omega = np.array(dictionary[value_from_row]['Freq'], dtype=float)
-        Rate = np.array(dictionary[value_from_row]['Rate'], dtype=float)
-
-        state = self.get_checkbox_state()
-
-        if state == 'None':
-            figure.clear()
-            self.ui.textEdit_error_3.setText(f"No Data")
-        else:
-            try:
-                fitting, short, middle, long, popt, R2 = Cal.simulation(Omega, Rate, state)
-                figure.clear()
-                figure.plot(Omega, Rate, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
-                figure.plot(Omega, fitting, pen='b')
-                if state == 'Two':
-                    figure.plot(Omega, short, pen='m')
-                    figure.plot(Omega, middle, pen='g')
-                    C1, C2, A, t1, t2, alpha= np.round(popt, decimals=5)
-                    C3=0
-                    t3 = 0
-                elif state == 'Three':
-                    figure.plot(Omega, short, pen='m')
-                    figure.plot(Omega, middle, pen='g')
-                    figure.plot(Omega, long, pen='c')
-                    C1, C2, C3, A, t1, t2, t3, alpha = np.round(popt, decimals=5)
-                elif state == 'One':
-                    self.ui.textEdit_error_3.setText(f"R² {R2}")
-                    C1,A,t1, alpha = np.round(popt, decimals=5)
-                    C2 = 0
-                    C3 = 0
-                    t2 = 0
-                    t3 = 0
-                else:
-                    return
-
-                figure.setLogMode(True, False)
-                self.ui.textEdit_error_3.setText(f"R² {R2}\nA = {A}\nα = {alpha}\nCDD = {C1}\tτ = {t1}\nCDD = {C2}\tτ = {t2}\nCDD = {C3}\tτ = {t3}")
-
-            except:
-                QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit the data, try unchecking τ.", QMessageBox.Ok)
-
-    def get_checkbox_state(self):
-        checked_count = sum([self.ui.checkBox_tau_1.isChecked(),
-                            self.ui.checkBox_tau_2.isChecked(),
-                            self.ui.checkBox_tau_3.isChecked()])
-        
-        if checked_count == 0:
-            state = 'None'
-        elif checked_count == 1:
-            state = 'One'
-        elif checked_count == 2:
-            state = 'Two'
-        elif checked_count == 3:
-            state = 'Three'
-        else:
-            state = 'Unknown'  # This case should technically never occur
-        
-        return state
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):

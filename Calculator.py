@@ -6,8 +6,6 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 
-
-
 # Math procedures
 def _find_nearest(array, value):
     # private api
@@ -557,82 +555,3 @@ def voigt(x, amp, cen, wid, frac, y0):
     lorentzian = amp *(2 * wid) / (np.pi * (4 * (x - cen)**2 + wid**2))
     gaussian = amp *(np.exp((-4 * np.log(2) * (x - cen)**2) / wid**2)) / (wid * np.sqrt(np.pi / (4 * np.log(2))))
     return  (frac * lorentzian + (1 - frac) * gaussian) + y0
-
-def twod_model(x, CDD, tauc, A, Ctrans, tautrans, taures):
-    term1 = tauc / (1 + (np.pi * 2 * x * tauc) ** 2)
-    term2 = 4 * tauc / (1 + (2 * np.pi * 2 * x * tauc) ** 2)
-    log_term1 = np.log((1 + (np.pi * 2 * x * tautrans) ** 2) / ((tautrans / taures) ** 2 + (np.pi * 2 * x * tautrans) ** 2))
-    log_term2 = 4 * np.log((1 + (np.pi * 2 * 2 * x * tautrans) ** 2) / ((tautrans / taures) ** 2 + (np.pi * 2 * 2 * x * tautrans) ** 2))
-    
-    result = CDD * (term1 + term2) + A + Ctrans * tautrans * (log_term1 + log_term2)
-    
-    return result
-
-def fit_model(Omega, Rate, fixed_CDD, initial_parameters):
-    Omega_fit = np.arange(min(Omega), max(Omega) + 0.1, 0.05)
-
-    bs = ([0, 0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
-
-    if fixed_CDD is not None and initial_parameters is not None:
-        initial_parameter = initial_parameters[1:]
-        b = bs[0][1:],bs[1][1:]
-        def twod_model_fixed(x, tauc, A, Ctrans, tautrans, taures):
-            return twod_model(x, fixed_CDD, tauc, A, Ctrans, tautrans, taures)
-        popt, _ = curve_fit(twod_model_fixed, Omega, Rate, p0 = initial_parameter, bounds = b, maxfev=100000080)
-        popt = [fixed_CDD] + popt.tolist()
-    else:
-        popt, _ = curve_fit(twod_model, Omega, Rate, bounds = bs, maxfev=100000000)
-
-        
-    fitted_curve = twod_model(Omega_fit, *popt)
-
-    r2_curve = twod_model(Omega, *popt)
-    R2 = round(calculate_r_squared(Rate, r2_curve),4)
-
-    return Omega_fit, fitted_curve, popt, R2
-
-def repeating_part(t, x):
-    return t / (1 + (np.pi * 2 * x * t)**2) + 4 * t / (1 + (np.pi * 4 * x * t)**2)
-
-def simplified_expression1(x, C1, C2, C3, A, t1, t2, t3):
-    return C1 * repeating_part(t1, x) + C2 * repeating_part(t2, x) + C3 * repeating_part(t3, x) + A
-
-def simplified_expression(x, C1, C2, C3, A, t1, t2, t3, alpha):
-    return C1 * repeating_part(t1, x) + C2 * repeating_part(t2, x) + C3 * repeating_part(t3, x) + A * (x)**(-alpha)
-
-def simulation(Omega, Rate, state):
-    if state == 'One':
-        initial = [1, 0.01, 1, 0.5]
-        bounds = ([0, 0, 0, -2], [np.inf, np.inf, np.inf, 2])
-        popt, _ = curve_fit(lambda x, C1, A, t1, alpha: simplified_expression(x, C1, 0, 0, A, t1, 0, 0, alpha), Omega, Rate, p0=initial, bounds=bounds)
-        C1, A, t1, alpha = popt[0], popt[1], popt[2], popt[3]
-        fitting = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0, alpha)
-        short, middle, long = 0, 0, 0
-        R2 = round(calculate_r_squared(Rate, fitting), 4)
-
-    elif state == 'Two':
-        initial = [1, 0.01, 1, 0.01, 0.1, 0.5]
-        bounds = ([0, 0, 0, 0, 0, -2], [np.inf, np.inf, np.inf, np.inf, np.inf, 2])
-        popt, _ = curve_fit(lambda x, C1, C2, A, t1, t2, alpha: simplified_expression(x, C1, C2, 0, A, t1, t2, 0, alpha), Omega, Rate, p0=initial, bounds=bounds)
-        C1, C2, A, t1, t2, alpha = popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]
-        fitting = simplified_expression(Omega, C1, C2, 0, A, t1, t2, 0, alpha)
-        short = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0, alpha)
-        middle = simplified_expression(Omega, 0, C2, 0, A, 0, t2, 0, alpha)
-        long = 0
-        R2 = round(calculate_r_squared(Rate, fitting), 4)
-
-    elif state == 'Three':
-        initial = [1, 0.1, 0.01, 1, 0.01, 0.1, 1, 1]
-        bounds = ([0, 0, 0, 0, 0, 0, 0, -2], [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, 2])
-        popt, _ = curve_fit(simplified_expression, Omega, Rate, p0=initial, bounds=bounds, maxfev=5000)
-        C1, C2, C3, A, t1, t2, t3, alpha = popt
-        fitting = simplified_expression(Omega, C1, C2, C3, A, t1, t2, t3, alpha)
-        short = simplified_expression(Omega, C1, 0, 0, A, t1, 0, 0, alpha)
-        middle = simplified_expression(Omega, 0, C2, 0, A, 0, t2, 0, alpha)
-        long = simplified_expression(Omega, 0, 0, C3, A, 0, 0, t3, alpha)
-        R2 = round(calculate_r_squared(Rate, fitting), 4)
-
-    else:
-        return  # Invalid state
-
-    return fitting, short, middle, long, popt, R2
