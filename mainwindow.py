@@ -606,7 +606,7 @@ class MainWindow(QMainWindow):
             # longcomponent
             Time_r, Re_r, Im_r = Cal.analysis_time_domain(file_path_gly, [], False)
             Time_s, Re_s, Im_s = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
-            Time, Re, Im = Cal.long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r)
+            Time, Re, Im = Cal.magnet_inhomogenity_correction(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r)
         else:
             if self.ui.checkBox_4.isChecked():
                 Time_o, Re_o, Im_o = Cal.analysis_time_domain(file_path, file_path_empty, subtract)

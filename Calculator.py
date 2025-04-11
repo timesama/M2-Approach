@@ -154,6 +154,35 @@ def subtract_long_component(Time, Re, Im):
     Im_subtracted = np.zeros(len(Real_subtracted))
     return Time_cropped, Real_subtracted, Im_subtracted
 
+def magnet_inhomogenity_correction(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
+    # s - sample, r - reference (glycerol)
+    # 1. Crop the arrays together (they should be of the same length, but I know, I know...)
+    if len(Time_s) > len(Time_r):
+        Time  =   Time_s[:len(Time_r)]
+        Re_sc    =   Re_s[:len(Time_r)]
+        Im_sc    =   Im_s[:len(Time_r)]
+        Re_rc   =   Re_r
+        Im_rc   =   Im_r
+    else:
+        Time  =   Time_r[:len(Time_s)]
+        Re_rc   =   Re_r[:len(Time_s)]
+        Im_rc   =   Im_r[:len(Time_s)]
+        Re_sc    =   Re_s
+        Im_sc    =   Im_s
+
+    # normalize to the maximum of the amplitude
+    Re_sn, Im_sn = _normalize(Re_sc, Im_sc)
+    Re_rn, Im_rn = _normalize(Re_rc, Im_rc)
+
+    #Derive the sample to glycerol
+    Re_derived = Re_sn/Re_rn
+    Im_derived = Im_sn/Im_rn
+
+    Re = Re_derived
+    Im = Im_derived
+
+    return Time, Re, Im
+
 def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     # r stands for reference, s stands for sample
     Amp_r = _calculate_amplitude(Re_r, Im_r)

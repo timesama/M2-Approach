@@ -2667,7 +2667,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <widget class="QGroupBox" name="groupBox">
                    <property name="minimumSize">
                     <size>
-                     <width>200</width>
+                     <width>300</width>
                      <height>300</height>
                     </size>
                    </property>
