@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
     lambda index=2: self.renameSection(self.ui.table_T1, index=2)
 )
         self.ui.table_GS.horizontalHeader().sectionDoubleClicked.connect(
-    lambda index=2: self.renameSection(self.ui.table_T1, index=2)
+    lambda index=2: self.renameSection(self.ui.table_GS, index=2)
 )
         self.ui.table_DQ_2.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=2: self.renameSection(self.ui.table_DQ_2, index=1)
@@ -758,7 +758,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             figure = self.ui.T1_Widget_2
         elif self.tab == 'GS':
-            figure = self.ui.GS_Widget_1
+            figure = self.ui.GS_Widget_2
         elif self.tab == 'DQ_Temp':
             figure = self.ui.DQ_Widget_6
         else:

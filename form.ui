@@ -765,7 +765,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>3</number>
+              <number>0</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -1704,6 +1704,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                    <property name="selectionBehavior">
                     <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="sortingEnabled">
+                    <bool>true</bool>
                    </property>
                    <property name="columnCount">
                     <number>2</number>
