@@ -55,10 +55,12 @@ class MainWindow(QMainWindow):
         self.selected_DQfiles = []
         self.selected_T1files = []
         self.selected_DQMQfile = []
+        self.selected_GSfiles = []
         self.dq_t2 = {}
         self.dq_comparison_linear = {}
         self.dq_comparison_distribution = {}
         self.tau_dictionary = {}
+        self.GS_dictionary = {}
         self.tab = None
         self.state_bad_code = False
 
@@ -75,10 +77,13 @@ class MainWindow(QMainWindow):
         self.ui.btn_Save_2.clicked.connect(self.save_data)
         self.ui.btn_Save_6.clicked.connect(self.save_data)
         self.ui.btn_Save_3.clicked.connect(self.save_data)
+        self.ui.btn_Save_4.clicked.connect(self.save_data)
+
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.btn_Load_2.clicked.connect(self.load_data)
         self.ui.btn_Load_3.clicked.connect(self.load_data)
         self.ui.btn_Load_4.clicked.connect(self.load_data)
+        self.ui.btn_Load_5.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
 
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
@@ -86,14 +91,18 @@ class MainWindow(QMainWindow):
         self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQMQ.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.btn_SelectFiles_GS.clicked.connect(self.open_select_comparison_files_dialog)
 
         #self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
+        self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
+        self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_4.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_5.clicked.connect(self.clear_list)
-        self.ui.btn_ClearTable.clicked.connect(self.clear_list)
+
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
+        self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_3.clicked.connect(self.delete_row)
 
         self.ui.btn_Start.clicked.connect(self.analysis)
@@ -105,6 +114,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.plot_nDQ)
         self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
+        self.ui.btn_Plot_GS.clicked.connect(self.plot_sqrt_time)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -119,12 +129,17 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.T1_Widget_1, "Time, ms", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
+        self.setup_graph(self.ui.GS_Widget_1, "√Time, √us", "Signal", "")
+        self.setup_graph(self.ui.GS_Widget_2, "X axis", "√Time, √us", "")
 
         # Table Headers
         self.ui.table_SE.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=0: self.renameSection(self.ui.table_SE, index=0)
 )
         self.ui.table_T1.horizontalHeader().sectionDoubleClicked.connect(
+    lambda index=2: self.renameSection(self.ui.table_T1, index=2)
+)
+        self.ui.table_GS.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=2: self.renameSection(self.ui.table_T1, index=2)
 )
         self.ui.table_DQ_2.horizontalHeader().sectionDoubleClicked.connect(
@@ -140,12 +155,22 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_17.clicked.connect(self.calculate_relaxation_time)
         self.ui.T1T2_fit_from.valueChanged.connect(self.calculate_relaxation_time)
         self.ui.T1T2_fit_to.valueChanged.connect(self.calculate_relaxation_time)
+
+        self.ui.checkBox_3.clicked.connect(self.calculate_sqrt_time)
+        self.ui.radioButton_short.clicked.connect(self.calculate_sqrt_time)
+        self.ui.radioButton_medium.clicked.connect(self.calculate_sqrt_time)
+        self.ui.radioButton_long.clicked.connect(self.calculate_sqrt_time)
+        self.ui.GS_fit_from_1.valueChanged.connect(self.calculate_sqrt_time)
+        self.ui.GS_fit_to_1.valueChanged.connect(self.calculate_sqrt_time)
+
         self.ui.radioButton_3.clicked.connect(self.hide_FFT_progress)
         self.ui.radioButton_2.clicked.connect(self.hide_FFT_progress)
+
         # Connect combobox signals to slots
         self.ui.comboBox.activated.connect(self.update_se_graphs)
         self.ui.comboBox_2.activated.connect(self.plot_fit)
         self.ui.comboBox_6.activated.connect(self.calculate_relaxation_time)
+        self.ui.comboBox_7.activated.connect(self.calculate_sqrt_time)
 
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
@@ -258,14 +283,22 @@ class MainWindow(QMainWindow):
             self.ui.T1_Widget_2.clear()
         elif self.tab == 'DQMQ':
             self.selected_DQMQfile = []
+        elif self.tab == 'GS':
+            self.selected_GSfiles = []
+            self.GS_dictionary = {}
+            self.ui.table_GS.setRowCount(0)
+            self.ui.GS_Widget_1.clear()
+            self.ui.GS_Widget_2.clear()
         elif self.tab == 'Extra':
             pass
 
 
         if self.tab == 'T1T2':
             combobox = self.ui.comboBox_6
-        elif self.tab == 'SE' or 'DQ':
+        elif self.tab in ('SE', 'DQ'):
             combobox = self.ui.comboBox_4
+        elif self.tab == 'GS':
+            combobox = self.ui.comboBox_7
 
 
         while combobox.count()>0:
@@ -283,6 +316,10 @@ class MainWindow(QMainWindow):
             table = self.ui.table_T1
             combobox = self.ui.comboBox_6
             files = self.selected_T1files
+        elif self.tab =='GS':
+            table = self.ui.table_GS
+            combobox = self.ui.comboBox_7
+            files = self.selected_GSfiles
         else:
             return
 
@@ -343,10 +380,15 @@ class MainWindow(QMainWindow):
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
                 self.update_T12_table()
+            elif self.tab == 'GS':
+                while self.ui.comboBox_7.count()>0:
+                    self.ui.comboBox_7.removeItem(0)
+                GSfileNames = dlg.selectedFiles()
+                self.selected_GSfiles.extend(GSfileNames)
+                self.update_GS_table()
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
                 self.dq_mq_analysis()
-
 
     def open_select_dialog(self):
         global State_multiple_files
@@ -410,6 +452,8 @@ class MainWindow(QMainWindow):
         elif current_tab_index == 4:
             self.tab = 'DQMQ'
         elif current_tab_index == 5:
+            self.tab = 'GS'
+        elif current_tab_index == 6:
             self.tab = 'Extra'
 
         if not (self.tab == 'SE' or self.tab == 'DQ'):
@@ -713,6 +757,8 @@ class MainWindow(QMainWindow):
             figure = self.ui.SEWidget
         elif self.tab == 'T1T2':
             figure = self.ui.T1_Widget_2
+        elif self.tab == 'GS':
+            figure = self.ui.GS_Widget_1
         elif self.tab == 'DQ_Temp':
             figure = self.ui.DQ_Widget_6
         else:
@@ -1349,7 +1395,6 @@ class MainWindow(QMainWindow):
             except:
                 relaxation_time.append(0)
             number = number + 1
-                    
 
         graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
 
@@ -1611,6 +1656,11 @@ class MainWindow(QMainWindow):
             files = self.selected_T1files
             default_name = 'T'
 
+        elif self.tab == 'GS':
+            table = self.ui.table_GS
+            files = self.selected_GSfiles
+            default_name = 'GoldmanShen_'
+
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
             files = self.selected_DQMQfile
@@ -1640,7 +1690,7 @@ class MainWindow(QMainWindow):
             files_list = file_path.strip().split('.')[0] + '_files.json'
             with open(files_list, 'r') as file:
                 files = json.load(file)
-        except Exception as e:  
+        except Exception as e:
             QMessageBox.warning(self, "File missing", f"Didn't find file list, only the tabular result is available", QMessageBox.Ok)
             files = None
             self.ui.comboBox_4.setEnabled(False)
@@ -1661,6 +1711,9 @@ class MainWindow(QMainWindow):
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
             self.selected_DQMQfile = files
+        elif self.tab == 'GS':
+            table = self.ui.table_GS
+            self.selected_GSfiles = files
 
         with open(file_path, 'r') as f:
             lines = f.readlines()
@@ -1687,7 +1740,8 @@ class MainWindow(QMainWindow):
             self.ui.dq_min_3.setEnabled(True)
             self.ui.dq_max_3.setEnabled(True)
             self.ui.power.setEnabled(True)
-
+        elif self.tab == 'GS':
+            self.update_GS_table()
 
     def save_figures(self, file_path, variable):
         # Set names
@@ -1749,6 +1803,184 @@ class MainWindow(QMainWindow):
 
         save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
         dialog.save_file_in_sef(self, dictionary, 'T1 3', 3, basename, save)
+
+    # GS Goldman Shen
+    def update_GS_table(self):
+        def clean_line(line):
+            while '\t\t' in line:
+                line = line.replace('\t\t', '\t')
+            return line.strip()
+
+        def create_dictionary(dictionary, file, addition, x_axis, sqrtTime, short, medium, long):
+            dictionary[file + addition]["X Axis"].append(x_axis)
+            dictionary[file + addition]["sqrtTime"].extend(sqrtTime)
+            dictionary[file + addition]["short"].extend(short)
+            dictionary[file + addition]["medium"].extend(medium)
+            dictionary[file + addition]["long"].extend(long)
+            return dictionary
+
+        selected_files = self.selected_GSfiles
+        table = self.ui.table_GS
+        combobox = self.ui.comboBox_7
+
+        pattern = r'_([0-9]+)\.dat$'
+        dictionary = self.GS_dictionary
+
+        try:
+            table.setRowCount(len(selected_files))
+            x_axis = []
+            for row, file in zip(range(table.rowCount()), selected_files):
+                dictionary[file] = {"X Axis": [], "sqrtTime": [], "short": [], "medium": [], "long": []}
+
+                sqrtTime = []
+                short = []
+                medium = []
+                long = []
+                Folder = QTableWidgetItem(file)
+
+                current_file = os.path.basename(file)
+
+                try:
+                    x_axis = re.search(pattern,current_file).group(1)
+                except:
+                    x_axis = row
+
+                try:
+                    with open(file, "r") as data:
+                        lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
+                    for line in lines[1:]:  # Skip the first line !!!
+                        parts = line.split('\t')
+                        time_value = float(parts[0])
+                        signal_value1 = float(parts[4])
+                        signal_value2 = float(parts[5])
+                        signal_value3 = float(parts[6])
+
+                        sqrtTime.append(time_value)
+                        short.append(signal_value1)
+                        medium.append(signal_value2)
+                        long.append(signal_value3)
+
+                    combobox.addItem(f"{current_file}")
+                except Exception as e:
+                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} because {e} Removing file from the table and file list.", QMessageBox.Ok)
+                    for file_to_delete in selected_files:
+                        if file_to_delete == file:
+                            selected_files.remove(file)
+                    return
+
+                Filename = QTableWidgetItem(current_file)
+                XValue = QTableWidgetItem(x_axis)
+                table.setItem(row, 0, Folder)
+                table.setItem(row, 1, Filename)
+                table.setItem(row, 2, XValue)
+                dictionary[file]["X Axis"].append(x_axis)
+                dictionary[file]["sqrtTime"].extend(sqrtTime)
+                dictionary[file]["short"].extend(short)
+                dictionary[file]["medium"].append(medium)
+                dictionary[file]["long"].extend(long)
+
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
+            self.clear_list()
+
+    def calculate_sqrt_time(self):
+        selected_file_idx = self.ui.comboBox_7.currentIndex()
+        if selected_file_idx == -1:
+            return
+        table = self.ui.table_GS
+        figure = self.ui.GS_Widget_1
+
+        dictionary = self.GS_dictionary
+
+        value_from_row = table.item(selected_file_idx, 0).text()
+
+        if self.ui.checkBox_3.isChecked():
+        # transform to sqrt
+            Time_original = np.sqrt(np.array(dictionary[value_from_row]['sqrtTime']).flatten())
+        else: # time is already in sqrt
+            Time_original = np.array(dictionary[value_from_row]['sqrtTime']).flatten()
+
+        short_original = np.array(dictionary[value_from_row]['short']).flatten()
+        medium_original = np.array(dictionary[value_from_row]['medium']).flatten()
+        long_original = np.array(dictionary[value_from_row]['long']).flatten()
+
+        self.ui.GS_fit_from_1.setMinimum(Time_original[0])
+        self.ui.GS_fit_from_1.setMaximum(Time_original[-1])
+
+        self.ui.GS_fit_to_1.setMinimum(Time_original[10])
+        self.ui.GS_fit_to_1.setMaximum(Time_original[-1])
+
+        from_val = self.ui.GS_fit_from_1.value()
+        to_val = self.ui.GS_fit_to_1.value()
+
+        # Find the closest indices to the selected Time range
+        starting_point = (np.abs(Time_original - from_val)).argmin()
+        ending_point = (np.abs(Time_original - to_val)).argmin() + 1  # +1 to include the endpoint
+
+        Time = Time_original[starting_point:ending_point]
+        short = short_original[starting_point:ending_point]
+        medium = medium_original[starting_point:ending_point]
+        long = long_original[starting_point:ending_point]
+
+
+        if self.ui.radioButton_short.isChecked():
+            Signal = short
+            Signal_original = short_original
+        elif self.ui.radioButton_medium.isChecked():
+            Signal = medium
+            Signal_original = medium_original
+        elif self.ui.radioButton_long.isChecked():
+            Signal = long
+            Signal_original = long_original
+
+        try:
+            Time_fit, fitted_curve, sqrtT, R2 = Cal.linear_fit_GS(Time, Signal)
+
+            self.ui.textEdit_error_2.setText(f"R² {R2}")
+
+            item = QTableWidgetItem(str(sqrtT))
+
+            table.setItem(selected_file_idx,3,item)
+
+            figure.clear()
+            figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+            figure.plot(Time_fit, fitted_curve, pen='b')
+
+            dictionary[value_from_row]['sqrtT'] = sqrtT
+
+            self.ui.btn_Plot1.setEnabled(True)
+        except Exception as e:
+            figure.clear()
+            QMessageBox.warning(self, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
+
+    def plot_sqrt_time(self):
+
+        table = self.ui.table_GS
+        graph = self.ui.GS_Widget_2
+        column = 3 #time
+
+        graph.clear()
+        if table.rowCount() < 1:
+            return
+
+        x_axis = []
+        sqrtT =[]
+        number = 1
+        for row in range(table.rowCount()):
+            try:
+                C = float(table.item(row, 2).text())
+                x_axis.append(C)
+            except:
+                x_axis.append(number)
+
+            try:
+                T = float(table.item(row, column).text())
+                sqrtT.append(T)
+            except:
+                sqrtT.append(0)
+            number = number + 1
+
+        graph.plot(x_axis, sqrtT, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):

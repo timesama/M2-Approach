@@ -584,3 +584,29 @@ def voigt(x, amp, cen, wid, frac, y0):
     lorentzian = amp *(2 * wid) / (np.pi * (4 * (x - cen)**2 + wid**2))
     gaussian = amp *(np.exp((-4 * np.log(2) * (x - cen)**2) / wid**2)) / (wid * np.sqrt(np.pi / (4 * np.log(2))))
     return  (frac * lorentzian + (1 - frac) * gaussian) + y0
+
+def linear_model(x, a, b):
+    return a * x + b
+
+def linear_fit_GS(Time, Signal):
+    # Fit using curve_fit
+    Time = np.array(Time).flatten()
+    Signal = np.array(Signal).flatten()
+    popt, _ = curve_fit(linear_model, Time, Signal)
+    a, b = popt
+
+    # Extrapolate to find Time (sqrtT) where Signal = 0: a * sqrtT + b = 0 -> sqrtT = -b / a
+    sqrtT = -b / a if a != 0 else np.nan
+
+    # Generate Time_fit and fitted_curve
+
+    Time_fit = np.linspace(min(Time), sqrtT, 300)
+    fitted_curve = linear_model(Time_fit, a, b)
+
+    # Compute R^2 manually
+    residuals = Signal - linear_model(Time, a, b)
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((Signal - np.mean(Signal))**2)
+    R2 = 1 - (ss_res / ss_tot)
+
+    return Time_fit, fitted_curve, sqrtT, R2
