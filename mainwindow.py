@@ -2037,6 +2037,7 @@ class MainWindow(QMainWindow):
         self.ui.groupBox_EAct.setHidden(True)
         self.ui.SEWidget.clear()
         self.setup_graph(self.ui.SEWidget, "", "", "")
+        self.update_xaxis(self.ui.table_SE, 0)
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):
