@@ -170,7 +170,7 @@ def magnet_inhomogenity_correction(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
         Re_sc    =   Re_s
         Im_sc    =   Im_s
 
-    # normalize to the maximum of the amplitude
+    # # normalize to the maximum of the amplitude
     Re_sn, Im_sn = _normalize(Re_sc, Im_sc)
     Re_rn, Im_rn = _normalize(Re_rc, Im_rc)
 
@@ -610,3 +610,34 @@ def linear_fit_GS(Time, Signal):
     R2 = 1 - (ss_res / ss_tot)
 
     return Time_fit, fitted_curve, sqrtT, R2
+
+    # Eact
+def calculate_Arrhenius_ax(Temperature, T2):
+    reciprocal_temperature = 1000/Temperature
+    lnT2 = np.log(1/T2)
+
+    return reciprocal_temperature, lnT2
+
+def calculate_Eact(reciprocal_temperature, lnT2, units):
+    R = 8.31446261815324 # kg⋅m2⋅s−2⋅K−1⋅mol−1
+
+    popt, _ = curve_fit(linear_model, reciprocal_temperature, lnT2)
+    a, b = popt
+
+    # Generate Time_fit and fitted_curve
+
+    Temp_fit = np.linspace(min(reciprocal_temperature), max(reciprocal_temperature), 300)
+    fitted_curve = linear_model(Temp_fit, a, b)
+
+    # Compute R^2 manually
+    residuals = lnT2 - linear_model(reciprocal_temperature, a, b)
+    ss_res = np.sum(residuals**2)
+    ss_tot = np.sum((lnT2 - np.mean(lnT2))**2)
+    R2 = 1 - (ss_res / ss_tot)
+
+    if units:
+        Eact = - b * R
+    else:
+        Eact = - b * R * 0.239005736
+
+    return Temp_fit, fitted_curve, Eact, R2

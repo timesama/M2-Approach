@@ -116,6 +116,8 @@ class MainWindow(QMainWindow):
         self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.plot_sqrt_time)
 
+        self.ui.pushButton_Eact.clicked.connect(self.plot_Arr)
+
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
         self.setup_graph(self.ui.FidWidget, "Time, μs", "Amplitude", "FID")
@@ -172,6 +174,18 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_6.activated.connect(self.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.calculate_sqrt_time)
 
+        # Eact
+        self.ui.radioButton_7.clicked.connect(self.plot_Arr)
+        self.ui.radioButton_8.clicked.connect(self.plot_Arr)
+        self.ui.checkBox_5.clicked.connect(self.plot_Arr)
+        self.ui.Eact_start.valueChanged.connect(self.plot_Arr)
+        self.ui.Eact_end.valueChanged.connect(self.plot_Arr)
+
+        self.ui.pushButton_Done.clicked.connect(self.hide_Eact)
+
+
+
+
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
         self.ui.dq_max.valueChanged.connect(self.update_dq_graphs)
@@ -192,6 +206,7 @@ class MainWindow(QMainWindow):
         self.ui.progressBar.setHidden(True)
         self.ui.textEdit_5.setHidden(True)
         self.ui.textEdit_6.setHidden(True)
+        self.ui.groupBox_EAct.setHidden(True)
 
     def check_for_updates(self):
         current_version = '0.2.0'
@@ -782,11 +797,11 @@ class MainWindow(QMainWindow):
         if text == "SC":  
             y =  self.read_column_values(self.ui.table_SE, 1)
             self.ui.SEWidget.getAxis('left').setLabel("SC")
-            
+
         elif text == "M₂":  
             y =  self.read_column_values(self.ui.table_SE, 2)
             self.ui.SEWidget.getAxis('left').setLabel("M₂")
-            
+
         elif text == "T₂*":  
             y =  self.read_column_values(self.ui.table_SE, 3)
             self.ui.SEWidget.getAxis('left').setLabel("T₂*")
@@ -796,7 +811,7 @@ class MainWindow(QMainWindow):
             x = [0]
             self.ui.SEWidget.getAxis('left').setLabel("Not Set")
             return            
-            
+
         self.ui.SEWidget.clear()
         self.ui.SEWidget.plot(x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
 
@@ -1980,6 +1995,48 @@ class MainWindow(QMainWindow):
             number = number + 1
 
         graph.plot(x_axis, sqrtT, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+
+    # Eact
+    def plot_Arr(self):
+        self.ui.groupBox_EAct.setHidden(False)
+        table = self.ui.table_SE
+        graph = self.ui.SEWidget
+
+        Temperature = np.array(self.read_column_values(table, 0))
+        T2 = np.array(self.read_column_values(table, 3))
+
+        sorted_indices = np.argsort(Temperature)
+        Temperature = Temperature[sorted_indices]
+        T2 = T2[sorted_indices]
+
+        if self.ui.checkBox_5.isChecked():
+            Temperature = Temperature + 273.15 #Transfer to K
+
+        starting_point = int(self.ui.Eact_start.value())
+        ending_point = -(int(self.ui.Eact_end.value()))
+        if ending_point == 0:
+            ending_point = None
+        try:
+            Temperature = Temperature[starting_point:ending_point]
+            T2 = T2[starting_point:ending_point]
+            reciprocal_temperature, lnT2 = Cal.calculate_Arrhenius_ax(Temperature, T2)
+            # fit linear
+            Temp_fit, fitted_curve, Eact, R2 = Cal.calculate_Eact(reciprocal_temperature, lnT2, self.ui.radioButton_8.isChecked())
+
+            graph.clear()
+            graph.plot(reciprocal_temperature, lnT2, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
+            graph.plot(Temp_fit, fitted_curve, pen='b')
+            self.setup_graph(graph, "1000/T, 𝐾⁻¹", "ln(τ)", "")
+
+            self.ui.textEdit_EAct.setText(f"Eact = {Eact}\nR² {R2}")
+
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
+
+    def hide_Eact(self):
+        self.ui.groupBox_EAct.setHidden(True)
+        self.ui.SEWidget.clear()
+        self.setup_graph(self.ui.SEWidget, "", "", "")
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):
