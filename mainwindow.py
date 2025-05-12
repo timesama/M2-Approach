@@ -750,7 +750,6 @@ class MainWindow(QMainWindow):
             info = '0'
         return info
 
-    # Changed table name -> changed x axis #TODO add figure
     def update_xaxis(self, table, index):
 
         if self.tab == 'SE':
