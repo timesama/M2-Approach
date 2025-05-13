@@ -171,12 +171,15 @@ def magnet_inhomogenity_correction(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
         Im_sc    =   Im_s
 
     # # normalize to the maximum of the amplitude
-    Re_sn, Im_sn = _normalize(Re_sc, Im_sc)
+    # Re_sn, Im_sn = _normalize(Re_sc, Im_sc)
     Re_rn, Im_rn = _normalize(Re_rc, Im_rc)
 
     #Derive the sample to glycerol
-    Re_derived = Re_sn/Re_rn
-    Im_derived = Im_sn/Im_rn
+    # Re_derived = Re_sn/Re_rn
+    # Im_derived = Im_sn/Im_rn
+
+    Re_derived = Re_sc/Re_rn
+    Im_derived = Im_sc/Im_rn
 
     Re = Re_derived
     Im = Im_derived
