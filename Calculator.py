@@ -644,3 +644,10 @@ def calculate_Eact(reciprocal_temperature, lnT2, units):
         Eact = - b * R * 0.239005736
 
     return Temp_fit, fitted_curve, Eact, R2
+
+def calculate_domain_size(t05, beta, r2, M2):
+    pi = np.pi
+    Dsd = np.sqrt(pi * M2) * ((r2*10**(-10))**2)/6
+    d = (2 * beta * t05 * np.sqrt(Dsd) / np.sqrt(pi))*10**(9)
+    d = np.round(d, 3)
+    return d

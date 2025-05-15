@@ -165,6 +165,10 @@ class MainWindow(QMainWindow):
         self.ui.GS_fit_from_1.valueChanged.connect(self.calculate_sqrt_time)
         self.ui.GS_fit_to_1.valueChanged.connect(self.calculate_sqrt_time)
 
+        self.ui.GS_beta.valueChanged.connect(self.calculate_sqrt_time)
+        self.ui.GS_r2.valueChanged.connect(self.calculate_sqrt_time)
+        self.ui.GS_m2.valueChanged.connect(self.calculate_sqrt_time)
+
         self.ui.radioButton_3.clicked.connect(self.hide_FFT_progress)
         self.ui.radioButton_2.clicked.connect(self.hide_FFT_progress)
 
@@ -1921,7 +1925,7 @@ class MainWindow(QMainWindow):
         self.ui.GS_fit_from_1.setMinimum(Time_original[0])
         self.ui.GS_fit_from_1.setMaximum(Time_original[-1])
 
-        self.ui.GS_fit_to_1.setMinimum(Time_original[10])
+        self.ui.GS_fit_to_1.setMinimum(Time_original[15])
         self.ui.GS_fit_to_1.setMaximum(Time_original[-1])
 
         from_val = self.ui.GS_fit_from_1.value()
@@ -1947,8 +1951,12 @@ class MainWindow(QMainWindow):
             Signal = long
             Signal_original = long_original
 
+        beta    =   self.ui.GS_beta.value()
+        r2    =   self.ui.GS_r2.value()
+        M2    =   self.ui.GS_m2.value()
         try:
             Time_fit, fitted_curve, sqrtT, R2 = Cal.linear_fit_GS(Time, Signal)
+            d = Cal.calculate_domain_size(sqrtT, beta, r2, M2)
 
             self.ui.textEdit_error_2.setText(f"R² {R2}")
 
@@ -1956,11 +1964,16 @@ class MainWindow(QMainWindow):
 
             table.setItem(selected_file_idx,3,item)
 
+            item2 = QTableWidgetItem(str(d))
+
+            table.setItem(selected_file_idx,4,item2)
+
             figure.clear()
             figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
             figure.plot(Time_fit, fitted_curve, pen='b')
 
             dictionary[value_from_row]['sqrtT'] = sqrtT
+            dictionary[value_from_row]['d'] = d
 
             self.ui.btn_Plot1.setEnabled(True)
         except Exception as e:
