@@ -248,6 +248,15 @@ def _crop_time_zero(Time, Real, Imaginary):
         Time_cropped = Time[Time_crop_idx:]
         Real_cropped = Real[Time_crop_idx:]
         Imaginary_cropped = Imaginary[Time_crop_idx:]
+
+        # There is a strange bug in Relax. Sometimes it records zero twice
+        # (might be that it even records other values twice, but this is what I have seen so far)
+        if Time_cropped[0] == Time_cropped[1]:
+            Time_cropped = Time[1:]
+            Real_cropped = Real[1:]
+            Imaginary_cropped = Imaginary[1:]
+            print('The file is corrupted, the zero time might be not exactly zero. This is the bug from Relax, I have nothing to do with that.')
+
         return Time_cropped, Real_cropped, Imaginary_cropped
     else:
         return Time, Real, Imaginary
