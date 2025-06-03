@@ -1762,18 +1762,21 @@ class MainWindow(QMainWindow):
             self.update_GS_table()
 
     def save_figures(self, file_path, variable):
-        # Set names
         parent_folder = os.path.dirname(file_path)
-        os.makedirs(parent_folder + '/Result/', exist_ok=True)  
+        result_folder = os.path.join(parent_folder, 'Result')
+        os.makedirs(result_folder, exist_ok=True)
 
         graph_fft = self.ui.FFTWidget
         graph_fid = self.ui.FidWidget
 
-        fft_file_path = (parent_folder + '/Result/' + f"FFT_{variable}.png")
-        fid_file_path = (parent_folder + '/Result/' + f"FID_{variable}.png")
+        fft_file_path = os.path.join(result_folder, f"FFT_{variable}.png")
+        fid_file_path = os.path.join(result_folder, f"NMR_{variable}.png")
+        fft_csv_path  = os.path.join(result_folder, f"FFT_{variable}.csv")
+        fid_csv_path  = os.path.join(result_folder, f"NMR_{variable}.csv")
 
         pg.QtGui.QGuiApplication.processEvents()
 
+        # Export PNGs
         exporter_fft = pg.exporters.ImageExporter(graph_fft.plotItem)
         exporter_fft.parameters()['width'] = 1000
         exporter_fft.export(fft_file_path)
@@ -1781,6 +1784,29 @@ class MainWindow(QMainWindow):
         exporter_fid = pg.exporters.ImageExporter(graph_fid.plotItem)
         exporter_fid.parameters()['width'] = 1000
         exporter_fid.export(fid_file_path)
+
+        # Save FFT FID CSV
+        curves = graph_fft.plotItem.listDataItems()
+
+        _, y2 = curves[1].getData()
+        x, y3 = curves[2].getData()
+
+        with open(fft_csv_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for xi, y2i, y3i in zip(x, y2, y3):
+                writer.writerow([xi, y2i, y3i])
+
+        curves = graph_fid.plotItem.listDataItems()
+
+        _, y2 = curves[1].getData()
+        x, y3 = curves[2].getData()
+
+        with open(fid_csv_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for xi, y2i, y3i in zip(x, y2, y3):
+                writer.writerow([xi, y2i, y3i])
+
+
 
     def load_data_and_check_validity(self, file_path):
         try:
