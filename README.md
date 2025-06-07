@@ -34,12 +34,11 @@ Initially created as a tool to speed up the analysis of NMR data, obtained from 
      
   - T1s measured from the FFC profile obtained with Stelar equipment
 
-### 23D Model:
-  -Advanced analysis of the FFC profiles
-  
-  -Fit to estimate taus, amplitudes, CDD constants
-  
-  -Deconvolution to Lorenzian curves to estimate tau's of various mobility regions
+### Goldman - Shen:
+  - The domain size analysis
+    
+  - Choice of appropriate components
+
   
   
 
