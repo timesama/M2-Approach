@@ -4228,6 +4228,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <string>Long component subtraction</string>
                    </property>
                   </widget>
+                  <widget class="QCheckBox" name="checkBox_Smooth">
+                   <property name="geometry">
+                    <rect>
+                     <x>110</x>
+                     <y>60</y>
+                     <width>121</width>
+                     <height>21</height>
+                    </rect>
+                   </property>
+                   <property name="text">
+                    <string>Smooth FFT</string>
+                   </property>
+                  </widget>
                  </widget>
                 </item>
                </layout>

@@ -705,7 +705,7 @@ class MainWindow(QMainWindow):
             self.ui.comboBox_4.addItem(filename)
 
         if self.ui.comboBox_4.currentIndex() == -1:
-            M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
+            M2, T2 = Cal._calculate_M2(Real_apod, Frequency, self.ui.checkBox_Smooth.isChecked())
 
             if self.tab == 'SE':
                 match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
@@ -745,7 +745,7 @@ class MainWindow(QMainWindow):
         # Update FFT graph
         self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
 
-        M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
+        M2, T2 = Cal._calculate_M2(Real_apod, Frequency, False)
         M2_r = round(M2, 6)
         T2_r = round(T2, 6)
 
@@ -2317,6 +2317,7 @@ class PhasingManual(QDialog):
 
     def smooth(self,y,):
         new_array = savgol_filter(y, window_length=self.Smooth, polyorder=1)
+        print(self.Smooth)
 
         return new_array
 
@@ -2338,7 +2339,7 @@ class PhasingManual(QDialog):
         self.ui.Delta.setText(f"Delta: {round(delta,7)}")
 
         Real_apod   = Cal._calculate_apodization(self.Real_freq_phased, Frequency)
-        M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
+        M2, T2 = Cal._calculate_M2(Real_apod, Frequency, False)
 
         self.ui.M2.setText(f"M₂: {round(M2,5)}")
         self.ui.T2.setText(f"T₂*: {round(T2,3)}")

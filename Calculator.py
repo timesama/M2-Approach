@@ -5,6 +5,7 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
+import matplotlib.pyplot as plt
 
 # Math procedures
 def _find_nearest(array, value):
@@ -232,7 +233,7 @@ def frequency_domain_analysis(FFT, Frequency):
     Real_apod = _calculate_apodization(Re, Frequency)
 
     # 10. M2 & T2
-    M2, T2 = _calculate_M2(Real_apod, Frequency)
+    M2, T2 = _calculate_M2(Real_apod, Frequency, False)
 
     return M2, T2
 
@@ -417,13 +418,24 @@ def _find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-def _calculate_M2(FFT_real, Frequency):
+def _calculate_M2(FFT_real, Frequency, Smooth):
+
     # private api
+    if Smooth:
+        RealPart = savgol_filter(np.real(FFT_real), 1000, polyorder=1)
+        Frequency = savgol_filter(Frequency, 1000, polyorder=1)
+    else:
+        RealPart = np.real(FFT_real)
+
+    print(len(RealPart))
+    # plt.plot(Frequency, RealPart)
+    # plt.show()
+
     # Take the integral of the REAL PART OF FFT by counts
-    Integral = np.trapz(np.real(FFT_real))
+    Integral = np.trapz(RealPart)
 
     # Normalize FFT to the Integral value
-    Fur_normalized = np.real(FFT_real) / Integral
+    Fur_normalized = RealPart / Integral
 
     # Calculate the integral of normalized FFT to receive 1
     Integral_one = np.trapz(Fur_normalized)
