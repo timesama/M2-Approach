@@ -10,6 +10,7 @@ from scipy.signal import savgol_filter
 from webbrowser import open as open_application
 from itertools import islice
 import pyqtgraph as pg
+from pyqtgraph import mkPen
 import pyqtgraph.exporters
 from ui_Form import Ui_NMR
 from ui_Notification import Ui_Note
@@ -120,7 +121,7 @@ class MainWindow(QMainWindow):
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
-        self.setup_graph(self.ui.FidWidget, "Time, μs", "Amplitude", "FID")
+        self.setup_graph(self.ui.FidWidget, "Time, μs", "Amplitude", "NMR Signal")
         self.setup_graph(self.ui.SEWidget, "Temperature, °C", "Choose", "")
         self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_2, "X axis", "Norm. DQ Intensity", "")
@@ -213,7 +214,7 @@ class MainWindow(QMainWindow):
         self.ui.groupBox_EAct.setHidden(True)
 
     def check_for_updates(self):
-        current_version = '0.2.0'
+        current_version = '0.2.1'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             # Make a GET request to fetch the latest release data
@@ -788,9 +789,9 @@ class MainWindow(QMainWindow):
     # Working with graphs
     def update_graphs(self, x, y1, y2, y3, graph):
         graph.clear()
-        graph.plot(x, y1, pen='k')
-        graph.plot(x, y2, pen='r')
-        graph.plot(x, y3, pen='b')
+        graph.plot(x, y1, pen=mkPen('k', width=3))
+        graph.plot(x, y2, pen=mkPen('r', width=2))
+        graph.plot(x, y3, pen=mkPen('b', width=2))
 
     # Working with SE graphs
     def update_se_graphs(self):
