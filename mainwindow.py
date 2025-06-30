@@ -1684,8 +1684,10 @@ class MainWindow(QMainWindow):
             table = self.ui.table_DQMQ
             files = self.selected_DQMQfile
             pattern = r'.*_(.*)'
-            default_name = 'DQMQ_data_' + re.search(pattern, os.path.split(os.path.dirname(files[0]))[1] ).group(1)
-
+            try:
+                default_name = 'DQMQ_data_' + re.search(pattern, os.path.split(os.path.dirname(files[0]))[1] ).group(1)
+            except:
+                default_name = 'DQMQ_data_'
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
 

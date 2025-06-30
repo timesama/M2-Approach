@@ -427,7 +427,7 @@ def _calculate_M2(FFT_real, Frequency, Smooth):
     else:
         RealPart = np.real(FFT_real)
 
-    print(len(RealPart))
+    # print(len(RealPart))
     # plt.plot(Frequency, RealPart)
     # plt.show()
 
