@@ -1150,14 +1150,14 @@ class MainWindow(QMainWindow):
                 table.setRowCount(len(selected_files*4))
                 x_axis = []
 
-                pattern_all = r'T1_all_ampl_(\s?-?\d+).txt'
+                pattern_all = r'T1_.*_(\s?-?\d+).txt'
 
                 for file in selected_files:
 
                     try:
                         x_axis = re.search(pattern_all, os.path.basename(file)).group(1)
                     except:
-                        x_axis = row
+                        x_axis = 'Variable'
 
                     Time = []
                     Signal_all = []
