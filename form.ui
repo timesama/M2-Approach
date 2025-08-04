@@ -3535,6 +3535,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
+                   <property name="sizeAdjustPolicy">
+                    <enum>QAbstractScrollArea::AdjustToContents</enum>
+                   </property>
                    <property name="editTriggers">
                     <set>QAbstractItemView::CurrentChanged</set>
                    </property>
@@ -3545,7 +3548,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <enum>QAbstractItemView::ExtendedSelection</enum>
                    </property>
                    <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
+                    <enum>QAbstractItemView::SelectItems</enum>
                    </property>
                    <property name="columnCount">
                     <number>4</number>

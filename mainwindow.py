@@ -1,8 +1,8 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re, csv, requests, winreg
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea
-from PySide6.QtCore import QCoreApplication, Signal
-from PySide6.QtGui import QColor, QIcon
+from PySide6.QtWidgets import QWidget,QTableWidgetItem, QTableWidget, QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea
+from PySide6.QtCore import QCoreApplication, Signal, QEvent
+from PySide6.QtGui import QColor, QIcon, QKeySequence
 import numpy as np
 import json
 from scipy.optimize import curve_fit
@@ -136,6 +136,8 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.GS_Widget_2, "X axis", "√Time, √us", "")
 
         # Table Headers
+        self.copy_enabler = TableCopyEnabler(self)
+
         self.ui.table_SE.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=0: self.renameSection(self.ui.table_SE, index=0)
 )
@@ -562,8 +564,6 @@ class MainWindow(QMainWindow):
             self.ui.btn_Load.setEnabled(False)
             self.ui.radioButton.setEnabled(False)
             self.ui.comboBox_4.setCurrentIndex(-1)
-
-            self.ui.textEdit_6.setText(f"Analysing file {i} out of {len(self.selected_files)}")
 
             if self.ui.checkBox.isChecked():
                 if len(self.selected_files_empty) < len(self.selected_files):
@@ -2432,6 +2432,56 @@ class PhasingManual(QDialog):
         self.ui.verticalSlider_c.valueChanged.connect(self.value_changed)
         self.ui.verticalSlider_d.valueChanged.connect(self.value_changed)
         self.ui.dial.valueChanged.connect(self.smoothing_changed)
+
+class TableCopyEnabler(QWidget):
+    def __init__(self, root_widget):
+        super().__init__()
+        self.enable_table_copying(root_widget)
+
+    def enable_table_copying(self, widget):
+        # Recursively search for all QTableWidget or QTableView instances
+        for table in widget.findChildren(QTableWidget):
+            table.setSelectionBehavior(QTableWidget.SelectItems)
+            table.setSelectionMode(QTableWidget.ExtendedSelection)
+            table.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        if isinstance(obj, QTableWidget) and event.type() == QEvent.KeyPress:
+            if event.matches(QKeySequence.Copy):
+                self.copy_table_selection(obj)
+                return True
+        return super().eventFilter(obj, event)
+
+    def copy_entire_table(self, table):
+        copied_text = ""
+        row_count = table.rowCount()
+        col_count = table.columnCount()
+
+        for row in range(row_count):
+            row_data = []
+            for col in range(col_count):
+                item = table.item(row, col)
+                row_data.append(item.text() if item else "")
+            copied_text += "\t".join(row_data) + "\n"
+
+        QApplication.clipboard().setText(copied_text.strip())
+
+
+    def copy_table_selection(self, table):
+        selected_ranges = table.selectedRanges()
+        if not selected_ranges:
+            return
+
+        copied_text = ""
+        for r in selected_ranges:
+            for row in range(r.topRow(), r.bottomRow() + 1):
+                row_data = []
+                for col in range(r.leftColumn(), r.rightColumn() + 1):
+                    item = table.item(row, col)
+                    row_data.append(item.text() if item else "")
+                copied_text += "\t".join(row_data) + "\n"
+
+        QApplication.clipboard().setText(copied_text.strip())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
