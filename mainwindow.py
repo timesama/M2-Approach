@@ -613,7 +613,6 @@ class MainWindow(QMainWindow):
         self.analysis()
 
     def update_legends_and_dq_graphs(self, legend):
-        self.ui.textEdit_6.setText(f"Finished")
         self.enable_buttons()
 
         if self.tab == 'DQ':
@@ -664,18 +663,12 @@ class MainWindow(QMainWindow):
         Amp = Cal._calculate_amplitude(Re, Im)
         self.update_graphs(Time, Amp, Re, Im, self.ui.FidWidget)
 
-        if self.ui.radioButton_2.isChecked():
-            number_of_points = 2**14
-        else:
-            number_of_points = 2**16
+        number_of_points = 2**16
 
         Time_fid, Fid =  Cal.final_analysis_time_domain(Time, Re, Im, number_of_points)
         Frequency = Cal._calculate_frequency_scale(Time_fid)
 
-        if self.ui.radioButton_2.isChecked():
-            FFT = self.FFT_handmade(Fid, Time_fid, Frequency)  #(math procedure)
-        else:
-            FFT = np.fft.fftshift(np.fft.fft(Fid))
+        FFT = np.fft.fftshift(np.fft.fft(Fid))
 
         # 8. Simple baseline
         Amp_spectra, Re_spectra, Im_spectra = Cal._simple_baseline_correction(FFT)
