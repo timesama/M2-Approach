@@ -832,14 +832,14 @@ class MainWindow(QMainWindow):
             self.ui.dq_min.setValue(time_min)
             self.ui.dq_max.setValue(time_max)
             x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
-        
+
         y = t2[(dq_time >= time_min) & (dq_time <= time_max)]
 
         if len(x) <= 1 or len(y) <= 1:
             return
 
         coeff = np.polyfit(x, y, 1)
-        
+
         Integral = np.trapz(dq)
         DQ_norm = dq/Integral
 
@@ -862,7 +862,7 @@ class MainWindow(QMainWindow):
 
         # Draw line
         self.graph_line = self.ui.DQ_Widget_1
-        
+
         if coeff is not None:
             # Generate x values for the line
             x_line = np.arange(0, 105.1, 0.1)
@@ -1045,7 +1045,7 @@ class MainWindow(QMainWindow):
         figure.plot(Time, fitted_curve, pen='m', name = 'fitting')
 
         self.ui.pushButton_DQMQ_2.setEnabled(True)
-        self.ui.pushButton_DQMQ_3.setEnabled(True)    
+        self.ui.pushButton_DQMQ_3.setEnabled(True)
 
     def plot_nDQ(self):
         file_path = self.selected_DQMQfile[0]
@@ -1061,9 +1061,9 @@ class MainWindow(QMainWindow):
         legend = figure.addLegend()
         noise_level = self.ui.noise.value()
         time_shift = int(self.ui.DQMQtime_shift.value())
+        smoothing = [self.ui.DQMQSmooth_from.value(), self.ui.DQMQSmooth_to.value(), int(self.ui.DQMQSmooth_window.value())]
 
-        Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
-
+        Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing)
 
         figure.plot(Time, DQ_normal, pen='r', name = 'DQ')
         figure.plot(Time, MQ_normal, pen='b', name = 'Ref')
@@ -1832,8 +1832,6 @@ class MainWindow(QMainWindow):
             for xi, y2i, y3i in zip(x, y2, y3):
                 writer.writerow([xi, y2i, y3i])
 
-
-
     def load_data_and_check_validity(self, file_path):
         try:
             data = np.loadtxt(file_path)
@@ -1859,7 +1857,6 @@ class MainWindow(QMainWindow):
                 return False
 
     # FFC analysis
-
     def bad_code_makes_more_bad_code(self):
         dictionary = self.tau_dictionary
         dialog = SaveFilesDialog(self)

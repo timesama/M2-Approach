@@ -8,6 +8,20 @@ from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 
 # Math procedures
+
+# def moving_average(arr, window_size):
+#     kernel = np.ones(window_size) / window_size
+#     return np.convolve(arr, kernel, mode='valid')
+
+
+def moving_average(arr, window_size):
+    kernel = np.ones(window_size) / window_size
+    pad_width = window_size // 2
+    padded = np.pad(arr, pad_width, mode='edge')
+    smoothed = np.convolve(padded, kernel, mode='valid')
+
+    return smoothed[:len(arr)]
+
 def _find_nearest(array, value):
     # private api
     array = np.asarray(array)
@@ -31,7 +45,7 @@ def normalize_mq(DQ, MQ, state):
 
     return DQ_norm, MQ_norm, End
 
-def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift):
+def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None):
 
     def exponent(x, a, b, c):
         return a * np.exp(-power*(x/b)) + c
@@ -61,6 +75,17 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift):
 
     nDQ = np.insert(nDQ, 0, 0)
     Time0 = np.insert(Time, 0, 0)
+
+    if (np.all(smoothing) and smoothing!=None and smoothing[2]!=1 and smoothing[1]>smoothing[0]):
+        try:
+            smooth_from_idx = _find_nearest(Time, smoothing[0])
+            smooth_to_idx =  _find_nearest(Time, smoothing[1])
+            new_nDQ = nDQ[smooth_from_idx:smooth_to_idx]
+            smooth_nDQ = moving_average(new_nDQ, smoothing[2])
+            nDQ[smooth_from_idx:smooth_to_idx] = smooth_nDQ
+        except Exception as e:
+            print(f'couldnt proceed because {e}')
+
 
     return Time, DQ_norm, Ref_norm, Diff, DQ_normal, MQ_normal, Time0, nDQ, fitted_curve
 
