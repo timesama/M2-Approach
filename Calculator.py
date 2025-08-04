@@ -31,12 +31,13 @@ def normalize_mq(DQ, MQ, state):
 
     return DQ_norm, MQ_norm, End
 
-def dqmq(file_path, fit_from, fit_to, p, noise_level):
+def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift):
 
     def exponent(x, a, b, c):
         return a * np.exp(-power*(x/b)) + c
 
     Time, DQ, Ref = read_data(file_path, 1)
+    Time = Time + time_shift
 
     power = p
 

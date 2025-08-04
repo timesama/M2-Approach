@@ -993,7 +993,9 @@ class MainWindow(QMainWindow):
             Time, DQ, Ref = Cal.read_data(file_path, 1)
         except:
             Time, DQ, Ref = Cal.read_data(file_path, 0)
-    
+
+        time_shift = int(self.ui.DQMQtime_shift.value())
+        Time = Time + time_shift
 
         figure.plot(Time, DQ, pen='r', name = 'DQ')
         figure.plot(Time, Ref, pen='b', name = 'Ref')
@@ -1008,14 +1010,15 @@ class MainWindow(QMainWindow):
         legend.clear()
         legend = figure.addLegend()
         noise_level = self.ui.noise.value()
+        time_shift = int(self.ui.DQMQtime_shift.value())
 
-        Time, DQ_norm, Ref_norm, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1, noise_level)
+        Time, DQ_norm, Ref_norm, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1, noise_level, time_shift)
 
         figure.plot(Time, DQ_norm, pen='r', name = 'DQ')
         figure.plot(Time, Ref_norm, pen='b', name = 'Ref')
 
         self.ui.pushButton_DQMQ_2.setEnabled(True)
-        self.ui.pushButton_DQMQ_3.setEnabled(True)     
+        self.ui.pushButton_DQMQ_3.setEnabled(True)
         self.ui.dq_min_3.setEnabled(True)
         self.ui.dq_max_3.setEnabled(True)
         self.ui.power.setEnabled(True)
@@ -1032,8 +1035,9 @@ class MainWindow(QMainWindow):
         legend = figure.addLegend()
         legend.clear()
         legend = figure.addLegend()
+        time_shift = int(self.ui.DQMQtime_shift.value())
 
-        Time, DQ_norm, Ref_norm, Diff, _, _, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level)
+        Time, DQ_norm, Ref_norm, Diff, _, _, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
 
         figure.plot(Time, DQ_norm, pen='r', name = 'DQ')
         figure.plot(Time, Ref_norm, pen='b', name = 'Ref')
@@ -1056,8 +1060,10 @@ class MainWindow(QMainWindow):
         legend.clear()
         legend = figure.addLegend()
         noise_level = self.ui.noise.value()
+        time_shift = int(self.ui.DQMQtime_shift.value())
 
-        Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level)
+        Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
+
 
         figure.plot(Time, DQ_normal, pen='r', name = 'DQ')
         figure.plot(Time, MQ_normal, pen='b', name = 'Ref')
