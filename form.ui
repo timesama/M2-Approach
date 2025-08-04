@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>700</height>
+    <width>1324</width>
+    <height>1026</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -136,8 +136,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>998</width>
-         <height>698</height>
+         <width>1322</width>
+         <height>1024</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -218,7 +218,7 @@
           <property name="flat">
            <bool>true</bool>
           </property>
-          <layout class="QGridLayout" name="gridLayout_2" rowstretch="0" columnstretch="0,2,2,0">
+          <layout class="QGridLayout" name="gridLayout_2" rowstretch="0" columnstretch="0,0,0">
            <property name="sizeConstraint">
             <enum>QLayout::SetDefaultConstraint</enum>
            </property>
@@ -240,93 +240,40 @@
            <property name="verticalSpacing">
             <number>0</number>
            </property>
-           <item row="0" column="3">
-            <layout class="QVBoxLayout" name="FFThand">
+           <item row="0" column="2">
+            <layout class="QVBoxLayout" name="FFT">
              <item>
-              <widget class="QTextEdit" name="textEdit_6">
+              <widget class="QPushButton" name="btn_Phasing">
+               <property name="text">
+                <string>Manual Phasing</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="PlotWidget" name="FFTWidget" native="true">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>1</horstretch>
+                 <verstretch>1</verstretch>
                 </sizepolicy>
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>0</width>
-                 <height>80</height>
+                 <width>1</width>
+                 <height>1</height>
                 </size>
                </property>
-               <property name="maximumSize">
+               <property name="sizeIncrement">
                 <size>
-                 <width>100</width>
-                 <height>30</height>
+                 <width>1</width>
+                 <height>1</height>
                 </size>
                </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-               <property name="html">
-                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;                        &lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QTextEdit" name="textEdit_5">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
+               <property name="baseSize">
                 <size>
-                 <width>100</width>
-                 <height>30</height>
+                 <width>1</width>
+                 <height>1</height>
                 </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background: transparent</string>
-               </property>
-               <property name="frameShape">
-                <enum>QFrame::NoFrame</enum>
-               </property>
-               <property name="html">
-                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;                        &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;FFT Progress:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QProgressBar" name="progressBar">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="value">
-                <number>0</number>
                </property>
               </widget>
              </item>
@@ -374,300 +321,158 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </item>
             </layout>
            </item>
-           <item row="0" column="2">
-            <layout class="QVBoxLayout" name="FFT">
-             <item>
-              <widget class="QPushButton" name="btn_Phasing">
-               <property name="text">
-                <string>Manual Phasing</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="PlotWidget" name="FFTWidget" native="true">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>1</horstretch>
-                 <verstretch>1</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>1</width>
-                 <height>1</height>
-                </size>
-               </property>
-               <property name="sizeIncrement">
-                <size>
-                 <width>1</width>
-                 <height>1</height>
-                </size>
-               </property>
-               <property name="baseSize">
-                <size>
-                 <width>1</width>
-                 <height>1</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
            <item row="0" column="0">
-            <layout class="QGridLayout" name="Files_selection" rowstretch="0,0,0,0,0,0,0" columnstretch="0,0">
-             <property name="sizeConstraint">
-              <enum>QLayout::SetMaximumSize</enum>
+            <widget class="QGroupBox" name="groupBox_11">
+             <property name="minimumSize">
+              <size>
+               <width>230</width>
+               <height>150</height>
+              </size>
              </property>
-             <property name="horizontalSpacing">
-              <number>5</number>
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>16777215</height>
+              </size>
              </property>
-             <item row="3" column="0">
-              <widget class="QPushButton" name="btn_Start">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Start</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QPushButton" name="btn_SelectFiles">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Select Files</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <widget class="QTextEdit" name="textEdit_2">
-               <property name="mouseTracking">
-                <bool>false</bool>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background: transparent</string>
-               </property>
-               <property name="frameShape">
-                <enum>QFrame::NoFrame</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="sizeAdjustPolicy">
-                <enum>QAbstractScrollArea::AdjustToContents</enum>
-               </property>
-               <property name="html">
-                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;                        &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2. Press Start for Analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="textInteractionFlags">
-                <set>Qt::NoTextInteraction</set>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0" colspan="2">
-              <widget class="QTextEdit" name="textEdit_3">
-               <property name="mouseTracking">
-                <bool>false</bool>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background: transparent</string>
-               </property>
-               <property name="frameShape">
-                <enum>QFrame::NoFrame</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="sizeAdjustPolicy">
-                <enum>QAbstractScrollArea::AdjustToContents</enum>
-               </property>
-               <property name="html">
-                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;                        &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;3. Save Result&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="textInteractionFlags">
-                <set>Qt::NoTextInteraction</set>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="btn_Add">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Add</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0" colspan="2">
-              <widget class="QRadioButton" name="radioButton">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="text">
-                <string>Save intermediate results</string>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <property name="autoExclusive">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" colspan="2">
-              <widget class="QTextEdit" name="textEdit">
-               <property name="mouseTracking">
-                <bool>false</bool>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
-               </property>
-               <property name="contextMenuPolicy">
-                <enum>Qt::DefaultContextMenu</enum>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">background: transparent</string>
-               </property>
-               <property name="frameShape">
-                <enum>QFrame::NoFrame</enum>
-               </property>
-               <property name="verticalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
-               </property>
-               <property name="sizeAdjustPolicy">
-                <enum>QAbstractScrollArea::AdjustToContents</enum>
-               </property>
-               <property name="undoRedoEnabled">
-                <bool>false</bool>
-               </property>
-               <property name="html">
-                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;                        &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;1. Select Files for Analysis&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="textInteractionFlags">
-                <set>Qt::NoTextInteraction</set>
-               </property>
-               <property name="placeholderText">
-                <string notr="true"/>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
-              <widget class="QPushButton" name="btn_Save">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Save</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="1">
-              <widget class="QPushButton" name="btn_Load">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Load</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+             <property name="title">
+              <string/>
+             </property>
+             <layout class="QFormLayout" name="formLayout">
+              <property name="verticalSpacing">
+               <number>20</number>
+              </property>
+              <property name="topMargin">
+               <number>20</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QPushButton" name="btn_SelectFiles">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Select Files</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="btn_Add">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Add</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" colspan="2">
+               <widget class="QPushButton" name="btn_Start">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>205</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Start</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" colspan="2">
+               <widget class="QRadioButton" name="radioButton">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Save intermediate results</string>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+                <property name="checked">
+                 <bool>false</bool>
+                </property>
+                <property name="autoExclusive">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="btn_Save">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Save</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QPushButton" name="btn_Load">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -765,7 +570,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>3</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -2064,10 +1869,130 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout_5" rowstretch="0,0,0,0,0,0,0,0" columnstretch="1,1,2,0,2">
+                <layout class="QGridLayout" name="gridLayout_5" rowstretch="0,0,0,0,0,0,0,0,0" columnstretch="1,1,2,0,2">
                  <property name="spacing">
                   <number>5</number>
                  </property>
+                 <item row="4" column="3" rowspan="2">
+                  <widget class="QGroupBox" name="groupBox_equations_3">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>50</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_6">
+                    <property name="leftMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>10</number>
+                    </property>
+                    <item>
+                     <widget class="QTextEdit" name="textEdit_T2_4">
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="mouseTracking">
+                       <bool>false</bool>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
+                      <property name="acceptDrops">
+                       <bool>false</bool>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: transparent</string>
+                      </property>
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                      <property name="verticalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOff</enum>
+                      </property>
+                      <property name="horizontalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOff</enum>
+                      </property>
+                      <property name="sizeAdjustPolicy">
+                       <enum>QAbstractScrollArea::AdjustToContents</enum>
+                      </property>
+                      <property name="undoRedoEnabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="html">
+                       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Plot:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="textInteractionFlags">
+                       <set>Qt::NoTextInteraction</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_10">
+                      <property name="text">
+                       <string>1ˢᵗ Exp</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_11">
+                      <property name="text">
+                       <string>2ⁿᵈ Exp</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_12">
+                      <property name="text">
+                       <string>3ⁿᵈ Exp</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="1" column="2" rowspan="5">
+                  <widget class="PlotWidget" name="T1_Widget_1" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>300</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="1" column="3">
                   <widget class="QGroupBox" name="groupBox_equations_2">
                    <property name="minimumSize">
@@ -2175,33 +2100,130 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </layout>
                   </widget>
                  </item>
-                 <item row="6" column="0">
-                  <widget class="QPushButton" name="btn_Save_3">
+                 <item row="0" column="2">
+                  <widget class="QComboBox" name="comboBox_6">
                    <property name="minimumSize">
                     <size>
-                     <width>0</width>
+                     <width>300</width>
                      <height>0</height>
                     </size>
                    </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
+                   <property name="styleSheet">
+                    <string notr="true">background: none</string>
                    </property>
-                   <property name="text">
-                    <string>Save</string>
+                   <property name="placeholderText">
+                    <string>Choose File for Analysis</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="1">
+                 <item row="6" column="0">
+                  <widget class="QPushButton" name="btn_SelectFiles_T1">
+                   <property name="text">
+                    <string>Select Files</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="1">
                   <widget class="QPushButton" name="btn_ClearTable_2">
                    <property name="text">
                     <string>Clear Table</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="7" column="0">
+                 <item row="6" column="1">
+                  <widget class="QPushButton" name="btn_DeleteRow">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string>Delete row</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0" rowspan="6" colspan="2">
+                  <widget class="QTableWidget" name="table_T1">
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::CurrentChanged</set>
+                   </property>
+                   <property name="dragEnabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="defaultDropAction">
+                    <enum>Qt::CopyAction</enum>
+                   </property>
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionMode">
+                    <enum>QAbstractItemView::ExtendedSelection</enum>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="sortingEnabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="columnCount">
+                    <number>9</number>
+                   </property>
+                   <column>
+                    <property name="text">
+                     <string>Folder</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>File name</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>X Axis</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>tau (1)</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>A (1)</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>tau (2)</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>A (2)</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>tau (3)</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>A (3)</string>
+                    </property>
+                   </column>
+                  </widget>
+                 </item>
+                 <item row="6" column="3">
+                  <widget class="QPushButton" name="btn_Plot1">
+                   <property name="text">
+                    <string>Plot</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="0">
                   <widget class="QPushButton" name="btn_Load_3">
                    <property name="minimumSize">
                     <size>
@@ -2220,21 +2242,156 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="0">
-                  <widget class="QPushButton" name="btn_SelectFiles_T1">
-                   <property name="text">
-                    <string>Select Files</string>
+                 <item row="0" column="4" rowspan="7">
+                  <widget class="PlotWidget" name="T1_Widget_2" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>300</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="3">
-                  <widget class="QPushButton" name="btn_Plot1">
+                 <item row="2" column="3">
+                  <widget class="QGroupBox" name="groupBox_equations_4">
+                   <property name="minimumSize">
+                    <size>
+                     <width>70</width>
+                     <height>80</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>100</width>
+                     <height>100</height>
+                    </size>
+                   </property>
+                   <property name="sizeIncrement">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_8">
+                    <property name="leftMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>10</number>
+                    </property>
+                    <item>
+                     <widget class="QTextEdit" name="textEdit_T2_3">
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>6</pointsize>
+                       </font>
+                      </property>
+                      <property name="mouseTracking">
+                       <bool>false</bool>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
+                      <property name="acceptDrops">
+                       <bool>false</bool>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: transparent</string>
+                      </property>
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                      <property name="verticalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOff</enum>
+                      </property>
+                      <property name="horizontalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOff</enum>
+                      </property>
+                      <property name="sizeAdjustPolicy">
+                       <enum>QAbstractScrollArea::AdjustToContents</enum>
+                      </property>
+                      <property name="undoRedoEnabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="html">
+                       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:6pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;Original Units:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="textInteractionFlags">
+                       <set>Qt::NoTextInteraction</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_16">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="text">
+                       <string>ms</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="radioButton_17">
+                      <property name="text">
+                       <string>μs</string>
+                      </property>
+                      <property name="checked">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="7" column="0">
+                  <widget class="QPushButton" name="btn_Save_3">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
                    <property name="text">
-                    <string>Plot</string>
+                    <string>Save</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="2" rowspan="2">
+                 <item row="6" column="2" rowspan="2">
                   <widget class="QGroupBox" name="groupBox_8">
                    <property name="title">
                     <string/>
@@ -2449,8 +2606,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </layout>
                   </widget>
                  </item>
-                 <item row="3" column="3" rowspan="2">
-                  <widget class="QGroupBox" name="groupBox_equations_3">
+                 <item row="3" column="3">
+                  <widget class="QGroupBox" name="groupBox_equations_5">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>70</width>
@@ -2466,7 +2626,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <property name="title">
                     <string/>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_6">
+                   <layout class="QVBoxLayout" name="verticalLayout_7">
                     <property name="leftMargin">
                      <number>5</number>
                     </property>
@@ -2480,7 +2640,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <number>10</number>
                     </property>
                     <item>
-                     <widget class="QTextEdit" name="textEdit_T2_4">
+                     <widget class="QTextEdit" name="textEdit_T2_6">
                       <property name="maximumSize">
                        <size>
                         <width>16777215</width>
@@ -2522,7 +2682,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Plot:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Set parameters:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                       </property>
                       <property name="textInteractionFlags">
                        <set>Qt::NoTextInteraction</set>
@@ -2530,275 +2690,81 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QRadioButton" name="radioButton_10">
-                      <property name="text">
-                       <string>1ˢᵗ Exp</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="radioButton_11">
-                      <property name="text">
-                       <string>2ⁿᵈ Exp</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="radioButton_12">
-                      <property name="text">
-                       <string>3ⁿᵈ Exp</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item row="2" column="3">
-                  <widget class="QGroupBox" name="groupBox_equations_4">
-                   <property name="minimumSize">
-                    <size>
-                     <width>70</width>
-                     <height>80</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>100</width>
-                     <height>100</height>
-                    </size>
-                   </property>
-                   <property name="sizeIncrement">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_8">
-                    <property name="leftMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>10</number>
-                    </property>
-                    <item>
-                     <widget class="QTextEdit" name="textEdit_T2_3">
-                      <property name="maximumSize">
-                       <size>
-                        <width>16777215</width>
-                        <height>30</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>6</pointsize>
-                       </font>
-                      </property>
-                      <property name="mouseTracking">
-                       <bool>false</bool>
-                      </property>
-                      <property name="focusPolicy">
-                       <enum>Qt::NoFocus</enum>
-                      </property>
-                      <property name="acceptDrops">
-                       <bool>false</bool>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">background: transparent</string>
-                      </property>
-                      <property name="frameShape">
-                       <enum>QFrame::NoFrame</enum>
-                      </property>
-                      <property name="verticalScrollBarPolicy">
-                       <enum>Qt::ScrollBarAlwaysOff</enum>
-                      </property>
-                      <property name="horizontalScrollBarPolicy">
-                       <enum>Qt::ScrollBarAlwaysOff</enum>
-                      </property>
-                      <property name="sizeAdjustPolicy">
-                       <enum>QAbstractScrollArea::AdjustToContents</enum>
-                      </property>
-                      <property name="undoRedoEnabled">
-                       <bool>false</bool>
-                      </property>
-                      <property name="html">
-                       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:6pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;Original Units:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                      </property>
-                      <property name="textInteractionFlags">
-                       <set>Qt::NoTextInteraction</set>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="radioButton_16">
+                     <widget class="QDoubleSpinBox" name="DSB_ExpFitting1">
                       <property name="enabled">
                        <bool>true</bool>
                       </property>
-                      <property name="text">
-                       <string>ms</string>
+                      <property name="prefix">
+                       <string>t1 </string>
                       </property>
-                      <property name="checked">
-                       <bool>true</bool>
+                      <property name="suffix">
+                       <string/>
+                      </property>
+                      <property name="decimals">
+                       <number>3</number>
+                      </property>
+                      <property name="maximum">
+                       <double>100000000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>10.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>100.000000000000000</double>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QRadioButton" name="radioButton_17">
-                      <property name="text">
-                       <string>μs</string>
-                      </property>
-                      <property name="checked">
+                     <widget class="QDoubleSpinBox" name="DSB_ExpFitting2">
+                      <property name="enabled">
                        <bool>false</bool>
+                      </property>
+                      <property name="prefix">
+                       <string>t2 </string>
+                      </property>
+                      <property name="suffix">
+                       <string/>
+                      </property>
+                      <property name="decimals">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <double>100000000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>100.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>1000.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="DSB_ExpFitting3">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="prefix">
+                       <string>t3 </string>
+                      </property>
+                      <property name="suffix">
+                       <string/>
+                      </property>
+                      <property name="decimals">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <double>100000000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>10000.000000000000000</double>
                       </property>
                      </widget>
                     </item>
                    </layout>
-                  </widget>
-                 </item>
-                 <item row="1" column="2" rowspan="4">
-                  <widget class="PlotWidget" name="T1_Widget_1" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1">
-                  <widget class="QPushButton" name="btn_DeleteRow">
-                   <property name="enabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="text">
-                    <string>Delete row</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="2">
-                  <widget class="QComboBox" name="comboBox_6">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">background: none</string>
-                   </property>
-                   <property name="placeholderText">
-                    <string>Choose File for Analysis</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0" rowspan="5" colspan="2">
-                  <widget class="QTableWidget" name="table_T1">
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::CurrentChanged</set>
-                   </property>
-                   <property name="dragEnabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="defaultDropAction">
-                    <enum>Qt::CopyAction</enum>
-                   </property>
-                   <property name="alternatingRowColors">
-                    <bool>true</bool>
-                   </property>
-                   <property name="selectionMode">
-                    <enum>QAbstractItemView::ExtendedSelection</enum>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="sortingEnabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="columnCount">
-                    <number>9</number>
-                   </property>
-                   <column>
-                    <property name="text">
-                     <string>Folder</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>File name</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>X Axis</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>tau (1)</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>A (1)</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>tau (2)</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>A (2)</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>tau (3)</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>A (3)</string>
-                    </property>
-                   </column>
-                  </widget>
-                 </item>
-                 <item row="0" column="4" rowspan="6">
-                  <widget class="PlotWidget" name="T1_Widget_2" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -2826,138 +2792,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout_6" rowstretch="1,0,0,0,0,0,0,0" columnstretch="0,0,0,0,4">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="horizontalSpacing">
-                  <number>5</number>
-                 </property>
-                 <property name="verticalSpacing">
-                  <number>10</number>
-                 </property>
-                 <item row="5" column="2" rowspan="3" colspan="2">
-                  <widget class="QPushButton" name="btn_Load_4">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>25</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Load</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1" rowspan="3">
-                  <widget class="QPushButton" name="btn_Save_2">
-                   <property name="text">
-                    <string>Save</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="0" rowspan="3">
-                  <widget class="QPushButton" name="btn_SelectFilesDQMQ">
-                   <property name="text">
-                    <string>Select Files</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="2" colspan="2">
-                  <widget class="QGroupBox" name="groupBox_5">
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_9">
-                    <item>
-                     <widget class="QPushButton" name="pushButton_DQMQ_1">
-                      <property name="text">
-                       <string>Plot Original</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_DQMQ_4">
-                      <property name="text">
-                       <string>Normalize</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_DQMQ_2">
-                      <property name="text">
-                       <string>Plot Difference</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_DQMQ_3">
-                      <property name="text">
-                       <string>Get nDQ</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item row="0" column="0" rowspan="5" colspan="2">
-                  <widget class="QTableWidget" name="table_DQMQ">
-                   <property name="minimumSize">
-                    <size>
-                     <width>400</width>
-                     <height>300</height>
-                    </size>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::CurrentChanged</set>
-                   </property>
-                   <property name="alternatingRowColors">
-                    <bool>true</bool>
-                   </property>
-                   <property name="selectionMode">
-                    <enum>QAbstractItemView::ExtendedSelection</enum>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="columnCount">
-                    <number>4</number>
-                   </property>
-                   <column>
-                    <property name="text">
-                     <string>Time</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>DQ</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Ref</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>nDQ</string>
-                    </property>
-                   </column>
-                  </widget>
-                 </item>
-                 <item row="1" column="2" rowspan="4" colspan="2">
+                <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,4" columnminimumwidth="0,0,0">
+                 <item row="0" column="1">
                   <widget class="QGroupBox" name="groupBox">
                    <property name="minimumSize">
                     <size>
@@ -2967,7 +2803,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>16777215</width>
+                     <width>250</width>
                      <height>16777215</height>
                     </size>
                    </property>
@@ -2975,7 +2811,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <string/>
                    </property>
                    <layout class="QFormLayout" name="formLayout_3">
-                    <item row="0" column="0">
+                    <property name="verticalSpacing">
+                     <number>15</number>
+                    </property>
+                    <item row="4" column="0">
                      <widget class="QTextEdit" name="textEdit_13">
                       <property name="mouseTracking">
                        <bool>false</bool>
@@ -3013,7 +2852,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="1">
+                    <item row="4" column="1">
                      <widget class="QDoubleSpinBox" name="dq_min_3">
                       <property name="enabled">
                        <bool>false</bool>
@@ -3041,7 +2880,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="0">
+                    <item row="5" column="0">
                      <widget class="QTextEdit" name="textEdit_12">
                       <property name="mouseTracking">
                        <bool>false</bool>
@@ -3080,7 +2919,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="1">
+                    <item row="5" column="1">
                      <widget class="QDoubleSpinBox" name="dq_max_3">
                       <property name="enabled">
                        <bool>false</bool>
@@ -3108,7 +2947,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </widget>
                     </item>
-                    <item row="2" column="0">
+                    <item row="6" column="0">
                      <widget class="QTextEdit" name="textEdit_14">
                       <property name="minimumSize">
                        <size>
@@ -3158,7 +2997,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </widget>
                     </item>
-                    <item row="2" column="1">
+                    <item row="6" column="1">
                      <widget class="QDoubleSpinBox" name="power">
                       <property name="enabled">
                        <bool>false</bool>
@@ -3186,7 +3025,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </widget>
                     </item>
-                    <item row="3" column="0">
+                    <item row="7" column="0">
                      <widget class="QTextEdit" name="textEdit_18">
                       <property name="minimumSize">
                        <size>
@@ -3236,7 +3075,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </widget>
                     </item>
-                    <item row="3" column="1">
+                    <item row="7" column="1">
                      <widget class="QDoubleSpinBox" name="noise">
                       <property name="enabled">
                        <bool>true</bool>
@@ -3264,7 +3103,35 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </widget>
                     </item>
-                    <item row="4" column="1">
+                    <item row="0" column="0" colspan="2">
+                     <widget class="QPushButton" name="pushButton_DQMQ_1">
+                      <property name="text">
+                       <string>Plot Original</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0" colspan="2">
+                     <widget class="QPushButton" name="pushButton_DQMQ_4">
+                      <property name="text">
+                       <string>Normalize</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0" colspan="2">
+                     <widget class="QPushButton" name="pushButton_DQMQ_2">
+                      <property name="text">
+                       <string>Plot Difference</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0" colspan="2">
+                     <widget class="QPushButton" name="pushButton_DQMQ_3">
+                      <property name="text">
+                       <string>Get nDQ</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="9" column="0" colspan="2">
                      <spacer name="verticalSpacer_4">
                       <property name="orientation">
                        <enum>Qt::Vertical</enum>
@@ -3277,10 +3144,169 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                      </spacer>
                     </item>
+                    <item row="10" column="0" colspan="2">
+                     <widget class="QPushButton" name="btn_SelectFilesDQMQ">
+                      <property name="text">
+                       <string>Select Files</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="11" column="0" colspan="2">
+                     <widget class="QPushButton" name="btn_Save_2">
+                      <property name="text">
+                       <string>Save</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="12" column="0" colspan="2">
+                     <widget class="QPushButton" name="btn_Load_4">
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Load</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="8" column="0">
+                     <widget class="QTextEdit" name="textEdit_27">
+                      <property name="minimumSize">
+                       <size>
+                        <width>100</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>200</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                      <property name="mouseTracking">
+                       <bool>false</bool>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::NoFocus</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">background: transparent</string>
+                      </property>
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
+                      </property>
+                      <property name="verticalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOff</enum>
+                      </property>
+                      <property name="horizontalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOff</enum>
+                      </property>
+                      <property name="sizeAdjustPolicy">
+                       <enum>QAbstractScrollArea::AdjustToContents</enum>
+                      </property>
+                      <property name="html">
+                       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Shift time:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="textInteractionFlags">
+                       <set>Qt::NoTextInteraction</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="8" column="1">
+                     <widget class="QDoubleSpinBox" name="noise_2">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="prefix">
+                       <string/>
+                      </property>
+                      <property name="suffix">
+                       <string/>
+                      </property>
+                      <property name="decimals">
+                       <number>2</number>
+                      </property>
+                      <property name="minimum">
+                       <double>-100.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>100.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.100000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>0.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </widget>
                  </item>
-                 <item row="0" column="4" rowspan="8">
+                 <item row="0" column="0">
+                  <widget class="QTableWidget" name="table_DQMQ">
+                   <property name="minimumSize">
+                    <size>
+                     <width>400</width>
+                     <height>300</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::CurrentChanged</set>
+                   </property>
+                   <property name="alternatingRowColors">
+                    <bool>true</bool>
+                   </property>
+                   <property name="selectionMode">
+                    <enum>QAbstractItemView::ExtendedSelection</enum>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="columnCount">
+                    <number>4</number>
+                   </property>
+                   <column>
+                    <property name="text">
+                     <string>Time</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>DQ</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>Ref</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>nDQ</string>
+                    </property>
+                   </column>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
                   <widget class="PlotWidget" name="DQMQ_Widget" native="true">
                    <property name="minimumSize">
                     <size>
@@ -3305,7 +3331,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </widget>
              <widget class="QWidget" name="f_GS">
               <attribute name="title">
-               <string>Goldman Shen</string>
+               <string>Spin Diffusion</string>
               </attribute>
               <layout class="QHBoxLayout" name="horizontalLayout_10">
                <property name="spacing">
@@ -3416,8 +3442,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       <property name="minimum">
                        <double>0.000000000000000</double>
                       </property>
+                      <property name="maximum">
+                       <double>10000.000000000000000</double>
+                      </property>
                       <property name="singleStep">
-                       <double>1.000000000000000</double>
+                       <double>0.010000000000000</double>
                       </property>
                       <property name="value">
                        <double>0.000000000000000</double>
@@ -3494,8 +3523,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       <property name="minimum">
                        <double>0.000000000000000</double>
                       </property>
+                      <property name="maximum">
+                       <double>10000.000000000000000</double>
+                      </property>
                       <property name="singleStep">
-                       <double>1.000000000000000</double>
+                       <double>0.010000000000000</double>
                       </property>
                       <property name="value">
                        <double>0.000000000000000</double>
@@ -3718,77 +3750,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </column>
                   </widget>
                  </item>
-                 <item row="1" column="3">
-                  <widget class="QGroupBox" name="groupBox_6">
-                   <property name="minimumSize">
-                    <size>
-                     <width>100</width>
-                     <height>200</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string/>
-                   </property>
-                   <widget class="QCheckBox" name="checkBox_3">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>20</y>
-                      <width>77</width>
-                      <height>22</height>
-                     </rect>
-                    </property>
-                    <property name="text">
-                     <string>to √time</string>
-                    </property>
-                    <property name="checked">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                   <widget class="QRadioButton" name="radioButton_medium">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>100</y>
-                      <width>91</width>
-                      <height>22</height>
-                     </rect>
-                    </property>
-                    <property name="text">
-                     <string>Medium</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                   <widget class="QRadioButton" name="radioButton_long">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>130</y>
-                      <width>91</width>
-                      <height>22</height>
-                     </rect>
-                    </property>
-                    <property name="text">
-                     <string>Long</string>
-                    </property>
-                   </widget>
-                   <widget class="QRadioButton" name="radioButton_short">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>70</y>
-                      <width>91</width>
-                      <height>22</height>
-                     </rect>
-                    </property>
-                    <property name="text">
-                     <string>Short</string>
-                    </property>
-                   </widget>
-                  </widget>
-                 </item>
                  <item row="4" column="3">
                   <widget class="QPushButton" name="btn_Plot_GS">
                    <property name="text">
@@ -3800,7 +3761,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <widget class="QGroupBox" name="groupBox_7">
                    <property name="minimumSize">
                     <size>
-                     <width>160</width>
+                     <width>190</width>
                      <height>0</height>
                     </size>
                    </property>
@@ -4097,6 +4058,77 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </layout>
                   </widget>
                  </item>
+                 <item row="0" column="3" rowspan="2">
+                  <widget class="QGroupBox" name="groupBox_6">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>150</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string/>
+                   </property>
+                   <widget class="QCheckBox" name="checkBox_3">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>20</y>
+                      <width>77</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>to √time</string>
+                    </property>
+                    <property name="checked">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                   <widget class="QRadioButton" name="radioButton_medium">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>100</y>
+                      <width>91</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Medium</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                   <widget class="QRadioButton" name="radioButton_long">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>130</y>
+                      <width>91</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Long</string>
+                    </property>
+                   </widget>
+                   <widget class="QRadioButton" name="radioButton_short">
+                    <property name="geometry">
+                     <rect>
+                      <x>10</x>
+                      <y>70</y>
+                      <width>91</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Short</string>
+                    </property>
+                   </widget>
+                  </widget>
+                 </item>
                 </layout>
                </item>
               </layout>
@@ -4144,42 +4176,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                    <property name="text">
                     <string>Set Default Folder</string>
-                   </property>
-                  </widget>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QGroupBox" name="groupBox_4">
-                  <property name="title">
-                   <string>FFT Procedure</string>
-                  </property>
-                  <widget class="QRadioButton" name="radioButton_2">
-                   <property name="geometry">
-                    <rect>
-                     <x>10</x>
-                     <y>30</y>
-                     <width>83</width>
-                     <height>21</height>
-                    </rect>
-                   </property>
-                   <property name="text">
-                    <string>Hand-made</string>
-                   </property>
-                  </widget>
-                  <widget class="QRadioButton" name="radioButton_3">
-                   <property name="geometry">
-                    <rect>
-                     <x>10</x>
-                     <y>60</y>
-                     <width>111</width>
-                     <height>21</height>
-                    </rect>
-                   </property>
-                   <property name="text">
-                    <string>Python function</string>
-                   </property>
-                   <property name="checked">
-                    <bool>true</bool>
                    </property>
                   </widget>
                  </widget>

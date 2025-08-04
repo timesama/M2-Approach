@@ -481,16 +481,12 @@ def decaying_2exponential(x, a1, b1, a2, b2, c):
 def decaying_3exponential(x, a1, b1, a2, b2, a3, b3, c):
     return a1 * np.exp(-x/b1) + a2 * np.exp(-x/b2) + a3 * np.exp(-x/b3) + c
 
-def fit_exponent(Time, Signal, order):
+def fit_exponent(Time, Signal, order, initial_parameters):
     Time_fit = np.linspace(start=min(Time), stop=max(Time), num=60)
 
     if order == 1:
-        p = [-10, 100, 15]
-        b = ([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
-        popt_, _ = curve_fit(decaying_exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
-
-        # Repeat with initial parameters close to p
-        p = popt_
+        p = initial_parameters
+        b = ([-np.inf, 0, -np.inf], [np.inf, 500000, np.inf])
         popt_, _ = curve_fit(decaying_exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
 
         fitted_curve = decaying_exponential(Time_fit, *popt_)
@@ -509,16 +505,10 @@ def fit_exponent(Time, Signal, order):
         R2 = round(calculate_r_squared(Signal, r2_curve),4)
 
     elif order == 2:
-        b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf])
+        b=([-np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 500000, np.inf, 500000, np.inf])
         try:
-            p1 = [-10, 100, 15, 1000, 20]
-            b1 = ([-np.inf, 0, -np.inf], [np.inf, 50000, np.inf])
-            popt1, _ = curve_fit(decaying_2exponential, Time, Signal, p0 = p1, bounds = b, maxfev=10000000)
-            # Repeat with initial parameters close to p
-            p = popt1
+            p = initial_parameters
             popt_, _ = curve_fit(decaying_2exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
-            # p = [popt1[0], popt1[1], 10, 10, popt1[2]]
-            # popt_, _ = curve_fit(decaying_2exponential, Time, Signal, bounds = b, maxfev=10000000, p0=p)
         except:
             print('No covariance for exp fitting of the 2d order')
             return
@@ -539,11 +529,9 @@ def fit_exponent(Time, Signal, order):
         R2 = round(calculate_r_squared(Signal, r2_curve),4)
 
     elif order ==3:
-        # p = [-10, 10, -10, 50, -10, 100, 15]
-        b=([-np.inf, 0, -np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 50000, np.inf, 50000, np.inf, 50000, np.inf])
-        # popt, pcov = curve_fit(decaying_3exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
-        popt_, _ = curve_fit(decaying_3exponential, Time, Signal, bounds = b, maxfev=10000000)
-
+        p = initial_parameters
+        b=([-np.inf, 0, -np.inf, 0, -np.inf, 0, -np.inf], [np.inf, 500000, np.inf, 500000, np.inf, 500000, np.inf])
+        popt_, _ = curve_fit(decaying_3exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
         fitted_curve = decaying_3exponential(Time_fit, *popt_)
 
         popt = np.round(popt_, 3)
@@ -558,7 +546,7 @@ def fit_exponent(Time, Signal, order):
         r2_curve = decaying_3exponential(Time, *popt_)
         R2 = round(calculate_r_squared(Signal, r2_curve),4)
 
-    return Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3, decrease_order
+    return Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3
 
 def check_tau_values(tau1, tau2, tau3):
     decrease_order = False
@@ -636,7 +624,7 @@ def linear_fit_GS(Time, Signal):
 
     return Time_fit, fitted_curve, sqrtT, R2
 
-    # Eact
+# Eact
 def calculate_Arrhenius_ax(Temperature, T2):
     reciprocal_temperature = 1000/Temperature
     lnT2 = np.log(1/T2)

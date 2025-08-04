@@ -151,9 +151,10 @@ class MainWindow(QMainWindow):
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
         #self.ui.table_SE.currentItemChanged.connect(self.update_xaxis)
-        self.ui.radioButton_4.clicked.connect(self.calculate_relaxation_time)
-        self.ui.radioButton_5.clicked.connect(self.calculate_relaxation_time)
-        self.ui.radioButton_6.clicked.connect(self.calculate_relaxation_time)
+        self.ui.radioButton_4.clicked.connect(self.change_exponential_order)
+        self.ui.radioButton_5.clicked.connect(self.change_exponential_order)
+        self.ui.radioButton_6.clicked.connect(self.change_exponential_order)
+
         self.ui.radioButton_16.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_17.clicked.connect(self.calculate_relaxation_time)
         self.ui.T1T2_fit_from.valueChanged.connect(self.calculate_relaxation_time)
@@ -170,9 +171,6 @@ class MainWindow(QMainWindow):
         self.ui.GS_r2.valueChanged.connect(self.calculate_sqrt_time)
         self.ui.GS_m2.valueChanged.connect(self.calculate_sqrt_time)
 
-        self.ui.radioButton_3.clicked.connect(self.hide_FFT_progress)
-        self.ui.radioButton_2.clicked.connect(self.hide_FFT_progress)
-
         # Connect combobox signals to slots
         self.ui.comboBox.activated.connect(self.update_se_graphs)
         self.ui.comboBox_2.activated.connect(self.plot_fit)
@@ -187,8 +185,6 @@ class MainWindow(QMainWindow):
         self.ui.Eact_end.valueChanged.connect(self.plot_Arr)
 
         self.ui.pushButton_Done.clicked.connect(self.hide_Eact)
-
-
 
 
         # Connect change events
@@ -208,9 +204,6 @@ class MainWindow(QMainWindow):
 
         # Disable buttons initially
         self.disable_buttons()
-        self.ui.progressBar.setHidden(True)
-        self.ui.textEdit_5.setHidden(True)
-        self.ui.textEdit_6.setHidden(True)
         self.ui.groupBox_EAct.setHidden(True)
 
     def check_for_updates(self):
@@ -514,16 +507,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_2.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
-
-    def hide_FFT_progress(self):
-        if self.ui.radioButton_3.isChecked():
-            self.ui.progressBar.setHidden(True)
-            self.ui.textEdit_5.setHidden(True)
-            self.ui.textEdit_6.setHidden(True)
-        else:
-            self.ui.progressBar.setHidden(False)
-            self.ui.textEdit_5.setHidden(False)
-            self.ui.textEdit_6.setHidden(False)
 
     def default_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Select Default Directory")
@@ -1310,6 +1293,25 @@ class MainWindow(QMainWindow):
 
         return dictionary
 
+    def change_exponential_order(self):
+        self.ui.DSB_ExpFitting1.setValue(100)
+        self.ui.DSB_ExpFitting2.setValue(1000)
+        self.ui.DSB_ExpFitting3.setValue(10000)
+        if self.ui.radioButton_4.isChecked():
+            self.ui.DSB_ExpFitting1.setEnabled(True)
+            self.ui.DSB_ExpFitting2.setEnabled(False)
+            self.ui.DSB_ExpFitting3.setEnabled(False)
+        elif self.ui.radioButton_5.isChecked():
+            self.ui.DSB_ExpFitting1.setEnabled(True)
+            self.ui.DSB_ExpFitting2.setEnabled(True)
+            self.ui.DSB_ExpFitting3.setEnabled(False)
+        else:
+            self.ui.DSB_ExpFitting1.setEnabled(True)
+            self.ui.DSB_ExpFitting2.setEnabled(True)
+            self.ui.DSB_ExpFitting3.setEnabled(True)
+
+        self.calculate_relaxation_time()
+
     def calculate_relaxation_time(self):
         table = self.ui.table_T1
         figure = self.ui.T1_Widget_1
@@ -1345,19 +1347,34 @@ class MainWindow(QMainWindow):
         # Time_fit = np.linspace(start=min(Time), stop=max(Time), num=60)
 
         try:
+
+            t1 = int(self.ui.DSB_ExpFitting1.value())
+            t2 = int(self.ui.DSB_ExpFitting2.value())
+            t3 = int(self.ui.DSB_ExpFitting3.value())
+
             if self.ui.radioButton_4.isChecked():
                 order = 1
+                initial_parameters = [Signal[0], t1, 1]
             elif self.ui.radioButton_5.isChecked():
                 order = 2
+                initial_parameters = [Signal[0], t1, Signal[0], t2, 1]
             else:
                 order = 3
+                # p = [-10, 10, -10, 50, -10, 100, 15]
+                initial_parameters = [Signal[0], t1, Signal[0], t2, Signal[0], t3, 1]
+
+
+            Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3 = Cal.fit_exponent(Time, Signal, order, initial_parameters)
+            self.ui.textEdit_error.setText(f"R² {R2}")
+
         except:
-            QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with {order} exponents. Fitting with one.", QMessageBox.Ok)
-            order = 1
+            QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with {order} exponents. Decrease the order of fitting and try again.", QMessageBox.Ok)
+            return
 
-        Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3, decrease_order = Cal.fit_exponent(Time, Signal, order)
-
-        self.ui.textEdit_error.setText(f"R² {R2}")
+        # set taus into boxes
+        self.ui.DSB_ExpFitting1.setValue(tau1)
+        self.ui.DSB_ExpFitting2.setValue(tau2)
+        self.ui.DSB_ExpFitting3.setValue(tau3)
 
         item1 = QTableWidgetItem(str(tau1))
         item2 = QTableWidgetItem(str(tau2))
@@ -1678,7 +1695,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'GS':
             table = self.ui.table_GS
             files = self.selected_GSfiles
-            default_name = 'GoldmanShen_'
+            default_name = 'SpinDiffusion_'
 
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
