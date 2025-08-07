@@ -423,6 +423,7 @@ class MainWindow(QMainWindow):
         global State_multiple_files
         State_multiple_files = True
         dlg = OpenFilesDialog(self)
+        self.clear_list()
 
         if dlg.exec():
             files = []
@@ -567,9 +568,6 @@ class MainWindow(QMainWindow):
         while self.ui.comboBox_4.count()>0:
             self.ui.comboBox_4.removeItem(0)
 
-        self.selected_files_gly = []
-        self.selected_files_empty = []
-
         if self.tab == 'SE':
             files = self.selected_files
             self.ui.SEWidget.clear()
@@ -588,20 +586,26 @@ class MainWindow(QMainWindow):
             return
 
         if self.ui.checkBox_glycerol.isChecked():
-            self.open_select_dialog_glycerol()
-            if len(self.selected_files_gly) < len(files):
-                QMessageBox.warning(self, "Invalid Data", f"The amount of Glycerol files is not the same as sample files. Adding glycerol files automatically.", QMessageBox.Ok)
-                last_file = self.selected_files_gly[-1]
-                num_to_add = len(files) - len(self.selected_files_gly)
-                self.selected_files_gly.extend([last_file] * num_to_add)
+            if self.selected_files_gly == []:
+                self.open_select_dialog_glycerol()
+                if len(self.selected_files_gly) < len(files):
+                    QMessageBox.warning(self, "Invalid Data", f"The amount of Glycerol files is not the same as sample files. Adding glycerol files automatically.", QMessageBox.Ok)
+                    last_file = self.selected_files_gly[-1]
+                    num_to_add = len(files) - len(self.selected_files_gly)
+                    self.selected_files_gly.extend([last_file] * num_to_add)
+        else:
+            self.selected_files_gly = []
 
         if self.ui.checkBox_baseline.isChecked():
-            self.open_select_dialog_baseline()
-            if len(self.selected_files_empty) < len(files):
-                QMessageBox.warning(self, "Invalid Data", f"The amount of Empty files is not the same as sample files. Adding baseline files automatically.", QMessageBox.Ok)
-                last_file = self.selected_files_empty[-1]
-                num_to_add = len(files) - len(self.selected_files_empty)
-                self.selected_files_empty.extend([last_file] * num_to_add)
+            if self.selected_files_empty == []:
+                self.open_select_dialog_baseline()
+                if len(self.selected_files_empty) < len(files):
+                    QMessageBox.warning(self, "Invalid Data", f"The amount of Empty files is not the same as sample files. Adding baseline files automatically.", QMessageBox.Ok)
+                    last_file = self.selected_files_empty[-1]
+                    num_to_add = len(files) - len(self.selected_files_empty)
+                    self.selected_files_empty.extend([last_file] * num_to_add)
+        else:
+            self.selected_files_empty = []
 
         self.disable_buttons()
         self.ui.btn_SelectFiles.setEnabled(False)
