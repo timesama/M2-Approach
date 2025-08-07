@@ -104,18 +104,22 @@ def analysis_time_domain(file_path, file_empty, subtract):
     if subtract == True:
         Time_empty, Real_empty, Imag_empty = read_data(file_empty, 0)
 
-        if len(Time) < len (Time_empty):
-            Real = Real - Real_empty[:Real[-1:]]
-            Imag = Imag - Imag_empty[:Imag[-1:]]
-        elif len(Time)>len(Time_empty):
-            Real = Real[:Real_empty[-1:]] - Real_empty
-            Imag = Imag[:Imag_empty[-1:]] - Imag_empty
-        elif len(Time) == len(Time_empty):
-            Real = Real- Real_empty
-            Imag = Imag - Imag_empty
-        else:
-            print("Couldn't subtract")
-            return
+        # Ensure all inputs are numpy arrays
+        Time = np.array(Time)
+        Time_empty = np.array(Time_empty)
+        Real = np.array(Real)
+        Real_empty = np.array(Real_empty)
+        Imag = np.array(Imag)
+        Imag_empty = np.array(Imag_empty)
+
+        # Determine the minimum length for safe subtraction
+        min_len = min(len(Time), len(Time_empty), len(Real), len(Real_empty), len(Imag), len(Imag_empty))
+
+        # Slice all arrays to the same minimum length
+        Real = Real[:min_len] - Real_empty[:min_len]
+        Imag = Imag[:min_len] - Imag_empty[:min_len]
+        Time = Time[:min_len]
+
     # 2. Crop time below zero
     T_cr, R_cr, I_cr = _crop_time_zero(Time, Real, Imag)
 
