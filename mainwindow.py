@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
         self.setWindowFlags(self.windowFlags() | self.windowFlags().WindowMaximizeButtonHint)
 
         self.selected_files = []
+        self.selected_files_DQ_single = []
         self.selected_files_gly = []
         self.selected_files_empty = []
         self.selected_DQfiles = []
@@ -174,8 +175,8 @@ class MainWindow(QMainWindow):
         self.ui.GS_m2.valueChanged.connect(self.calculate_sqrt_time)
 
         # Connect combobox signals to slots
-        self.ui.comboBox.activated.connect(self.update_se_graphs)
-        self.ui.comboBox_2.activated.connect(self.plot_fit)
+        self.ui.comboBox_SE_chooseY.activated.connect(self.update_se_graphs)
+        self.ui.comboBox_FunctionDQ.activated.connect(self.plot_fit)
         self.ui.comboBox_6.activated.connect(self.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.calculate_sqrt_time)
 
@@ -230,22 +231,28 @@ class MainWindow(QMainWindow):
     def open_url(self):
         open_application('https://github.com/timesama/M2-Approach/releases')
 
-    def update_file(self):
-        i = self.ui.comboBox_4.currentIndex() + 1
+    def update_file(self): # It detects the file ny its position in the table - should not be so. Take the filename from the dictionary
         self.ui.btn_Phasing.setEnabled(True)
 
+        filename = self.ui.comboBox_4.currentText()
+        if self.tab == 'SE':
+            files = self.selected_files
+        else:
+            files = self.selected_files_DQ_single
+
         try:
-            file_path = self.selected_files[i-1]
+            file_path = next((f for f in files if os.path.basename(f) == filename), None)
+            i = next((i for i, f in enumerate(files) if os.path.basename(f) == filename), None)+1
         except:
             return
 
-        if self.ui.checkBox_2.isChecked() and self.ui.checkBox.isChecked():
+        if self.ui.checkBox_glycerol.isChecked() and self.ui.checkBox_baseline.isChecked():
             file_path_gly = self.selected_files_gly[i-1]
             file_path_empty = self.selected_files_empty[i-1]
-        elif self.ui.checkBox_2.isChecked():
+        elif self.ui.checkBox_glycerol.isChecked():
             file_path_gly = self.selected_files_gly[i-1]
             file_path_empty=[]
-        elif self.ui.checkBox.isChecked():
+        elif self.ui.checkBox_baseline.isChecked():
             file_path_gly = []
             file_path_empty = self.selected_files_empty[i-1]
         else:
@@ -253,13 +260,13 @@ class MainWindow(QMainWindow):
             file_path_empty = []
 
         try:
-            self.process_file_data(file_path, file_path_gly,file_path_empty, i)
+            self.process_file_data(file_path, file_path_gly, file_path_empty, i)
         except:
             return
 
         # Update general figures
         if self.tab == 'DQ':
-            self.highlight_row(self.ui.table_DQ, i) 
+            self.highlight_row(self.ui.table_DQ, i)
             self.update_dq_graphs()
         elif self.tab == 'SE':
             self.highlight_row(self.ui.table_SE, i)
@@ -268,13 +275,20 @@ class MainWindow(QMainWindow):
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
 
     def clear_list(self):
-        if self.tab == 'SE' or self.tab == 'DQ':
+        if self.tab == 'SE':
             self.selected_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
             self.ui.table_SE.setRowCount(0)
-            self.ui.table_DQ.setRowCount(0)
             self.ui.SEWidget.clear()
+            self.ui.FFTWidget.clear()
+            self.ui.FidWidget.clear()
+            self.ui.btn_Start.setStyleSheet("background-color: none")
+        elif self.tab == 'DQ':
+            self.selected_files_DQ_single = []
+            self.selected_files_gly = []
+            self.selected_files_empty = []
+            self.ui.table_DQ.setRowCount(0)
             self.ui.DQ_Widget_1.clear()
             self.ui.DQ_Widget_2.clear()
             self.ui.DQ_Widget_3.clear()
@@ -409,28 +423,45 @@ class MainWindow(QMainWindow):
         global State_multiple_files
         State_multiple_files = True
         dlg = OpenFilesDialog(self)
+
         if dlg.exec():
-            self.selected_files = []
+            files = []
             fileNames = dlg.selectedFiles()
-            self.selected_files.extend(fileNames)
+            files.extend(fileNames)
             self.ui.btn_Start.setEnabled(True)
             self.ui.btn_Start.setStyleSheet("background-color: green")
             self.ui.btn_Add.setEnabled(True)
+
+        if self.tab == 'SE':
+            self.selected_files = files
+        else:
+            self.selected_files_DQ_single = files
 
     def add_select_dialog(self):
         global State_multiple_files
         State_multiple_files = True
         dlg = OpenFilesDialog(self)
+
+        if self.tab == 'SE':
+            files = self.selected_files
+        else:
+            files = self.selected_files_DQ_single
+
         if dlg.exec():
             fileNames = dlg.selectedFiles()
-            self.selected_files.extend(fileNames)
+            files.extend(fileNames)
             self.ui.btn_Start.setEnabled(True)
             self.ui.btn_Start.setStyleSheet("background-color: green")
             self.ui.btn_Add.setEnabled(True)
 
+        if self.tab == 'SE':
+            self.selected_files = files
+        else:
+            self.selected_files_DQ_single = files
+
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self)
-        dlg.setWindowTitle("Select Reference Files")
+        dlg.setWindowTitle("Select Glycerol Files")
         if dlg.exec():
             fileNames_gly = dlg.selectedFiles()
             self.selected_files_gly.extend(fileNames_gly)
@@ -439,7 +470,7 @@ class MainWindow(QMainWindow):
 
     def open_select_dialog_baseline(self):
         dlg = OpenFilesDialog(self)
-        dlg.setWindowTitle("Select Reference Files")
+        dlg.setWindowTitle("Select Baseline Files")
         if dlg.exec():
             fileNames_empty = dlg.selectedFiles()
             self.selected_files_empty.extend(fileNames_empty)
@@ -482,8 +513,8 @@ class MainWindow(QMainWindow):
         self.ui.btn_Phasing.setEnabled(False)
         self.ui.dq_min.setEnabled(False)
         self.ui.dq_max.setEnabled(False)
-        self.ui.comboBox.setEnabled(False)
-        self.ui.comboBox_2.setEnabled(False)
+        self.ui.comboBox_SE_chooseY.setEnabled(False)
+        self.ui.comboBox_FunctionDQ.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
         self.ui.radioButton_Log_2.setEnabled(False)
@@ -505,8 +536,8 @@ class MainWindow(QMainWindow):
         self.ui.btn_Load.setEnabled(True)
         self.ui.dq_min.setEnabled(True)
         self.ui.dq_max.setEnabled(True)
-        self.ui.comboBox.setEnabled(True)
-        self.ui.comboBox_2.setEnabled(True)
+        self.ui.comboBox_SE_chooseY.setEnabled(True)
+        self.ui.comboBox_FunctionDQ.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
 
@@ -536,83 +567,85 @@ class MainWindow(QMainWindow):
         while self.ui.comboBox_4.count()>0:
             self.ui.comboBox_4.removeItem(0)
 
-        # Clear Graphs
-        self.ui.SEWidget.clear()
-        self.ui.DQ_Widget_1.clear()
-        self.ui.DQ_Widget_2.clear()
-        self.ui.DQ_Widget_3.clear()
-        self.ui.DQ_Widget_4.clear()
-        self.ui.comboBox.setCurrentIndex(-1)
-        self.ui.comboBox_2.setCurrentIndex(-1)
-        self.ui.textEdit_4.setText("")
-        file_path_empty = self.selected_files_empty
+        self.selected_files_gly = []
+        self.selected_files_empty = []
 
-        legend = pg.LegendItem(offset=(300, 10), parent=self.ui.FidWidget.graphicsItem())
+        if self.tab == 'SE':
+            files = self.selected_files
+            self.ui.SEWidget.clear()
+            self.ui.comboBox_SE_chooseY.setCurrentIndex(-1)
+        else:
+            files = self.selected_files_DQ_single
+            self.ui.DQ_Widget_1.clear()
+            self.ui.DQ_Widget_2.clear()
+            self.ui.DQ_Widget_3.clear()
+            self.ui.DQ_Widget_4.clear()
+            self.ui.textEdit_4.setText("")
+            self.ui.comboBox_FunctionDQ.setCurrentIndex(-1)
 
-        if not self.load_data_and_check_validity((self.selected_files[0])):
+
+        if (len(files)==0 or (not self.load_data_and_check_validity((files[0])))):
             return
 
-        if self.ui.checkBox_2.isChecked():
+        if self.ui.checkBox_glycerol.isChecked():
             self.open_select_dialog_glycerol()
-        if self.ui.checkBox.isChecked():
+            if len(self.selected_files_gly) < len(files):
+                QMessageBox.warning(self, "Invalid Data", f"The amount of Glycerol files is not the same as sample files. Adding glycerol files automatically.", QMessageBox.Ok)
+                last_file = self.selected_files_gly[-1]
+                num_to_add = len(files) - len(self.selected_files_gly)
+                self.selected_files_gly.extend([last_file] * num_to_add)
+
+        if self.ui.checkBox_baseline.isChecked():
             self.open_select_dialog_baseline()
-        for i, file_path in enumerate(self.selected_files, start=1):
-            filename = os.path.basename(file_path)
+            if len(self.selected_files_empty) < len(files):
+                QMessageBox.warning(self, "Invalid Data", f"The amount of Empty files is not the same as sample files. Adding baseline files automatically.", QMessageBox.Ok)
+                last_file = self.selected_files_empty[-1]
+                num_to_add = len(files) - len(self.selected_files_empty)
+                self.selected_files_empty.extend([last_file] * num_to_add)
 
-            self.disable_buttons()
-            self.ui.btn_SelectFiles.setEnabled(False)
-            self.ui.btn_Load.setEnabled(False)
-            self.ui.radioButton.setEnabled(False)
-            self.ui.comboBox_4.setCurrentIndex(-1)
+        self.disable_buttons()
+        self.ui.btn_SelectFiles.setEnabled(False)
+        self.ui.btn_Load.setEnabled(False)
+        self.ui.radioButton.setEnabled(False)
+        self.ui.comboBox_4.setCurrentIndex(-1)
 
-            if self.ui.checkBox.isChecked():
-                if len(self.selected_files_empty) < len(self.selected_files):
-                    QMessageBox.warning(self, "Invalid Data", f"The amount of Empty files is not the same as sample files. Adding files automatically.", QMessageBox.Ok)
-                    last_file = self.selected_files_empty[-1]
-                    num_to_add = len(self.selected_files) - len(self.selected_files_empty)
-                    self.selected_files_empty.extend([last_file] * num_to_add)
+        for i, file_path in enumerate(files, start=1):
+            # filename = os.path.basename(file_path)
 
-                file_path_empty = self.selected_files_empty[0]
-                try:
-                    self.process_file_data(file_path, [], file_path_empty, i)
-                except:
-                    self.analysis_error(file_path)
-                    return
-
-            if self.ui.checkBox_2.isChecked():
-                if len(self.selected_files_gly) < len(self.selected_files):
-                    QMessageBox.warning(self, "Invalid Data", f"The amount of reference files is not the same as sample files. Adding glycerol files automatically.", QMessageBox.Ok)
-                    last_file = self.selected_files_gly[-1]
-                    num_to_add = len(self.selected_files) - len(self.selected_files_gly)
-                    self.selected_files_gly.extend([last_file] * num_to_add)
-
-                file_path_gly = self.selected_files_gly[0]
-                try:
-                    self.process_file_data(file_path, file_path_gly, [], i)
-                except:
-                    self.analysis_error(file_path)
-                    return
+            if self.ui.checkBox_glycerol.isChecked():
+                file_path_gly = self.selected_files_gly[i-1]
             else:
-                try:
-                    self.process_file_data(file_path, [], file_path_empty, i)
-                except:
-                    self.analysis_error(file_path)
-                    return
+                file_path_gly = []
+            if self.ui.checkBox_baseline.isChecked():
+                file_path_empty = self.selected_files_empty[i-1]
+            else:
+                file_path_empty = []
 
-        self.update_legends_and_dq_graphs(legend)
+            try:
+                self.process_file_data(file_path, file_path_gly, file_path_empty, i)
+            except:
+                self.analysis_error(file_path, files)
+                return
+
+        self.update_legends_and_dq_graphs()
         self.ui.btn_Start.setStyleSheet("background-color: none")
 
         if self.ui.radioButton.isChecked():
             QMessageBox.information(self, "Data Saved", f"The figures have been saved to {os.path.dirname(file_path) + '/Result'}", QMessageBox.Ok)
 
-    def analysis_error(self, file_path):
-        QMessageBox.warning(self, "Invalid Data", f"Error in {file_path}. Restarting analysis", QMessageBox.Ok)
-        self.selected_files.remove(file_path)
+    def analysis_error(self, file_path, files):
+        QMessageBox.warning(self, "Invalid Data", f"Couldn't read the {os.path.basename(file_path)}. Deleting the file.", QMessageBox.Ok)
+        files.remove(file_path)
         self.ui.btn_SelectFiles.setEnabled(True)
         self.ui.btn_Start.setStyleSheet("background-color: none")
-        self.analysis()
 
-    def update_legends_and_dq_graphs(self, legend):
+        self.ui.FidWidget.clear()
+        self.ui.FFTWidget.clear()
+        self.ui.btn_Phasing.setEnabled(False)
+        self.enable_buttons()
+        # self.analysis()
+
+    def update_legends_and_dq_graphs(self):
         self.enable_buttons()
 
         if self.tab == 'DQ':
@@ -624,41 +657,47 @@ class MainWindow(QMainWindow):
         # Read name of filename
         filename = os.path.basename(file_path)
 
-        # Read data
-        try:
-            data = np.loadtxt(file_path)
-            x, y, z = data[:, 0], data[:, 1], data[:, 2]
+        # if self.tab == 'SE':
+        #     files = self.selected_files
+        # else:
+        #     files = self.selected_files_DQ_single
 
-        except Exception as e:
-            QMessageBox.warning(self, "Corrupt File", f"Couldn't read the {filename} beacuse {e} Only table data is available", QMessageBox.Ok)
-            self.ui.FidWidget.clear()
-            self.ui.FFTWidget.clear()
-            self.ui.btn_Phasing.setEnabled(False)
-            for file_to_delete in self.selected_files:
-                if file_to_delete == file_path:
-                    self.selected_files.remove(file_path)
-            self.enable_buttons()
-            self.ui.btn_Start.setStyleSheet("background-color: none")
-            return
+        # # Read data
+        # # try:
+        # data = np.loadtxt(file_path)
+        # x, y, z = data[:, 0], data[:, 1], data[:, 2]
 
-        subtract = False
-        if self.ui.checkBox.isChecked():
+        # except Exception as e:
+        #     QMessageBox.warning(self, "Corrupt File", f"Couldn't read the {filename} beacuse {e} Only table data is available", QMessageBox.Ok)
+        #     self.ui.FidWidget.clear()
+        #     self.ui.FFTWidget.clear()
+        #     self.ui.btn_Phasing.setEnabled(False)
+        #     for file_to_delete in files:
+        #         if file_to_delete == file_path:
+        #             files.remove(file_path)
+        #     self.enable_buttons()
+        #     self.ui.btn_Start.setStyleSheet("background-color: none")
+        #     return
+
+        if self.ui.checkBox_baseline.isChecked():
             subtract = True
-
-        if self.ui.checkBox_2.isChecked():
-            # Read data
-            data = np.loadtxt(file_path)
-            x, y, z = data[:, 0], data[:, 1], data[:, 2]
-            # longcomponent
-            Time_r, Re_r, Im_r = Cal.analysis_time_domain(file_path_gly, [], False)
-            Time_s, Re_s, Im_s = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
-            Time, Re, Im = Cal.magnet_inhomogenity_correction(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r)
         else:
-            if self.ui.checkBox_4.isChecked():
-                Time_o, Re_o, Im_o = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
-                Time, Re, Im = Cal.subtract_long_component(Time_o, Re_o, Im_o)
-            else:
-                Time, Re, Im = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
+            subtract = False
+
+        # Read data
+        data = np.loadtxt(file_path)
+        x, y, z = data[:, 0], data[:, 1], data[:, 2]
+
+        Time, Re, Im = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
+
+        if self.ui.checkBox_glycerol.isChecked():
+            # Glycerol
+            Time_r, Re_r, Im_r = Cal.analysis_time_domain(file_path_gly, [], False)
+            Time, Re, Im = Cal.magnet_inhomogenity_correction(Time, Time_r, Re, Re_r, Im, Im_r)
+
+        if self.ui.checkBox_long_component.isChecked():
+            # Longcomponent
+            Time, Re, Im = Cal.subtract_long_component(Time, Re, Im)
 
         Amp = Cal._calculate_amplitude(Re, Im)
         self.update_graphs(Time, Amp, Re, Im, self.ui.FidWidget)
@@ -773,17 +812,17 @@ class MainWindow(QMainWindow):
     def update_se_graphs(self):
 
         x = self.read_column_values(self.ui.table_SE, 0)
-        text = self.ui.comboBox.currentText()
+        text = self.ui.comboBox_SE_chooseY.currentText()
 
-        if text == "SC":  
+        if text == "SC":
             y =  self.read_column_values(self.ui.table_SE, 1)
             self.ui.SEWidget.getAxis('left').setLabel("SC")
 
-        elif text == "M₂":  
+        elif text == "M₂":
             y =  self.read_column_values(self.ui.table_SE, 2)
             self.ui.SEWidget.getAxis('left').setLabel("M₂")
 
-        elif text == "T₂*":  
+        elif text == "T₂*":
             y =  self.read_column_values(self.ui.table_SE, 3)
             self.ui.SEWidget.getAxis('left').setLabel("T₂*")
 
@@ -798,7 +837,7 @@ class MainWindow(QMainWindow):
 
     # Working with DQ graphs
     def update_dq_graphs(self):
-        if len(self.selected_files) > 1:
+        if len(self.selected_files_DQ_single) > 1:
             self.linearization()
             self.plot_fit()
         else:
@@ -900,8 +939,8 @@ class MainWindow(QMainWindow):
             b=([0, 0, 0, 0, 0], [ np.inf, np.inf, np.inf, 1, np.inf])
             self.ui.DQ_Widget_2.getAxis('bottom').setLabel("T₂*")
 
-        text = self.ui.comboBox_2.currentText()
-        
+        text = self.ui.comboBox_FunctionDQ.currentText()
+
         try:
             x_fit = np.arange(0, np.max(x) + 0.001, 0.01)
         except:
@@ -1677,7 +1716,7 @@ class MainWindow(QMainWindow):
             default_name = 'SE_'
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
-            files = self.selected_files
+            files = self.selected_files_DQ_single
             default_name = 'Table_DQ_' + os.path.split(os.path.dirname(files[0]))[1]
         elif self.tab == 'DQ_Temp':
             table = self.ui.table_DQ_2
@@ -1738,7 +1777,7 @@ class MainWindow(QMainWindow):
             self.selected_files = files
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
-            self.selected_files = files
+            self.selected_files_DQ_single = files
         elif self.tab == 'DQ_Temp':
             table = self.ui.table_DQ_2
             self.selected_DQfiles = files
@@ -1834,7 +1873,12 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "Invalid Data Format", f"I can't read the {filename} file, it should have 3 columns exactly, deleting it.", QMessageBox.Ok)
                 self.ui.btn_SelectFiles.setEnabled(True)
                 self.ui.radioButton.setEnabled(True)
-                self.selected_files.clear()
+
+                if self.tab =='SE':
+                    files = self.selected_files
+                else:
+                    files = self.selected_files_DQ_single
+                files.clear()
                 return False
             return True
 
