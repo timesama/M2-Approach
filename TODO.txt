@@ -1,11 +1,5 @@
 TODO list:
-Comprehensive system for subtraction of long component
-In the settings: 
--baseline (empty ampule)
-DQ Mq calculation
+Grouping the files in the SE +, T1T2 and SpinDiffusion for comprehensive graphs
 Icons for buttons
 Units for values!
-
-Clear and delete row btns for FFC
-FFC calculations: use fitted A and CDD to plot equations for t1, t2 and t3 (user defined)
 

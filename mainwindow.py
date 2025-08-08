@@ -10,7 +10,7 @@ from scipy.signal import savgol_filter
 from webbrowser import open as open_application
 from itertools import islice
 import pyqtgraph as pg
-from pyqtgraph import mkPen
+from pyqtgraph import mkPen, ColorMap, mkColor
 import pyqtgraph.exporters
 from ui_Form import Ui_NMR
 from ui_Notification import Ui_Note
@@ -64,6 +64,7 @@ class MainWindow(QMainWindow):
         self.dq_comparison_distribution = {}
         self.tau_dictionary = {}
         self.GS_dictionary = {}
+        self.group_data_SE = {}
         self.tab = None
         self.state_bad_code = False
 
@@ -211,6 +212,19 @@ class MainWindow(QMainWindow):
         self.disable_buttons()
         self.ui.groupBox_EAct.setHidden(True)
 
+        self.tab10_colors = [
+            mkColor('#1f77b4'),  # blue
+            mkColor('#ff7f0e'),  # orange
+            mkColor('#2ca02c'),  # green
+            mkColor('#d62728'),  # red
+            mkColor('#9467bd'),  # purple
+            mkColor('#8c564b'),  # brown
+            mkColor('#e377c2'),  # pink
+            mkColor('#7f7f7f'),  # gray
+            mkColor('#bcbd22'),  # olive
+            mkColor('#17becf')   # cyan
+        ]
+
     def check_for_updates(self):
         current_version = '0.2.1'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
@@ -286,6 +300,7 @@ class MainWindow(QMainWindow):
             self.ui.FFTWidget.clear()
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
+            self.group_data_SE = {}
         elif self.tab == 'DQ':
             self.selected_files_DQ_single = []
             self.selected_files_gly = []
@@ -489,7 +504,14 @@ class MainWindow(QMainWindow):
 
     def open_group_window(self):
         self.group_window = GroupWindow()
+        self.group_window.copy_table_data(self.ui.table_SE)
+        self.group_data_SE = {}
 
+        if self.group_window.exec_() == QDialog.Accepted:
+            self.group_data_SE = self.group_window.group_dict
+            print("Group data received:", self.group_data_SE)
+        else:
+            print("Group window was cancelled.")
 
     def state(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
@@ -667,28 +689,6 @@ class MainWindow(QMainWindow):
         # Read name of filename
         filename = os.path.basename(file_path)
 
-        # if self.tab == 'SE':
-        #     files = self.selected_files
-        # else:
-        #     files = self.selected_files_DQ_single
-
-        # # Read data
-        # # try:
-        # data = np.loadtxt(file_path)
-        # x, y, z = data[:, 0], data[:, 1], data[:, 2]
-
-        # except Exception as e:
-        #     QMessageBox.warning(self, "Corrupt File", f"Couldn't read the {filename} beacuse {e} Only table data is available", QMessageBox.Ok)
-        #     self.ui.FidWidget.clear()
-        #     self.ui.FFTWidget.clear()
-        #     self.ui.btn_Phasing.setEnabled(False)
-        #     for file_to_delete in files:
-        #         if file_to_delete == file_path:
-        #             files.remove(file_path)
-        #     self.enable_buttons()
-        #     self.ui.btn_Start.setStyleSheet("background-color: none")
-        #     return
-
         if self.ui.checkBox_baseline.isChecked():
             subtract = True
         else:
@@ -852,7 +852,46 @@ class MainWindow(QMainWindow):
             return            
 
         self.ui.SEWidget.clear()
-        self.ui.SEWidget.plot(x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
+        self.ui.SEWidget.plot(
+            x, y, pen=None,
+            symbol='o', symbolPen=None,
+            symbolBrush=(255, 0, 0, 255),
+            symbolSize=10
+        )
+
+        if self.group_data_SE:
+            y_index = self.ui.comboBox_SE_chooseY.currentIndex()
+            y_col = y_index + 1
+
+            n_groups = len(self.group_data_SE)
+
+            for i, (group_number, group_rows) in enumerate(self.group_data_SE.items()):
+                group_x = []
+                group_y = []
+
+                for row_data in group_rows:
+                    try:
+                        x_val = float(row_data[0])
+                        y_val = float(row_data[y_col])
+                        group_x.append(x_val)
+                        group_y.append(y_val)
+                    except (ValueError, IndexError):
+                        continue
+
+                sorted_points = sorted(zip(group_x, group_y), key=lambda p: p[0])
+                if len(sorted_points) > 1:
+                    xs, ys = zip(*sorted_points)
+
+                    color = self.tab10_colors[i % len(self.tab10_colors)]
+
+                    self.ui.SEWidget.plot(
+                        xs, ys,
+                        pen={'color': color, 'width': 2},
+                        symbol='o',
+                        symbolBrush=color,
+                        symbolPen=None,
+                        symbolSize=8
+                    )
 
     # Working with DQ graphs
     def update_dq_graphs(self):
@@ -2544,55 +2583,80 @@ class GroupWindow(QDialog):
         super().__init__(parent)
         self.ui = Ui_GroupForm()
         self.ui.setupUi(self)
-        self.ui.pushButton.setEnabled(False)
 
-        if array is not None:
-            self.echo_time = array
+        self.ui.pushButton_group.clicked.connect(self.create_group)
+        self.ui.pushButton_clear.clicked.connect(self.clear)
+        self.ui.pushButton_cancel.clicked.connect(self.close)
+        self.ui.pushButton_done.clicked.connect(self.done_clicked)
 
-        if (data is not None) and (len(data['se'])>1):
-            self.ui.pushButton.setEnabled(True)
-            self.populate_table(data)
+        self.group_counter = 1
+        self.group_dict = {}
 
-        # self.ui.pushButton.clicked.connect(self.form_array_echo_time)
+    def done_clicked(self):
+        print("Done clicked. Sending data back...")
+        self.accept()  # This will close the dialog and return QDialog.Accepted
 
-    def populate_table(self, selected_data):
-        table = self.ui.tableWidget
+    def copy_table_data(self, source_table):
 
-        # idiotic way, but meh
-        total_length = 0
-        for key in selected_data.values():
-            total_length += len(key)
+        rows = source_table.rowCount()
+        cols = source_table.columnCount()
 
-        files_array = list(selected_data.values())
-        files_array = [item for item in files_array if item]
+        self.ui.tableWidget.setRowCount(rows)
+        self.ui.tableWidget.setColumnCount(cols)
 
-        table.setRowCount(total_length)
-        row = 0
-        for value in files_array:
-            for file in value:
-                filename = os.path.basename(file)
-                item = QTableWidgetItem(str(filename))
-                table.setItem(row, 0, item)
+        for col in range(cols):
+            header = source_table.horizontalHeaderItem(0)
+            if header:
+                self.ui.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem(header.text()))
 
-                if self.echo_time == []:
-                    try:
-                        pattern_echo_time = re.compile(r'.*_\s*(\d+)_c\.dat')
-                        match = pattern_echo_time.search(filename)
-                        file_key = match.group(1)
-                        item = QTableWidgetItem(str(file_key))
-                    except:
-                        item = QTableWidgetItem('')
-                else:
-                    item = QTableWidgetItem(self.echo_time[row])
-                table.setItem(row, 1, item)
+        for row in range(rows):
+            for col in range(cols):
+                item = source_table.item(row, col)
+                if item:
+                    self.ui.tableWidget.setItem(row, col, QTableWidgetItem(item.text()))
 
-                row += 1
-        self.ui.tableWidget.resizeColumnsToContents()
-        self.adjust_window_size()
+        # add group column
+        current_cols = self.ui.tableWidget.columnCount()
+        self.ui.tableWidget.setColumnCount(current_cols + 1)
+        self.ui.tableWidget.setHorizontalHeaderItem(current_cols, QTableWidgetItem("Group"))
 
-    def adjust_window_size(self):
-        table_width = self.ui.tableWidget.horizontalHeader().length()
-        self.resize(table_width + 100, 300)
+        self.ui.tableWidget.setSortingEnabled(True)
+
+    def create_group(self):
+        selected_rows = set()
+        for item in self.ui.tableWidget.selectedItems():
+            selected_rows.add(item.row())
+        if not selected_rows:
+            print("No rows selected.")
+            return
+        selected_rows = sorted(selected_rows)
+
+        group_data = []
+        for row in selected_rows:
+            row_data = []
+            for col in range(self.ui.tableWidget.columnCount() - 1):
+                item = self.ui.tableWidget.item(row, col)
+                row_data.append(item.text() if item else "")
+            group_data.append(row_data)
+            self.ui.tableWidget.setItem(row, self.ui.tableWidget.columnCount() - 1,
+                                        QTableWidgetItem(str(self.group_counter)))
+
+
+        self.group_dict[self.group_counter] = group_data
+        print(self.group_dict)
+
+        self.group_counter += 1
+
+    def clear(self):
+        self.group_counter = 1
+        self.group_dict = {}
+
+        rows = self.ui.tableWidget.rowCount()
+        cols = self.ui.tableWidget.columnCount()
+
+        for row in range(rows):
+            self.ui.tableWidget.setItem(row, cols - 1, QTableWidgetItem(""))
+
 
 
 
