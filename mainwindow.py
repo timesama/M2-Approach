@@ -65,6 +65,7 @@ class MainWindow(QMainWindow):
         self.tau_dictionary = {}
         self.GS_dictionary = {}
         self.group_data_SE = {}
+        self.group_data_T1T2 = {}
         self.tab = None
         self.state_bad_code = False
 
@@ -122,6 +123,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_Eact.clicked.connect(self.plot_Arr)
 
         self.ui.pushButton_GroupSE.clicked.connect(self.open_group_window)
+        self.ui.pushButton_GroupT1T2.clicked.connect(self.open_group_window)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -504,14 +506,27 @@ class MainWindow(QMainWindow):
 
     def open_group_window(self):
         self.group_window = GroupWindow()
-        self.group_window.copy_table_data(self.ui.table_SE)
-        self.group_data_SE = {}
+
+        if self.tab == 'SE':
+            self.group_window.copy_table_data(self.ui.table_SE)
+            self.group_data_SE = {}
+        elif self.tab == 'T1T2':
+            self.group_window.copy_table_data(self.ui.table_T1)
+            self.group_data_T1T2 = {}
 
         if self.group_window.exec_() == QDialog.Accepted:
-            self.group_data_SE = self.group_window.group_dict
-            print("Group data received:", self.group_data_SE)
+            data = self.group_window.group_dict
+            print("Group data received:", data)
         else:
             print("Group window was cancelled.")
+
+        if self.tab == 'SE':
+            self.group_data_SE = data
+            self.update_se_graphs()
+
+        elif self.tab == 'T1T2':
+            self.group_data_T1T2 = data
+            self.plot_relaxation_time()
 
     def state(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
@@ -862,8 +877,6 @@ class MainWindow(QMainWindow):
         if self.group_data_SE:
             y_index = self.ui.comboBox_SE_chooseY.currentIndex()
             y_col = y_index + 1
-
-            n_groups = len(self.group_data_SE)
 
             for i, (group_number, group_rows) in enumerate(self.group_data_SE.items()):
                 group_x = []
@@ -1520,7 +1533,7 @@ class MainWindow(QMainWindow):
                 x_axis.append(C)
             except:
                 x_axis.append(number)
-            
+
             try:
                 T = float(table.item(row, column).text())
                 relaxation_time.append(T)
@@ -1529,6 +1542,35 @@ class MainWindow(QMainWindow):
             number = number + 1
 
         graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+
+        if self.group_data_T1T2:
+            for i, (group_number, group_rows) in enumerate(self.group_data_T1T2.items()):
+                group_x = []
+                group_y = []
+
+                for row_data in group_rows:
+                    try:
+                        x_val = float(row_data[2])
+                        y_val = float(row_data[column])
+                        group_x.append(x_val)
+                        group_y.append(y_val)
+                    except (ValueError, IndexError):
+                        continue
+
+                sorted_points = sorted(zip(group_x, group_y), key=lambda p: p[0])
+                if len(sorted_points) > 1:
+                    xs, ys = zip(*sorted_points)
+
+                    color = self.tab10_colors[i % len(self.tab10_colors)]
+
+                    graph.plot(
+                        xs, ys,
+                        pen={'color': color, 'width': 2},
+                        symbol='o',
+                        symbolBrush=color,
+                        symbolPen=None,
+                        symbolSize=8
+                    )
 
     # Working with tables
     def update_DQ_comparison(self):
@@ -2641,10 +2683,8 @@ class GroupWindow(QDialog):
             self.ui.tableWidget.setItem(row, self.ui.tableWidget.columnCount() - 1,
                                         QTableWidgetItem(str(self.group_counter)))
 
-
         self.group_dict[self.group_counter] = group_data
-        print(self.group_dict)
-
+        # print(self.group_dict)
         self.group_counter += 1
 
     def clear(self):
@@ -2656,8 +2696,6 @@ class GroupWindow(QDialog):
 
         for row in range(rows):
             self.ui.tableWidget.setItem(row, cols - 1, QTableWidgetItem(""))
-
-
 
 
 if __name__ == "__main__":
