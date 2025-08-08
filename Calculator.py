@@ -93,6 +93,7 @@ def _cut_beginning(Time, Data, Data2):
     # private api
     Data_amp = _calculate_amplitude(Data, Data2)
     Time_plot = Time[np.argmax(Data_amp):]
+    Time_plot = Time_plot - Time_plot[0]
     Data_plot = Data[np.argmax(Data_amp):]
     Data_plot2 = Data2[np.argmax(Data_amp):]
     return Time_plot, Data_plot, Data_plot2
@@ -191,7 +192,6 @@ def magnet_inhomogenity_correction(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     if len(Time_s) > len(Time_r):
         Time  =   Time_s[:len(Time_r)]
         Re_sc    =   Re_s[:len(Time_r)]
-        Im_sc    =   Im_s[:len(Time_r)]
         Re_rc   =   Re_r
         Im_rc   =   Im_r
     else:
@@ -199,21 +199,10 @@ def magnet_inhomogenity_correction(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
         Re_rc   =   Re_r[:len(Time_s)]
         Im_rc   =   Im_r[:len(Time_s)]
         Re_sc    =   Re_s
-        Im_sc    =   Im_s
 
-    # # normalize to the maximum of the amplitude
-    # Re_sn, Im_sn = _normalize(Re_sc, Im_sc)
-    Re_rn, Im_rn = _normalize(Re_rc, Im_rc)
-
-    #Derive the sample to glycerol
-    # Re_derived = Re_sn/Re_rn
-    # Im_derived = Im_sn/Im_rn
-
-    Re_derived = Re_sc/Re_rn
-    Im_derived = Im_sc/Im_rn
-
-    Re = Re_derived
-    Im = Im_derived
+    Re_rn, _ = _normalize(Re_rc, Im_rc)
+    Re = Re_sc/Re_rn
+    Im = np.zeros(len(Re))
 
     return Time, Re, Im
 
@@ -490,12 +479,20 @@ def _calculate_M2(FFT_real, Frequency, Smooth):
 
     return M2, T2
 
-def calculate_SC(Amplitude):
-    S = np.mean(Amplitude[2:20])
-    L = np.mean(Amplitude[120:160])
-    solid_content = (S-L)/S
-    # solid_content = L
-    return solid_content
+def calculate_SC(Amplitude, times, absolute):
+
+    try:
+        S = np.mean(Amplitude[times[0]:times[1]])
+        L = np.mean(Amplitude[times[2]:times[3]])
+
+        if absolute:
+            solid_content = S
+        else:
+            solid_content = (S-L)/S
+        return solid_content
+    except Exception as e:
+        print(f'Because {e} couldnt calculate SC, making it 0')
+        solid_content = 0
 
 def calculate_DQ_intensity(Time, Amplitude):
     idx_time = np.argmin(np.abs(Time - 4))

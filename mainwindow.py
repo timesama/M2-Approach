@@ -15,6 +15,7 @@ import pyqtgraph.exporters
 from ui_Form import Ui_NMR
 from ui_Notification import Ui_Note
 from ui_PhasingManual import Ui_Phasing as Ui_PhasingManual
+from ui_GroupForm import Ui_GroupForm
 import Calculator as Cal # Mathematical procedures
 
 pg.CONFIG_OPTIONS['background'] = 'w'
@@ -95,7 +96,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFiles_GS.clicked.connect(self.open_select_comparison_files_dialog)
 
-        #self.ui.btn_SelectFiles.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
@@ -119,6 +119,8 @@ class MainWindow(QMainWindow):
         self.ui.btn_Plot_GS.clicked.connect(self.plot_sqrt_time)
 
         self.ui.pushButton_Eact.clicked.connect(self.plot_Arr)
+
+        self.ui.pushButton_GroupSE.clicked.connect(self.open_group_window)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -485,6 +487,10 @@ class MainWindow(QMainWindow):
 
         self.phasing_manual_window.closed.connect(self.after_phasing)
 
+    def open_group_window(self):
+        self.group_window = GroupWindow()
+
+
     def state(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
 
@@ -730,7 +736,16 @@ class MainWindow(QMainWindow):
                 match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
                 temperature = self.extract_info(match)
 
-                SFC = Cal.calculate_SC(Amp)
+                short_from = self.ui.SC_short.value() *2
+                short_to = self.ui.SC_short_2.value() *2
+
+                long_from = self.ui.SC_long.value() *2
+                long_to = self.ui.SC_long_2.value() *2
+
+                absolute = self.ui.radioButton_absolute.isChecked()
+                times = [int(short_from), int(short_to), int(long_from), int(long_to)]
+
+                SFC = Cal.calculate_SC(Amp, times, absolute)
                 self.ui.table_SE.setRowCount(i) # HERE to set the right amount of rows
                 self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
 
@@ -2523,6 +2538,63 @@ class TableCopyEnabler(QWidget):
                 copied_text += "\t".join(row_data) + "\n"
 
         QApplication.clipboard().setText(copied_text.strip())
+
+class GroupWindow(QDialog):
+    def __init__(self, parent=None, data=None, array = None):
+        super().__init__(parent)
+        self.ui = Ui_GroupForm()
+        self.ui.setupUi(self)
+        self.ui.pushButton.setEnabled(False)
+
+        if array is not None:
+            self.echo_time = array
+
+        if (data is not None) and (len(data['se'])>1):
+            self.ui.pushButton.setEnabled(True)
+            self.populate_table(data)
+
+        # self.ui.pushButton.clicked.connect(self.form_array_echo_time)
+
+    def populate_table(self, selected_data):
+        table = self.ui.tableWidget
+
+        # idiotic way, but meh
+        total_length = 0
+        for key in selected_data.values():
+            total_length += len(key)
+
+        files_array = list(selected_data.values())
+        files_array = [item for item in files_array if item]
+
+        table.setRowCount(total_length)
+        row = 0
+        for value in files_array:
+            for file in value:
+                filename = os.path.basename(file)
+                item = QTableWidgetItem(str(filename))
+                table.setItem(row, 0, item)
+
+                if self.echo_time == []:
+                    try:
+                        pattern_echo_time = re.compile(r'.*_\s*(\d+)_c\.dat')
+                        match = pattern_echo_time.search(filename)
+                        file_key = match.group(1)
+                        item = QTableWidgetItem(str(file_key))
+                    except:
+                        item = QTableWidgetItem('')
+                else:
+                    item = QTableWidgetItem(self.echo_time[row])
+                table.setItem(row, 1, item)
+
+                row += 1
+        self.ui.tableWidget.resizeColumnsToContents()
+        self.adjust_window_size()
+
+    def adjust_window_size(self):
+        table_width = self.ui.tableWidget.horizontalHeader().length()
+        self.resize(table_width + 100, 300)
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
