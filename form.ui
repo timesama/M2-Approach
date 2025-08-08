@@ -570,7 +570,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>3</number>
+              <number>0</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -3803,6 +3803,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <height>0</height>
                        </size>
                       </property>
+                      <property name="frame">
+                       <bool>true</bool>
+                      </property>
                       <property name="prefix">
                        <string/>
                       </property>
@@ -4419,6 +4422,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <string>Short</string>
                     </property>
                    </widget>
+                  </widget>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QPushButton" name="pushButton_GroupSD">
+                   <property name="text">
+                    <string>Group</string>
+                   </property>
                   </widget>
                  </item>
                 </layout>

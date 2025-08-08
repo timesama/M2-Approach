@@ -66,6 +66,7 @@ class MainWindow(QMainWindow):
         self.GS_dictionary = {}
         self.group_data_SE = {}
         self.group_data_T1T2 = {}
+        self.group_data_SD = {}
         self.tab = None
         self.state_bad_code = False
 
@@ -124,6 +125,7 @@ class MainWindow(QMainWindow):
 
         self.ui.pushButton_GroupSE.clicked.connect(self.open_group_window)
         self.ui.pushButton_GroupT1T2.clicked.connect(self.open_group_window)
+        self.ui.pushButton_GroupSD.clicked.connect(self.open_group_window)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -329,6 +331,7 @@ class MainWindow(QMainWindow):
             self.ui.table_T1.setRowCount(0)
             self.ui.T1_Widget_1.clear()
             self.ui.T1_Widget_2.clear()
+            self.group_data_T1T2 = {}
         elif self.tab == 'DQMQ':
             self.selected_DQMQfile = []
         elif self.tab == 'GS':
@@ -337,6 +340,7 @@ class MainWindow(QMainWindow):
             self.ui.table_GS.setRowCount(0)
             self.ui.GS_Widget_1.clear()
             self.ui.GS_Widget_2.clear()
+            self.group_data_SD = {}
         elif self.tab == 'Extra':
             pass
 
@@ -513,10 +517,13 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             self.group_window.copy_table_data(self.ui.table_T1)
             self.group_data_T1T2 = {}
+        elif self.tab == 'GS':
+            self.group_window.copy_table_data(self.ui.table_GS)
+            self.group_data_SD = {}
 
         if self.group_window.exec_() == QDialog.Accepted:
             data = self.group_window.group_dict
-            print("Group data received:", data)
+            # print("Group data received:", data)
         else:
             print("Group window was cancelled.")
 
@@ -527,6 +534,10 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             self.group_data_T1T2 = data
             self.plot_relaxation_time()
+
+        elif self.tab == 'GS':
+            self.group_data_SD = data
+            self.plot_sqrt_time()
 
     def state(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
@@ -2194,6 +2205,35 @@ class MainWindow(QMainWindow):
             number = number + 1
 
         graph.plot(x_axis, sqrtT, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+
+        if self.group_data_SD:
+            for i, (group_number, group_rows) in enumerate(self.group_data_SD.items()):
+                group_x = []
+                group_y = []
+
+                for row_data in group_rows:
+                    try:
+                        # Adjust these indexes as per your group data structure
+                        x_val = float(row_data[2])  # e.g., x value
+                        y_val = float(row_data[column])
+                        group_x.append(x_val)
+                        group_y.append(y_val)
+                    except (ValueError, IndexError):
+                        continue
+
+                sorted_points = sorted(zip(group_x, group_y), key=lambda p: p[0])
+                if len(sorted_points) > 1:
+                    xs, ys = zip(*sorted_points)
+                    color = self.tab10_colors[i % len(self.tab10_colors)]
+
+                    graph.plot(
+                        xs, ys,
+                        pen={'color': color, 'width': 2},
+                        symbol='o',
+                        symbolBrush=color,
+                        symbolPen=None,
+                        symbolSize=8
+                    )
 
     # Eact
     def plot_Arr(self):

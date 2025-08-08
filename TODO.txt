@@ -1,5 +1,5 @@
 TODO list:
-Grouping the files in the SE +, T1T2 and SpinDiffusion for comprehensive graphs
+Grouping is finished - up to bug testing
 Icons for buttons
 Units for values!
 
