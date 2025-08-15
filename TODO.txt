@@ -1,5 +1,8 @@
 TODO list:
 Grouping is finished - up to bug testing
+Grouping is working only when X axis is filled.
+X axis in T1T2 gets empty each time when new file added -pisses me off
 Icons for buttons
 Units for values!
+add SE FID and MSE processing as some sort of loading
 

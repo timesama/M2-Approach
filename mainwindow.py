@@ -636,7 +636,10 @@ class MainWindow(QMainWindow):
             self.ui.comboBox_FunctionDQ.setCurrentIndex(-1)
 
 
-        if (len(files)==0 or (not self.load_data_and_check_validity((files[0])))):
+        # if (len(files)==0 or (not self.load_data_and_check_validity((files[0])))):
+        #     return
+
+        if (len(files)==0):
             return
 
         if self.ui.checkBox_glycerol.isChecked():
@@ -669,6 +672,7 @@ class MainWindow(QMainWindow):
 
         for i, file_path in enumerate(files, start=1):
             # filename = os.path.basename(file_path)
+            # print(f"processing {file_path}")
 
             if self.ui.checkBox_glycerol.isChecked():
                 file_path_gly = self.selected_files_gly[i-1]
@@ -683,7 +687,7 @@ class MainWindow(QMainWindow):
                 self.process_file_data(file_path, file_path_gly, file_path_empty, i)
             except:
                 self.analysis_error(file_path, files)
-                return
+                # return
 
         self.update_legends_and_dq_graphs()
         self.ui.btn_Start.setStyleSheet("background-color: none")
