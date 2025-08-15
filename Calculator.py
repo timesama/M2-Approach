@@ -373,6 +373,9 @@ def _exp_apodization(Time):
 
 def _add_zeros(Time, Real, Imaginary, number_of_points):
     # private api
+    while len(Time) > number_of_points:
+        number_of_points = number_of_points*2
+        print(f'Increased the number of points for FFT to be {number_of_points}')
     length_diff = number_of_points - len(Time)
     amount_to_add = np.zeros(length_diff+1)
 
