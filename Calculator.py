@@ -244,7 +244,7 @@ def final_analysis_time_domain(Time, Real, Imaginary, number_of_points):
     return Tim, Fid
 
 def frequency_domain_analysis(FFT, Frequency):
-
+    # TODO: Not used!
     # 8. Simple baseline
     _, Re, _ = _simple_baseline_correction(FFT)
 
@@ -414,7 +414,7 @@ def _calculate_apodization(Real, Freq):
     apodization_function_s = np.exp(-(Freq / sigma_ap) ** 6)
 
     Real_apod = Real * apodization_function_s
-    
+
     return Real_apod
 
 def _calculate_amplitude(Real, Imaginary):

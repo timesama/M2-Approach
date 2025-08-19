@@ -747,6 +747,15 @@ class MainWindow(QMainWindow):
         Time_fid, Fid =  Cal.final_analysis_time_domain(Time, Re, Im, number_of_points)
         Frequency = Cal._calculate_frequency_scale(Time_fid)
 
+        if len(Frequency) < len(Fid):
+            diff = len(Fid) - len(Frequency)
+            df = Frequency[1] - Frequency[0]
+            extra_freq = Frequency[-1] + np.arange(1, diff+1) * df
+            Frequency = np.concatenate([Frequency, extra_freq])
+        elif len(Frequency) > len(Fid):
+            Frequency = Frequency[:len(Fid)]
+
+
         FFT = np.fft.fftshift(np.fft.fft(Fid))
 
         # 8. Simple baseline
