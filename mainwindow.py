@@ -352,9 +352,9 @@ class MainWindow(QMainWindow):
         elif self.tab == 'GS':
             combobox = self.ui.comboBox_7
 
-
-        while combobox.count()>0:
-            combobox.removeItem(0)
+        if self.tab != 'DQMQ' and  self.tab != 'DQ_Temp':
+            while combobox.count()>0:
+                combobox.removeItem(0)
 
     def delete_row(self):
 
@@ -1201,6 +1201,39 @@ class MainWindow(QMainWindow):
             table.setItem(row, 3, QTableWidgetItem(str(round(nDQ[row+1],4))))
         table.resizeColumnsToContents()
 
+    def plot_nDQ_on_Load(self):
+        table = self.ui.table_DQMQ
+        table.resizeColumnsToContents()
+        Time        = []
+        DQ_normal   = []
+        MQ_normal   = []
+        Time0       = []
+        nDQ         = []
+
+        row_count = table.rowCount()
+        for row in range(row_count):
+            Time.append(float(table.item(row, 0).text()))
+            DQ_normal.append(float(table.item(row, 1).text()))
+            MQ_normal.append(float(table.item(row, 2).text()))
+            nDQ.append(float(table.item(row, 3).text()))
+
+        Time = np.array(Time)
+        DQ_normal = np.array(DQ_normal)
+        MQ_normal = np.array(MQ_normal)
+        DQ_normal, MQ_normal, _ = Cal.normalize_mq(DQ_normal, MQ_normal, 'plus')
+        nDQ = np.array(nDQ)
+        nDQ = np.insert(nDQ, 0, 0)
+        Time0 = np.insert(Time, 0, 0)
+
+        figure = self.ui.DQMQ_Widget
+        figure.clear()
+        legend = figure.addLegend()
+        legend.clear()
+        legend = figure.addLegend()
+        figure.plot(Time, DQ_normal, pen='r', name = 'DQ')
+        figure.plot(Time, MQ_normal, pen='b', name = 'Ref')
+        figure.plot(Time0, nDQ, pen='k', symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
+
     # Relaxation time section
     def update_T12_table(self):
         def clean_line(line):
@@ -1933,12 +1966,15 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             self.update_T12_table()
         elif self.tab == 'DQMQ':
-            self.dq_mq_analysis()
+            self.ui.pushButton_DQMQ_1.setEnabled(True)
             self.ui.pushButton_DQMQ_2.setEnabled(True)
-            self.ui.pushButton_DQMQ_3.setEnabled(True)     
+            self.ui.pushButton_DQMQ_3.setEnabled(True)
+            self.ui.pushButton_DQMQ_4.setEnabled(True)
             self.ui.dq_min_3.setEnabled(True)
             self.ui.dq_max_3.setEnabled(True)
             self.ui.power.setEnabled(True)
+            self.plot_nDQ_on_Load()
+
         elif self.tab == 'GS':
             self.update_GS_table()
 
