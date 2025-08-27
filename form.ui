@@ -3310,7 +3310,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        <double>-100.000000000000000</double>
                       </property>
                       <property name="maximum">
-                       <double>100.000000000000000</double>
+                       <double>1000.000000000000000</double>
                       </property>
                       <property name="singleStep">
                        <double>0.100000000000000</double>
@@ -3388,7 +3388,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        <double>-100.000000000000000</double>
                       </property>
                       <property name="maximum">
-                       <double>100.000000000000000</double>
+                       <double>1000.000000000000000</double>
                       </property>
                       <property name="singleStep">
                        <double>0.100000000000000</double>

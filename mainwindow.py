@@ -1618,7 +1618,6 @@ class MainWindow(QMainWindow):
                 table.removeRow(row)
                 del self.selected_DQfiles[row]
 
-                
             item = QTableWidgetItem(filename)
 
             pattern = r'DQ_table_(-?[0-9]+).csv'
@@ -1629,7 +1628,7 @@ class MainWindow(QMainWindow):
 
             table.setItem(row, 0, item)
             table.setItem(row, 1, default_name)
-        
+
         table.resizeColumnsToContents()
 
     def launch(self):
