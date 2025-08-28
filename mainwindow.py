@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re, csv, requests, winreg
 from PySide6.QtWidgets import QWidget,QTableWidgetItem, QTableWidget, QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea
-from PySide6.QtCore import QCoreApplication, Signal, QEvent
+from PySide6.QtCore import QCoreApplication, Signal, QEvent, Qt
 from PySide6.QtGui import QColor, QIcon, QKeySequence
 import numpy as np
 import json
@@ -10,7 +10,7 @@ from scipy.signal import savgol_filter
 from webbrowser import open as open_application
 from itertools import islice
 import pyqtgraph as pg
-from pyqtgraph import mkPen, ColorMap, mkColor
+from pyqtgraph import mkPen, ColorMap, mkColor, InfiniteLine
 import pyqtgraph.exporters
 from ui_Form import Ui_NMR
 from ui_Notification import Ui_Note
@@ -230,7 +230,7 @@ class MainWindow(QMainWindow):
         ]
 
     def check_for_updates(self):
-        current_version = '0.2.1'
+        current_version = '0.2.2'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             # Make a GET request to fetch the latest release data
@@ -1124,8 +1124,8 @@ class MainWindow(QMainWindow):
         time_shift = int(self.ui.DQMQtime_shift.value())
         Time = Time + time_shift
 
-        figure.plot(Time, DQ, pen='r', name = 'DQ')
-        figure.plot(Time, Ref, pen='b', name = 'Ref')
+        figure.plot(Time, DQ, pen=mkPen('r', width=3), name = 'DQ')
+        figure.plot(Time, Ref, pen=mkPen('b', width=3), name = 'Ref')
 
         return Time, DQ, Ref
 
@@ -1141,8 +1141,8 @@ class MainWindow(QMainWindow):
 
         Time, DQ_norm, Ref_norm, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1, noise_level, time_shift)
 
-        figure.plot(Time, DQ_norm, pen='r', name = 'DQ')
-        figure.plot(Time, Ref_norm, pen='b', name = 'Ref')
+        figure.plot(Time, DQ_norm, pen=mkPen('r', width=3), name = 'DQ')
+        figure.plot(Time, Ref_norm, pen=mkPen('b', width=3), name = 'Ref')
 
         self.ui.pushButton_DQMQ_2.setEnabled(True)
         self.ui.pushButton_DQMQ_3.setEnabled(True)
@@ -1164,12 +1164,13 @@ class MainWindow(QMainWindow):
         legend = figure.addLegend()
         time_shift = int(self.ui.DQMQtime_shift.value())
 
-        Time, DQ_norm, Ref_norm, Diff, _, _, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
+        # Time, DQ_norm, Ref_norm, Diff, _, _, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
+        Time, _, _, Diff, DQ_norm, Ref_norm, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
 
-        figure.plot(Time, DQ_norm, pen='r', name = 'DQ')
-        figure.plot(Time, Ref_norm, pen='b', name = 'Ref')
-        figure.plot(Time, Diff, pen='k', name = 'Diff')
-        figure.plot(Time, fitted_curve, pen='m', name = 'fitting')
+        figure.plot(Time, DQ_norm, pen=mkPen('r', width=2), name = 'DQ')
+        figure.plot(Time, Ref_norm, pen=mkPen('b', width=2), name = 'Ref')
+        figure.plot(Time, Diff, pen=mkPen('k', width=3), name = 'Diff')
+        figure.plot(Time, fitted_curve, pen=mkPen('m', width=3), name = 'fitting')
 
         self.ui.pushButton_DQMQ_2.setEnabled(True)
         self.ui.pushButton_DQMQ_3.setEnabled(True)
@@ -1192,9 +1193,13 @@ class MainWindow(QMainWindow):
 
         Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing)
 
-        figure.plot(Time, DQ_normal, pen='r', name = 'DQ')
-        figure.plot(Time, MQ_normal, pen='b', name = 'Ref')
-        figure.plot(Time0, nDQ, pen='k', symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
+        hline = InfiniteLine(pos=0.5, angle=0, pen=mkPen(color=(200, 200, 255), width=2, style=Qt.DashLine))
+        figure.addItem(hline)
+
+        figure.plot(Time, DQ_normal, pen=mkPen('r', width=3), name = 'DQ')
+        figure.plot(Time, MQ_normal, pen=mkPen('b', width=3), name = 'Ref')
+        figure.plot(Time0, nDQ, pen=mkPen('k', width=3), symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
+
 
         num_rows  = len(Time)
         for row in range(num_rows):
@@ -1230,9 +1235,9 @@ class MainWindow(QMainWindow):
         legend = figure.addLegend()
         legend.clear()
         legend = figure.addLegend()
-        figure.plot(Time, DQ_normal, pen='r', name = 'DQ')
-        figure.plot(Time, MQ_normal, pen='b', name = 'Ref')
-        figure.plot(Time0, nDQ, pen='k', symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
+        figure.plot(Time, DQ_normal, pen=mkPen('r', width=3), name = 'DQ')
+        figure.plot(Time, MQ_normal, pen=mkPen('b', width=3), name = 'Ref')
+        figure.plot(Time0, nDQ, pen=mkPen('k', width=3), symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
 
     # Relaxation time section
     def update_T12_table(self):
