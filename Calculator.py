@@ -47,12 +47,8 @@ def normalize_mq(DQ, MQ, state):
 
 def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None):
 
-    # def exponent(x, a, b, c):
-    #     return a * np.exp(-power*(x/b)) + c
-
     def exponent(x, a, b, c):
-        return a * np.exp(-power*(x/b)) + c
-
+        return a * np.exp(- ((x / (b + 1e-12)) ** power) ) + c
 
     # read files
     Time, DQ, Ref = read_data(file_path, 1)
@@ -70,10 +66,13 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None
     Time_cut = Time[idx_min:idx_max+1]
     Diff_cut = Diff[idx_min:idx_max+1]
 
-    a0 = max(Diff_cut) - min(Diff_cut)
-    b0 = max(1e-6, (Time_cut[-1] - Time_cut[0]) / 4.0)
-    c0 = np.median(Diff_cut[-5:])
-    initial_params = [a0, b0, c0]
+    try:
+        a0 = max(Diff_cut) - min(Diff_cut)
+        b0 = max(1e-6, (Time_cut[-1] - Time_cut[0]) / 4.0)
+        c0 = np.median(Diff_cut[-5:])
+        initial_params = [a0, b0, c0]
+    except:
+        initial_params = [(0, 10, 0)]
 
     popt, _ = curve_fit(exponent, Time_cut, Diff_cut, p0 = initial_params, maxfev=10000000)
     fitted_curve = exponent(Time, *popt)
@@ -85,7 +84,7 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None
     DQ_normal, MQ_normal, _ = normalize_mq(DQ_norm, MQ, 'plus')
 
     # Calculate nDQ
-    additive_function = _exp_apodization(Time, Time_cut[0], noise_level)
+    additive_function = _exp_apodization(Time, fit_from, noise_level)
     nDQ = (DQ_normal+noise_level*additive_function)/(DQ_normal+MQ_normal+2*noise_level*additive_function)
 
     nDQ = np.insert(nDQ, 0, 0)
