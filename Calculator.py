@@ -47,31 +47,46 @@ def normalize_mq(DQ, MQ, state):
 
 def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None):
 
+    # def exponent(x, a, b, c):
+    #     return a * np.exp(-power*(x/b)) + c
+
     def exponent(x, a, b, c):
         return a * np.exp(-power*(x/b)) + c
 
+
+    # read files
     Time, DQ, Ref = read_data(file_path, 1)
     Time = Time + time_shift
 
     power = p
 
+    # Normalize data: data norm = data/max data
+    # Diff here is MQ norm - DQ norm
     DQ_norm, Ref_norm, Diff = normalize_mq(DQ, Ref, 'minus')
 
+    # Fit the difference MQ-DQ with exponent
     idx_min = _find_nearest(Time, fit_from)
     idx_max = _find_nearest(Time, fit_to)
     Time_cut = Time[idx_min:idx_max+1]
     Diff_cut = Diff[idx_min:idx_max+1]
 
-    popt, _ = curve_fit(exponent, Time_cut, Diff_cut, p0=[(0, 10, 0)], maxfev=10000000)
+    a0 = max(Diff_cut) - min(Diff_cut)
+    b0 = max(1e-6, (Time_cut[-1] - Time_cut[0]) / 4.0)
+    c0 = np.median(Diff_cut[-5:])
+    initial_params = [a0, b0, c0]
+
+    popt, _ = curve_fit(exponent, Time_cut, Diff_cut, p0 = initial_params, maxfev=10000000)
     fitted_curve = exponent(Time, *popt)
 
     # Subtract difference function from Ref
     MQ = Ref_norm - fitted_curve
 
+    # DQ normal = DQ_norm, but the MQ normal is the new normalization of the MQ, whith subtraction of fitted difference betwen initial MQ and DQ.
     DQ_normal, MQ_normal, _ = normalize_mq(DQ_norm, MQ, 'plus')
 
-    additive_function = _exp_apodization(Time)
-    nDQ = (DQ_normal+noise_level*additive_function)/(DQ_normal+MQ+2*noise_level*additive_function)
+    # Calculate nDQ
+    additive_function = _exp_apodization(Time, Time_cut[0], noise_level)
+    nDQ = (DQ_normal+noise_level*additive_function)/(DQ_normal+MQ_normal+2*noise_level*additive_function)
 
     nDQ = np.insert(nDQ, 0, 0)
     Time0 = np.insert(Time, 0, 0)
@@ -364,12 +379,14 @@ def _apodization(Time, Real, Imaginary):
     Im_ap = Imaginary * apodization_function
     return Re_ap, Im_ap
 
-def _exp_apodization(Time):
-    # private api
-    Time_end = Time[-1]+10
-    noise = Time_end*0.3
-    additive_function =  0.5*np.exp(((Time - Time_end) / noise) ** 3)
-    return additive_function
+def _exp_apodization(Time, Time_fitFrom, noise_level):
+    noise_tau = Time_fitFrom * 0.19 if Time_fitFrom != 0 else 1e-9
+    exp_function = np.empty_like(Time)
+    before = Time < Time_fitFrom
+    exp_function[before] = np.exp( ((Time[before] - Time_fitFrom) / noise_tau) ** 3 )
+    exp_function[~before] = 1.0 - np.exp( ((Time_fitFrom - Time[~before]) / noise_tau) ** 3 )
+    return 0.5 * noise_level * exp_function
+
 
 def _add_zeros(Time, Real, Imaginary, number_of_points):
     # private api
