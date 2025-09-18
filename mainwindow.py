@@ -1246,6 +1246,9 @@ class MainWindow(QMainWindow):
         figure.plot(Time0, nDQ, pen=mkPen('k', width=3), symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
 
     # Relaxation time section
+    # A good example ofr bad architecture with no thoughts of scaling whatsoever.
+    # Will i learn?
+    # Lol, no
     def update_T12_table(self):
         def clean_line(line):
             while '\t\t' in line:
@@ -1304,7 +1307,49 @@ class MainWindow(QMainWindow):
                     for file_to_delete in selected_files:
                         if file_to_delete == file:
                             selected_files.remove(file)
-            elif os.path.splitext(selected_files[0])[1] == '.txt': # Reading T1 recorded at different time regions
+
+            elif os.path.splitext(selected_files[0])[1] == '.csv': # Reading T1 recorded transformed from relaxyzer by prerecorded FIDs - this is a VERY bad way to solve things...
+                self.state_bad_code = False
+                table.setRowCount(len(selected_files))
+                x_axis = []
+                csv_pattern =  r'_(\-?\d+)(?=\.csv$)'
+                for row, file in zip(range(table.rowCount()), selected_files):
+                    current_file = os.path.basename(file)
+                    Time = []
+                    Signal = []
+
+                    try:
+                        x_axis = re.search(csv_pattern, current_file).group(1)
+                    except:
+                        x_axis = row
+
+                    dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
+                    data = []
+                    with open(file) as f:
+                        for line in f:
+                            parts = line.strip().split(",")
+
+                            time_value = float(parts[0])
+                            signal_value = float(parts[1])
+                            Time.append(time_value)
+                            Signal.append(signal_value)
+
+                    # fill dictionary
+                    dictionary[file]["X Axis"].append(x_axis)
+                    dictionary[file]["Time"].extend(Time)
+                    dictionary[file]["Signal"].extend(Signal)
+
+                    # fill table
+                    Folder = QTableWidgetItem(file)
+                    Filename = QTableWidgetItem(current_file)
+                    Temp = QTableWidgetItem(str(x_axis))
+                    table.setItem(row, 0, Folder)
+                    table.setItem(row, 1, Filename)
+                    table.setItem(row, 2, Temp)
+
+                    combobox.addItem(f"{current_file}")
+
+            elif os.path.splitext(selected_files[0])[1] == '.txt': # Reading T1 recorded at different time regions - this is a VERY bad way to solve things...
                 self.state_bad_code = False
                 table.setRowCount(len(selected_files*4))
                 x_axis = []
