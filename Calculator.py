@@ -318,6 +318,38 @@ def _time_domain_phase(Real, Imaginary):
 
     return Re, Im
 
+def fit_fft_with_voigh(Frequency, FFT):
+    spectrum = np.abs(FFT)
+    # coarse center guess from max
+    idx_peak = np.argmax(spectrum)
+    mu0 = Frequency[idx_peak]
+
+    # window in Hz
+    window = (Frequency[-1] - Frequency[0]) * 0.1  # 10% of full span
+    mask = (Frequency >= (mu0 - window/2)) & (Frequency <= (mu0 + window/2))
+
+    x = Frequency[mask]
+    y = spectrum[mask]
+
+    #  initial guesses
+    cen0 = Frequency[idx_peak]   # center guess
+    amp0 = np.max(spectrum)
+    wid0 = (Frequency[-1] - Frequency[0]) / 50  # +-200 khz
+    frac0 = 0.5     # start with equal mix
+    y00 = 0
+
+    p0 = [amp0, cen0, wid0, frac0, y00]
+
+    # amplitude, center, width, fraction, y0
+    lower = [0, Frequency[0], (Frequency[1]-Frequency[0]), 0, -10]
+    upper = [np.inf, Frequency[-1], (Frequency[-1]-Frequency[0]), 1, 10]
+
+    #  fit
+    popt, pcov = curve_fit(voigt, x, y, bounds=(lower, upper), p0=p0, maxfev=20000)
+
+    return popt
+
+
 def _adjust_frequency(Frequency, Re, Im):
     # private api
     # Create complex FID
@@ -330,8 +362,13 @@ def _adjust_frequency(Frequency, Re, Im):
     if len(Frequency) != len(FFT):
         Frequency = np.linspace(Frequency[0], Frequency[-1], len(FFT))
 
-    # Find index of max spectrum (amplitude)
-    index_max = np.argmax(FFT)
+    popt_fitting = []
+    try:
+        popt_fitting = fit_fft_with_voigh(Frequency, FFT)
+        index_max = np.argmax(voigt(Frequency, *popt_fitting))
+    except:
+        print('The fitting of the FFT to adjust the frequency couldnt be done. Using simple adjustemnt')
+        index_max = np.argmax(FFT)
 
     # Find index of zero (frequency)
     index_zero = _find_nearest(Frequency, 0)
@@ -355,10 +392,11 @@ def _adjust_frequency(Frequency, Re, Im):
     Re_shifted = np.real(Fid_shifted)
     Im_shifted = np.imag(Fid_shifted)
 
+    # plt.plot(Frequency, FFT, label="original")
+    # plt.plot(Frequency, FFT_shifted, label="shifted")
+    # plt.plot(Frequency, voigt(Frequency, *popt_fitting), 'r--', label="Gaussian fit")
 
-    plt.plot(Frequency, FFT_shifted)
-    plt.plot(Frequency, FFT)
-    plt.show()
+    # plt.show()
 
     return Re_shifted, Im_shifted
 
