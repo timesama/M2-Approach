@@ -241,7 +241,13 @@ class MainWindow(QMainWindow):
 
             # Compare the versions
             if latest_version != current_version:
-                result = QMessageBox.information(self, "New Relaxyzer Available", f"A new version (Relaxyzer {latest_version}) is available.\nWould you like to update?", QMessageBox.Yes | QMessageBox.No)
+                msg = QMessageBox(self)
+                msg.setIcon(QMessageBox.Information)
+                msg.setWindowTitle("New Relaxyzer Available")
+                msg.setText(f"A new version (Relaxyzer {latest_version}) is available.\nWould you like to update?")
+                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                msg.setWindowFlags(msg.windowFlags() | Qt.WindowStaysOnTopHint)
+                result = msg.exec_()
                 if result == QMessageBox.Yes:
                     self.open_url()
 
