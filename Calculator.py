@@ -151,10 +151,11 @@ def analysis_time_domain(file_path, file_empty, subtract):
     R_sh, I_sh = _adjust_frequency(Frequency, R_ph, I_ph)
 
     # 5 Again Phase
-    R_ph2, I_ph2 = _time_domain_phase(R_sh, I_sh)
+    # SO. I turned it off. BECAUSE of the PAKE shape. -_-)
+    # R_ph2, I_ph2 = _time_domain_phase(R_sh, I_sh)
 
     # Again frequency
-    R_sh, I_sh = _adjust_frequency(Frequency, R_ph2, I_ph2)
+    # R_sh, I_sh = _adjust_frequency(Frequency, R_ph2, I_ph2)
 
 
     return T_cr, R_sh, I_sh
@@ -247,7 +248,6 @@ def long_component(Time_s, Time_r, Re_s, Re_r, Im_s, Im_r):
     return Time_cropped, Re_n, Im_n
 
 def final_analysis_time_domain(Time, Real, Imaginary, number_of_points):
-    # TODO: Not used!
     # 5. Apodize the time-domain
     Re_ap, Im_ap = _apodization(Time, Real, Imaginary)
 
@@ -338,20 +338,27 @@ def _adjust_frequency(Frequency, Re, Im):
 
     # Find difference
     delta_index = index_max - index_zero
+    # print(f'The max is {Frequency[index_max]}')
 
     # To avoid over correction
     if delta_index == 0:
+        print('The frequency was not adjusted, it is already perfect')
         return Re, Im
 
     # Shift the spectra (amplitude) by the difference in indices
     FFT_shifted = np.concatenate((FFT[delta_index:], FFT[:delta_index]))
 
     # iFFT
-    Fid_shifted = np.fft.ifft(np.fft.fftshift(FFT_shifted))
+    Fid_shifted = np.fft.ifft(np.fft.ifftshift(FFT_shifted))
 
     # Define Real, Imaginary and Amplitude
     Re_shifted = np.real(Fid_shifted)
     Im_shifted = np.imag(Fid_shifted)
+
+
+    plt.plot(Frequency, FFT_shifted)
+    plt.plot(Frequency, FFT)
+    plt.show()
 
     return Re_shifted, Im_shifted
 
@@ -385,7 +392,6 @@ def _exp_apodization(Time, Time_fitFrom, noise_level):
     exp_function[before] = np.exp( ((Time[before] - Time_fitFrom) / noise_tau) ** 3 )
     exp_function[~before] = 1.0 - np.exp( ((Time_fitFrom - Time[~before]) / noise_tau) ** 3 )
     return 0.5 * noise_level * exp_function
-
 
 def _add_zeros(Time, Real, Imaginary, number_of_points):
     # private api

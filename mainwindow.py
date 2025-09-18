@@ -1298,7 +1298,6 @@ class MainWindow(QMainWindow):
                     for file_to_delete in selected_files:
                         if file_to_delete == file:
                             selected_files.remove(file)
-
             elif os.path.splitext(selected_files[0])[1] == '.txt': # Reading T1 recorded at different time regions
                 self.state_bad_code = False
                 table.setRowCount(len(selected_files*4))
@@ -2569,7 +2568,7 @@ class PhasingManual(QDialog):
 
     def smooth(self,y,):
         new_array = savgol_filter(y, window_length=self.Smooth, polyorder=1)
-        print(self.Smooth)
+        # print(self.Smooth)
 
         return new_array
 
