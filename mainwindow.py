@@ -1740,7 +1740,7 @@ class MainWindow(QMainWindow):
 
             item = QTableWidgetItem(filename)
 
-            pattern = r'DQ_table_(-?[0-9]+).csv'
+            pattern = r'Table_DQ_(-?[0-9]+).csv'
             try:
                 default_name = QTableWidgetItem(str(re.search(pattern, filename).group(1)))
             except:
@@ -1777,20 +1777,16 @@ class MainWindow(QMainWindow):
                 'X axis': [], 'Center': [], 'FWHM': [], 'Lorentz ratio': [], 
                 'Fitting type': [], 'T2 limit': []}
 
-        #legend = self.ui.DQ_Widget_3.addLegend()
-        legend1 = self.ui.DQ_Widget_4.addLegend()  # Get the legend object
+        legend = self.ui.DQ_Widget_3.addLegend()
         self.ui.DQ_Widget_6.clear()
         self.ui.DQ_Widget_5.clear()
         self.ui.DQ_Widget_4.clear()
         self.ui.DQ_Widget_3.clear()
 
-        if legend1 is not None:
-            #legend.clear()
-            legend1.clear()
-            #self.ui.DQ_Widget_3.addLegend()
-            self.ui.DQ_Widget_4.addLegend()
-            #legend.setPen((0, 0, 0))  
-            legend1.setPen((0, 0, 0))
+        if legend is not None:
+            legend.clear()
+            self.ui.DQ_Widget_3.addLegend()
+            legend.setPen((0, 0, 0))  
 
         # This is a mess :(
 
@@ -1814,8 +1810,6 @@ class MainWindow(QMainWindow):
                     continue
 
             # Initial arrays
-
-
             dq_time = data[:,0] #DQ filtering time
             dq = data[:,1] #DQ amlitude
             t2 = data[:,2] #T2*
@@ -1895,8 +1889,8 @@ class MainWindow(QMainWindow):
             if coeff is not None:
                 x_line = np.arange(0, 105.1, 0.1)
                 y_line = np.polyval(coeff, x_line)
-                
-                self.ui.DQ_Widget_3.plot(x_line, y_line, pen=color) 
+
+                self.ui.DQ_Widget_3.plot(x_line, y_line, pen=color)
 
             self.dq_comparison_distribution['File name'].append(file)
             self.dq_comparison_distribution['X axis'].append(file_name)
