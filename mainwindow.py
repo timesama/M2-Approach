@@ -134,10 +134,8 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.SEWidget, "Temperature, °C", "Choose", "")
         self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_2, "X axis", "Norm. DQ Intensity", "")
-        self.setup_graph(self.ui.DQ_Widget_3, "DQ Filtering Time", "T₂*", "")
-        self.setup_graph(self.ui.DQ_Widget_4, "", "Norm. DQ Intensity", "")
-        self.setup_graph(self.ui.DQ_Widget_5, "", "Center", "")
-        self.setup_graph(self.ui.DQ_Widget_6, "Name", "FWHM", "")
+        self.setup_graph(self.ui.DQ_Widget_4, "T₂*", "Norm. DQ Intensity", "")
+        self.setup_graph(self.ui.DQ_Widget_5, "X axis", "Center", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time, ms", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
@@ -202,11 +200,11 @@ class MainWindow(QMainWindow):
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
         self.ui.dq_max.valueChanged.connect(self.update_dq_graphs)
 
-        self.ui.dq_min_2.valueChanged.connect(self.update_DQ_comparison_plot)
-        self.ui.dq_max_2.valueChanged.connect(self.update_DQ_comparison_plot)
+        # self.ui.dq_min_2.valueChanged.connect(self.update_DQ_comparison_plot)
+        # self.ui.dq_max_2.valueChanged.connect(self.update_DQ_comparison_plot)
 
-        self.ui.radioButton_Log_2.clicked.connect(self.update_DQ_comparison_plot) # this is a bad coding
-        self.ui.comboBox_5.activated.connect(self.update_DQ_comparison_plot)
+        # self.ui.radioButton_Log_2.clicked.connect(self.update_DQ_comparison_plot) # this is a bad coding
+        # self.ui.comboBox_5.activated.connect(self.update_DQ_comparison_plot)
         self.ui.comboBox_4.activated.connect(self.update_file)
 
         self.ui.dq_min_3.valueChanged.connect(self.plot_diff)
@@ -326,7 +324,6 @@ class MainWindow(QMainWindow):
             self.ui.table_DQ.setRowCount(0)
             self.ui.DQ_Widget_1.clear()
             self.ui.DQ_Widget_2.clear()
-            self.ui.DQ_Widget_3.clear()
             self.ui.DQ_Widget_4.clear()
             self.ui.FFTWidget.clear()
             self.ui.FidWidget.clear()
@@ -335,10 +332,8 @@ class MainWindow(QMainWindow):
             self.selected_DQfiles = []
             self.dq_t2 = {}
             self.ui.table_DQ_2.setRowCount(0)
-            self.ui.DQ_Widget_3.clear()
             self.ui.DQ_Widget_4.clear()
             self.ui.DQ_Widget_5.clear()
-            self.ui.DQ_Widget_6.clear()
         elif self.tab == 'T1T2':
             self.selected_T1files = []
             self.tau_dictionary = {}
@@ -588,10 +583,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_FunctionDQ.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
-        self.ui.radioButton_Log_2.setEnabled(False)
-        self.ui.comboBox_5.setEnabled(False)
-        self.ui.dq_min_2.setEnabled(False)
-        self.ui.dq_max_2.setEnabled(False)
         self.ui.btn_Launch.setEnabled(False)
         self.ui.btn_Plot1.setEnabled(False)
         self.ui.pushButton_DQMQ_1.setEnabled(False)
@@ -646,14 +637,9 @@ class MainWindow(QMainWindow):
             files = self.selected_files_DQ_single
             self.ui.DQ_Widget_1.clear()
             self.ui.DQ_Widget_2.clear()
-            self.ui.DQ_Widget_3.clear()
             self.ui.DQ_Widget_4.clear()
             self.ui.textEdit_4.setText("")
             self.ui.comboBox_FunctionDQ.setCurrentIndex(-1)
-
-
-        # if (len(files)==0 or (not self.load_data_and_check_validity((files[0])))):
-        #     return
 
         if (len(files)==0):
             return
@@ -694,8 +680,6 @@ class MainWindow(QMainWindow):
             self.window_array = np.array([])
 
         for i, file_path in enumerate(files, start=1):
-            # filename = os.path.basename(file_path)
-            # print(f"processing {file_path}")
 
             if self.ui.checkBox_glycerol.isChecked():
                 file_path_gly = self.selected_files_gly[i-1]
@@ -780,11 +764,6 @@ class MainWindow(QMainWindow):
 
 
         FFT = np.fft.fftshift(np.fft.fft(Fid))
-
-        # if self.ui.checkBox_Smooth.isChecked():
-        #     RealPart = savgol_filter(np.real(FFT), 1000, polyorder=1)
-        #     ImaginaryPart = savgol_filter(np.imag(FFT), 1000, polyorder=1)
-        #     FFT = np.array(RealPart + 1j * ImaginaryPart)
 
         if not self.window_array.size == 0:
             try:
@@ -890,7 +869,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'GS':
             figure = self.ui.GS_Widget_2
         elif self.tab == 'DQ_Temp':
-            figure = self.ui.DQ_Widget_6
+            figure = self.ui.DQ_Widget_5
         else:
             return
 
@@ -1726,7 +1705,7 @@ class MainWindow(QMainWindow):
             foldername = os.path.dirname(parent_folder)
             filename = os.path.basename(parent_folder)
 
-            try: 
+            try:
                 data = np.loadtxt(parent_folder, delimiter=',')
                 if data.shape[1] < 3:
                     QMessageBox.warning(self, "Invalid Data", f"The file {foldername} does not have at least 3 columns and will be removed from the table and file list.", QMessageBox.Ok)
@@ -1753,18 +1732,13 @@ class MainWindow(QMainWindow):
 
     def launch(self):
         try:
-            self.ui.radioButton_Log_2.setEnabled(True)
-            self.ui.comboBox_5.setEnabled(True)
-            self.ui.dq_min_2.setEnabled(True)
-            self.ui.dq_max_2.setEnabled(True)
-
             self.dq_t2 = {}
             for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
                 # Read data from file
                 data = np.loadtxt(parent_folder, delimiter=',')
 
                 # Read the DQ filtering time, DQ amlitude and corresponding T2*
-                dq_t2 = data[:, [0, 1, 3]]
+                dq_t2 = data[:, [4, 5]]
                 self.dq_t2[row] = dq_t2
             self.update_DQ_comparison_plot()
         except Exception as e:
@@ -1777,21 +1751,26 @@ class MainWindow(QMainWindow):
                 'X axis': [], 'Center': [], 'FWHM': [], 'Lorentz ratio': [], 
                 'Fitting type': [], 'T2 limit': []}
 
-        legend = self.ui.DQ_Widget_3.addLegend()
-        self.ui.DQ_Widget_6.clear()
+        legend = self.ui.DQ_Widget_4.addLegend()
+        legend_functionsCenters = self.ui.DQ_Widget_5.addLegend()
         self.ui.DQ_Widget_5.clear()
         self.ui.DQ_Widget_4.clear()
-        self.ui.DQ_Widget_3.clear()
+        self.ui.DQ_Widget_polyFit.clear()
+        self.ui.DQ_Widget_derivativeCenter.clear()
 
         if legend is not None:
             legend.clear()
-            self.ui.DQ_Widget_3.addLegend()
-            legend.setPen((0, 0, 0))  
+            legend.setPen((0, 0, 0)) 
+
+        if legend_functionsCenters is not None:
+            legend_functionsCenters.clear()
+            legend_functionsCenters.setPen((0, 0, 0)) 
 
         # This is a mess :(
 
-        center = []
-        weight = []
+        center_g = []
+        center_l = []
+        center_v = []
         comparison_par = []
         for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.dq_t2.items()):
             file_name_item = self.ui.table_DQ_2.item(row, 1)
@@ -1799,7 +1778,7 @@ class MainWindow(QMainWindow):
             if file_name_item is not None:
                 file_name = file_name_item.text()
                 file = file_item.text()
-                if file_name != 'hide':
+                if file_name != 'hide': #TODO OHMYGOD SERIOUSLY?????????????
                     try:
                         _comp_par = float(file_name)
                     except:
@@ -1810,102 +1789,54 @@ class MainWindow(QMainWindow):
                     continue
 
             # Initial arrays
-            dq_time = data[:,0] #DQ filtering time
-            dq = data[:,1] #DQ amlitude
-            t2 = data[:,2] #T2*
+            t2_lin = data[:,0] #T2*
+            dq_norm = data[:,1]
 
-            # Linear
-            # Read boxes for ALL the graph just opne for the sake of consistency
-            time_min = self.ui.dq_min_2.value()
-            time_max = self.ui.dq_max_2.value()
+            # Initial fitting parameters with statistical functions
+            p = [1, 5, 5, 0]
+            b=([0, 0, 0, 0, 0], [ np.inf, np.inf, np.inf, 1, np.inf]) # Voigt
+            b1=([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf]) # Gauss and Lorenz
 
-            t2_x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
-            if len(t2_x) < 3:
-                time_min = 0
-                time_max = 20
-                self.ui.dq_min_2.setValue(time_min)
-                self.ui.dq_max_2.setValue(time_max)
-                t2_x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
+            # create an array of T2* for plotting fitted function
+            t2_fit = np.arange(0, np.max(t2_lin) + 0.001, 0.01)
 
+            # Fit with 3 different functions and get centers
+            # if text == 'Gauss':
+            params, _ = curve_fit(Cal.gaussian, t2_lin, dq_norm, p0=p, bounds=b1)
+            cen_g = params[1]
+            center_g.append(cen_g)
 
-            t2_y = t2[(dq_time >= time_min) & (dq_time <= time_max)]
-            coeff = np.polyfit(t2_x, t2_y, 1)
-            t2_lin_ = coeff[0] * dq_time + coeff[1] # Will it work?
+            # elif text == 'Lorenz':
+            params, _ = curve_fit(Cal.lorenz, t2_lin, dq_norm, p0=p, bounds=b1)
+            cen_l = params[1]
+            center_l.append(cen_l)
 
+            # elif text == 'Pseudo Voigt':
+            params, _ = curve_fit(Cal.voigt, t2_lin, dq_norm,  bounds = b)
+            cen_v = params[1]
+            center_v.append(cen_v)
 
-            # Dq time on T2
-            Integral = np.trapz(dq)
-            dq_norm = dq/Integral
+            y_fit = Cal.voigt(t2_fit, *params)
 
-            if self.ui.radioButton_Log_2.isChecked():
-                t2_lin = np.log10(t2_lin_)
-                self.ui.DQ_Widget_4.getAxis('bottom').setLabel("log(T₂*)")
-                p = [1, 1, 1, 0]
-                b=([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, 1, np.inf])
-            else:
-                t2_lin = t2_lin_
-                self.ui.DQ_Widget_4.getAxis('bottom').setLabel("T₂*")
-                p = [1, 5, 5, 0]
-                b=([0, 0, 0, 0, 0], [ np.inf, np.inf, np.inf, 1, np.inf])
-
-            text = self.ui.comboBox_5.currentText()
-            dq_fit = np.arange(0, np.max(t2_lin) + 0.001, 0.01)
-            b1=([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf])
-
-            if text == 'Gauss':
-                params, _ = curve_fit(Cal.gaussian, t2_lin, dq_norm, p0=p, bounds=b1)
-                y_fit = Cal.gaussian(dq_fit, *params)
-                y_r2 = Cal.gaussian(t2_lin, *params)
-                cen = params[1]
-                center.append(cen)
-                fwhm = params[2]
-                weight.append(fwhm)
-                w = 0
-            elif text == 'Lorenz':
-                params, _ = curve_fit(Cal.lorenz, t2_lin, dq_norm, p0=p, bounds=b1)
-                y_fit = Cal.lorenz(dq_fit, *params)
-                y_r2 = Cal.lorenz(t2_lin, *params)
-                cen = params[1]
-                center.append(cen)
-                fwhm = params[2]
-                weight.append(fwhm)
-                w = 1
-            elif text == 'Pseudo Voigt':
-                params, _ = curve_fit(Cal.voigt, t2_lin, dq_norm,  bounds = b)
-                y_fit = Cal.voigt(dq_fit, *params)
-                y_r2 = Cal.voigt(t2_lin, *params)
-                cen = params[1]
-                center.append(cen)
-                fwhm = params[2]
-                weight.append(fwhm)
-                w = params[3]
-
-            # Draw a graph
+            # Draw a graph T2* versus nDQ data and fitted functions
             color = tuple(cmap.map(key))
-            self.ui.DQ_Widget_3.plot(dq_time, t2, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=10, name=file_name)
             self.ui.DQ_Widget_4.plot(t2_lin, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=10, name=file_name)
-            self.ui.DQ_Widget_4.plot(dq_fit, y_fit, pen=color)
+            self.ui.DQ_Widget_4.plot(t2_fit, y_fit, pen=color)
 
-            if coeff is not None:
-                x_line = np.arange(0, 105.1, 0.1)
-                y_line = np.polyval(coeff, x_line)
-
-                self.ui.DQ_Widget_3.plot(x_line, y_line, pen=color)
-
-            self.dq_comparison_distribution['File name'].append(file)
-            self.dq_comparison_distribution['X axis'].append(file_name)
-            self.dq_comparison_distribution['Center'].append(cen)
-            self.dq_comparison_distribution['FWHM'].append(fwhm)
-            self.dq_comparison_distribution['Lorentz ratio'].append(w)
-            self.dq_comparison_distribution['Fitting type'].append(text)
-            self.dq_comparison_distribution['T2 limit'].append(time_max)
+            # Add centers values to the table:
+            self.ui.table_DQ_2.setItem(row, 2, QTableWidgetItem(str(cen_g)))
+            self.ui.table_DQ_2.setItem(row, 3, QTableWidgetItem(str(cen_l)))
+            self.ui.table_DQ_2.setItem(row, 4, QTableWidgetItem(str(cen_v)))
 
 
-        self.ui.DQ_Widget_5.plot(comparison_par, center, pen='r', symbolPen=None, symbol='o', symbolBrush='r')
-        self.ui.DQ_Widget_6.plot(comparison_par, weight, pen='b', symbolPen=None, symbol='o', symbolBrush='b')
+            #TODO: make disctionary self.dq_comparison_distribution['File name'].append(file) updates
+
+        self.ui.DQ_Widget_5.plot(comparison_par, center_g, pen='r', symbolPen=None, symbol='o', symbolBrush='r', name='Gaus')
+        self.ui.DQ_Widget_5.plot(comparison_par, center_l, pen='b', symbolPen=None, symbol='o', symbolBrush='b', name='Lorenz')
+        self.ui.DQ_Widget_5.plot(comparison_par, center_v, pen='k', symbolPen=None, symbol='o', symbolBrush='k', name='Voigt')
 
     def write_collective_dictionary(self, dictionary, save_path_name):
-        # file = name of the file 
+        # file = name of the file
         data = dictionary
         headers = data.keys()
 
