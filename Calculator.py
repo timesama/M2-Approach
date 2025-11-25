@@ -6,6 +6,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
+from sympy import symbols, diff, solve
 
 # Math procedures
 
@@ -685,6 +686,41 @@ def voigt(x, amp, cen, wid, frac, y0):
     lorentzian = amp *(2 * wid) / (np.pi * (4 * (x - cen)**2 + wid**2))
     gaussian = amp *(np.exp((-4 * np.log(2) * (x - cen)**2) / wid**2)) / (wid * np.sqrt(np.pi / (4 * np.log(2))))
     return  (frac * lorentzian + (1 - frac) * gaussian) + y0
+
+def derivative_peak_find(x, y):
+    # Find maximum
+    y_max_idx = np.argmax(y)
+
+    # Take the range around maximum from the start to 10 more points after the max
+    end_idx = min(y_max_idx + 10, len(y))
+    y_range = y[:end_idx]
+    x_range = x[:end_idx]
+
+    # Fit T2* vs nDQ in the range around maximum with polynom of the 5th power
+    coeffs_polynom = np.polyfit(x_range, y_range, 5)
+
+    x_fit_for_plot = np.arange(x_range[0], x_range[-1], 0.01)
+    y_fit_for_plot = np.polyval(coeffs_polynom, x_fit_for_plot)
+
+    # Create sympy polynomial
+    s = symbols('s')
+    poly_sym = sum(coeffs_polynom[i] * s**(5 - i) for i in range(6))
+
+    # Derivative symbolically
+    dpoly = diff(poly_sym, s)
+
+    # Solve derivative = 0
+    roots = solve(dpoly, s)
+
+    # Keep only real roots inside the fitting range
+    real_roots = [float(r) for r in roots if r.is_real]
+    bounded_roots = [r for r in real_roots if x_range[0] <= r <= x_range[-1]]
+
+    # Pick the FIRST peak: smallest-x valid root
+    center = min(bounded_roots) if bounded_roots else None
+
+    return x_fit_for_plot, y_fit_for_plot, center
+
 
 def linear_model(x, a, b):
     return a * x + b
