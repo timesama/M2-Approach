@@ -266,7 +266,7 @@ def frequency_domain_analysis(FFT, Frequency):
     Real_apod = _calculate_apodization(Re, Frequency)
 
     # 10. M2 & T2
-    M2, T2 = _calculate_M2(Real_apod, Frequency, False)
+    M2, T2 = _calculate_M2(Real_apod, Frequency)
 
     return M2, T2
 
@@ -304,10 +304,10 @@ def _time_domain_phase(Real, Imaginary):
         Re_phased = Real * np.cos(np.deg2rad(phi)) - Imaginary * np.sin(np.deg2rad(phi))
         Im_phased = Real * np.sin(np.deg2rad(phi)) + Imaginary * np.cos(np.deg2rad(phi))
         Magnitude_phased = _calculate_amplitude(Re_phased, Im_phased)
-        
+
         Re_cut = Re_phased[:5]
         Ma_cut = Magnitude_phased[:5]
-        
+
         delta[phi] = np.mean(Ma_cut - Re_cut)
 
     idx = np.argmin(delta)
@@ -348,7 +348,6 @@ def fit_fft_with_voigh(Frequency, FFT):
     popt, pcov = curve_fit(voigt, x, y, bounds=(lower, upper), p0=p0, maxfev=20000)
 
     return popt
-
 
 def _adjust_frequency(Frequency, Re, Im):
     # private api
@@ -500,14 +499,10 @@ def _find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-def _calculate_M2(FFT_real, Frequency, Smooth):
+def _calculate_M2(FFT_real, Frequency):
 
-    # private api
-    if Smooth:
-        RealPart = savgol_filter(np.real(FFT_real), 1000, polyorder=1)
-        Frequency = savgol_filter(Frequency, 1000, polyorder=1)
-    else:
-        RealPart = np.real(FFT_real)
+
+    RealPart = np.real(FFT_real)
 
     # print(len(RealPart))
     # plt.plot(Frequency, RealPart)
@@ -524,6 +519,9 @@ def _calculate_M2(FFT_real, Frequency, Smooth):
 
     # Multiplication (the power ^n will give the nth moment (here it is n=2)
     Multiplication = (Frequency ** 2) * Fur_normalized
+
+    # plt.plot(Frequency, Multiplication)
+    # plt.show()
 
     # Calculate the integral of multiplication - the nth moment
     # The (2pi)^2 are the units to transform from rad/sec to Hz
