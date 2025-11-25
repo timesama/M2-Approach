@@ -4531,12 +4531,50 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <rect>
                      <x>110</x>
                      <y>60</y>
-                     <width>121</width>
+                     <width>171</width>
                      <height>21</height>
                     </rect>
                    </property>
                    <property name="text">
-                    <string>Smooth FFT</string>
+                    <string>Smooth FFT with window:</string>
+                   </property>
+                  </widget>
+                  <widget class="QDoubleSpinBox" name="SmoothWindowFrom">
+                   <property name="geometry">
+                    <rect>
+                     <x>110</x>
+                     <y>90</y>
+                     <width>62</width>
+                     <height>22</height>
+                    </rect>
+                   </property>
+                   <property name="decimals">
+                    <number>0</number>
+                   </property>
+                   <property name="maximum">
+                    <double>100000.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>150.000000000000000</double>
+                   </property>
+                  </widget>
+                  <widget class="QDoubleSpinBox" name="SmoothWindowTo">
+                   <property name="geometry">
+                    <rect>
+                     <x>190</x>
+                     <y>90</y>
+                     <width>62</width>
+                     <height>22</height>
+                    </rect>
+                   </property>
+                   <property name="decimals">
+                    <number>0</number>
+                   </property>
+                   <property name="maximum">
+                    <double>10000000.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>1000.000000000000000</double>
                    </property>
                   </widget>
                  </widget>
