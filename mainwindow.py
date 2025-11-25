@@ -59,6 +59,7 @@ class MainWindow(QMainWindow):
         self.selected_T1files = []
         self.selected_DQMQfile = []
         self.selected_GSfiles = []
+        self.window_array = np.array([])
         self.dq_t2 = {}
         self.dq_comparison_linear = {}
         self.dq_comparison_distribution = {}
@@ -285,6 +286,13 @@ class MainWindow(QMainWindow):
             file_path_gly = []
             file_path_empty = []
 
+        if self.ui.checkBox_Smooth.isChecked():
+            window_first_value = self.ui.SmoothWindowFrom.value()
+            window_last_value = self.ui.SmoothWindowTo.value()
+            self.window_array = np.linspace(window_first_value, window_last_value, len(files), dtype=np.int32)
+        else:
+            self.window_array = np.array([])
+
         try:
             self.process_file_data(file_path, file_path_gly, file_path_empty, i)
         except:
@@ -361,6 +369,8 @@ class MainWindow(QMainWindow):
         if self.tab != 'DQMQ' and  self.tab != 'DQ_Temp':
             while combobox.count()>0:
                 combobox.removeItem(0)
+
+        self.window_array = np.array([])
 
     def delete_row(self):
 
@@ -676,6 +686,13 @@ class MainWindow(QMainWindow):
         self.ui.radioButton.setEnabled(False)
         self.ui.comboBox_4.setCurrentIndex(-1)
 
+        if self.ui.checkBox_Smooth.isChecked():
+            window_first_value = self.ui.SmoothWindowFrom.value()
+            window_last_value = self.ui.SmoothWindowTo.value()
+            self.window_array = np.linspace(window_first_value, window_last_value, len(files), dtype=np.int32)
+        else:
+            self.window_array = np.array([])
+
         for i, file_path in enumerate(files, start=1):
             # filename = os.path.basename(file_path)
             # print(f"processing {file_path}")
@@ -764,10 +781,25 @@ class MainWindow(QMainWindow):
 
         FFT = np.fft.fftshift(np.fft.fft(Fid))
 
+        # if self.ui.checkBox_Smooth.isChecked():
+        #     RealPart = savgol_filter(np.real(FFT), 1000, polyorder=1)
+        #     ImaginaryPart = savgol_filter(np.imag(FFT), 1000, polyorder=1)
+        #     FFT = np.array(RealPart + 1j * ImaginaryPart)
+
+        if not self.window_array.size == 0:
+            try:
+                window = self.window_array[i-1]
+                RealPart = savgol_filter(np.real(FFT), window, polyorder=1)
+                ImaginaryPart = savgol_filter(np.imag(FFT), window, polyorder=1)
+                FFT = np.array(RealPart + 1j * ImaginaryPart)
+            except Exception as e:
+                print(f'Couldnt smooth because {e}')
+
         # 8. Simple baseline
         Amp_spectra, Re_spectra, Im_spectra = Cal._simple_baseline_correction(FFT)
         # 9. Cal.apodization
         Real_apod = Cal._calculate_apodization(Re_spectra, Frequency)
+
 
         # Update FFT graphs
         self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
@@ -775,7 +807,7 @@ class MainWindow(QMainWindow):
             self.ui.comboBox_4.addItem(filename)
 
         if self.ui.comboBox_4.currentIndex() == -1:
-            M2, T2 = Cal._calculate_M2(Real_apod, Frequency, self.ui.checkBox_Smooth.isChecked())
+            M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
 
             if self.tab == 'SE':
                 match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
@@ -824,7 +856,7 @@ class MainWindow(QMainWindow):
         # Update FFT graph
         self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
 
-        M2, T2 = Cal._calculate_M2(Real_apod, Frequency, False)
+        M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
         M2_r = round(M2, 6)
         T2_r = round(T2, 6)
 
@@ -1036,7 +1068,7 @@ class MainWindow(QMainWindow):
             self.ui.DQ_Widget_2.getAxis('bottom').setLabel("log(T₂*)")
         else:
             x = _x
-            p = [1, 5, 5, 0]
+            p = [1, 10, 10, 0]
             b=([0, 0, 0, 0, 0], [ np.inf, np.inf, np.inf, 1, np.inf])
             self.ui.DQ_Widget_2.getAxis('bottom').setLabel("T₂*")
 
@@ -2641,7 +2673,7 @@ class PhasingManual(QDialog):
         self.ui.Delta.setText(f"Delta: {round(delta,7)}")
 
         Real_apod   = Cal._calculate_apodization(self.Real_freq_phased, Frequency)
-        M2, T2 = Cal._calculate_M2(Real_apod, Frequency, False)
+        M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
 
         self.ui.M2.setText(f"M₂: {round(M2,5)}")
         self.ui.T2.setText(f"T₂*: {round(T2,3)}")
