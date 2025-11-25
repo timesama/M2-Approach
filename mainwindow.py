@@ -112,7 +112,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_DeleteRow_3.clicked.connect(self.delete_row)
 
         self.ui.btn_Start.clicked.connect(self.analysis)
-        self.ui.btn_Launch.clicked.connect(self.launch)
 
         self.ui.pushButton_DQMQ_1.clicked.connect(self.plot_original)
         self.ui.radioButton_Log.clicked.connect(self.plot_fit)
@@ -134,13 +133,14 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.SEWidget, "Temperature, °C", "Choose", "")
         self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_2, "X axis", "Norm. DQ Intensity", "")
-        self.setup_graph(self.ui.DQ_Widget_4, "T₂*", "Norm. DQ Intensity", "")
+        self.setup_graph(self.ui.DQ_Widget_4, "T₂*", "Norm. DQ Intensity", "FunctionFit")
         self.setup_graph(self.ui.DQ_Widget_5, "X axis", "Center", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time, ms", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
         self.setup_graph(self.ui.GS_Widget_1, "√Time, √us", "Signal", "")
         self.setup_graph(self.ui.GS_Widget_2, "X axis", "√Time, √us", "")
+        self.setup_graph(self.ui.DQ_Widget_polyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
 
         # Table Headers
         self.copy_enabler = TableCopyEnabler(self)
@@ -159,7 +159,6 @@ class MainWindow(QMainWindow):
 )
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
-        #self.ui.table_SE.currentItemChanged.connect(self.update_xaxis)
         self.ui.radioButton_4.clicked.connect(self.change_exponential_order)
         self.ui.radioButton_5.clicked.connect(self.change_exponential_order)
         self.ui.radioButton_6.clicked.connect(self.change_exponential_order)
@@ -192,21 +191,13 @@ class MainWindow(QMainWindow):
         self.ui.checkBox_5.clicked.connect(self.plot_Arr)
         self.ui.Eact_start.valueChanged.connect(self.plot_Arr)
         self.ui.Eact_end.valueChanged.connect(self.plot_Arr)
-
         self.ui.pushButton_Done.clicked.connect(self.hide_Eact)
 
 
         # Connect change events
         self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
         self.ui.dq_max.valueChanged.connect(self.update_dq_graphs)
-
-        # self.ui.dq_min_2.valueChanged.connect(self.update_DQ_comparison_plot)
-        # self.ui.dq_max_2.valueChanged.connect(self.update_DQ_comparison_plot)
-
-        # self.ui.radioButton_Log_2.clicked.connect(self.update_DQ_comparison_plot) # this is a bad coding
-        # self.ui.comboBox_5.activated.connect(self.update_DQ_comparison_plot)
         self.ui.comboBox_4.activated.connect(self.update_file)
-
         self.ui.dq_min_3.valueChanged.connect(self.plot_diff)
         self.ui.dq_max_3.valueChanged.connect(self.plot_diff)
         self.ui.power.valueChanged.connect(self.plot_diff)
@@ -334,6 +325,7 @@ class MainWindow(QMainWindow):
             self.ui.table_DQ_2.setRowCount(0)
             self.ui.DQ_Widget_4.clear()
             self.ui.DQ_Widget_5.clear()
+            self.ui.DQ_Widget_polyFit.clear()
         elif self.tab == 'T1T2':
             self.selected_T1files = []
             self.tau_dictionary = {}
@@ -583,7 +575,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_FunctionDQ.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
-        self.ui.btn_Launch.setEnabled(False)
         self.ui.btn_Plot1.setEnabled(False)
         self.ui.pushButton_DQMQ_1.setEnabled(False)
         self.ui.pushButton_DQMQ_2.setEnabled(False)
@@ -1699,7 +1690,6 @@ class MainWindow(QMainWindow):
     def update_DQ_comparison(self):
         table = self.ui.table_DQ_2
         table.setRowCount(len(self.selected_DQfiles))
-        self.ui.btn_Launch.setEnabled(True)
 
         for row, parent_folder in enumerate(self.selected_DQfiles, start=0):
             foldername = os.path.dirname(parent_folder)
@@ -1718,17 +1708,21 @@ class MainWindow(QMainWindow):
                 del self.selected_DQfiles[row]
 
             item = QTableWidgetItem(filename)
+            item_name = QTableWidgetItem()
 
-            pattern = r'Table_DQ_(-?[0-9]+).csv'
+            pattern = r'Table_DQ_(-?[0-9]+).*.csv'
             try:
-                default_name = QTableWidgetItem(str(re.search(pattern, filename).group(1)))
+                item_xaxis = float(re.search(pattern, filename).group(1))
+                item_name.setData(Qt.EditRole, item_xaxis)
             except:
-                default_name = QTableWidgetItem(str(row+1))
+                item_name.setData(Qt.EditRole, float(row+1))
 
             table.setItem(row, 0, item)
-            table.setItem(row, 1, default_name)
+            table.setItem(row, 1, item_name)
 
         table.resizeColumnsToContents()
+
+        self.launch()
 
     def launch(self):
         try:
@@ -1751,12 +1745,11 @@ class MainWindow(QMainWindow):
                 'X axis': [], 'Center': [], 'FWHM': [], 'Lorentz ratio': [], 
                 'Fitting type': [], 'T2 limit': []}
 
-        legend = self.ui.DQ_Widget_4.addLegend()
+        legend = self.ui.DQ_Widget_4.addLegend(offset=(0,0))
         legend_functionsCenters = self.ui.DQ_Widget_5.addLegend()
         self.ui.DQ_Widget_5.clear()
         self.ui.DQ_Widget_4.clear()
         self.ui.DQ_Widget_polyFit.clear()
-        self.ui.DQ_Widget_derivativeCenter.clear()
 
         if legend is not None:
             legend.clear()
@@ -1766,12 +1759,21 @@ class MainWindow(QMainWindow):
             legend_functionsCenters.clear()
             legend_functionsCenters.setPen((0, 0, 0)) 
 
-        # This is a mess :(
 
+        legend.anchor(itemPos=(1, 0), parentPos=(1, 0))
+
+        # This is a mess :(
         center_g = []
         center_l = []
         center_v = []
+        center_d = []
+
+        bold_g = []
+        bold_l = []
+        bold_v = []
+
         comparison_par = []
+
         for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.dq_t2.items()):
             file_name_item = self.ui.table_DQ_2.item(row, 1)
             file_item = self.ui.table_DQ_2.item(row, 0)
@@ -1805,35 +1807,60 @@ class MainWindow(QMainWindow):
             params, _ = curve_fit(Cal.gaussian, t2_lin, dq_norm, p0=p, bounds=b1)
             cen_g = params[1]
             center_g.append(cen_g)
+            fwhm_g = params[2]
+            bold_g.append(fwhm_g)
 
             # elif text == 'Lorenz':
             params, _ = curve_fit(Cal.lorenz, t2_lin, dq_norm, p0=p, bounds=b1)
             cen_l = params[1]
             center_l.append(cen_l)
+            fwhm_l = params[2]
+            bold_l.append(fwhm_l)
 
             # elif text == 'Pseudo Voigt':
             params, _ = curve_fit(Cal.voigt, t2_lin, dq_norm,  bounds = b)
             cen_v = params[1]
             center_v.append(cen_v)
+            fwhm_v = params[2]
+            bold_v.append(fwhm_v)
 
             y_fit = Cal.voigt(t2_fit, *params)
+
+            # Fitting with polynomial and derivative search:
+            t2_detivative_plot, nDQ_derivative_plot, center_derivative = Cal.derivative_peak_find(t2_lin, dq_norm)
+            center_d.append(center_derivative)
 
             # Draw a graph T2* versus nDQ data and fitted functions
             color = tuple(cmap.map(key))
             self.ui.DQ_Widget_4.plot(t2_lin, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=10, name=file_name)
             self.ui.DQ_Widget_4.plot(t2_fit, y_fit, pen=color)
 
-            # Add centers values to the table:
-            self.ui.table_DQ_2.setItem(row, 2, QTableWidgetItem(str(cen_g)))
-            self.ui.table_DQ_2.setItem(row, 3, QTableWidgetItem(str(cen_l)))
-            self.ui.table_DQ_2.setItem(row, 4, QTableWidgetItem(str(cen_v)))
+            self.ui.DQ_Widget_polyFit.plot(t2_lin, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=10)
+            self.ui.DQ_Widget_polyFit.plot(t2_detivative_plot, nDQ_derivative_plot, pen=color)
 
+            # Add centers values to the table:
+            def set_numeric_item(table, row, col, value):
+                item = QTableWidgetItem()
+                item.setData(Qt.EditRole, round(float(value), 2))
+                table.setItem(row, col, item)
+
+            # Add centers values to the table
+            set_numeric_item(self.ui.table_DQ_2, row, 2, cen_g)
+            set_numeric_item(self.ui.table_DQ_2, row, 3, cen_l)
+            set_numeric_item(self.ui.table_DQ_2, row, 4, cen_v)
+            set_numeric_item(self.ui.table_DQ_2, row, 5, center_derivative)
+
+            # Add FWHM values to the table
+            set_numeric_item(self.ui.table_DQ_2, row, 6, fwhm_g)
+            set_numeric_item(self.ui.table_DQ_2, row, 7, fwhm_l)
+            set_numeric_item(self.ui.table_DQ_2, row, 8, fwhm_v)
 
             #TODO: make disctionary self.dq_comparison_distribution['File name'].append(file) updates
 
         self.ui.DQ_Widget_5.plot(comparison_par, center_g, pen='r', symbolPen=None, symbol='o', symbolBrush='r', name='Gaus')
         self.ui.DQ_Widget_5.plot(comparison_par, center_l, pen='b', symbolPen=None, symbol='o', symbolBrush='b', name='Lorenz')
         self.ui.DQ_Widget_5.plot(comparison_par, center_v, pen='k', symbolPen=None, symbol='o', symbolBrush='k', name='Voigt')
+        self.ui.DQ_Widget_5.plot(comparison_par, center_d, pen='g', symbolPen=None, symbol='o', symbolBrush='g', name='Derivative')
 
     def write_collective_dictionary(self, dictionary, save_path_name):
         # file = name of the file
