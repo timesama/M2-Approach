@@ -449,9 +449,9 @@ class MainWindow(QMainWindow):
         global State_multiple_files
         State_multiple_files = True
         dlg = OpenFilesDialog(self)
-        self.clear_list()
 
         if dlg.exec():
+            self.clear_list()
             files = []
             fileNames = dlg.selectedFiles()
             files.extend(fileNames)
