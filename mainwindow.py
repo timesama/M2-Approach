@@ -182,7 +182,7 @@ class MainWindow(QMainWindow):
         # Connect combobox signals to slots
         self.ui.comboBox_SE_chooseY.activated.connect(self.update_se_graphs)
         self.ui.comboBox_FunctionDQ.activated.connect(self.plot_fit)
-        self.ui.comboBox_6.activated.connect(self.calculate_relaxation_time)
+        self.ui.T1T2_ChooseFileComboBox.activated.connect(self.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.calculate_sqrt_time)
 
         # Eact
@@ -347,7 +347,7 @@ class MainWindow(QMainWindow):
 
 
         if self.tab == 'T1T2':
-            combobox = self.ui.comboBox_6
+            combobox = self.ui.T1T2_ChooseFileComboBox
         elif self.tab in ('SE', 'DQ'):
             combobox = self.ui.comboBox_4
         elif self.tab == 'GS':
@@ -369,7 +369,7 @@ class MainWindow(QMainWindow):
             combobox = self.ui.comboBox_4
         elif self.tab =='T1T2':
             table = self.ui.table_T1
-            combobox = self.ui.comboBox_6
+            combobox = self.ui.T1T2_ChooseFileComboBox
             files = self.selected_T1files
         elif self.tab =='GS':
             table = self.ui.table_GS
@@ -430,8 +430,8 @@ class MainWindow(QMainWindow):
                 self.selected_DQfiles.extend(DQfileNames)
                 self.update_DQ_comparison()
             elif self.tab == 'T1T2':
-                while self.ui.comboBox_6.count()>0:
-                    self.ui.comboBox_6.removeItem(0)
+                while self.ui.T1T2_ChooseFileComboBox.count()>0:
+                    self.ui.T1T2_ChooseFileComboBox.removeItem(0)
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
                 self.update_T12_table()
@@ -1265,7 +1265,7 @@ class MainWindow(QMainWindow):
 
         selected_files = self.selected_T1files
         table = self.ui.table_T1
-        combobox = self.ui.comboBox_6
+        combobox = self.ui.T1T2_ChooseFileComboBox
         # pattern = r'(T1|T2)_(\s?-?\d+)(_.*)?\.dat'
         pattern = r'(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))'
         dictionary = self.tau_dictionary
@@ -1538,7 +1538,7 @@ class MainWindow(QMainWindow):
     def calculate_relaxation_time(self):
         table = self.ui.table_T1
         figure = self.ui.T1_Widget_1
-        selected_file_idx = self.ui.comboBox_6.currentIndex()
+        selected_file_idx = self.ui.T1T2_ChooseFileComboBox.currentIndex()
         dictionary = self.tau_dictionary
         starting_point = int(self.ui.T1T2_fit_from.value())
         ending_point = -(int(self.ui.T1T2_fit_to.value()))
@@ -1565,9 +1565,6 @@ class MainWindow(QMainWindow):
 
         Time = Time_original[starting_point:ending_point]
         Signal = Signal_original[starting_point:ending_point]
-
-        # Time_fit = np.arange(min(Time), max(Time) + 1, min(Time) * 0.1)
-        # Time_fit = np.linspace(start=min(Time), stop=max(Time), num=60)
 
         try:
 
@@ -1627,11 +1624,11 @@ class MainWindow(QMainWindow):
         table = self.ui.table_T1
         graph = self.ui.T1_Widget_2
 
-        if self.ui.radioButton_10.isChecked():
+        if self.ui.T1T2_1expPlotButton.isChecked():
             column = 3
-        elif self.ui.radioButton_11.isChecked():
+        elif self.ui.T1T2_2expPlotButton.isChecked():
             column = 5
-        elif self.ui.radioButton_12.isChecked():
+        elif self.ui.T1T2_3expPlotButton.isChecked():
             column = 7
 
         graph.clear()
