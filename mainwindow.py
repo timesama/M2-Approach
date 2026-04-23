@@ -159,9 +159,9 @@ class MainWindow(QMainWindow):
 )
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
-        self.ui.radioButton_4.clicked.connect(self.change_exponential_order)
-        self.ui.radioButton_5.clicked.connect(self.change_exponential_order)
-        self.ui.radioButton_6.clicked.connect(self.change_exponential_order)
+        self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.change_exponential_order)
+        self.ui.T1T2_FitWith2ExpButton.clicked.connect(self.change_exponential_order)
+        self.ui.T1T2_FitWith3ExpButton.clicked.connect(self.change_exponential_order)
 
         self.ui.radioButton_16.clicked.connect(self.calculate_relaxation_time)
         self.ui.radioButton_17.clicked.connect(self.calculate_relaxation_time)
@@ -1520,11 +1520,13 @@ class MainWindow(QMainWindow):
         self.ui.DSB_ExpFitting1.setValue(100)
         self.ui.DSB_ExpFitting2.setValue(1000)
         self.ui.DSB_ExpFitting3.setValue(10000)
-        if self.ui.radioButton_4.isChecked():
+
+        if self.ui.T1T2_FitWith1ExpButton.isChecked():
             self.ui.DSB_ExpFitting1.setEnabled(True)
             self.ui.DSB_ExpFitting2.setEnabled(False)
             self.ui.DSB_ExpFitting3.setEnabled(False)
-        elif self.ui.radioButton_5.isChecked():
+
+        elif self.ui.T1T2_FitWith2ExpButton.isChecked():
             self.ui.DSB_ExpFitting1.setEnabled(True)
             self.ui.DSB_ExpFitting2.setEnabled(True)
             self.ui.DSB_ExpFitting3.setEnabled(False)
@@ -1572,15 +1574,14 @@ class MainWindow(QMainWindow):
             t2 = int(self.ui.DSB_ExpFitting2.value())
             t3 = int(self.ui.DSB_ExpFitting3.value())
 
-            if self.ui.radioButton_4.isChecked():
+            if self.ui.T1T2_FitWith1ExpButton.isChecked():
                 order = 1
                 initial_parameters = [Signal[0], t1, 1]
-            elif self.ui.radioButton_5.isChecked():
+            elif self.ui.T1T2_FitWith2ExpButton.isChecked():
                 order = 2
                 initial_parameters = [Signal[0], t1, Signal[0], t2, 1]
             else:
                 order = 3
-                # p = [-10, 10, -10, 50, -10, 100, 15]
                 initial_parameters = [Signal[0], t1, Signal[0], t2, Signal[0], t3, 1]
 
 
