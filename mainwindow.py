@@ -1001,13 +1001,13 @@ class MainWindow(QMainWindow):
         if coeff is not None:
             # Generate x values for the line
             x_line = np.arange(0, 105.1, 0.1)
-            
+
             # Calculate y values using the coefficients
             y_line = np.polyval(coeff, x_line)
-            
+
             # Plot the graph and the line
             self.dq_t2_graph()
-            self.graph_line.plot(x_line, y_line, pen='r')  
+            self.graph_line.plot(x_line, y_line, pen='r')
             self.t2_dq_graph()
 
     def t2_dq_graph(self):
