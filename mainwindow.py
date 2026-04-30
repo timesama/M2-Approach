@@ -138,6 +138,7 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.T1_Widget_1, "Time, ms", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
+        self.setup_graph(self.ui.DQMQ_Widget_DRes, "Dres/2pi, KHz", "P(Dres)", "")
         self.setup_graph(self.ui.GS_Widget_1, "√Time, √us", "Signal", "")
         self.setup_graph(self.ui.GS_Widget_2, "X axis", "√Time, √us", "")
         self.setup_graph(self.ui.DQ_Widget_polyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
@@ -1088,7 +1089,7 @@ class MainWindow(QMainWindow):
         # Display R2, Xo and FWHM
         self.ui.textEdit_4.setText(f"R\u00B2: {round(R, 4)} \nX\u2080: {round(cen, 4)} \nFWHM: {round(fwhm, 4)} \nFraction (Lorenz): {round(w,2)}")
 
-    # DQ MQ section
+    # DQ Ref section
     def dq_mq_analysis(self):
 
         table = self.ui.table_DQMQ
@@ -1147,7 +1148,7 @@ class MainWindow(QMainWindow):
         noise_level = self.ui.noise.value()
         time_shift = int(self.ui.DQMQtime_shift.value())
 
-        Time, DQ_norm, Ref_norm, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1, noise_level, time_shift)
+        Time, DQ_norm, Ref_norm, _, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1, noise_level, time_shift)
 
         figure.plot(Time, DQ_norm, pen=mkPen('r', width=3), name = 'DQ')
         figure.plot(Time, Ref_norm, pen=mkPen('b', width=3), name = 'Ref')
@@ -1172,8 +1173,7 @@ class MainWindow(QMainWindow):
         legend = figure.addLegend()
         time_shift = int(self.ui.DQMQtime_shift.value())
 
-        # Time, DQ_norm, Ref_norm, Diff, _, _, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
-        Time, _, _, Diff, DQ_norm, Ref_norm, _, _, fitted_curve = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
+        Time, _, _, Diff, DQ_norm, Ref_norm, _, _, fitted_curve, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
 
         figure.plot(Time, DQ_norm, pen=mkPen('r', width=2), name = 'DQ')
         figure.plot(Time, Ref_norm, pen=mkPen('b', width=2), name = 'Ref')
@@ -1199,13 +1199,14 @@ class MainWindow(QMainWindow):
         time_shift = int(self.ui.DQMQtime_shift.value())
         smoothing = [self.ui.DQMQSmooth_from.value(), self.ui.DQMQSmooth_to.value(), int(self.ui.DQMQSmooth_window.value())]
 
-        Time, _, _, _, DQ_normal, MQ_normal, Time0, nDQ, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing)
+        Time, _, _, _, DQ_normal, Ref_normal, Time0, nDQ, _ , MQ_normal= Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing)
 
         hline = InfiniteLine(pos=0.5, angle=0, pen=mkPen(color=(200, 200, 255), width=2, style=Qt.DashLine))
         figure.addItem(hline)
 
         figure.plot(Time, DQ_normal, pen=mkPen('r', width=3), name = 'DQ')
-        figure.plot(Time, MQ_normal, pen=mkPen('b', width=3), name = 'Ref')
+        figure.plot(Time, Ref_normal, pen=mkPen('b', width=3), name = 'Ref')
+        figure.plot(Time, MQ_normal, pen=mkPen('m', width=3), name = 'MQ')
         figure.plot(Time0, nDQ, pen=mkPen('k', width=3), symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
 
 
@@ -1219,7 +1220,7 @@ class MainWindow(QMainWindow):
         table.resizeColumnsToContents()
         Time        = []
         DQ_normal   = []
-        MQ_normal   = []
+        Ref_normal   = []
         Time0       = []
         nDQ         = []
 
@@ -1227,13 +1228,13 @@ class MainWindow(QMainWindow):
         for row in range(row_count):
             Time.append(float(table.item(row, 0).text()))
             DQ_normal.append(float(table.item(row, 1).text()))
-            MQ_normal.append(float(table.item(row, 2).text()))
+            Ref_normal.append(float(table.item(row, 2).text()))
             nDQ.append(float(table.item(row, 3).text()))
 
         Time = np.array(Time)
         DQ_normal = np.array(DQ_normal)
-        MQ_normal = np.array(MQ_normal)
-        DQ_normal, MQ_normal, _ = Cal.normalize_mq(DQ_normal, MQ_normal, 'plus')
+        Ref_normal = np.array(Ref_normal)
+        DQ_normal, Ref_normal, _ = Cal.normalize_mq(DQ_normal, Ref_normal, 'plus')
         nDQ = np.array(nDQ)
         nDQ = np.insert(nDQ, 0, 0)
         Time0 = np.insert(Time, 0, 0)
@@ -1244,7 +1245,7 @@ class MainWindow(QMainWindow):
         legend.clear()
         legend = figure.addLegend()
         figure.plot(Time, DQ_normal, pen=mkPen('r', width=3), name = 'DQ')
-        figure.plot(Time, MQ_normal, pen=mkPen('b', width=3), name = 'Ref')
+        figure.plot(Time, Ref_normal, pen=mkPen('b', width=3), name = 'Ref')
         figure.plot(Time0, nDQ, pen=mkPen('k', width=3), symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
 
     # Relaxation time section

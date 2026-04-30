@@ -2772,7 +2772,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </widget>
              <widget class="QWidget" name="e_DQMQ">
               <attribute name="title">
-               <string>DQ MQ</string>
+               <string>DQ Ref</string>
               </attribute>
               <layout class="QHBoxLayout" name="horizontalLayout_10">
                <property name="spacing">
@@ -2949,9 +2949,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QPushButton" name="pushButton_DQMQ_CalculateIntegralSum">
+                       <widget class="QPushButton" name="DQMQ_pushButton_CalculateIntegralSum">
                         <property name="text">
                          <string>Calculate Integral Sum</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="DQMQ_pushButton_CalculateDres">
+                        <property name="text">
+                         <string>Calculate Dres</string>
                         </property>
                        </widget>
                       </item>

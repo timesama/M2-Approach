@@ -34,17 +34,18 @@ def read_data(file_path, header):
     x, y, z = data[:, 0], data[:, 1], data[:, 2]
     return x, y, z
 
-def normalize_mq(DQ, MQ, state):
-    maximum = np.max(MQ)
-    DQ_norm = DQ/maximum
-    MQ_norm = MQ/maximum
+def normalize_mq(Signal, Ref, state):
+    maximum = np.max(Ref)
+    Signal_norm = Signal/maximum
+    Ref_norm = Ref/maximum
 
     if state == 'minus':
-        End = MQ_norm - DQ_norm
+        End = Ref_norm - Signal_norm
     else:
-        End = MQ_norm + DQ_norm
+        End = Ref_norm + Signal_norm
+        End = End/np.max(End)
 
-    return DQ_norm, MQ_norm, End
+    return Signal_norm, Ref_norm, End
 
 def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None):
 
@@ -58,10 +59,10 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None
     power = p
 
     # Normalize data: data norm = data/max data
-    # Diff here is MQ norm - DQ norm
+    # Diff here is Ref norm - DQ norm
     DQ_norm, Ref_norm, Diff = normalize_mq(DQ, Ref, 'minus')
 
-    # Fit the difference MQ-DQ with exponent
+    # Fit the difference Ref-DQ with exponent
     idx_min = _find_nearest(Time, fit_from)
     idx_max = _find_nearest(Time, fit_to)
     Time_cut = Time[idx_min:idx_max+1]
@@ -79,14 +80,14 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None
     fitted_curve = exponent(Time, *popt)
 
     # Subtract difference function from Ref
-    MQ = Ref_norm - fitted_curve
+    Ref = Ref_norm - fitted_curve
 
-    # DQ normal = DQ_norm, but the MQ normal is the new normalization of the MQ, whith subtraction of fitted difference betwen initial MQ and DQ.
-    DQ_normal, MQ_normal, _ = normalize_mq(DQ_norm, MQ, 'plus')
+    # DQ normal = DQ_norm, but the Ref normal is the new normalization of the Ref, whith subtraction of fitted difference betwen initial Ref and DQ.
+    DQ_normal, Ref_normal, MQ_normal = normalize_mq(DQ_norm, Ref, 'plus')
 
     # Calculate nDQ
     additive_function = _exp_apodization(Time, fit_from, noise_level)
-    nDQ = (DQ_normal+noise_level*additive_function)/(DQ_normal+MQ_normal+2*noise_level*additive_function)
+    nDQ = (DQ_normal+noise_level*additive_function)/(DQ_normal+Ref_normal+2*noise_level*additive_function)
 
     nDQ = np.insert(nDQ, 0, 0)
     Time0 = np.insert(Time, 0, 0)
@@ -102,7 +103,7 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None
             print(f'couldnt proceed because {e}')
 
 
-    return Time, DQ_norm, Ref_norm, Diff, DQ_normal, MQ_normal, Time0, nDQ, fitted_curve
+    return Time, DQ_norm, Ref_norm, Diff, DQ_normal, Ref_normal, Time0, nDQ, fitted_curve, MQ_normal
 
 def _cut_beginning(Time, Data, Data2):
     # private api
