@@ -14,7 +14,7 @@ class OpenFilesDialog(QFileDialog):
         if State_multiple_files:
             self.setFileMode(QFileDialog.ExistingFiles)  # Allow selecting multiple files
         else:
-            pass
+            self.setFileMode(QFileDialog.ExistingFile)
 
         self.setNameFilter(str("Data (*.dat *.txt *.csv *.sef)"))
 
