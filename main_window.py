@@ -16,7 +16,7 @@ from ui_Form import Ui_NMR
 import Calculator as Cal # Mathematical procedures
 from controllers import (
     SETabController, DQTabController, DQTempTabController,
-    T1T2TabController, DQMQTabController, GSTabController
+    T1T2TabController, DQMQTabController, GSTabController, GeneralSEDQController
 )
 from dialogs.open_files_dialog import OpenFilesDialog
 import dialogs.open_files_dialog as open_files_dialog_module
@@ -92,6 +92,7 @@ class MainWindow(QMainWindow):
         self.t1t2_controller = T1T2TabController(ui=self.ui, state=self.app_state, parent=self)
         self.dqmq_controller = DQMQTabController(ui=self.ui, state=self.app_state, parent=self)
         self.gs_controller = GSTabController(ui=self.ui, state=self.app_state, parent=self)
+        self.general_se_dq_controller = GeneralSEDQController(ui=self.ui, state=self.app_state, parent=self, se_controller=self.se_controller, dq_controller=self.dq_controller)
 
         self.state()
 
@@ -113,7 +114,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Load_3.clicked.connect(self.load_data)
         self.ui.btn_Load_4.clicked.connect(self.load_data)
         self.ui.btn_Load_5.clicked.connect(self.load_data)
-        self.ui.btn_Phasing.clicked.connect(self.open_phasing_manual)
+        self.ui.btn_Phasing.clicked.connect(self.general_se_dq_controller.open_phasing_manual)
 
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
         self.ui.btn_Add.clicked.connect(self.add_select_dialog)
@@ -133,7 +134,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_3.clicked.connect(self.delete_row)
 
-        self.ui.btn_Start.clicked.connect(self.analysis)
+        self.ui.btn_Start.clicked.connect(self.general_se_dq_controller.analysis)
 
         self.ui.pushButton_DQMQ_1.clicked.connect(self.dqmq_controller.plot_original)
         self.ui.radioButton_Log.clicked.connect(self.dq_controller.plot_fit)
@@ -510,31 +511,6 @@ class MainWindow(QMainWindow):
             self.selected_files_DQ_single = files
             self.app_state.dq_files = files
 
-    def open_select_dialog_glycerol(self):
-        dlg = OpenFilesDialog(self)
-        dlg.setWindowTitle("Select Glycerol Files")
-        if dlg.exec():
-            fileNames_gly = dlg.selectedFiles()
-            self.selected_files_gly.extend(fileNames_gly)
-        self.ui.btn_Start.setEnabled(True)
-        self.ui.btn_Add.setEnabled(True)
-
-    def open_select_dialog_baseline(self):
-        dlg = OpenFilesDialog(self)
-        dlg.setWindowTitle("Select Baseline Files")
-        if dlg.exec():
-            fileNames_empty = dlg.selectedFiles()
-            self.selected_files_empty.extend(fileNames_empty)
-        self.ui.btn_Start.setEnabled(True)
-        self.ui.btn_Add.setEnabled(True)
-
-    def open_phasing_manual(self):
-        self.phasing_manual_window = PhasingManual()
-        self.phasing_manual_window.read_data()
-        self.phasing_manual_window.show()
-
-        self.phasing_manual_window.closed.connect(self.after_phasing)
-
     def open_group_window(self):
         self.group_window = GroupWindow()
 
@@ -637,236 +613,6 @@ class MainWindow(QMainWindow):
         if ok and new_header:
             table.horizontalHeaderItem(index).setText(new_header)
             self.update_xaxis(table, index)
-
-    # All these functions refer to the general analysis where FFT and FID are produced
-    def analysis(self):
-        # Clear Combobox
-        while self.ui.comboBox_4.count()>0:
-            self.ui.comboBox_4.removeItem(0)
-
-        if self.tab == 'SE':
-            files = self.selected_files
-            self.ui.SEWidget.clear()
-            self.ui.comboBox_SE_chooseY.setCurrentIndex(-1)
-        else:
-            files = self.selected_files_DQ_single
-            self.ui.DQ_Widget_1.clear()
-            self.ui.DQ_Widget_2.clear()
-            self.ui.DQ_Widget_4.clear()
-            self.ui.textEdit_4.setText("")
-            self.ui.comboBox_FunctionDQ.setCurrentIndex(-1)
-
-        if (len(files)==0):
-            return
-
-        if self.ui.checkBox_glycerol.isChecked():
-            if self.selected_files_gly == []:
-                self.open_select_dialog_glycerol()
-                if len(self.selected_files_gly) < len(files):
-                    QMessageBox.warning(self, "Invalid Data", f"The amount of Glycerol files is not the same as sample files. Adding glycerol files automatically.", QMessageBox.Ok)
-                    last_file = self.selected_files_gly[-1]
-                    num_to_add = len(files) - len(self.selected_files_gly)
-                    self.selected_files_gly.extend([last_file] * num_to_add)
-        else:
-            self.selected_files_gly = []
-
-        if self.ui.checkBox_baseline.isChecked():
-            if self.selected_files_empty == []:
-                self.open_select_dialog_baseline()
-                if len(self.selected_files_empty) < len(files):
-                    QMessageBox.warning(self, "Invalid Data", f"The amount of Empty files is not the same as sample files. Adding baseline files automatically.", QMessageBox.Ok)
-                    last_file = self.selected_files_empty[-1]
-                    num_to_add = len(files) - len(self.selected_files_empty)
-                    self.selected_files_empty.extend([last_file] * num_to_add)
-        else:
-            self.selected_files_empty = []
-
-        self.disable_buttons()
-        self.ui.btn_SelectFiles.setEnabled(False)
-        self.ui.btn_Load.setEnabled(False)
-        self.ui.radioButton.setEnabled(False)
-        self.ui.comboBox_4.setCurrentIndex(-1)
-
-        if self.ui.checkBox_Smooth.isChecked():
-            window_first_value = self.ui.SmoothWindowFrom.value()
-            window_last_value = self.ui.SmoothWindowTo.value()
-            self.window_array = np.linspace(window_first_value, window_last_value, len(files), dtype=np.int32)
-        else:
-            self.window_array = np.array([])
-
-        for i, file_path in enumerate(files, start=1):
-
-            if self.ui.checkBox_glycerol.isChecked():
-                file_path_gly = self.selected_files_gly[i-1]
-            else:
-                file_path_gly = []
-            if self.ui.checkBox_baseline.isChecked():
-                file_path_empty = self.selected_files_empty[i-1]
-            else:
-                file_path_empty = []
-
-            try:
-                self.process_file_data(file_path, file_path_gly, file_path_empty, i)
-            except:
-                self.analysis_error(file_path, files)
-                # return
-
-        self.update_legends_and_dq_graphs()
-        self.ui.btn_Start.setStyleSheet("background-color: none")
-
-        if self.ui.radioButton.isChecked():
-            QMessageBox.information(self, "Data Saved", f"The figures have been saved to {os.path.dirname(file_path) + '/Result'}", QMessageBox.Ok)
-
-    def analysis_error(self, file_path, files):
-        QMessageBox.warning(self, "Invalid Data", f"Couldn't read the {os.path.basename(file_path)}. Deleting the file.", QMessageBox.Ok)
-        files.remove(file_path)
-        self.ui.btn_SelectFiles.setEnabled(True)
-        self.ui.btn_Start.setStyleSheet("background-color: none")
-
-        self.ui.FidWidget.clear()
-        self.ui.FFTWidget.clear()
-        self.ui.btn_Phasing.setEnabled(False)
-        self.enable_buttons()
-        # self.analysis()
-
-    def update_legends_and_dq_graphs(self):
-        self.enable_buttons()
-
-        if self.tab == 'DQ':
-            self.dq_controller.update_graphs()
-
-    def process_file_data(self, file_path, file_path_gly, file_path_empty, i):
-        global Frequency, Re_spectra, Im_spectra
-
-        # Read name of filename
-        filename = os.path.basename(file_path)
-
-        if self.ui.checkBox_baseline.isChecked():
-            subtract = True
-        else:
-            subtract = False
-
-        # Read data
-        data = np.loadtxt(file_path)
-        x, y, z = data[:, 0], data[:, 1], data[:, 2]
-
-        Time, Re, Im = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
-
-        if self.ui.checkBox_glycerol.isChecked():
-            # Glycerol
-            Time_r, Re_r, Im_r = Cal.analysis_time_domain(file_path_gly, [], False)
-            Time, Re, Im = Cal.magnet_inhomogenity_correction(Time, Time_r, Re, Re_r, Im, Im_r)
-
-        if self.ui.checkBox_long_component.isChecked():
-            # Longcomponent
-            Time, Re, Im = Cal.subtract_long_component(Time, Re, Im)
-
-        Amp = Cal._calculate_amplitude(Re, Im)
-        self.update_graphs(Time, Amp, Re, Im, self.ui.FidWidget)
-
-        number_of_points = 2**16
-
-        Time_fid, Fid =  Cal.final_analysis_time_domain(Time, Re, Im, number_of_points)
-        Frequency = Cal._calculate_frequency_scale(Time_fid)
-
-        if len(Frequency) < len(Fid):
-            diff = len(Fid) - len(Frequency)
-            df = Frequency[1] - Frequency[0]
-            extra_freq = Frequency[-1] + np.arange(1, diff+1) * df
-            Frequency = np.concatenate([Frequency, extra_freq])
-        elif len(Frequency) > len(Fid):
-            Frequency = Frequency[:len(Fid)]
-
-
-        FFT = np.fft.fftshift(np.fft.fft(Fid))
-
-        if not self.window_array.size == 0:
-            try:
-                window = self.window_array[i-1]
-                RealPart = savgol_filter(np.real(FFT), window, polyorder=1)
-                ImaginaryPart = savgol_filter(np.imag(FFT), window, polyorder=1)
-                FFT = np.array(RealPart + 1j * ImaginaryPart)
-            except Exception as e:
-                print(f'Couldnt smooth because {e}')
-
-        # 8. Simple baseline
-        Amp_spectra, Re_spectra, Im_spectra = Cal._simple_baseline_correction(FFT)
-        # 9. Cal.apodization
-        Real_apod = Cal._calculate_apodization(Re_spectra, Frequency)
-
-
-        # Update FFT graphs
-        self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
-        if self.ui.comboBox_4.findText(filename) == -1:
-            self.ui.comboBox_4.addItem(filename)
-
-        if self.ui.comboBox_4.currentIndex() == -1:
-            M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
-
-            if self.tab == 'SE':
-                match = re.search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
-                temperature = self.extract_info(match)
-
-                short_from = self.ui.SC_short.value() *2
-                short_to = self.ui.SC_short_2.value() *2
-
-                long_from = self.ui.SC_long.value() *2
-                long_to = self.ui.SC_long_2.value() *2
-
-                absolute = self.ui.radioButton_absolute.isChecked()
-                times = [int(short_from), int(short_to), int(long_from), int(long_to)]
-
-                SFC = Cal.calculate_SC(Amp, times, absolute)
-                self.ui.table_SE.setRowCount(i) # HERE to set the right amount of rows
-                self.fill_table(self.ui.table_SE, temperature, SFC, M2, T2, i)
-
-                self.ui.table_SE.setItem(i-1, 4, QTableWidgetItem(filename))
-
-                if self.ui.radioButton.isChecked():
-                    self.save_figures(file_path, filename)
-
-            elif self.tab == 'DQ':
-                match = re.search(r'_(\d+\.\d+)_', filename)
-                dq_time = self.extract_info(match)
-
-                Amplitude = Cal._calculate_amplitude(y, z)
-                DQ = Cal.calculate_DQ_intensity(x, Amplitude)
-                self.ui.table_DQ.setRowCount(i)
-                self.fill_table(self.ui.table_DQ, dq_time, DQ, M2, T2, i)
-
-                if self.ui.radioButton.isChecked():
-                    self.save_figures(file_path, dq_time)
-        else:
-            pass
-
-    def after_phasing(self):
-        global Frequency, Re_spectra, Im_spectra
-
-        i = self.ui.comboBox_4.currentIndex()
-
-        Real_apod   = Cal._calculate_apodization(Re_spectra, Frequency) #(math procedure)
-        Amp_spectra = Cal._calculate_amplitude(Re_spectra, Im_spectra)
-
-        # Update FFT graph
-        self.update_graphs(Frequency, Amp_spectra, Re_spectra, Im_spectra, self.ui.FFTWidget)
-
-        M2, T2 = Cal._calculate_M2(Real_apod, Frequency)
-        M2_r = round(M2, 6)
-        T2_r = round(T2, 6)
-
-        if self.tab == 'SE':
-            table = self.ui.table_SE
-        elif self.tab == 'DQ':
-            table = self.ui.table_DQ
-
-
-        table.setItem(i, 2, QTableWidgetItem(str(M2_r)))
-        table.setItem(i, 3, QTableWidgetItem(str(T2_r)))
-
-        if self.tab == 'SE':
-            self.update_se_graphs()
-        elif self.tab == 'DQ':
-            self.dq_controller.update_graphs()
 
     def extract_info(self, pattern):
         if pattern:
