@@ -68,6 +68,7 @@ class MainWindow(QMainWindow):
         self.selected_DQfiles = []
         self.selected_T1files = []
         self.selected_DQMQfile = []
+        self.app_state.dqmq_files = self.selected_DQMQfile
         self.selected_GSfiles = []
         self.window_array = np.array([])
         self.dq_t2 = {}
@@ -88,7 +89,7 @@ class MainWindow(QMainWindow):
         )
         self.dq_temp_controller = DQTempTabController(self)
         self.t1t2_controller = T1T2TabController(self)
-        self.dqmq_controller = DQMQTabController(self)
+        self.dqmq_controller = DQMQTabController(ui=self.ui, state=self.app_state, parent=self)
         self.gs_controller = GSTabController(self)
         self.extra_controller = ExtraTabController(self)
 
@@ -134,11 +135,11 @@ class MainWindow(QMainWindow):
 
         self.ui.btn_Start.clicked.connect(self.analysis)
 
-        self.ui.pushButton_DQMQ_1.clicked.connect(self.plot_original)
+        self.ui.pushButton_DQMQ_1.clicked.connect(self.dqmq_controller.plot_original)
         self.ui.radioButton_Log.clicked.connect(self.dq_controller.plot_fit)
-        self.ui.pushButton_DQMQ_4.clicked.connect(self.plot_norm)
-        self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
-        self.ui.pushButton_DQMQ_3.clicked.connect(self.plot_nDQ)
+        self.ui.pushButton_DQMQ_4.clicked.connect(self.dqmq_controller.plot_norm)
+        self.ui.pushButton_DQMQ_2.clicked.connect(self.dqmq_controller.plot_diff)
+        self.ui.pushButton_DQMQ_3.clicked.connect(self.dqmq_controller.plot_nDQ)
         self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.plot_sqrt_time)
 
@@ -220,9 +221,9 @@ class MainWindow(QMainWindow):
         self.ui.dq_min.valueChanged.connect(self.dq_controller.update_graphs)
         self.ui.dq_max.valueChanged.connect(self.dq_controller.update_graphs)
         self.ui.comboBox_4.activated.connect(self.update_file)
-        self.ui.dq_min_3.valueChanged.connect(self.plot_diff)
-        self.ui.dq_max_3.valueChanged.connect(self.plot_diff)
-        self.ui.power.valueChanged.connect(self.plot_diff)
+        self.ui.dq_min_3.valueChanged.connect(self.dqmq_controller.plot_diff)
+        self.ui.dq_max_3.valueChanged.connect(self.dqmq_controller.plot_diff)
+        self.ui.power.valueChanged.connect(self.dqmq_controller.plot_diff)
 
         # Disable buttons initially
         self.disable_buttons()
@@ -359,6 +360,7 @@ class MainWindow(QMainWindow):
             self.group_data_T1T2 = {}
         elif self.tab == 'DQMQ':
             self.selected_DQMQfile = []
+            self.app_state.dqmq_files = []
         elif self.tab == 'GS':
             self.selected_GSfiles = []
             self.GS_dictionary = {}
@@ -467,7 +469,7 @@ class MainWindow(QMainWindow):
                 self.update_GS_table()
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
-                self.dq_mq_analysis()
+                self.dqmq_controller.dq_mq_analysis()
 
     def open_select_dialog(self):
         global State_multiple_files
@@ -904,164 +906,6 @@ class MainWindow(QMainWindow):
     def update_se_graphs(self):
         self.se_controller.update_graphs()
 
-    # DQ Ref section
-    def dq_mq_analysis(self):
-
-        table = self.ui.table_DQMQ
-        table.clear()
-
-        try:
-            Time, DQ, Ref = self.plot_original()
-        except Exception as e:
-            QMessageBox.warning(self, "Corrupt File", f"Couldn't read the file beacuse {e}", QMessageBox.Ok)
-            self.clear_list()
-            return
-        num_rows  = len(Time)
-        table.setRowCount(num_rows)
-
-        for row in range(num_rows):
-            table.setItem(row, 0, QTableWidgetItem(str(Time[row])))
-            table.setItem(row, 1, QTableWidgetItem(str(DQ[row])))
-            table.setItem(row, 2, QTableWidgetItem(str(Ref[row])))
-
-        table.resizeColumnsToContents() # TODO ADD THIS EVERYWHERE!!!!
-        table.setHorizontalHeaderLabels(['Time','DQ','Ref','nDQ']) # I don't know why i need this, but otherwise the columns get 1234 headres.
-        self.ui.pushButton_DQMQ_1.setEnabled(True)
-        self.ui.pushButton_DQMQ_2.setEnabled(False)
-        self.ui.pushButton_DQMQ_3.setEnabled(False)
-        self.ui.pushButton_DQMQ_4.setEnabled(True)
-
-    def plot_original(self):
-        file_path = self.selected_DQMQfile[0]
-
-        figure = self.ui.DQMQ_Widget
-        figure.clear()
-        legend = figure.addLegend()
-        legend.clear()
-        legend = figure.addLegend()
-
-        try:
-            Time, DQ, Ref = Cal.read_data(file_path, 1)
-        except:
-            Time, DQ, Ref = Cal.read_data(file_path, 0)
-
-        time_shift = int(self.ui.DQMQtime_shift.value())
-        Time = Time + time_shift
-
-        figure.plot(Time, DQ, pen=mkPen('r', width=3), name = 'DQ')
-        figure.plot(Time, Ref, pen=mkPen('b', width=3), name = 'Ref')
-
-        return Time, DQ, Ref
-
-    def plot_norm(self):
-        file_path = self.selected_DQMQfile[0]
-        figure = self.ui.DQMQ_Widget
-        figure.clear()
-        legend = figure.addLegend()
-        legend.clear()
-        legend = figure.addLegend()
-        noise_level = self.ui.noise.value()
-        time_shift = int(self.ui.DQMQtime_shift.value())
-
-        Time, DQ_norm, Ref_norm, _, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1, noise_level, time_shift)
-
-        figure.plot(Time, DQ_norm, pen=mkPen('r', width=3), name = 'DQ')
-        figure.plot(Time, Ref_norm, pen=mkPen('b', width=3), name = 'Ref')
-
-        self.ui.pushButton_DQMQ_2.setEnabled(True)
-        self.ui.pushButton_DQMQ_3.setEnabled(True)
-        self.ui.dq_min_3.setEnabled(True)
-        self.ui.dq_max_3.setEnabled(True)
-        self.ui.power.setEnabled(True)
-
-    def plot_diff(self):
-        file_path = self.selected_DQMQfile[0]
-        fit_from = self.ui.dq_min_3.value()
-        fit_to = self.ui.dq_max_3.value()
-        p = self.ui.power.value()
-        noise_level = self.ui.noise.value()
-
-        figure = self.ui.DQMQ_Widget
-        figure.clear()
-        legend = figure.addLegend()
-        legend.clear()
-        legend = figure.addLegend()
-        time_shift = int(self.ui.DQMQtime_shift.value())
-
-        Time, _, _, Diff, DQ_norm, Ref_norm, _, _, fitted_curve, _ = Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift)
-
-        figure.plot(Time, DQ_norm, pen=mkPen('r', width=2), name = 'DQ')
-        figure.plot(Time, Ref_norm, pen=mkPen('b', width=2), name = 'Ref')
-        figure.plot(Time, Diff, pen=mkPen('k', width=3), name = 'Diff')
-        figure.plot(Time, fitted_curve, pen=mkPen('m', width=3), name = 'fitting')
-
-        self.ui.pushButton_DQMQ_2.setEnabled(True)
-        self.ui.pushButton_DQMQ_3.setEnabled(True)
-
-    def plot_nDQ(self):
-        file_path = self.selected_DQMQfile[0]
-        fit_from = self.ui.dq_min_3.value()
-        fit_to = self.ui.dq_max_3.value()
-        p = self.ui.power.value()
-        table = self.ui.table_DQMQ
-
-        figure = self.ui.DQMQ_Widget
-        figure.clear()
-        legend = figure.addLegend()
-        legend.clear()
-        legend = figure.addLegend()
-        noise_level = self.ui.noise.value()
-        time_shift = int(self.ui.DQMQtime_shift.value())
-        smoothing = [self.ui.DQMQSmooth_from.value(), self.ui.DQMQSmooth_to.value(), int(self.ui.DQMQSmooth_window.value())]
-
-        Time, _, _, _, DQ_normal, Ref_normal, Time0, nDQ, _ , MQ_normal= Cal.dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing)
-
-        hline = InfiniteLine(pos=0.5, angle=0, pen=mkPen(color=(200, 200, 255), width=2, style=Qt.DashLine))
-        figure.addItem(hline)
-
-        figure.plot(Time, DQ_normal, pen=mkPen('r', width=3), name = 'DQ')
-        figure.plot(Time, Ref_normal, pen=mkPen('b', width=3), name = 'Ref')
-        figure.plot(Time, MQ_normal, pen=mkPen('m', width=3), name = 'MQ')
-        figure.plot(Time0, nDQ, pen=mkPen('k', width=3), symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
-
-
-        num_rows  = len(Time)
-        for row in range(num_rows):
-            table.setItem(row, 3, QTableWidgetItem(str(round(nDQ[row+1],4))))
-        table.resizeColumnsToContents()
-
-    def plot_nDQ_on_Load(self):
-        table = self.ui.table_DQMQ
-        table.resizeColumnsToContents()
-        Time        = []
-        DQ_normal   = []
-        Ref_normal   = []
-        Time0       = []
-        nDQ         = []
-
-        row_count = table.rowCount()
-        for row in range(row_count):
-            Time.append(float(table.item(row, 0).text()))
-            DQ_normal.append(float(table.item(row, 1).text()))
-            Ref_normal.append(float(table.item(row, 2).text()))
-            nDQ.append(float(table.item(row, 3).text()))
-
-        Time = np.array(Time)
-        DQ_normal = np.array(DQ_normal)
-        Ref_normal = np.array(Ref_normal)
-        DQ_normal, Ref_normal, _ = Cal.normalize_mq(DQ_normal, Ref_normal, 'plus')
-        nDQ = np.array(nDQ)
-        nDQ = np.insert(nDQ, 0, 0)
-        Time0 = np.insert(Time, 0, 0)
-
-        figure = self.ui.DQMQ_Widget
-        figure.clear()
-        legend = figure.addLegend()
-        legend.clear()
-        legend = figure.addLegend()
-        figure.plot(Time, DQ_normal, pen=mkPen('r', width=3), name = 'DQ')
-        figure.plot(Time, Ref_normal, pen=mkPen('b', width=3), name = 'Ref')
-        figure.plot(Time0, nDQ, pen=mkPen('k', width=3), symbol='o', symbolPen='k', symbolSize=10, name='nDQ')
 
     # Relaxation time section
     # A good example ofr bad architecture with no thoughts of scaling whatsoever.
@@ -1797,6 +1641,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'DQMQ':
             table = self.ui.table_DQMQ
             self.selected_DQMQfile = files
+            self.app_state.dqmq_files = files
         elif self.tab == 'GS':
             table = self.ui.table_GS
             self.selected_GSfiles = files
@@ -1827,7 +1672,7 @@ class MainWindow(QMainWindow):
             self.ui.dq_min_3.setEnabled(True)
             self.ui.dq_max_3.setEnabled(True)
             self.ui.power.setEnabled(True)
-            self.plot_nDQ_on_Load()
+            self.dqmq_controller.plot_nDQ_on_Load()
 
         elif self.tab == 'GS':
             self.update_GS_table()
