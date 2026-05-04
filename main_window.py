@@ -17,7 +17,7 @@ from ui_PhasingManual import Ui_Phasing as Ui_PhasingManual
 import Calculator as Cal # Mathematical procedures
 from controllers import (
     SETabController, DQTabController, DQTempTabController,
-    T1T2TabController, DQMQTabController, GSTabController, ExtraTabController
+    T1T2TabController, DQMQTabController, GSTabController
 )
 from dialogs.open_files_dialog import OpenFilesDialog
 import dialogs.open_files_dialog as open_files_dialog_module
@@ -91,7 +91,6 @@ class MainWindow(QMainWindow):
         self.t1t2_controller = T1T2TabController(ui=self.ui, state=self.app_state, parent=self)
         self.dqmq_controller = DQMQTabController(ui=self.ui, state=self.app_state, parent=self)
         self.gs_controller = GSTabController(ui=self.ui, state=self.app_state, parent=self)
-        self.extra_controller = ExtraTabController(self)
 
         self.state()
 
@@ -143,7 +142,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 
-        self.ui.pushButton_Eact.clicked.connect(self.plot_Arr)
+        self.ui.pushButton_Eact.clicked.connect(self.se_controller.plot_Arr)
 
         self.ui.pushButton_GroupSE.clicked.connect(self.open_group_window)
         self.ui.pushButton_GroupT1T2.clicked.connect(self.open_group_window)
@@ -209,12 +208,12 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_7.activated.connect(self.gs_controller.calculate_sqrt_time)
 
         # Eact
-        self.ui.radioButton_7.clicked.connect(self.plot_Arr)
-        self.ui.radioButton_8.clicked.connect(self.plot_Arr)
-        self.ui.checkBox_5.clicked.connect(self.plot_Arr)
-        self.ui.Eact_start.valueChanged.connect(self.plot_Arr)
-        self.ui.Eact_end.valueChanged.connect(self.plot_Arr)
-        self.ui.pushButton_Done.clicked.connect(self.hide_Eact)
+        self.ui.radioButton_7.clicked.connect(self.se_controller.plot_Arr)
+        self.ui.radioButton_8.clicked.connect(self.se_controller.plot_Arr)
+        self.ui.checkBox_5.clicked.connect(self.se_controller.plot_Arr)
+        self.ui.Eact_start.valueChanged.connect(self.se_controller.plot_Arr)
+        self.ui.Eact_end.valueChanged.connect(self.se_controller.plot_Arr)
+        self.ui.pushButton_Done.clicked.connect(self.se_controller.hide_Eact)
 
 
         # Connect change events
@@ -1148,49 +1147,6 @@ class MainWindow(QMainWindow):
 
         save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
         dialog.save_file_in_sef(self, dictionary, 'T1 3', 3, basename, save)
-
-    # Eact
-    def plot_Arr(self):
-        self.ui.groupBox_EAct.setHidden(False)
-        table = self.ui.table_SE
-        graph = self.ui.SEWidget
-
-        Temperature = np.array(self.read_column_values(table, 0))
-        T2 = np.array(self.read_column_values(table, 3))
-
-        sorted_indices = np.argsort(Temperature)
-        Temperature = Temperature[sorted_indices]
-        T2 = T2[sorted_indices]
-
-        if self.ui.checkBox_5.isChecked():
-            Temperature = Temperature + 273.15 #Transfer to K
-
-        starting_point = int(self.ui.Eact_start.value())
-        ending_point = -(int(self.ui.Eact_end.value()))
-        if ending_point == 0:
-            ending_point = None
-        try:
-            Temperature = Temperature[starting_point:ending_point]
-            T2 = T2[starting_point:ending_point]
-            reciprocal_temperature, lnT2 = Cal.calculate_Arrhenius_ax(Temperature, T2)
-            # fit linear
-            Temp_fit, fitted_curve, Eact, R2 = Cal.calculate_Eact(reciprocal_temperature, lnT2, self.ui.radioButton_8.isChecked())
-
-            graph.clear()
-            graph.plot(reciprocal_temperature, lnT2, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
-            graph.plot(Temp_fit, fitted_curve, pen='b')
-            self.setup_graph(graph, "1000/T, 𝐾⁻¹", "ln(τ)", "")
-
-            self.ui.textEdit_EAct.setText(f"Eact = {Eact}\nR² {R2}")
-
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
-
-    def hide_Eact(self):
-        self.ui.groupBox_EAct.setHidden(True)
-        self.ui.SEWidget.clear()
-        self.setup_graph(self.ui.SEWidget, "", "", "")
-        self.update_xaxis(self.ui.table_SE, 0)
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):

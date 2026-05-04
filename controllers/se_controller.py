@@ -1,4 +1,7 @@
 from controllers.base_tab_controller import BaseTabController
+import numpy as np
+from PySide6.QtWidgets import QMessageBox
+import Calculator as Cal
 
 
 class SETabController(BaseTabController):
@@ -47,3 +50,37 @@ class SETabController(BaseTabController):
                         pen={'color': color, 'width': 2},
                         symbol='o', symbolBrush=color, symbolPen=None, symbolSize=8
                     )
+
+    def plot_Arr(self):
+        self.ui.groupBox_EAct.setHidden(False)
+        table = self.ui.table_SE
+        graph = self.ui.SEWidget
+        Temperature = np.array(self.read_column_values(table, 0))
+        T2 = np.array(self.read_column_values(table, 3))
+        sorted_indices = np.argsort(Temperature)
+        Temperature = Temperature[sorted_indices]
+        T2 = T2[sorted_indices]
+        if self.ui.checkBox_5.isChecked():
+            Temperature = Temperature + 273.15
+        starting_point = int(self.ui.Eact_start.value())
+        ending_point = -(int(self.ui.Eact_end.value()))
+        if ending_point == 0:
+            ending_point = None
+        try:
+            Temperature = Temperature[starting_point:ending_point]
+            T2 = T2[starting_point:ending_point]
+            reciprocal_temperature, lnT2 = Cal.calculate_Arrhenius_ax(Temperature, T2)
+            Temp_fit, fitted_curve, Eact, R2 = Cal.calculate_Eact(reciprocal_temperature, lnT2, self.ui.radioButton_8.isChecked())
+            graph.clear()
+            graph.plot(reciprocal_temperature, lnT2, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
+            graph.plot(Temp_fit, fitted_curve, pen='b')
+            self.parent.setup_graph(graph, "1000/T, 𝐾⁻¹", "ln(τ)", "")
+            self.ui.textEdit_EAct.setText(f"Eact = {Eact}\nR² {R2}")
+        except Exception as e:
+            QMessageBox.warning(self.parent, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
+
+    def hide_Eact(self):
+        self.ui.groupBox_EAct.setHidden(True)
+        self.ui.SEWidget.clear()
+        self.parent.setup_graph(self.ui.SEWidget, "", "", "")
+        self.parent.update_xaxis(self.ui.table_SE, 0)
