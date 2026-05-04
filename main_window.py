@@ -15,7 +15,10 @@ import pyqtgraph.exporters
 from ui_Form import Ui_NMR
 from ui_PhasingManual import Ui_Phasing as Ui_PhasingManual
 import Calculator as Cal # Mathematical procedures
-from SE_tab import SETabUIController
+from controllers import (
+    SETabController, DQTabController, DQTempTabController,
+    T1T2TabController, DQMQTabController, GSTabController, ExtraTabController
+)
 from dialogs.open_files_dialog import OpenFilesDialog
 from dialogs.notification_dialog import NotificationDialog
 from dialogs.group_window import GroupWindow
@@ -73,7 +76,13 @@ class MainWindow(QMainWindow):
         self.group_data_SD = {}
         self.tab = None
         self.state_bad_code = False
-        self.se_tab_ui = SETabUIController(self)
+        self.se_controller = SETabController(self)
+        self.dq_controller = DQTabController(self)
+        self.dq_temp_controller = DQTempTabController(self)
+        self.t1t2_controller = T1T2TabController(self)
+        self.dqmq_controller = DQMQTabController(self)
+        self.gs_controller = GSTabController(self)
+        self.extra_controller = ExtraTabController(self)
 
         self.state()
 
@@ -881,15 +890,11 @@ class MainWindow(QMainWindow):
 
     # Working with SE graphs
     def update_se_graphs(self):
-        self.se_tab_ui.update_graphs()
+        self.se_controller.update_graphs()
 
     # Working with DQ graphs
     def update_dq_graphs(self):
-        if len(self.selected_files_DQ_single) > 1:
-            self.linearization()
-            self.plot_fit()
-        else:
-            return
+        self.dq_controller.update_graphs()
 
     def dq_t2_graph(self):
         x = self.read_column_values(self.ui.table_DQ, 0)
