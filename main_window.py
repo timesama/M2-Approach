@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
             parent=self,
         )
         self.dq_temp_controller = DQTempTabController(self)
-        self.t1t2_controller = T1T2TabController(self)
+        self.t1t2_controller = T1T2TabController(ui=self.ui, state=self.app_state, parent=self)
         self.dqmq_controller = DQMQTabController(ui=self.ui, state=self.app_state, parent=self)
         self.gs_controller = GSTabController(self)
         self.extra_controller = ExtraTabController(self)
@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_4.clicked.connect(self.dqmq_controller.plot_norm)
         self.ui.pushButton_DQMQ_2.clicked.connect(self.dqmq_controller.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.dqmq_controller.plot_nDQ)
-        self.ui.btn_Plot1.clicked.connect(self.plot_relaxation_time)
+        self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.plot_sqrt_time)
 
         self.ui.pushButton_Eact.clicked.connect(self.plot_Arr)
@@ -182,14 +182,14 @@ class MainWindow(QMainWindow):
 )
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.dq_controller.update_graphs)
-        self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.change_exponential_order)
-        self.ui.T1T2_FitWith2ExpButton.clicked.connect(self.change_exponential_order)
-        self.ui.T1T2_FitWith3ExpButton.clicked.connect(self.change_exponential_order)
+        self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
+        self.ui.T1T2_FitWith2ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
+        self.ui.T1T2_FitWith3ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
 
-        self.ui.radioButton_16.clicked.connect(self.calculate_relaxation_time)
-        self.ui.radioButton_17.clicked.connect(self.calculate_relaxation_time)
-        self.ui.T1T2_fit_from.valueChanged.connect(self.calculate_relaxation_time)
-        self.ui.T1T2_fit_to.valueChanged.connect(self.calculate_relaxation_time)
+        self.ui.radioButton_16.clicked.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.radioButton_17.clicked.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.T1T2_fit_from.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.T1T2_fit_to.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
 
         self.ui.checkBox_3.clicked.connect(self.calculate_sqrt_time)
         self.ui.radioButton_short.clicked.connect(self.calculate_sqrt_time)
@@ -205,7 +205,7 @@ class MainWindow(QMainWindow):
         # Connect combobox signals to slots
         self.ui.comboBox_SE_chooseY.activated.connect(self.update_se_graphs)
         self.ui.comboBox_FunctionDQ.activated.connect(self.dq_controller.plot_fit)
-        self.ui.T1T2_ChooseFileComboBox.activated.connect(self.calculate_relaxation_time)
+        self.ui.T1T2_ChooseFileComboBox.activated.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.calculate_sqrt_time)
 
         # Eact
@@ -458,7 +458,7 @@ class MainWindow(QMainWindow):
                     self.ui.T1T2_ChooseFileComboBox.removeItem(0)
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
-                self.update_T12_table()
+                self.t1t2_controller.update_T12_table()
             elif self.tab == 'GS':
                 while self.ui.comboBox_7.count()>0:
                     self.ui.comboBox_7.removeItem(0)
@@ -560,7 +560,7 @@ class MainWindow(QMainWindow):
 
         elif self.tab == 'T1T2':
             self.group_data_T1T2 = data
-            self.plot_relaxation_time()
+            self.t1t2_controller.plot_relaxation_time()
 
         elif self.tab == 'GS':
             self.group_data_SD = data
@@ -903,443 +903,6 @@ class MainWindow(QMainWindow):
         self.se_controller.update_graphs()
 
 
-    # Relaxation time section
-    # A good example ofr bad architecture with no thoughts of scaling whatsoever.
-    # Will i learn?
-    # Lol, no
-    def update_T12_table(self):
-        def clean_line(line):
-            while '\t\t' in line:
-                line = line.replace('\t\t', '\t')
-            return line.strip()
-
-        def create_dictionary(dictionary, file, addition, x_axis, Time, Signal):
-            dictionary[file + addition]["X Axis"].append(x_axis)
-            dictionary[file + addition]["Time"].extend(Time)
-            dictionary[file + addition]["Signal"].extend(Signal)
-            return dictionary
-
-        selected_files = self.selected_T1files
-        table = self.ui.table_T1
-        combobox = self.ui.T1T2_ChooseFileComboBox
-        # pattern = r'(T1|T2)_(\s?-?\d+)(_.*)?\.dat'
-        pattern = r'(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))'
-        dictionary = self.tau_dictionary
-
-        try:
-            if os.path.splitext(selected_files[0])[1]  == '.sef': # Read data aqcuired from Evaluation of FFC machine version1
-                if os.path.splitext(selected_files[1])[1] != '.sef':
-                    QMessageBox.warning(self, "Error", f"Load two files: Magnetization and Profile in .sef format.", QMessageBox.Ok)
-                    for file_to_delete in selected_files:
-                        if file_to_delete == file:
-                            selected_files.remove(file)
-                try:
-                    if os.stat(selected_files[0]).st_size > os.stat(selected_files[1]).st_size:
-                        filetoreadzones  = selected_files[1]
-                        filetoreaddata   = selected_files[0]
-                    else:
-                        filetoreadzones = selected_files[0]
-                        filetoreaddata  = selected_files[1]
-                    dictionary = self.process_files(filetoreadzones, filetoreaddata)
-
-                    # Fill the table
-                    table.setRowCount(len(dictionary))
-
-
-                    for row, key in zip(range(table.rowCount()), dictionary):
-                        x_axis = dictionary[key]["X Axis"]
-                        Temp = QTableWidgetItem(x_axis)
-                        Folder  = QTableWidgetItem(filetoreaddata)
-                        Filename   = QTableWidgetItem(os.path.basename(filetoreaddata))
-                        table.setItem(row, 0, Folder)
-                        table.setItem(row, 1, Filename)
-
-
-                        table.setItem(row, 2, Temp)
-                        combobox.addItem(f"{x_axis}")
-
-                    self.tau_dictionary = dictionary
-                    self.state_bad_code = True
-                except:
-                    QMessageBox.warning(self, "Error", f"Something went wrong.\nLoad two files: Magnetization and Profile.", QMessageBox.Ok)
-                    for file_to_delete in selected_files:
-                        if file_to_delete == file:
-                            selected_files.remove(file)
-
-            elif os.path.splitext(selected_files[0])[1] == '.csv': # Reading T1 recorded transformed from relaxyzer by prerecorded FIDs - this is a VERY bad way to solve things...
-                self.state_bad_code = False
-                table.setRowCount(len(selected_files))
-                x_axis = []
-                csv_pattern =  r'_(\-?\d+)(?=\.csv$)'
-                for row, file in zip(range(table.rowCount()), selected_files):
-                    current_file = os.path.basename(file)
-                    Time = []
-                    Signal = []
-
-                    try:
-                        x_axis = re.search(csv_pattern, current_file).group(1)
-                    except:
-                        x_axis = row
-
-                    dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
-                    data = []
-                    with open(file) as f:
-                        for line in f:
-                            parts = line.strip().split(",")
-
-                            time_value = float(parts[0])
-                            signal_value = float(parts[1])
-                            Time.append(time_value)
-                            Signal.append(signal_value)
-
-                    # fill dictionary
-                    dictionary[file]["X Axis"].append(x_axis)
-                    dictionary[file]["Time"].extend(Time)
-                    dictionary[file]["Signal"].extend(Signal)
-
-                    # fill table
-                    Folder = QTableWidgetItem(file)
-                    Filename = QTableWidgetItem(current_file)
-                    Temp = QTableWidgetItem(str(x_axis))
-                    table.setItem(row, 0, Folder)
-                    table.setItem(row, 1, Filename)
-                    table.setItem(row, 2, Temp)
-
-                    combobox.addItem(f"{current_file}")
-
-            elif os.path.splitext(selected_files[0])[1] == '.txt': # Reading T1 recorded at different time regions - this is a VERY bad way to solve things...
-                self.state_bad_code = False
-                table.setRowCount(len(selected_files*4))
-                x_axis = []
-
-                pattern_all = r'T1_.*_(\s?-?\d+).txt'
-
-                for file in selected_files:
-
-                    try:
-                        x_axis = re.search(pattern_all, os.path.basename(file)).group(1)
-                    except:
-                        x_axis = 'Variable'
-
-                    Time = []
-                    Signal_all = []
-                    Signal_short = []
-                    Signal_med = []
-                    Signal_long =[]
-
-                    dictionary[file + '_all'] = {"X Axis": [], "Time": [], "Signal": []}
-                    dictionary[file + '_short'] = {"X Axis": [], "Time": [], "Signal": []}
-                    dictionary[file + '_medium'] = {"X Axis": [], "Time": [], "Signal": []}
-                    dictionary[file + '_long'] = {"X Axis": [], "Time": [], "Signal": []}
-
-                    with open(file, "r") as data:
-                        #lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
-                        lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
-                        for line in lines[1:]:  # Skip the first line !!!
-                            parts = line.split('\t')
-                            Time.append(float(parts[0]))
-                            Signal_all.append(float(parts[1]))
-                            Signal_short.append(float(parts[2]))
-                            Signal_med.append(float(parts[3]))
-                            Signal_long.append(float(parts[4]))
-
-                        dictionary = create_dictionary(dictionary, file, '_all', x_axis, Time, Signal_all)
-                        dictionary = create_dictionary(dictionary, file, '_short', x_axis, Time, Signal_short)
-                        dictionary = create_dictionary(dictionary, file, '_medium', x_axis, Time, Signal_med)
-                        dictionary = create_dictionary(dictionary, file, '_long', x_axis, Time, Signal_long)
-
-                for row, entry in zip(range(table.rowCount()), dictionary):
-                    Folder = QTableWidgetItem(entry)
-                    current_file = os.path.basename(entry)
-                    Filename = QTableWidgetItem(current_file)
-                    x_axis = dictionary[entry]["X Axis"][0]
-                    try:
-                        Temp = QTableWidgetItem(x_axis)
-                    except:
-                        x_axis = str(row)
-                        Temp = QTableWidgetItem(x_axis)
-                    table.setItem(row, 0, Folder)
-                    table.setItem(row, 1, Filename)
-                    table.setItem(row, 2, Temp)
-                    combobox.addItem(f"{current_file}")
-            else: # Normal reading
-                self.state_bad_code = False
-                table.setRowCount(len(selected_files))
-                x_axis = []
-                for row, file in zip(range(table.rowCount()), selected_files):
-                    dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
-
-                    Time = []
-                    Signal = []
-                    Folder = QTableWidgetItem(file)
-
-                    current_file = os.path.basename(file)
-
-                    try:
-                        x_axis = re.search(pattern,current_file).group(2)
-                    except:
-                        x_axis = row
-                    try:
-                    # Read files as I create them from excel in spintrack
-                        with open(file, "r") as data:
-                            #lines = [line.replace('\t\t\t', '').rstrip('\n') for line in data if not (line.rstrip('\n').endswith('\t\t\t\t'))]
-                            lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
-                        for line in lines[1:]:  # Skip the first line !!!
-                            parts = line.split('\t')
-                            time_value = float(parts[0])
-                            signal_value = float(parts[1])
-                            Time.append(time_value)
-                            Signal.append(signal_value)
-
-                        combobox.addItem(f"{current_file}")
-                    except:
-                        try:
-                            # read files regularly
-                            data = np.loadtxt(file)
-                            Time, Signal = data[:, 0], data[:, 1]
-
-                            combobox.addItem(f"{current_file}")
-                        except FileNotFoundError:
-                            QMessageBox.warning(self, "File Not Found", f"The file {file} was not found. Only table data is available.", QMessageBox.Ok)
-                            return
-                        except Exception as e:
-                            QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} because {e} Removing file from the table and file list.", QMessageBox.Ok)
-                            for file_to_delete in selected_files:
-                                if file_to_delete == file:
-                                    selected_files.remove(file)
-                            return
-
-                    Filename = QTableWidgetItem(current_file)
-                    Temp = QTableWidgetItem(x_axis)
-                    table.setItem(row, 0, Folder)
-                    table.setItem(row, 1, Filename)
-                    table.setItem(row, 2, Temp)
-                    dictionary[file]["X Axis"].append(x_axis)
-                    dictionary[file]["Time"].extend(Time)
-                    dictionary[file]["Signal"].extend(Signal)
-
-        except:
-            QMessageBox.warning(self, "Error", f"Something went wrong. Try again.", QMessageBox.Ok)
-            self.clear_list()
-
-        self.ui.btn_Plot1.setEnabled(True)
-        combobox.setCurrentIndex(-1)
-
-    def process_files(self, file1, file2):
-        # Step 1: Parse the first file to map Zones to Frequencies
-        zone_to_frequency = {}
-        with open(file1, 'r') as f1:
-            for line in islice(f1, 4, None):
-                parts = line.split()
-                frequency = parts[0]
-                zone = parts[-2]
-                zone_to_frequency[zone] = frequency
-
-        # Step 2: Parse the second file to extract Time and Signal data
-        dictionary = {}
-        current_zone = None
-        with open(file2, 'r') as f2:
-            for line in f2:
-                line = line.strip()
-
-                # Detect new Zone block
-                if line.startswith("Zone"):
-                    current_zone = line.split()[1]
-                    continue
-
-                # Skip header and empty lines
-                if not line or line.startswith("TAU") or line.startswith("---"):
-                    continue
-
-                # Extract Time and Signal data
-                if current_zone in zone_to_frequency:
-                    try:
-                        parts = line.split()
-                        time = float(parts[0])  # Time column
-                        signal = float(parts[1])  # Signal column
-                        frequency = zone_to_frequency[current_zone]
-
-                        # Initialize dictionary entry if not exists
-                        name = file2 + ' at freq:' + str(frequency)
-                        if name not in dictionary:
-                            dictionary[name] = {"X Axis": frequency, "Time": [], "Signal": []}
-
-                        # Append data
-                        dictionary[name]["Time"].append(time)
-                        dictionary[name]["Signal"].append(signal)
-                    except (ValueError, IndexError):
-                        continue
-
-        return dictionary
-
-    def change_exponential_order(self):
-        self.ui.DSB_ExpFitting1.setValue(100)
-        self.ui.DSB_ExpFitting2.setValue(1000)
-        self.ui.DSB_ExpFitting3.setValue(10000)
-
-        if self.ui.T1T2_FitWith1ExpButton.isChecked():
-            self.ui.DSB_ExpFitting1.setEnabled(True)
-            self.ui.DSB_ExpFitting2.setEnabled(False)
-            self.ui.DSB_ExpFitting3.setEnabled(False)
-
-        elif self.ui.T1T2_FitWith2ExpButton.isChecked():
-            self.ui.DSB_ExpFitting1.setEnabled(True)
-            self.ui.DSB_ExpFitting2.setEnabled(True)
-            self.ui.DSB_ExpFitting3.setEnabled(False)
-        else:
-            self.ui.DSB_ExpFitting1.setEnabled(True)
-            self.ui.DSB_ExpFitting2.setEnabled(True)
-            self.ui.DSB_ExpFitting3.setEnabled(True)
-
-        self.calculate_relaxation_time()
-
-    def calculate_relaxation_time(self):
-        table = self.ui.table_T1
-        figure = self.ui.T1_Widget_1
-        selected_file_idx = self.ui.T1T2_ChooseFileComboBox.currentIndex()
-        dictionary = self.tau_dictionary
-        starting_point = int(self.ui.T1T2_fit_from.value())
-        ending_point = -(int(self.ui.T1T2_fit_to.value()))
-        if ending_point == 0:
-            ending_point = None
-
-        if self.ui.radioButton_16.isChecked():
-        # milisec units
-            denominator = 1
-        else:
-        # microsec units
-            denominator = 1000
-
-        if selected_file_idx == -1:
-            return
-
-        if self.state_bad_code == True:
-            value_from_row = table.item(selected_file_idx, 0).text() + ' at freq:' + table.item(selected_file_idx, 2).text()
-            denominator = 0.001
-        else:
-            value_from_row = table.item(selected_file_idx, 0).text()
-        Time_original = np.array(dictionary[value_from_row]['Time'])/denominator
-        Signal_original = np.array(dictionary[value_from_row]['Signal'])
-
-        Time = Time_original[starting_point:ending_point]
-        Signal = Signal_original[starting_point:ending_point]
-
-        try:
-
-            t1 = int(self.ui.DSB_ExpFitting1.value())
-            t2 = int(self.ui.DSB_ExpFitting2.value())
-            t3 = int(self.ui.DSB_ExpFitting3.value())
-
-            if self.ui.T1T2_FitWith1ExpButton.isChecked():
-                order = 1
-                initial_parameters = [Signal[0], t1, 1]
-            elif self.ui.T1T2_FitWith2ExpButton.isChecked():
-                order = 2
-                initial_parameters = [Signal[0], t1, Signal[0], t2, 1]
-            else:
-                order = 3
-                initial_parameters = [Signal[0], t1, Signal[0], t2, Signal[0], t3, 1]
-
-
-            Time_fit, fitted_curve, tau1, tau2, tau3, R2, A1, A2, A3 = Cal.fit_exponent(Time, Signal, order, initial_parameters)
-            self.ui.textEdit_error.setText(f"R² {R2}")
-
-        except:
-            QMessageBox.warning(self, "No covariance", f"I am sorry, I couldn't fit with {order} exponents. Decrease the order of fitting and try again.", QMessageBox.Ok)
-            return
-
-        # set taus into boxes
-        self.ui.DSB_ExpFitting1.setValue(tau1)
-        self.ui.DSB_ExpFitting2.setValue(tau2)
-        self.ui.DSB_ExpFitting3.setValue(tau3)
-
-        item1 = QTableWidgetItem(str(tau1))
-        item2 = QTableWidgetItem(str(tau2))
-        item3 = QTableWidgetItem(str(tau3))
-        item11 = QTableWidgetItem(str(A1))
-        item22 = QTableWidgetItem(str(A2))
-        item33 = QTableWidgetItem(str(A3))
-
-        table.setItem(selected_file_idx,3,item1)
-        table.setItem(selected_file_idx,5,item2)
-        table.setItem(selected_file_idx,7,item3)
-        table.setItem(selected_file_idx,4,item11)
-        table.setItem(selected_file_idx,6,item22)
-        table.setItem(selected_file_idx,8,item33)
-
-        figure.clear()
-        figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
-        figure.plot(Time_fit, fitted_curve, pen='b')
-
-        dictionary[value_from_row]['T1 1'] = tau1
-        dictionary[value_from_row]['T1 2'] = tau2
-        dictionary[value_from_row]['T1 3'] = tau3
-        self.ui.btn_Plot1.setEnabled(True)
-
-    def plot_relaxation_time(self):
-
-        table = self.ui.table_T1
-        graph = self.ui.T1_Widget_2
-
-        if self.ui.T1T2_1expPlotButton.isChecked():
-            column = 3
-        elif self.ui.T1T2_2expPlotButton.isChecked():
-            column = 5
-        elif self.ui.T1T2_3expPlotButton.isChecked():
-            column = 7
-
-        graph.clear()
-        if table.rowCount() < 1:
-            return
-
-        x_axis = []
-        relaxation_time =[]
-        number = 1
-        for row in range(table.rowCount()):
-            try:
-                C = float(table.item(row, 2).text())
-                x_axis.append(C)
-            except:
-                x_axis.append(number)
-
-            try:
-                T = float(table.item(row, column).text())
-                relaxation_time.append(T)
-            except:
-                relaxation_time.append(0)
-            number = number + 1
-
-        graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
-
-        if self.group_data_T1T2:
-            for i, (group_number, group_rows) in enumerate(self.group_data_T1T2.items()):
-                group_x = []
-                group_y = []
-
-                for row_data in group_rows:
-                    try:
-                        x_val = float(row_data[2])
-                        y_val = float(row_data[column])
-                        group_x.append(x_val)
-                        group_y.append(y_val)
-                    except (ValueError, IndexError):
-                        continue
-
-                sorted_points = sorted(zip(group_x, group_y), key=lambda p: p[0])
-                if len(sorted_points) > 1:
-                    xs, ys = zip(*sorted_points)
-
-                    color = self.tab10_colors[i % len(self.tab10_colors)]
-
-                    graph.plot(
-                        xs, ys,
-                        pen={'color': color, 'width': 2},
-                        symbol='o',
-                        symbolBrush=color,
-                        symbolPen=None,
-                        symbolSize=8
-                    )
-
     # Working with tables
     def update_DQ_comparison(self):
         table = self.ui.table_DQ_2
@@ -1659,7 +1222,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'DQ_Temp':
             self.update_DQ_comparison()
         elif self.tab == 'T1T2':
-            self.update_T12_table()
+            self.t1t2_controller.update_T12_table()
         elif self.tab == 'DQMQ':
             self.ui.pushButton_DQMQ_1.setEnabled(True)
             self.ui.pushButton_DQMQ_2.setEnabled(True)
