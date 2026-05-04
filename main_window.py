@@ -90,7 +90,7 @@ class MainWindow(QMainWindow):
         self.dq_temp_controller = DQTempTabController(self)
         self.t1t2_controller = T1T2TabController(ui=self.ui, state=self.app_state, parent=self)
         self.dqmq_controller = DQMQTabController(ui=self.ui, state=self.app_state, parent=self)
-        self.gs_controller = GSTabController(self)
+        self.gs_controller = GSTabController(ui=self.ui, state=self.app_state, parent=self)
         self.extra_controller = ExtraTabController(self)
 
         self.state()
@@ -141,7 +141,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_2.clicked.connect(self.dqmq_controller.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.dqmq_controller.plot_nDQ)
         self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
-        self.ui.btn_Plot_GS.clicked.connect(self.plot_sqrt_time)
+        self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 
         self.ui.pushButton_Eact.clicked.connect(self.plot_Arr)
 
@@ -191,22 +191,22 @@ class MainWindow(QMainWindow):
         self.ui.T1T2_fit_from.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.T1T2_fit_to.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
 
-        self.ui.checkBox_3.clicked.connect(self.calculate_sqrt_time)
-        self.ui.radioButton_short.clicked.connect(self.calculate_sqrt_time)
-        self.ui.radioButton_medium.clicked.connect(self.calculate_sqrt_time)
-        self.ui.radioButton_long.clicked.connect(self.calculate_sqrt_time)
-        self.ui.GS_fit_from_1.valueChanged.connect(self.calculate_sqrt_time)
-        self.ui.GS_fit_to_1.valueChanged.connect(self.calculate_sqrt_time)
+        self.ui.checkBox_3.clicked.connect(self.gs_controller.calculate_sqrt_time)
+        self.ui.radioButton_short.clicked.connect(self.gs_controller.calculate_sqrt_time)
+        self.ui.radioButton_medium.clicked.connect(self.gs_controller.calculate_sqrt_time)
+        self.ui.radioButton_long.clicked.connect(self.gs_controller.calculate_sqrt_time)
+        self.ui.GS_fit_from_1.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
+        self.ui.GS_fit_to_1.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
 
-        self.ui.GS_beta.valueChanged.connect(self.calculate_sqrt_time)
-        self.ui.GS_r2.valueChanged.connect(self.calculate_sqrt_time)
-        self.ui.GS_m2.valueChanged.connect(self.calculate_sqrt_time)
+        self.ui.GS_beta.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
+        self.ui.GS_r2.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
+        self.ui.GS_m2.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
 
         # Connect combobox signals to slots
         self.ui.comboBox_SE_chooseY.activated.connect(self.update_se_graphs)
         self.ui.comboBox_FunctionDQ.activated.connect(self.dq_controller.plot_fit)
         self.ui.T1T2_ChooseFileComboBox.activated.connect(self.t1t2_controller.calculate_relaxation_time)
-        self.ui.comboBox_7.activated.connect(self.calculate_sqrt_time)
+        self.ui.comboBox_7.activated.connect(self.gs_controller.calculate_sqrt_time)
 
         # Eact
         self.ui.radioButton_7.clicked.connect(self.plot_Arr)
@@ -464,7 +464,7 @@ class MainWindow(QMainWindow):
                     self.ui.comboBox_7.removeItem(0)
                 GSfileNames = dlg.selectedFiles()
                 self.selected_GSfiles.extend(GSfileNames)
-                self.update_GS_table()
+                self.gs_controller.update_GS_table()
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
                 self.dqmq_controller.dq_mq_analysis()
@@ -564,7 +564,7 @@ class MainWindow(QMainWindow):
 
         elif self.tab == 'GS':
             self.group_data_SD = data
-            self.plot_sqrt_time()
+            self.gs_controller.plot_sqrt_time()
 
     def state(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
@@ -1234,7 +1234,7 @@ class MainWindow(QMainWindow):
             self.dqmq_controller.plot_nDQ_on_Load()
 
         elif self.tab == 'GS':
-            self.update_GS_table()
+            self.gs_controller.update_GS_table()
 
     def save_figures(self, file_path, variable):
         parent_folder = os.path.dirname(file_path)
@@ -1324,222 +1324,6 @@ class MainWindow(QMainWindow):
 
         save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
         dialog.save_file_in_sef(self, dictionary, 'T1 3', 3, basename, save)
-
-    # GS Goldman Shen
-    def update_GS_table(self):
-        def clean_line(line):
-            while '\t\t' in line:
-                line = line.replace('\t\t', '\t')
-            return line.strip()
-
-        def create_dictionary(dictionary, file, addition, x_axis, sqrtTime, short, medium, long):
-            dictionary[file + addition]["X Axis"].append(x_axis)
-            dictionary[file + addition]["sqrtTime"].extend(sqrtTime)
-            dictionary[file + addition]["short"].extend(short)
-            dictionary[file + addition]["medium"].extend(medium)
-            dictionary[file + addition]["long"].extend(long)
-            return dictionary
-
-        selected_files = self.selected_GSfiles
-        table = self.ui.table_GS
-        combobox = self.ui.comboBox_7
-
-        pattern = r'_([0-9]+)\.dat$'
-        dictionary = self.GS_dictionary
-
-        try:
-            table.setRowCount(len(selected_files))
-            x_axis = []
-            for row, file in zip(range(table.rowCount()), selected_files):
-                dictionary[file] = {"X Axis": [], "sqrtTime": [], "short": [], "medium": [], "long": []}
-
-                sqrtTime = []
-                short = []
-                medium = []
-                long = []
-                Folder = QTableWidgetItem(file)
-
-                current_file = os.path.basename(file)
-
-                try:
-                    x_axis = re.search(pattern,current_file).group(1)
-                except:
-                    x_axis = row
-
-                try:
-                    with open(file, "r") as data:
-                        lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
-                    for line in lines[1:]:  # Skip the first line !!!
-                        parts = line.split('\t')
-                        time_value = float(parts[0])
-                        signal_value1 = float(parts[4])
-                        signal_value2 = float(parts[5])
-                        signal_value3 = float(parts[6])
-
-                        sqrtTime.append(time_value)
-                        short.append(signal_value1)
-                        medium.append(signal_value2)
-                        long.append(signal_value3)
-
-                    combobox.addItem(f"{current_file}")
-                except Exception as e:
-                    QMessageBox.warning(self, "Invalid Data", f"I couldn't read {current_file} because {e} Removing file from the table and file list.", QMessageBox.Ok)
-                    for file_to_delete in selected_files:
-                        if file_to_delete == file:
-                            selected_files.remove(file)
-                    return
-
-                Filename = QTableWidgetItem(current_file)
-                XValue = QTableWidgetItem(x_axis)
-                table.setItem(row, 0, Folder)
-                table.setItem(row, 1, Filename)
-                table.setItem(row, 2, XValue)
-                dictionary[file]["X Axis"].append(x_axis)
-                dictionary[file]["sqrtTime"].extend(sqrtTime)
-                dictionary[file]["short"].extend(short)
-                dictionary[file]["medium"].append(medium)
-                dictionary[file]["long"].extend(long)
-
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
-            self.clear_list()
-
-    def calculate_sqrt_time(self):
-        selected_file_idx = self.ui.comboBox_7.currentIndex()
-        if selected_file_idx == -1:
-            return
-        table = self.ui.table_GS
-        figure = self.ui.GS_Widget_1
-
-        dictionary = self.GS_dictionary
-
-        value_from_row = table.item(selected_file_idx, 0).text()
-
-        if self.ui.checkBox_3.isChecked():
-        # transform to sqrt
-            Time_original = np.sqrt(np.array(dictionary[value_from_row]['sqrtTime']).flatten())
-        else: # time is already in sqrt
-            Time_original = np.array(dictionary[value_from_row]['sqrtTime']).flatten()
-
-        short_original = np.array(dictionary[value_from_row]['short']).flatten()
-        medium_original = np.array(dictionary[value_from_row]['medium']).flatten()
-        long_original = np.array(dictionary[value_from_row]['long']).flatten()
-
-        self.ui.GS_fit_from_1.setMinimum(Time_original[0])
-        self.ui.GS_fit_from_1.setMaximum(Time_original[-1])
-
-        self.ui.GS_fit_to_1.setMinimum(Time_original[15])
-        self.ui.GS_fit_to_1.setMaximum(Time_original[-1])
-
-        from_val = self.ui.GS_fit_from_1.value()
-        to_val = self.ui.GS_fit_to_1.value()
-
-        # Find the closest indices to the selected Time range
-        starting_point = (np.abs(Time_original - from_val)).argmin()
-        ending_point = (np.abs(Time_original - to_val)).argmin() + 1  # +1 to include the endpoint
-
-        Time = Time_original[starting_point:ending_point]
-        short = short_original[starting_point:ending_point]
-        medium = medium_original[starting_point:ending_point]
-        long = long_original[starting_point:ending_point]
-
-
-        if self.ui.radioButton_short.isChecked():
-            Signal = short
-            Signal_original = short_original
-        elif self.ui.radioButton_medium.isChecked():
-            Signal = medium
-            Signal_original = medium_original
-        elif self.ui.radioButton_long.isChecked():
-            Signal = long
-            Signal_original = long_original
-
-        beta    =   self.ui.GS_beta.value()
-        r2    =   self.ui.GS_r2.value()
-        M2    =   self.ui.GS_m2.value()
-        try:
-            Time_fit, fitted_curve, sqrtT, R2 = Cal.linear_fit_GS(Time, Signal)
-            d = Cal.calculate_domain_size(sqrtT, beta, r2, M2)
-
-            self.ui.textEdit_error_2.setText(f"R² {R2}")
-
-            item = QTableWidgetItem(str(sqrtT))
-
-            table.setItem(selected_file_idx,3,item)
-
-            item2 = QTableWidgetItem(str(d))
-
-            table.setItem(selected_file_idx,4,item2)
-
-            figure.clear()
-            figure.plot(Time_original, Signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
-            figure.plot(Time_fit, fitted_curve, pen='b')
-
-            dictionary[value_from_row]['sqrtT'] = sqrtT
-            dictionary[value_from_row]['d'] = d
-
-            self.ui.btn_Plot1.setEnabled(True)
-        except Exception as e:
-            figure.clear()
-            QMessageBox.warning(self, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
-
-    def plot_sqrt_time(self):
-
-        table = self.ui.table_GS
-        graph = self.ui.GS_Widget_2
-        column = 3 #time
-
-        graph.clear()
-        if table.rowCount() < 1:
-            return
-
-        x_axis = []
-        sqrtT =[]
-        number = 1
-        for row in range(table.rowCount()):
-            try:
-                C = float(table.item(row, 2).text())
-                x_axis.append(C)
-            except:
-                x_axis.append(number)
-
-            try:
-                T = float(table.item(row, column).text())
-                sqrtT.append(T)
-            except:
-                sqrtT.append(0)
-            number = number + 1
-
-        graph.plot(x_axis, sqrtT, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
-
-        if self.group_data_SD:
-            for i, (group_number, group_rows) in enumerate(self.group_data_SD.items()):
-                group_x = []
-                group_y = []
-
-                for row_data in group_rows:
-                    try:
-                        # Adjust these indexes as per your group data structure
-                        x_val = float(row_data[2])  # e.g., x value
-                        y_val = float(row_data[column])
-                        group_x.append(x_val)
-                        group_y.append(y_val)
-                    except (ValueError, IndexError):
-                        continue
-
-                sorted_points = sorted(zip(group_x, group_y), key=lambda p: p[0])
-                if len(sorted_points) > 1:
-                    xs, ys = zip(*sorted_points)
-                    color = self.tab10_colors[i % len(self.tab10_colors)]
-
-                    graph.plot(
-                        xs, ys,
-                        pen={'color': color, 'width': 2},
-                        symbol='o',
-                        symbolBrush=color,
-                        symbolPen=None,
-                        symbolSize=8
-                    )
 
     # Eact
     def plot_Arr(self):
