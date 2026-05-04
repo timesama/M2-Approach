@@ -34,10 +34,6 @@ pg.CONFIG_OPTIONS['foreground'] = 'k'
 # here is the generous example of the masterpiece in bad coding.
 # but it works and I don't care
 
-# Global
-Frequency = []
-Re_spectra = []
-Im_spectra = []
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -897,4 +893,3 @@ class MainWindow(QMainWindow):
             Fur[i] = np.sum(Fid * (cos_values[:, i] - 1j * sin_values[:, i]))
         QCoreApplication.processEvents()
         return Fur
-

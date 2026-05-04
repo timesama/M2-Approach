@@ -5,7 +5,8 @@ from scipy.signal import savgol_filter
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
 from dialogs.open_files_dialog import OpenFilesDialog
-from dialogs.phasing_manual import PhasingManual, Frequency, Re_spectra, Im_spectra
+import dialogs.phasing_manual as phasing_manual_module
+from dialogs.phasing_manual import PhasingManual
 
 
 class GeneralSEDQController(BaseTabController):
@@ -46,7 +47,6 @@ class GeneralSEDQController(BaseTabController):
         if self.parent.tab=='DQ': self.dq_controller.update_graphs()
 
     def process_file_data(self,file_path,file_path_gly,file_path_empty,i):
-        global Frequency, Re_spectra, Im_spectra
         mw=self.parent; filename=os.path.basename(file_path)
         subtract=self.ui.checkBox_baseline.isChecked()
         data=np.loadtxt(file_path); x,y,z=data[:,0],data[:,1],data[:,2]
@@ -55,31 +55,45 @@ class GeneralSEDQController(BaseTabController):
             Time_r,Re_r,Im_r=Cal.analysis_time_domain(file_path_gly,[],False); Time,Re,Im=Cal.magnet_inhomogenity_correction(Time,Time_r,Re,Re_r,Im,Im_r)
         if self.ui.checkBox_long_component.isChecked(): Time,Re,Im=Cal.subtract_long_component(Time,Re,Im)
         Amp=Cal._calculate_amplitude(Re,Im); mw.update_graphs(Time,Amp,Re,Im,self.ui.FidWidget)
-        Time_fid,Fid=Cal.final_analysis_time_domain(Time,Re,Im,2**16); Frequency=Cal._calculate_frequency_scale(Time_fid)
+        Time_fid,Fid=Cal.final_analysis_time_domain(Time,Re,Im,2**16); frequency=Cal._calculate_frequency_scale(Time_fid)
         FFT=np.fft.fftshift(np.fft.fft(Fid))
         if mw.window_array.size!=0:
             window=mw.window_array[i-1]; FFT=np.array(savgol_filter(np.real(FFT),window,1)+1j*savgol_filter(np.imag(FFT),window,1))
-        Amp_spectra,Re_spectra,Im_spectra=Cal._simple_baseline_correction(FFT); Real_apod=Cal._calculate_apodization(Re_spectra,Frequency)
-        mw.update_graphs(Frequency,Amp_spectra,Re_spectra,Im_spectra,self.ui.FFTWidget)
+        amp_spectra,re_spectra,im_spectra=Cal._simple_baseline_correction(FFT); Real_apod=Cal._calculate_apodization(re_spectra,frequency)
+        self.state.spectrum.frequency = frequency
+        self.state.spectrum.re_spectra = re_spectra
+        self.state.spectrum.im_spectra = im_spectra
+        mw.update_graphs(frequency,amp_spectra,re_spectra,im_spectra,self.ui.FFTWidget)
         if self.ui.comboBox_4.findText(filename)==-1: self.ui.comboBox_4.addItem(filename)
         if self.ui.comboBox_4.currentIndex()==-1:
-            M2,T2=Cal._calculate_M2(Real_apod,Frequency)
+            M2,T2=Cal._calculate_M2(Real_apod,frequency)
             if mw.tab=='SE':
                 self.se_controller.process_processed_file(i, filename, Amp, M2, T2, file_path)
             elif mw.tab=='DQ':
                 self.dq_controller.process_processed_file(i, filename, x, y, z, M2, T2, file_path)
 
     def after_phasing(self):
-        global Frequency, Re_spectra, Im_spectra
-        mw=self.parent; i=self.ui.comboBox_4.currentIndex(); Real_apod=Cal._calculate_apodization(Re_spectra,Frequency); Amp_spectra=Cal._calculate_amplitude(Re_spectra,Im_spectra)
-        mw.update_graphs(Frequency,Amp_spectra,Re_spectra,Im_spectra,self.ui.FFTWidget); M2,T2=Cal._calculate_M2(Real_apod,Frequency)
+        mw=self.parent
+        i=self.ui.comboBox_4.currentIndex()
+        frequency = self.state.spectrum.frequency
+        re_spectra = self.state.spectrum.re_spectra
+        im_spectra = self.state.spectrum.im_spectra
+        Real_apod=Cal._calculate_apodization(re_spectra,frequency); Amp_spectra=Cal._calculate_amplitude(re_spectra,im_spectra)
+        mw.update_graphs(frequency,Amp_spectra,re_spectra,im_spectra,self.ui.FFTWidget); M2,T2=Cal._calculate_M2(Real_apod,frequency)
         table=self.ui.table_SE if mw.tab=='SE' else self.ui.table_DQ
         table.setItem(i,2,QTableWidgetItem(str(round(M2,6)))); table.setItem(i,3,QTableWidgetItem(str(round(T2,6))))
         if mw.tab=='SE': self.se_controller.update_graphs()
         elif mw.tab=='DQ': self.dq_controller.update_graphs()
 
     def open_phasing_manual(self):
-        mw=self.parent; mw.phasing_manual_window=PhasingManual(); mw.phasing_manual_window.read_data(); mw.phasing_manual_window.show(); mw.phasing_manual_window.closed.connect(self.after_phasing)
+        mw=self.parent
+        phasing_manual_module.Frequency = self.state.spectrum.frequency
+        phasing_manual_module.Re_spectra = self.state.spectrum.re_spectra
+        phasing_manual_module.Im_spectra = self.state.spectrum.im_spectra
+        mw.phasing_manual_window=PhasingManual()
+        mw.phasing_manual_window.read_data()
+        mw.phasing_manual_window.show()
+        mw.phasing_manual_window.closed.connect(self.after_phasing)
 
     def open_select_dialog_glycerol(self):
         dlg=OpenFilesDialog(self.parent); dlg.setWindowTitle('Select Glycerol Files')
