@@ -983,7 +983,7 @@ class MainWindow(QMainWindow):
         dialog.save_data_as_csv(self, table, files, default_name)
 
         if self.state_bad_code == True:
-            self.bad_code_makes_more_bad_code()
+            self.t1t2_controller.bad_code_makes_more_bad_code()
 
     def load_data(self):
         dlg = OpenFilesDialog(self)
@@ -1133,21 +1133,6 @@ class MainWindow(QMainWindow):
                 return False
             else:
                 return False
-
-    # FFC analysis
-    def bad_code_makes_more_bad_code(self):
-        dictionary = self.tau_dictionary
-        dialog = SaveFilesDialog(self)
-        basename = os.path.basename(self.selected_T1files[0])
-
-        save = not all(data.get('T1 1', 0) == 0 for data in dictionary.values())
-        dialog.save_file_in_sef(self, dictionary, 'T1 1', 1, basename, save)
-
-        save = not all(data.get('T1 2', 0) ==0 for data in dictionary.values())
-        dialog.save_file_in_sef(self, dictionary, 'T1 2', 2, basename, save)
-
-        save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
-        dialog.save_file_in_sef(self, dictionary, 'T1 3', 3, basename, save)
 
     # Math procedures
     def FFT_handmade(self, Fid, Time, Freq):

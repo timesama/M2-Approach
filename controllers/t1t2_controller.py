@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
+from dialogs.save_files_dialog import SaveFilesDialog
 
 
 class T1T2TabController(BaseTabController):
@@ -235,3 +236,14 @@ class T1T2TabController(BaseTabController):
             except: relaxation_time.append(0)
             number += 1
         graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+
+    def bad_code_makes_more_bad_code(self):
+        dictionary = self.parent.tau_dictionary
+        dialog = SaveFilesDialog(self.parent)
+        basename = os.path.basename(self.parent.selected_T1files[0])
+        save = not all(data.get('T1 1', 0) == 0 for data in dictionary.values())
+        dialog.save_file_in_sef(self.parent, dictionary, 'T1 1', 1, basename, save)
+        save = not all(data.get('T1 2', 0) == 0 for data in dictionary.values())
+        dialog.save_file_in_sef(self.parent, dictionary, 'T1 2', 2, basename, save)
+        save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
+        dialog.save_file_in_sef(self.parent, dictionary, 'T1 3', 3, basename, save)
