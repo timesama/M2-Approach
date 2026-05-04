@@ -4,4 +4,5 @@ from .dq_temp_controller import DQTempTabController
 from .t1t2_controller import T1T2TabController
 from .dqmq_controller import DQMQTabController
 from .gs_controller import GSTabController
-from .extra_controller import ExtraTabController
+
+from .general_se_dq_controller import GeneralSEDQController
