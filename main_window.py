@@ -23,6 +23,7 @@ from dialogs.open_files_dialog import OpenFilesDialog
 from dialogs.notification_dialog import NotificationDialog
 from dialogs.group_window import GroupWindow
 from widgets.table_copy_enabler import TableCopyEnabler
+from app_state import AppState
 
 pg.CONFIG_OPTIONS['background'] = 'w'
 pg.CONFIG_OPTIONS['foreground'] = 'k'
@@ -57,8 +58,11 @@ class MainWindow(QMainWindow):
         # Maximize minimize
         self.setWindowFlags(self.windowFlags() | self.windowFlags().WindowMaximizeButtonHint)
 
+        self.app_state = AppState()
+
         self.selected_files = []
         self.selected_files_DQ_single = []
+        self.app_state.dq_files = self.selected_files_DQ_single
         self.selected_files_gly = []
         self.selected_files_empty = []
         self.selected_DQfiles = []
@@ -77,7 +81,11 @@ class MainWindow(QMainWindow):
         self.tab = None
         self.state_bad_code = False
         self.se_controller = SETabController(self)
-        self.dq_controller = DQTabController(self)
+        self.dq_controller = DQTabController(
+            ui=self.ui,
+            state=self.app_state,
+            parent=self,
+        )
         self.dq_temp_controller = DQTempTabController(self)
         self.t1t2_controller = T1T2TabController(self)
         self.dqmq_controller = DQMQTabController(self)
@@ -127,7 +135,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Start.clicked.connect(self.analysis)
 
         self.ui.pushButton_DQMQ_1.clicked.connect(self.plot_original)
-        self.ui.radioButton_Log.clicked.connect(self.plot_fit)
+        self.ui.radioButton_Log.clicked.connect(self.dq_controller.plot_fit)
         self.ui.pushButton_DQMQ_4.clicked.connect(self.plot_norm)
         self.ui.pushButton_DQMQ_2.clicked.connect(self.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.plot_nDQ)
@@ -172,7 +180,7 @@ class MainWindow(QMainWindow):
     lambda index=2: self.renameSection(self.ui.table_DQ_2, index=1)
 )
         # Connect table signals to slots
-        self.ui.table_DQ.currentItemChanged.connect(self.update_dq_graphs)
+        self.ui.table_DQ.currentItemChanged.connect(self.dq_controller.update_graphs)
         self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.change_exponential_order)
         self.ui.T1T2_FitWith2ExpButton.clicked.connect(self.change_exponential_order)
         self.ui.T1T2_FitWith3ExpButton.clicked.connect(self.change_exponential_order)
@@ -195,7 +203,7 @@ class MainWindow(QMainWindow):
 
         # Connect combobox signals to slots
         self.ui.comboBox_SE_chooseY.activated.connect(self.update_se_graphs)
-        self.ui.comboBox_FunctionDQ.activated.connect(self.plot_fit)
+        self.ui.comboBox_FunctionDQ.activated.connect(self.dq_controller.plot_fit)
         self.ui.T1T2_ChooseFileComboBox.activated.connect(self.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.calculate_sqrt_time)
 
@@ -209,8 +217,8 @@ class MainWindow(QMainWindow):
 
 
         # Connect change events
-        self.ui.dq_min.valueChanged.connect(self.update_dq_graphs)
-        self.ui.dq_max.valueChanged.connect(self.update_dq_graphs)
+        self.ui.dq_min.valueChanged.connect(self.dq_controller.update_graphs)
+        self.ui.dq_max.valueChanged.connect(self.dq_controller.update_graphs)
         self.ui.comboBox_4.activated.connect(self.update_file)
         self.ui.dq_min_3.valueChanged.connect(self.plot_diff)
         self.ui.dq_max_3.valueChanged.connect(self.plot_diff)
@@ -304,7 +312,7 @@ class MainWindow(QMainWindow):
         # Update general figures
         if self.tab == 'DQ':
             self.highlight_row(self.ui.table_DQ, i)
-            self.update_dq_graphs()
+            self.dq_controller.update_graphs()
         elif self.tab == 'SE':
             self.highlight_row(self.ui.table_SE, i)
             self.update_se_graphs()
@@ -313,6 +321,7 @@ class MainWindow(QMainWindow):
 
     def clear_list(self):
         if self.tab == 'SE':
+            self.app_state = AppState()
             self.selected_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
@@ -324,6 +333,7 @@ class MainWindow(QMainWindow):
             self.group_data_SE = {}
         elif self.tab == 'DQ':
             self.selected_files_DQ_single = []
+            self.app_state.dq_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
             self.ui.table_DQ.setRowCount(0)
@@ -477,6 +487,7 @@ class MainWindow(QMainWindow):
             self.selected_files = files
         else:
             self.selected_files_DQ_single = files
+            self.app_state.dq_files = files
 
     def add_select_dialog(self):
         global State_multiple_files
@@ -499,6 +510,7 @@ class MainWindow(QMainWindow):
             self.selected_files = files
         else:
             self.selected_files_DQ_single = files
+            self.app_state.dq_files = files
 
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self)
@@ -723,7 +735,7 @@ class MainWindow(QMainWindow):
         self.enable_buttons()
 
         if self.tab == 'DQ':
-            self.update_dq_graphs()
+            self.dq_controller.update_graphs()
 
     def process_file_data(self, file_path, file_path_gly, file_path_empty, i):
         global Frequency, Re_spectra, Im_spectra
@@ -856,7 +868,7 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             self.update_se_graphs()
         elif self.tab == 'DQ':
-            self.update_dq_graphs()
+            self.dq_controller.update_graphs()
 
     def extract_info(self, pattern):
         if pattern:
@@ -891,152 +903,6 @@ class MainWindow(QMainWindow):
     # Working with SE graphs
     def update_se_graphs(self):
         self.se_controller.update_graphs()
-
-    # Working with DQ graphs
-    def update_dq_graphs(self):
-        self.dq_controller.update_graphs()
-
-    def dq_t2_graph(self):
-        x = self.read_column_values(self.ui.table_DQ, 0)
-        y= self.read_column_values(self.ui.table_DQ, 3)
-        self.ui.DQ_Widget_1.clear()
-        self.ui.DQ_Widget_1.plot(x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
-
-    def linearization(self):
-        # Calculate line
-        time_min = self.ui.dq_min.value()
-        time_max = self.ui.dq_max.value()
-        dq_time = np.array(self.read_column_values(self.ui.table_DQ, 0))
-        t2 = np.array(self.read_column_values(self.ui.table_DQ, 3))
-        dq = np.array(self.read_column_values(self.ui.table_DQ, 1))
-
-        x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
-        if len(x) < 3:
-            time_min = 0
-            time_max = 20
-            self.ui.dq_min.setValue(time_min)
-            self.ui.dq_max.setValue(time_max)
-            x = dq_time[(dq_time >= time_min) & (dq_time <= time_max)]
-
-        y = t2[(dq_time >= time_min) & (dq_time <= time_max)]
-
-        if len(x) <= 1 or len(y) <= 1:
-            return
-
-        coeff = np.polyfit(x, y, 1)
-
-        Integral = np.trapz(dq)
-        DQ_norm = dq/Integral
-
-        self.ui.table_DQ.setColumnCount(5)
-        self.ui.table_DQ.setColumnWidth(4,70)
-        self.ui.table_DQ.setHorizontalHeaderItem(4, QTableWidgetItem("T₂* lin"))
-
-        self.ui.table_DQ.setColumnCount(6)
-        self.ui.table_DQ.setColumnWidth(5,70)
-        self.ui.table_DQ.setHorizontalHeaderItem(5, QTableWidgetItem("DQ Norm"))
-
-        for row in range(self.ui.table_DQ.rowCount()):
-            T2_lin = coeff[0] * dq_time[row] + coeff[1]
-            T2_lin = round(T2_lin, 4)
-            item = QTableWidgetItem(str(T2_lin))
-            self.ui.table_DQ.setItem(row, 4, item)
-            item2 = QTableWidgetItem(str(round(DQ_norm[row], 4)))
-            self.ui.table_DQ.setItem(row, 5, item2)
-
-
-        # Draw line
-        self.graph_line = self.ui.DQ_Widget_1
-
-        if coeff is not None:
-            # Generate x values for the line
-            x_line = np.arange(0, 105.1, 0.1)
-
-            # Calculate y values using the coefficients
-            y_line = np.polyval(coeff, x_line)
-
-            # Plot the graph and the line
-            self.dq_t2_graph()
-            self.graph_line.plot(x_line, y_line, pen='r')
-            self.t2_dq_graph()
-
-    def t2_dq_graph(self):
-        x = self.read_column_values(self.ui.table_DQ, 4)
-        y= self.read_column_values(self.ui.table_DQ, 5)
-
-        graph_DQ_distr = self.ui.DQ_Widget_2
-        button = self.ui.radioButton_Log
-        if button.isChecked():
-            new_x = np.log10(x)
-            graph_DQ_distr.getAxis('bottom').setLabel("log(T₂*)")
-        else:
-            new_x = x
-            graph_DQ_distr.getAxis('bottom').setLabel("T₂*")
-
-        graph_DQ_distr.clear()
-        graph_DQ_distr.plot(new_x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
-
-    def plot_fit(self):
-        _x = self.read_column_values(self.ui.table_DQ, 4)
-        y = self.read_column_values(self.ui.table_DQ, 5)
-
-        button = self.ui.radioButton_Log
-        if button.isChecked():
-            x = np.log10(_x)
-            p = [1, 1, 1, 0]
-            b=([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, 1, np.inf])
-            self.ui.DQ_Widget_2.getAxis('bottom').setLabel("log(T₂*)")
-        else:
-            x = _x
-            p = [1, 10, 10, 0]
-            b=([0, 0, 0, 0, 0], [ np.inf, np.inf, np.inf, 1, np.inf])
-            self.ui.DQ_Widget_2.getAxis('bottom').setLabel("T₂*")
-
-        text = self.ui.comboBox_FunctionDQ.currentText()
-
-        try:
-            x_fit = np.arange(0, np.max(x) + 0.001, 0.01)
-        except:
-            x_fit = np.arange(0, 100 + 0.001, 0.01)
-
-        b1=([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf])
-
-        if text == 'Gauss':
-            params, _ = curve_fit(Cal.gaussian, x, y, p0=p, bounds=b1)
-            y_fit = Cal.gaussian(x_fit, *params)
-            y_r2 = Cal.gaussian(x, *params)
-            cen = params[1]
-            fwhm = params[2]
-            w = 0
-            button.setEnabled(True)
-        elif text == 'Lorenz':
-            params, _ = curve_fit(Cal.lorenz, x, y, p0=p, bounds=b1)
-            y_fit = Cal.lorenz(x_fit, *params)
-            y_r2 = Cal.lorenz(x, *params)
-            cen = params[1]
-            fwhm = params[2]
-            w = 1
-            button.setEnabled(True)
-        elif text == 'Pseudo Voigt':
-            params, _ = curve_fit(Cal.voigt, x, y,  bounds = b)
-            y_fit = Cal.voigt(x_fit, *params)
-            y_r2 = Cal.voigt(x, *params)
-            cen = params[1]
-            fwhm = params[2]
-            w = params[3]
-            button.setEnabled(True)
-        else:
-            button.setEnabled(False)
-            return
-
-        #R2
-        R = Cal.calculate_r_squared(y, y_r2)
-        # Plot the line
-        self.t2_dq_graph()
-        self.ui.DQ_Widget_2.plot(x_fit, y_fit, pen='r')
-
-        # Display R2, Xo and FWHM
-        self.ui.textEdit_4.setText(f"R\u00B2: {round(R, 4)} \nX\u2080: {round(cen, 4)} \nFWHM: {round(fwhm, 4)} \nFraction (Lorenz): {round(w,2)}")
 
     # DQ Ref section
     def dq_mq_analysis(self):
@@ -1921,6 +1787,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             self.selected_files_DQ_single = files
+            self.app_state.dq_files = files
         elif self.tab == 'DQ_Temp':
             table = self.ui.table_DQ_2
             self.selected_DQfiles = files
@@ -1947,7 +1814,7 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             self.update_se_graphs()
         elif self.tab == 'DQ':
-            self.update_dq_graphs()
+            self.dq_controller.update_graphs()
         elif self.tab == 'DQ_Temp':
             self.update_DQ_comparison()
         elif self.tab == 'T1T2':
@@ -2588,4 +2455,3 @@ class PhasingManual(QDialog):
         self.ui.verticalSlider_c.valueChanged.connect(self.value_changed)
         self.ui.verticalSlider_d.valueChanged.connect(self.value_changed)
         self.ui.dial.valueChanged.connect(self.smoothing_changed)
-
