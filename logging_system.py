@@ -1,14 +1,16 @@
-import os
 import sys
 from pathlib import Path
 
 
-def _is_repo_code(filename: str) -> bool:
+def _is_target_code(filename: str) -> bool:
     if not filename:
         return False
-    parts = Path(filename).parts
-    skip = {"site-packages", "lib-dynload", "importlib", "encodings"}
-    return not any(p in skip for p in parts)
+    p = Path(filename)
+    parts = p.parts
+    if "site-packages" in parts:
+        return False
+    # only app code we care about
+    return any(token in parts for token in ("controllers", "dialogs")) or p.name in {"main.py", "main_window.py"}
 
 
 def _format_file_lengths(frame):
@@ -20,16 +22,7 @@ def _format_file_lengths(frame):
         if isinstance(value, (list, tuple)):
             hints.append(f"{name}:len={len(value)}")
         elif isinstance(value, str):
-            size = None
-            if os.path.exists(value) and os.path.isfile(value):
-                try:
-                    size = os.path.getsize(value)
-                except OSError:
-                    size = None
-            if size is not None:
-                hints.append(f"{name}:path,size={size}")
-            else:
-                hints.append(f"{name}:str")
+            hints.append(f"{name}:str")
     return ", ".join(hints)
 
 
@@ -38,9 +31,13 @@ def _profile(frame, event, arg):
         return _profile
     code = frame.f_code
     filename = code.co_filename
-    if not _is_repo_code(filename):
+    if not _is_target_code(filename):
         return _profile
     fn = code.co_name
+    # ignore noisy internals / Qt event floods
+    noisy_prefixes = ("event", "mouse", "paint", "resize", "enter", "leave", "timer")
+    if fn.startswith("_") or fn.lower().startswith(noisy_prefixes):
+        return _profile
     details = _format_file_lengths(frame)
     if details:
         print(f"[TRACE] {fn} | {details}")
