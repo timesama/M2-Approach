@@ -20,6 +20,7 @@ from controllers import (
     T1T2TabController, DQMQTabController, GSTabController, ExtraTabController
 )
 from dialogs.open_files_dialog import OpenFilesDialog
+import dialogs.open_files_dialog as open_files_dialog_module
 from dialogs.notification_dialog import NotificationDialog
 from dialogs.group_window import GroupWindow
 from widgets.table_copy_enabler import TableCopyEnabler
@@ -36,7 +37,6 @@ pg.CONFIG_OPTIONS['foreground'] = 'k'
 Frequency = []
 Re_spectra = []
 Im_spectra = []
-State_multiple_files = None
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -442,12 +442,10 @@ class MainWindow(QMainWindow):
         graph_widget.setTitle(title)
 
     def open_select_comparison_files_dialog(self):
-        global State_multiple_files
-
         if self.tab == 'DQMQ':
-            State_multiple_files = False
+            open_files_dialog_module.State_multiple_files = False
         else:
-            State_multiple_files = True
+            open_files_dialog_module.State_multiple_files = True
 
         dlg = OpenFilesDialog(self)
         if dlg.exec():
@@ -472,8 +470,7 @@ class MainWindow(QMainWindow):
                 self.dqmq_controller.dq_mq_analysis()
 
     def open_select_dialog(self):
-        global State_multiple_files
-        State_multiple_files = True
+        open_files_dialog_module.State_multiple_files = True
         dlg = OpenFilesDialog(self)
 
         if dlg.exec():
@@ -492,8 +489,7 @@ class MainWindow(QMainWindow):
             self.app_state.dq_files = files
 
     def add_select_dialog(self):
-        global State_multiple_files
-        State_multiple_files = True
+        open_files_dialog_module.State_multiple_files = True
         dlg = OpenFilesDialog(self)
 
         if self.tab == 'SE':

@@ -8,6 +8,12 @@ from controllers.base_tab_controller import BaseTabController
 
 
 class DQMQTabController(BaseTabController):
+    def _get_current_file(self):
+        files = self.state.dqmq_files or []
+        if not files:
+            return None
+        return files[0]
+
     def dq_mq_analysis(self):
         table = self.ui.table_DQMQ
         table.clear()
@@ -33,7 +39,9 @@ class DQMQTabController(BaseTabController):
         self.ui.pushButton_DQMQ_4.setEnabled(True)
 
     def plot_original(self):
-        file_path = self.state.dqmq_files[0]
+        file_path = self._get_current_file()
+        if file_path is None:
+            return np.array([]), np.array([]), np.array([])
         figure = self.ui.DQMQ_Widget
         figure.clear()
         legend = figure.addLegend()
@@ -50,7 +58,9 @@ class DQMQTabController(BaseTabController):
         return time, dq, ref
 
     def plot_norm(self):
-        file_path = self.state.dqmq_files[0]
+        file_path = self._get_current_file()
+        if file_path is None:
+            return
         figure = self.ui.DQMQ_Widget
         figure.clear()
         legend = figure.addLegend()
@@ -68,7 +78,9 @@ class DQMQTabController(BaseTabController):
         self.ui.power.setEnabled(True)
 
     def plot_diff(self):
-        file_path = self.state.dqmq_files[0]
+        file_path = self._get_current_file()
+        if file_path is None:
+            return
         fit_from = self.ui.dq_min_3.value()
         fit_to = self.ui.dq_max_3.value()
         p = self.ui.power.value()
@@ -90,7 +102,9 @@ class DQMQTabController(BaseTabController):
         self.ui.pushButton_DQMQ_3.setEnabled(True)
 
     def plot_nDQ(self):
-        file_path = self.state.dqmq_files[0]
+        file_path = self._get_current_file()
+        if file_path is None:
+            return
         fit_from = self.ui.dq_min_3.value()
         fit_to = self.ui.dq_max_3.value()
         p = self.ui.power.value()
