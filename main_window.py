@@ -189,6 +189,9 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_17.clicked.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.T1T2_fit_from.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.T1T2_fit_to.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.DSB_ExpFitting1.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.DSB_ExpFitting2.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.DSB_ExpFitting3.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
 
         self.ui.checkBox_3.clicked.connect(self.gs_controller.calculate_sqrt_time)
         self.ui.radioButton_short.clicked.connect(self.gs_controller.calculate_sqrt_time)
