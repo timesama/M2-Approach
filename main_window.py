@@ -387,9 +387,11 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             table = self.ui.table_SE
             combobox = self.ui.comboBox_4
+            files = self.selected_files
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             combobox = self.ui.comboBox_4
+            files = self.selected_files_DQ_single
         elif self.tab =='T1T2':
             table = self.ui.table_T1
             combobox = self.ui.T1T2_ChooseFileComboBox
@@ -405,16 +407,32 @@ class MainWindow(QMainWindow):
         if row == -1:
             QMessageBox.warning(self, "Cricket sounds", f"Select the row.", QMessageBox.Ok)
             return
-        item = table.item(row,0).text()
+
         table.removeRow(row)
-        combobox.removeItem(row)
+        if combobox.count() > row:
+            combobox.removeItem(row)
 
         try:
-            for file_to_delete in files:
-                if file_to_delete == item:
-                    files.remove(item)
-        except:
-            QMessageBox.warning(self, "Hidden", f"The row is hidden, but the file is not deleted.", QMessageBox.Ok)
+            if files and len(files) > row:
+                files.pop(row)
+            if self.tab in ('SE', 'DQ') and self.selected_files_gly and len(self.selected_files_gly) > row:
+                self.selected_files_gly.pop(row)
+            if self.tab in ('SE', 'DQ') and self.selected_files_empty and len(self.selected_files_empty) > row:
+                self.selected_files_empty.pop(row)
+        except Exception:
+            QMessageBox.warning(self, "Delete warning", "Row was removed from table, but file lists may be out of sync.", QMessageBox.Ok)
+
+        if self.tab == 'SE':
+            self.se_controller.update_graphs()
+        elif self.tab == 'DQ':
+            self.dq_controller.update_graphs()
+
+        if self.tab in ('SE', 'DQ') and combobox.count() > 0:
+            combobox.setCurrentIndex(min(row, combobox.count() - 1))
+            self.update_file()
+        elif self.tab in ('SE', 'DQ'):
+            self.ui.FidWidget.clear()
+            self.ui.FFTWidget.clear()
 
     def highlight_row(self, table, row_selected):
 
