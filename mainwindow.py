@@ -84,7 +84,6 @@ class MainWindow(QMainWindow):
         self.phased_spectra_SE = {}
         self.phased_spectra_DQ = {}
         self.tab = None
-        self.state_bad_code = False
         self.se_controller = SETabController(ui=self.ui, state=self.app_state, parent=self)
         self.dq_controller = DQTabController(
             ui=self.ui,
@@ -783,8 +782,6 @@ class MainWindow(QMainWindow):
             with open(files_json, 'w') as f:
                 json.dump({"files": files, "phased": phased_data}, f)
 
-        if self.state_bad_code == True:
-            self.t1t2_controller.bad_code_makes_more_bad_code()
 
     def load_data(self):
         dlg = OpenFilesDialog(self)
@@ -935,7 +932,7 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _looks_like_path(value):
-        return ('/' in value) or ('\\' in value) or value.endswith(('.txt', '.dat', '.csv', '.sef'))
+        return ('/' in value) or ('\\' in value) or value.endswith(('.txt', '.dat', '.csv'))
 
     def save_figures(self, file_path, variable):
         parent_folder = os.path.dirname(file_path)

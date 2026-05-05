@@ -46,13 +46,8 @@ class T1T2TabController(BaseTabController):
         dictionary.clear()
 
         try:
-            if os.path.splitext(selected_files[0])[1] == '.sef':
-                logger.warning("T1T2 unsupported format: .sef")
-                QMessageBox.warning(self.parent, "Unsupported format .sef", "Reading of NMRD data is disabled for the versions > 0.2.2.", QMessageBox.Ok)
-                return
-            elif os.path.splitext(selected_files[0])[1] == '.csv':
+            if os.path.splitext(selected_files[0])[1] == '.csv':
                 logger.info("T1T2 branch: CSV")
-                self.parent.state_bad_code = False
                 table.setRowCount(len(selected_files))
                 csv_pattern = r'_(\-?\d+)(?=\.csv$)'
                 for row, file in zip(range(table.rowCount()), selected_files):
@@ -80,7 +75,6 @@ class T1T2TabController(BaseTabController):
 
             elif os.path.splitext(selected_files[0])[1] == '.txt':
                 logger.info("T1T2 branch: TXT")
-                self.parent.state_bad_code = False
                 table.setRowCount(len(selected_files * 4))
                 pattern_all = r'T1_.*_(\s?-?\d+).txt'
                 for file in selected_files:
@@ -117,7 +111,6 @@ class T1T2TabController(BaseTabController):
                     combobox.addItem(f"{current_file}")
             else:
                 logger.info("T1T2 branch: default")
-                self.parent.state_bad_code = False
                 table.setRowCount(len(selected_files))
                 for row, file in zip(range(table.rowCount()), selected_files):
                     logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
@@ -178,11 +171,8 @@ class T1T2TabController(BaseTabController):
         denominator = 1 if self.ui.radioButton_16.isChecked() else 1000
         if idx == -1:
             return
-        if self.parent.state_bad_code:
-            key = table.item(idx, T1Columns.FOLDER).text() + ' at freq:' + table.item(idx, T1Columns.X_AXIS).text()
-            denominator = 0.001
-        else:
-            key = table.item(idx, T1Columns.FOLDER).text()
+
+        key = table.item(idx, T1Columns.FOLDER).text()
         t0 = np.array(dictionary[key]['Time']) / denominator
         s0 = np.array(dictionary[key]['Signal'])
         t, s = t0[start:end], s0[start:end]
@@ -226,16 +216,6 @@ class T1T2TabController(BaseTabController):
         graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
         self.highlight_selected_relaxation_point()
 
-    def bad_code_makes_more_bad_code(self):
-        dictionary = self.parent.tau_dictionary
-        dialog = SaveFilesDialog(self.parent)
-        basename = os.path.basename(self.parent.selected_T1files[0])
-        save = not all(data.get('T1 1', 0) == 0 for data in dictionary.values())
-        dialog.save_file_in_sef(self.parent, dictionary, 'T1 1', 1, basename, save)
-        save = not all(data.get('T1 2', 0) == 0 for data in dictionary.values())
-        dialog.save_file_in_sef(self.parent, dictionary, 'T1 2', 2, basename, save)
-        save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
-        dialog.save_file_in_sef(self.parent, dictionary, 'T1 3', 3, basename, save)
 
     def highlight_selected_relaxation_point(self):
         row = self.ui.table_T1.currentRow()

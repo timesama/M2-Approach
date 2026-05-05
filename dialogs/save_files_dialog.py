@@ -33,27 +33,3 @@ class SaveFilesDialog(QFileDialog):
             files_list_path = os.path.splitext(file_path)[0] + '_files.json'
             with open(files_list_path, 'w') as file_list:
                 json.dump(files, file_list)
-
-    def save_file_in_sef(self, wtf, dictionary, tau, n, begin, save):
-        if not save:
-            return
-        try:
-            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\MyApp", 0, winreg.KEY_READ)
-            directory, _ = winreg.QueryValueEx(key, "SelectedFolder")
-            winreg.CloseKey(key)
-        except Exception:
-            directory = os.path.dirname(sys.argv[0])
-        try:
-            options = QFileDialog.Options()
-            default_add = '_recalculated_tau_' + str(n)
-            file_path, _ = QFileDialog.getSaveFileName(self, "Save File As", directory + '/' + begin + default_add, "SEF files (*.sef)", options=options)
-            with open(file_path, 'w') as f:
-                f.write('STELAR Export File\n\n')
-                f.write('_BRLX______\t_T1________\t_R1________\t____%err___\t+-err(R1)__\tZone\tFile\n\n')
-                for key in dictionary:
-                    Frequency = dictionary[key]['X Axis']
-                    T1 = dictionary[key][tau]
-                    Omega_1 = 0 if T1 == 0 else 1000 / T1
-                    f.write(f'{Frequency}\t{T1}\t{Omega_1}\n')
-        except Exception:
-            QMessageBox.warning(self, "Save failed", "Sorry, couldn't save the separate file in .sef for magnetization.", QMessageBox.Ok)

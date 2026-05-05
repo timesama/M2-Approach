@@ -16,7 +16,7 @@ class OpenFilesDialog(QFileDialog):
         else:
             self.setFileMode(QFileDialog.ExistingFile)
 
-        self.setNameFilter(str("Data (*.dat *.txt *.csv *.sef)"))
+        self.setNameFilter(str("Data (*.dat *.txt *.csv)"))
 
         directory = self.get_initial_directory()
         self.setDirectory(directory)
