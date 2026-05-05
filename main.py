@@ -1,11 +1,11 @@
 import sys
 from PySide6.QtWidgets import QApplication
 from main_window import MainWindow
-from logging_system import install_function_logger
+from utils.logging_config import setup_logging
 
 
 def main():
-    install_function_logger()
+    setup_logging()
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

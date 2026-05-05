@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 
 import numpy as np
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
@@ -8,10 +9,17 @@ import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
 from dialogs.save_files_dialog import SaveFilesDialog
 from controllers.table_columns import T1Columns
+from utils.ui_busy import busy_cursor
+
+logger = logging.getLogger(__name__)
 
 
 class T1T2TabController(BaseTabController):
     def update_T12_table(self):
+        with busy_cursor():
+            self._update_T12_table_impl()
+
+    def _update_T12_table_impl(self):
         def clean_line(line):
             while '\t\t' in line:
                 line = line.replace('\t\t', '\t')
@@ -24,6 +32,7 @@ class T1T2TabController(BaseTabController):
             return dictionary
 
         selected_files = self.parent.selected_T1files
+        logger.info("T1T2 loading %d files", len(selected_files))
         table = self.ui.table_T1
         combobox = self.ui.T1T2_ChooseFileComboBox
         pattern = r'(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))'
@@ -38,13 +47,16 @@ class T1T2TabController(BaseTabController):
 
         try:
             if os.path.splitext(selected_files[0])[1] == '.sef':
+                logger.warning("T1T2 unsupported format: .sef")
                 QMessageBox.warning(self.parent, "Unsupported format .sef", "Reading of NMRD data is disabled for the versions > 0.2.2.", QMessageBox.Ok)
                 return
             elif os.path.splitext(selected_files[0])[1] == '.csv':
+                logger.info("T1T2 branch: CSV")
                 self.parent.state_bad_code = False
                 table.setRowCount(len(selected_files))
                 csv_pattern = r'_(\-?\d+)(?=\.csv$)'
                 for row, file in zip(range(table.rowCount()), selected_files):
+                    logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
                     current_file = os.path.basename(file)
                     try:
                         x_axis = re.search(csv_pattern, current_file).group(1)
@@ -67,10 +79,12 @@ class T1T2TabController(BaseTabController):
                     combobox.addItem(f"{current_file}")
 
             elif os.path.splitext(selected_files[0])[1] == '.txt':
+                logger.info("T1T2 branch: TXT")
                 self.parent.state_bad_code = False
                 table.setRowCount(len(selected_files * 4))
                 pattern_all = r'T1_.*_(\s?-?\d+).txt'
                 for file in selected_files:
+                    logger.info("T1T2 parsing file: %s", os.path.basename(file))
                     try:
                         x_axis = re.search(pattern_all, os.path.basename(file)).group(1)
                     except Exception:
@@ -102,9 +116,11 @@ class T1T2TabController(BaseTabController):
                     table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(preserved_x_axis.get(entry, x_axis))))
                     combobox.addItem(f"{current_file}")
             else:
+                logger.info("T1T2 branch: default")
                 self.parent.state_bad_code = False
                 table.setRowCount(len(selected_files))
                 for row, file in zip(range(table.rowCount()), selected_files):
+                    logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
                     dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
                     current_file = os.path.basename(file)
                     try:
@@ -131,6 +147,7 @@ class T1T2TabController(BaseTabController):
                     dictionary[file]["Signal"].extend(Signal)
                     combobox.addItem(f"{current_file}")
         except Exception:
+            logger.exception("T1T2 loading failed")
             QMessageBox.warning(self.parent, "Error", "Something went wrong. Try again.", QMessageBox.Ok)
             self.parent.clear_list()
 
@@ -148,6 +165,10 @@ class T1T2TabController(BaseTabController):
         self.calculate_relaxation_time()
 
     def calculate_relaxation_time(self):
+        with busy_cursor():
+            self._calculate_relaxation_time_impl()
+
+    def _calculate_relaxation_time_impl(self):
         table = self.ui.table_T1
         figure = self.ui.T1_Widget_1
         idx = self.ui.T1T2_ChooseFileComboBox.currentIndex()
@@ -172,11 +193,14 @@ class T1T2TabController(BaseTabController):
             order, p = 2, [s[0], t1, s[0], t2, 1]
         else:
             order, p = 3, [s[0], t1, s[0], t2, s[0], t3, 1]
+        logger.info("T1T2 fitting selected curve: index=%d, order=%d", idx, order)
         try:
             tf, fit, tau1, tau2, tau3, r2, a1, a2, a3 = Cal.fit_exponent(t, s, order, p)
         except Exception:
+            logger.exception("T1T2 fit failed for index=%d order=%d", idx, order)
             QMessageBox.warning(self.parent, "Fitting failed", f"Fitting failed for a {order}-exponential model. Decrease the coherence order and/or adjust the initial tau values.", QMessageBox.Ok)
             return
+        logger.info("T1T2 fit completed: tau1=%s tau2=%s tau3=%s r2=%s", tau1, tau2, tau3, r2)
         self.ui.textEdit_error.setText(f"R² {r2}")
         table.setItem(idx, T1Columns.TAU_1, QTableWidgetItem(str(tau1))); table.setItem(idx, T1Columns.TAU_2, QTableWidgetItem(str(tau2))); table.setItem(idx, T1Columns.TAU_3, QTableWidgetItem(str(tau3)))
         table.setItem(idx, T1Columns.A_1, QTableWidgetItem(str(a1))); table.setItem(idx, T1Columns.A_2, QTableWidgetItem(str(a2))); table.setItem(idx, T1Columns.A_3, QTableWidgetItem(str(a3)))

@@ -1,4 +1,5 @@
 import os
+import logging
 import numpy as np
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 from scipy.signal import savgol_filter
@@ -7,6 +8,9 @@ from controllers.base_tab_controller import BaseTabController
 from dialogs.open_files_dialog import OpenFilesDialog
 import dialogs.phasing_manual as phasing_manual_module
 from dialogs.phasing_manual import PhasingManual
+from utils.ui_busy import busy_cursor
+
+logger = logging.getLogger(__name__)
 
 
 class GeneralSEDQController(BaseTabController):
@@ -16,28 +20,34 @@ class GeneralSEDQController(BaseTabController):
         self.dq_controller = dq_controller
 
     def analysis(self):
-        mw=self.parent
-        while self.ui.comboBox_4.count()>0: self.ui.comboBox_4.removeItem(0)
-        if mw.tab=='SE': files=mw.selected_files; self.ui.SEWidget.clear(); self.ui.comboBox_SE_chooseY.setCurrentIndex(-1)
-        else: files=mw.selected_files_DQ_single; self.ui.DQ_Widget_1.clear(); self.ui.DQ_Widget_2.clear(); self.ui.DQ_Widget_4.clear(); self.ui.textEdit_4.setText(''); self.ui.comboBox_FunctionDQ.setCurrentIndex(-1)
-        if len(files)==0: return
-        if self.ui.checkBox_glycerol.isChecked() and mw.selected_files_gly==[]:
-            self.open_select_dialog_glycerol()
-        if self.ui.checkBox_baseline.isChecked() and mw.selected_files_empty==[]:
-            self.open_select_dialog_baseline()
-        mw.disable_buttons(); self.ui.btn_SelectFiles.setEnabled(False); self.ui.btn_Load.setEnabled(False); self.ui.radioButton.setEnabled(False); self.ui.comboBox_4.setCurrentIndex(-1)
-        mw.window_array = np.linspace(self.ui.SmoothWindowFrom.value(), self.ui.SmoothWindowTo.value(), len(files), dtype=np.int32) if self.ui.checkBox_Smooth.isChecked() else np.array([])
-        for i,file_path in enumerate(files,start=1):
-            try:
-                f_g = mw.selected_files_gly[i-1] if self.ui.checkBox_glycerol.isChecked() else []
-                f_e = mw.selected_files_empty[i-1] if self.ui.checkBox_baseline.isChecked() else []
-                self.process_file_data(file_path,f_g,f_e,i)
-            except Exception:
-                self.analysis_error(file_path, files)
-        self.update_legends_and_dq_graphs(); self.ui.btn_Start.setStyleSheet('background-color: none')
+        with busy_cursor():
+            mw=self.parent
+            while self.ui.comboBox_4.count()>0: self.ui.comboBox_4.removeItem(0)
+            if mw.tab=='SE': files=mw.selected_files; self.ui.SEWidget.clear(); self.ui.comboBox_SE_chooseY.setCurrentIndex(-1)
+            else: files=mw.selected_files_DQ_single; self.ui.DQ_Widget_1.clear(); self.ui.DQ_Widget_2.clear(); self.ui.DQ_Widget_4.clear(); self.ui.textEdit_4.setText(''); self.ui.comboBox_FunctionDQ.setCurrentIndex(-1)
+            if len(files)==0: return
+            logger.info("%s analysis started: %d files", mw.tab, len(files))
+            logger.info("Options - glycerol:%s baseline:%s long_component:%s smoothing:%s", self.ui.checkBox_glycerol.isChecked(), self.ui.checkBox_baseline.isChecked(), self.ui.checkBox_long_component.isChecked(), self.ui.checkBox_Smooth.isChecked())
+            if self.ui.checkBox_glycerol.isChecked() and mw.selected_files_gly==[]:
+                self.open_select_dialog_glycerol()
+            if self.ui.checkBox_baseline.isChecked() and mw.selected_files_empty==[]:
+                self.open_select_dialog_baseline()
+            mw.disable_buttons(); self.ui.btn_SelectFiles.setEnabled(False); self.ui.btn_Load.setEnabled(False); self.ui.radioButton.setEnabled(False); self.ui.comboBox_4.setCurrentIndex(-1)
+            mw.window_array = np.linspace(self.ui.SmoothWindowFrom.value(), self.ui.SmoothWindowTo.value(), len(files), dtype=np.int32) if self.ui.checkBox_Smooth.isChecked() else np.array([])
+            for i,file_path in enumerate(files,start=1):
+                logger.info("%s processing file %d/%d: %s", mw.tab, i, len(files), os.path.basename(file_path))
+                try:
+                    f_g = mw.selected_files_gly[i-1] if self.ui.checkBox_glycerol.isChecked() else []
+                    f_e = mw.selected_files_empty[i-1] if self.ui.checkBox_baseline.isChecked() else []
+                    self.process_file_data(file_path,f_g,f_e,i)
+                except Exception:
+                    self.analysis_error(file_path, files)
+            self.update_legends_and_dq_graphs(); self.ui.btn_Start.setStyleSheet('background-color: none')
+            logger.info("%s analysis completed: %d files", mw.tab, len(files))
 
     def analysis_error(self, file_path, files):
         mw=self.parent
+        logger.exception("Failed to process file %s", file_path)
         QMessageBox.warning(mw, "Invalid Data", f"Couldn't read the {os.path.basename(file_path)}. Deleting the file.", QMessageBox.Ok)
         files.remove(file_path); self.ui.btn_SelectFiles.setEnabled(True); self.ui.btn_Start.setStyleSheet("background-color: none")
         self.ui.FidWidget.clear(); self.ui.FFTWidget.clear(); self.ui.btn_Phasing.setEnabled(False); mw.enable_buttons()

@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 
 import numpy as np
 import pyqtgraph as pg
@@ -10,39 +11,47 @@ from scipy.optimize import curve_fit
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
 from controllers.table_columns import DQTempColumns
+from utils.ui_busy import busy_cursor
+
+logger = logging.getLogger(__name__)
 
 
 class DQTempTabController(BaseTabController):
     def update_DQ_comparison(self):
-        table = self.ui.table_DQ_2
-        table.setRowCount(len(self.parent.selected_DQfiles))
-        for row, parent_folder in enumerate(self.parent.selected_DQfiles, start=0):
-            foldername = os.path.dirname(parent_folder)
-            filename = os.path.basename(parent_folder)
-            try:
-                data = np.loadtxt(parent_folder, delimiter=',')
-                if data.shape[1] < 3:
-                    QMessageBox.warning(self.parent, "Invalid Data", f"The file {foldername} does not have at least 3 columns and will be removed from the table and file list.", QMessageBox.Ok)
+        with busy_cursor():
+            table = self.ui.table_DQ_2
+            logger.info("DQ Temp loading %d files", len(self.parent.selected_DQfiles))
+            table.setRowCount(len(self.parent.selected_DQfiles))
+            for row, parent_folder in enumerate(self.parent.selected_DQfiles, start=0):
+                logger.info("DQ Temp processing file %d/%d: %s", row + 1, len(self.parent.selected_DQfiles), os.path.basename(parent_folder))
+                foldername = os.path.dirname(parent_folder)
+                filename = os.path.basename(parent_folder)
+                try:
+                    data = np.loadtxt(parent_folder, delimiter=',')
+                    if data.shape[1] < 3:
+                        QMessageBox.warning(self.parent, "Invalid Data", f"The file {foldername} does not have at least 3 columns and will be removed from the table and file list.", QMessageBox.Ok)
+                        table.removeRow(row)
+                        del self.parent.selected_DQfiles[row]
+                except Exception as e:
+                    logger.exception("DQ Temp invalid input file: %s", parent_folder)
+                    QMessageBox.warning(self.parent, "Invalid Data", f"The file {foldername} {e} Removed from the table and file list.", QMessageBox.Ok)
                     table.removeRow(row)
                     del self.parent.selected_DQfiles[row]
-            except Exception as e:
-                QMessageBox.warning(self.parent, "Invalid Data", f"The file {foldername} {e} Removed from the table and file list.", QMessageBox.Ok)
-                table.removeRow(row)
-                del self.parent.selected_DQfiles[row]
-            item = QTableWidgetItem(filename)
-            item_name = QTableWidgetItem()
-            pattern = r'Table_DQ_(-?[0-9]+).*.csv'
-            try:
-                item_xaxis = float(re.search(pattern, filename).group(1))
-                item_name.setData(Qt.EditRole, item_xaxis)
-            except Exception:
-                item_name.setData(Qt.EditRole, float(row + 1))
-            table.setItem(row, DQTempColumns.FOLDER, item)
-            table.setItem(row, DQTempColumns.NAME, item_name)
-        table.resizeColumnsToContents()
-        self.launch()
+                item = QTableWidgetItem(filename)
+                item_name = QTableWidgetItem()
+                pattern = r'Table_DQ_(-?[0-9]+).*.csv'
+                try:
+                    item_xaxis = float(re.search(pattern, filename).group(1))
+                    item_name.setData(Qt.EditRole, item_xaxis)
+                except Exception:
+                    item_name.setData(Qt.EditRole, float(row + 1))
+                table.setItem(row, DQTempColumns.FOLDER, item)
+                table.setItem(row, DQTempColumns.NAME, item_name)
+            table.resizeColumnsToContents()
+            self.launch()
 
     def launch(self):
+        logger.info("DQ Temp launching comparison fit")
         try:
             self.parent.dq_t2 = {}
             for row, parent_folder in enumerate(self.parent.selected_DQfiles, start=0):
@@ -50,6 +59,7 @@ class DQTempTabController(BaseTabController):
                 self.parent.dq_t2[row] = data[:, [4, 5]]
             self.update_DQ_comparison_plot()
         except Exception as e:
+            logger.exception("DQ Temp launch failed")
             QMessageBox.warning(self.parent, "Corrupted file", f"Couldn't analyse the {os.path.dirname(parent_folder)} because {e}", QMessageBox.Ok)
 
     def update_DQ_comparison_plot(self):

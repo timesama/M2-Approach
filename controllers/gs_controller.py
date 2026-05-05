@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 
 import numpy as np
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
@@ -7,16 +8,24 @@ from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
 from controllers.table_columns import GSColumns
+from utils.ui_busy import busy_cursor
+
+logger = logging.getLogger(__name__)
 
 
 class GSTabController(BaseTabController):
     def update_GS_table(self):
+        with busy_cursor():
+            self._update_GS_table_impl()
+
+    def _update_GS_table_impl(self):
         def clean_line(line):
             while '\t\t' in line:
                 line = line.replace('\t\t', '\t')
             return line.strip()
 
         selected_files = self.parent.selected_GSfiles
+        logger.info("GS loading %d files", len(selected_files))
         table = self.ui.table_GS
         combobox = self.ui.comboBox_7
         pattern = r'_([0-9]+)\.dat$'
@@ -26,6 +35,7 @@ class GSTabController(BaseTabController):
         try:
             table.setRowCount(len(selected_files))
             for row, file in zip(range(table.rowCount()), selected_files):
+                logger.info("GS processing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
                 dictionary[file] = {"X Axis": [], "sqrtTime": [], "short": [], "medium": [], "long": []}
                 sqrtTime, short, medium, long = [], [], [], []
                 current_file = os.path.basename(file)
@@ -51,14 +61,20 @@ class GSTabController(BaseTabController):
                 dictionary[file]["medium"].extend(medium)
                 dictionary[file]["long"].extend(long)
         except Exception as e:
+            logger.exception("GS table loading failed")
             QMessageBox.warning(self.parent, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
             self.parent.clear_list()
         table.resizeColumnsToContents()
 
     def calculate_sqrt_time(self):
+        with busy_cursor():
+            self._calculate_sqrt_time_impl()
+
+    def _calculate_sqrt_time_impl(self):
         idx = self.ui.comboBox_7.currentIndex()
         if idx == -1:
             return
+        logger.info("GS fit started: index=%d", idx)
         table = self.ui.table_GS
         figure = self.ui.GS_Widget_1
         dictionary = self.parent.GS_dictionary
@@ -87,8 +103,10 @@ class GSTabController(BaseTabController):
             table.resizeColumnsToContents()
             figure.clear(); figure.plot(time_original, signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
             dictionary[key]['sqrtT'] = sqrtT; dictionary[key]['d'] = d
+            logger.info("GS fit completed: sqrtT=%s d=%s", sqrtT, d)
             self.ui.btn_Plot1.setEnabled(True)
         except Exception as e:
+            logger.exception("GS fit failed: index=%d", idx)
             figure.clear(); QMessageBox.warning(self.parent, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
 
     def plot_sqrt_time(self):

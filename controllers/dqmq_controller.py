@@ -1,10 +1,14 @@
 import numpy as np
+import logging
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 from pyqtgraph import InfiniteLine, mkPen
 
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
+from utils.ui_busy import busy_cursor
+
+logger = logging.getLogger(__name__)
 
 
 class DQMQTabController(BaseTabController):
@@ -15,12 +19,15 @@ class DQMQTabController(BaseTabController):
         return files[0]
 
     def dq_mq_analysis(self):
-        table = self.ui.table_DQMQ
+        with busy_cursor():
+            table = self.ui.table_DQMQ
+            logger.info("DQMQ analysis started")
         table.clear()
         table.setColumnCount(4)
         try:
             time, dq, ref = self.plot_original()
         except Exception as e:
+            logger.exception("DQMQ analysis failed")
             QMessageBox.warning(self.parent, "Corrupt File", f"Couldn't read the file beacuse {e}", QMessageBox.Ok)
             if self.parent is not None:
                 self.parent.clear_list()
@@ -38,6 +45,7 @@ class DQMQTabController(BaseTabController):
         self.ui.pushButton_DQMQ_2.setEnabled(False)
         self.ui.pushButton_DQMQ_3.setEnabled(False)
         self.ui.pushButton_DQMQ_4.setEnabled(True)
+        logger.info("DQMQ analysis completed: %d points", len(time))
 
     def plot_original(self):
         file_path = self._get_current_file()
@@ -59,6 +67,7 @@ class DQMQTabController(BaseTabController):
         return time, dq, ref
 
     def plot_norm(self):
+        logger.info("DQMQ normalization started")
         file_path = self._get_current_file()
         if file_path is None:
             return
@@ -86,6 +95,7 @@ class DQMQTabController(BaseTabController):
         fit_to = self.ui.dq_max_3.value()
         p = self.ui.power.value()
         noise_level = self.ui.noise.value()
+        logger.info("DQMQ diff fit: from=%s to=%s power=%s noise=%s", fit_from, fit_to, p, noise_level)
         time_shift = int(self.ui.DQMQtime_shift.value())
         figure = self.ui.DQMQ_Widget
         figure.clear()
@@ -110,6 +120,7 @@ class DQMQTabController(BaseTabController):
         fit_to = self.ui.dq_max_3.value()
         p = self.ui.power.value()
         noise_level = self.ui.noise.value()
+        logger.info("DQMQ nDQ fit: from=%s to=%s power=%s noise=%s", fit_from, fit_to, p, noise_level)
         time_shift = int(self.ui.DQMQtime_shift.value())
         smoothing = [self.ui.DQMQSmooth_from.value(), self.ui.DQMQSmooth_to.value(), int(self.ui.DQMQSmooth_window.value())]
         figure = self.ui.DQMQ_Widget

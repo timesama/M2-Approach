@@ -27,6 +27,10 @@ from dialogs.phasing_manual import PhasingManual
 from widgets.table_copy_enabler import TableCopyEnabler
 from app_state import AppState
 from controllers.table_columns import T1Columns, GSColumns, DQTempColumns
+from utils.ui_busy import busy_cursor
+import logging
+
+logger = logging.getLogger(__name__)
 
 pg.CONFIG_OPTIONS['background'] = 'w'
 pg.CONFIG_OPTIONS['foreground'] = 'k'
@@ -790,12 +794,17 @@ class MainWindow(QMainWindow):
             self.load_table_from_csv(tableName)
 
     def load_table_from_csv(self, tableName):
+        with busy_cursor():
+            self._load_table_from_csv_impl(tableName)
+
+    def _load_table_from_csv_impl(self, tableName):
 
         self.clear_list()
         self.enable_buttons()
         self.ui.comboBox_4.clear()
 
         file_path = tableName[0]
+        logger.info("Loading saved table: %s", file_path)
         try:
             files_list = file_path.strip().split('.')[0] + '_files.json'
             with open(files_list, 'r') as file:
