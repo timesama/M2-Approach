@@ -5,7 +5,6 @@
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
-import matplotlib.pyplot as plt
 from sympy import symbols, diff, solve
 
 # Math procedures
