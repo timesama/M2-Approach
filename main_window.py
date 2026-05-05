@@ -746,10 +746,10 @@ class MainWindow(QMainWindow):
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
         if self.tab in ('SE', 'DQ') and dialog.last_saved_file_path:
-            phased_file = os.path.splitext(dialog.last_saved_file_path)[0] + '_phased.json'
+            files_json = os.path.splitext(dialog.last_saved_file_path)[0] + '_files.json'
             phased_data = self.phased_spectra_SE if self.tab == 'SE' else self.phased_spectra_DQ
-            with open(phased_file, 'w') as f:
-                json.dump(phased_data, f)
+            with open(files_json, 'w') as f:
+                json.dump({"files": files, "phased": phased_data}, f)
 
         if self.state_bad_code == True:
             self.t1t2_controller.bad_code_makes_more_bad_code()
@@ -771,10 +771,17 @@ class MainWindow(QMainWindow):
         try:
             files_list = file_path.strip().split('.')[0] + '_files.json'
             with open(files_list, 'r') as file:
-                files = json.load(file)
+                files_payload = json.load(file)
+                if isinstance(files_payload, dict):
+                    files = files_payload.get("files", [])
+                    phased = files_payload.get("phased", {})
+                else:
+                    files = files_payload
+                    phased = {}
         except Exception as e:
             QMessageBox.warning(self, "File missing", f"Didn't find file list, only the tabular result is available", QMessageBox.Ok)
             files = None
+            phased = {}
             self.ui.comboBox_4.setEnabled(False)
             self.ui.btn_Phasing.setEnabled(False)
 
