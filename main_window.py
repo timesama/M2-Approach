@@ -312,8 +312,6 @@ class MainWindow(QMainWindow):
         try:
             self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
         except Exception:
-            self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
-        except Exception:
             return
 
         # Update general figures
@@ -402,11 +400,9 @@ class MainWindow(QMainWindow):
             table = self.ui.table_SE
             combobox = self.ui.comboBox_4
             files = self.selected_files
-            files = self.selected_files
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             combobox = self.ui.comboBox_4
-            files = self.selected_files_DQ_single
             files = self.selected_files_DQ_single
         elif self.tab =='T1T2':
             table = self.ui.table_T1
@@ -424,34 +420,11 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Cricket sounds", f"Select the row.", QMessageBox.Ok)
             return
 
-
         table.removeRow(row)
-        if combobox.count() > row:
-            combobox.removeItem(row)
         if combobox.count() > row:
             combobox.removeItem(row)
 
         try:
-            if files and len(files) > row:
-                files.pop(row)
-            if self.tab in ('SE', 'DQ') and self.selected_files_gly and len(self.selected_files_gly) > row:
-                self.selected_files_gly.pop(row)
-            if self.tab in ('SE', 'DQ') and self.selected_files_empty and len(self.selected_files_empty) > row:
-                self.selected_files_empty.pop(row)
-        except Exception:
-            QMessageBox.warning(self, "Delete warning", "Row was removed from table, but file lists may be out of sync.", QMessageBox.Ok)
-
-        if self.tab == 'SE':
-            self.se_controller.update_graphs()
-        elif self.tab == 'DQ':
-            self.dq_controller.update_graphs()
-
-        if self.tab in ('SE', 'DQ') and combobox.count() > 0:
-            combobox.setCurrentIndex(min(row, combobox.count() - 1))
-            self.update_file()
-        elif self.tab in ('SE', 'DQ'):
-            self.ui.FidWidget.clear()
-            self.ui.FFTWidget.clear()
             if files and len(files) > row:
                 files.pop(row)
             if self.tab in ('SE', 'DQ') and self.selected_files_gly and len(self.selected_files_gly) > row:
@@ -803,6 +776,7 @@ class MainWindow(QMainWindow):
         self.clear_list()
         self.enable_buttons()
         self.ui.comboBox_4.clear()
+        self.ui.comboBox_4.clear()
 
         file_path = tableName[0]
         try:
@@ -871,13 +845,27 @@ class MainWindow(QMainWindow):
                 for row in range(table.rowCount()):
                     self.ui.comboBox_4.addItem(f"File #{row+1}")
 
+        if self.tab in ('SE', 'DQ'):
+            if files:
+                for path in files:
+                    self.ui.comboBox_4.addItem(os.path.basename(path))
+            else:
+                for row in range(table.rowCount()):
+                    self.ui.comboBox_4.addItem(f"File #{row+1}")
+
         if self.tab == 'SE':
             self.update_se_graphs()
             if self.ui.comboBox_4.count() > 0:
                 self.ui.comboBox_4.setCurrentIndex(0)
                 self.update_file()
+            if self.ui.comboBox_4.count() > 0:
+                self.ui.comboBox_4.setCurrentIndex(0)
+                self.update_file()
         elif self.tab == 'DQ':
             self.dq_controller.update_graphs()
+            if self.ui.comboBox_4.count() > 0:
+                self.ui.comboBox_4.setCurrentIndex(0)
+                self.update_file()
             if self.ui.comboBox_4.count() > 0:
                 self.ui.comboBox_4.setCurrentIndex(0)
                 self.update_file()
