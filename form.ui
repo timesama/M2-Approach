@@ -1613,7 +1613,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <string notr="true"/>
                    </property>
                    <property name="editTriggers">
-                    <set>QAbstractItemView::CurrentChanged</set>
+                    <set>QAbstractItemView::NoEditTriggers</set>
                    </property>
                    <property name="alternatingRowColors">
                     <bool>true</bool>

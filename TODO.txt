@@ -10,39 +10,6 @@ TODO, Codex: Next task: focused cleanup and robustness pass for DQ temperature t
 
 Do not redesign the application architecture in this task. Do not change numerical algorithms except where needed to handle failed fits safely. Keep the task focused.
 
-TASK 1 — Fix table_DQ_2 cell behavior
-
-Problem:
-In table_DQ_2, some cells appear as “double boxes” / editable widget-like cells for some reason. They should be normal QTableWidget cells.
-
-Required behavior:
-- table_DQ_2 should use regular QTableWidgetItem cells, not embedded widgets/spinboxes/combo boxes.
-- The user should not be able to edit table_DQ_2 manually.
-- The table should still be selectable/copyable if current app behavior allows table copying.
-
-Implementation:
-- Inspect all code that fills table_DQ_2.
-- Remove any use of setCellWidget for table_DQ_2.
-- Ensure values are inserted with QTableWidgetItem.
-- Set the table itself to non-editable, preferably once during setup or controller initialization:
-
-    self.ui.table_DQ_2.setEditTriggers(QTableWidget.NoEditTriggers)
-
-- If needed, also clear editable flags on individual items:
-
-    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-
-- Do not make other unrelated tables non-editable unless already intended.
-
-Likely files:
-- controllers/dq_temp_controller.py
-- main_window.py, if table setup still happens there
-- any shared table helper
-
-Validation:
-- Search for table_DQ_2.setCellWidget. There should be none unless there is a very deliberate reason.
-- table_DQ_2 cells should render as normal table cells.
-- table_DQ_2 cells should not be editable by double-clicking.
 
 TASK 2 — Make DQ temperature fitting robust per file
 
