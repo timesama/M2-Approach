@@ -16,33 +16,43 @@ logger = logging.getLogger(__name__)
 
 class T1T2TabController(BaseTabController):
     def update_T12_table(self):
+
         with busy_cursor():
             self._update_T12_table_impl()
 
     def _update_T12_table_impl(self):
+
         def clean_line(line):
+
             while '\t\t' in line:
                 line = line.replace('\t\t', '\t')
             return line.strip()
 
         def create_dictionary(dictionary, file, addition, x_axis, Time, Signal):
+
             dictionary[file + addition]["X Axis"].append(x_axis)
             dictionary[file + addition]["Time"].extend(Time)
             dictionary[file + addition]["Signal"].extend(Signal)
             return dictionary
 
         selected_files = self.parent.selected_T1files
+
         logger.info("T1T2 loading %d files", len(selected_files))
+
         table = self.ui.table_T1
         combobox = self.ui.T1T2_ChooseFileComboBox
+
         pattern = r'(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))'
         dictionary = self.parent.tau_dictionary
         preserved_x_axis = {}
+
         for row in range(table.rowCount()):
             file_item = table.item(row, T1Columns.FOLDER)
             x_item = table.item(row, T1Columns.X_AXIS)
+
             if file_item is not None and x_item is not None:
                 preserved_x_axis[file_item.text()] = x_item.text()
+
         dictionary.clear()
 
         try:
@@ -50,20 +60,26 @@ class T1T2TabController(BaseTabController):
                 logger.info("T1T2 branch: CSV")
                 table.setRowCount(len(selected_files))
                 csv_pattern = r'_(\-?\d+)(?=\.csv$)'
+
                 for row, file in zip(range(table.rowCount()), selected_files):
                     logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
                     current_file = os.path.basename(file)
+
                     try:
                         x_axis = re.search(csv_pattern, current_file).group(1)
+
                     except Exception:
                         x_axis = row
+
                     dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
                     Time, Signal = [], []
+
                     with open(file) as f:
                         for line in f:
                             parts = line.strip().split(",")
                             Time.append(float(parts[0]))
                             Signal.append(float(parts[1]))
+
                     effective_x = preserved_x_axis.get(file, str(x_axis))
                     dictionary[file]["X Axis"].append(effective_x)
                     dictionary[file]["Time"].extend(Time)
@@ -77,19 +93,25 @@ class T1T2TabController(BaseTabController):
                 logger.info("T1T2 branch: TXT")
                 table.setRowCount(len(selected_files * 4))
                 pattern_all = r'T1_.*_(\s?-?\d+).txt'
+
                 for file in selected_files:
                     logger.info("T1T2 parsing file: %s", os.path.basename(file))
+
                     try:
                         x_axis = re.search(pattern_all, os.path.basename(file)).group(1)
+
                     except Exception:
                         x_axis = 'Variable'
+
                     Time, Signal_all, Signal_short, Signal_med, Signal_long = [], [], [], [], []
                     dictionary[file + '_all'] = {"X Axis": [], "Time": [], "Signal": []}
                     dictionary[file + '_short'] = {"X Axis": [], "Time": [], "Signal": []}
                     dictionary[file + '_medium'] = {"X Axis": [], "Time": [], "Signal": []}
                     dictionary[file + '_long'] = {"X Axis": [], "Time": [], "Signal": []}
+
                     with open(file, "r") as data:
                         lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
+
                         for line in lines[1:]:
                             parts = line.split('\t')
                             Time.append(float(parts[0]))
@@ -97,6 +119,7 @@ class T1T2TabController(BaseTabController):
                             Signal_short.append(float(parts[2]))
                             Signal_med.append(float(parts[3]))
                             Signal_long.append(float(parts[4]))
+
                     dictionary = create_dictionary(dictionary, file, '_all', x_axis, Time, Signal_all)
                     dictionary = create_dictionary(dictionary, file, '_short', x_axis, Time, Signal_short)
                     dictionary = create_dictionary(dictionary, file, '_medium', x_axis, Time, Signal_med)
@@ -109,28 +132,36 @@ class T1T2TabController(BaseTabController):
                     table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(current_file))
                     table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(preserved_x_axis.get(entry, x_axis))))
                     combobox.addItem(f"{current_file}")
+
             else:
                 logger.info("T1T2 branch: default")
                 table.setRowCount(len(selected_files))
+
                 for row, file in zip(range(table.rowCount()), selected_files):
                     logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
                     dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
                     current_file = os.path.basename(file)
+
                     try:
                         x_axis = re.search(pattern, current_file).group(2)
+
                     except Exception:
                         x_axis = row
+
                     try:
                         with open(file, "r") as data:
                             lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
                         Time, Signal = [], []
+
                         for line in lines[1:]:
                             parts = line.split('\t')
                             Time.append(float(parts[0]))
                             Signal.append(float(parts[1]))
+
                     except Exception:
                         data = np.loadtxt(file)
                         Time, Signal = data[:, 0], data[:, 1]
+
                     table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(file))
                     table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(current_file))
                     effective_x = preserved_x_axis.get(file, str(x_axis))
@@ -139,6 +170,7 @@ class T1T2TabController(BaseTabController):
                     dictionary[file]["Time"].extend(Time)
                     dictionary[file]["Signal"].extend(Signal)
                     combobox.addItem(f"{current_file}")
+
         except Exception:
             logger.exception("T1T2 loading failed")
             QMessageBox.warning(self.parent, "Error", "Something went wrong. Try again.", QMessageBox.Ok)
@@ -149,19 +181,19 @@ class T1T2TabController(BaseTabController):
         table.resizeColumnsToContents()
 
     def change_exponential_order(self):
-        self.ui.DSB_ExpFitting1.setValue(100)
-        self.ui.DSB_ExpFitting2.setValue(1000)
-        self.ui.DSB_ExpFitting3.setValue(10000)
         self.ui.DSB_ExpFitting1.setEnabled(True)
         self.ui.DSB_ExpFitting2.setEnabled(not self.ui.T1T2_FitWith1ExpButton.isChecked())
         self.ui.DSB_ExpFitting3.setEnabled(self.ui.T1T2_FitWith3ExpButton.isChecked())
+
         self.calculate_relaxation_time()
 
     def calculate_relaxation_time(self):
+
         with busy_cursor():
             self._calculate_relaxation_time_impl()
 
     def _calculate_relaxation_time_impl(self):
+
         table = self.ui.table_T1
         figure = self.ui.T1_Widget_1
         idx = self.ui.T1T2_ChooseFileComboBox.currentIndex()
@@ -200,6 +232,7 @@ class T1T2TabController(BaseTabController):
         self.ui.btn_Plot1.setEnabled(True)
 
     def plot_relaxation_time(self):
+
         table = self.ui.table_T1
         graph = self.ui.T1_Widget_2
         column = T1Columns.TAU_1 if self.ui.T1T2_1expPlotButton.isChecked() else T1Columns.TAU_2 if self.ui.T1T2_2expPlotButton.isChecked() else T1Columns.TAU_3
@@ -218,6 +251,7 @@ class T1T2TabController(BaseTabController):
 
 
     def highlight_selected_relaxation_point(self):
+
         row = self.ui.table_T1.currentRow()
         if row < 0:
             return
