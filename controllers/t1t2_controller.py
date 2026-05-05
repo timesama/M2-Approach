@@ -37,7 +37,7 @@ class T1T2TabController(BaseTabController):
 
         try:
             if os.path.splitext(selected_files[0])[1] == '.sef':
-                QMessageBox.warning(self.parent, "Unsupported format", "SEF/FFC reading is disabled for T1T2 tab.", QMessageBox.Ok)
+                QMessageBox.warning(self.parent, "Unsupported format .sef", "Reading of NMRD data is disabled for the versions > 0.2.2.", QMessageBox.Ok)
                 return
             elif os.path.splitext(selected_files[0])[1] == '.csv':
                 self.parent.state_bad_code = False
@@ -173,7 +173,7 @@ class T1T2TabController(BaseTabController):
         try:
             tf, fit, tau1, tau2, tau3, r2, a1, a2, a3 = Cal.fit_exponent(t, s, order, p)
         except Exception:
-            QMessageBox.warning(self.parent, "No covariance", f"I am sorry, I couldn't fit with {order} exponents. Decrease the order of fitting and try again.", QMessageBox.Ok)
+            QMessageBox.warning(self.parent, "Fitting failed", f"Fitting failed for a {order}-exponential model. Decrease the coherence order and/or adjust the initial tau values.", QMessageBox.Ok)
             return
         self.ui.textEdit_error.setText(f"R² {r2}")
         table.setItem(idx, 3, QTableWidgetItem(str(tau1))); table.setItem(idx, 5, QTableWidgetItem(str(tau2))); table.setItem(idx, 7, QTableWidgetItem(str(tau3)))

@@ -183,7 +183,6 @@ class MainWindow(QMainWindow):
         self.ui.table_DQ.currentItemChanged.connect(self.dq_controller.update_graphs)
         self.ui.table_SE.itemSelectionChanged.connect(self.update_se_graphs)
         self.ui.table_DQ.itemSelectionChanged.connect(self.dq_controller.update_graphs)
-        self.ui.table_DQ_2.itemSelectionChanged.connect(self.dq_temp_controller.update_DQ_comparison_plot)
         self.ui.table_T1.itemSelectionChanged.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
         self.ui.T1T2_FitWith2ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
