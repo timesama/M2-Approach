@@ -1,6 +1,5 @@
 import os
 import re
-from itertools import islice
 
 import numpy as np
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
@@ -28,28 +27,18 @@ class T1T2TabController(BaseTabController):
         combobox = self.ui.T1T2_ChooseFileComboBox
         pattern = r'(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))'
         dictionary = self.parent.tau_dictionary
+        preserved_x_axis = {}
+        for row in range(table.rowCount()):
+            file_item = table.item(row, 0)
+            x_item = table.item(row, 2)
+            if file_item is not None and x_item is not None:
+                preserved_x_axis[file_item.text()] = x_item.text()
         dictionary.clear()
 
         try:
             if os.path.splitext(selected_files[0])[1] == '.sef':
-                if os.path.splitext(selected_files[1])[1] != '.sef':
-                    QMessageBox.warning(self.parent, "Error", "Load two files: Magnetization and Profile in .sef format.", QMessageBox.Ok)
-                    return
-                if os.stat(selected_files[0]).st_size > os.stat(selected_files[1]).st_size:
-                    filetoreadzones, filetoreaddata = selected_files[1], selected_files[0]
-                else:
-                    filetoreadzones, filetoreaddata = selected_files[0], selected_files[1]
-                dictionary = self.process_files(filetoreadzones, filetoreaddata)
-                table.setRowCount(len(dictionary))
-                for row, key in zip(range(table.rowCount()), dictionary):
-                    x_axis = dictionary[key]["X Axis"]
-                    table.setItem(row, 0, QTableWidgetItem(filetoreaddata))
-                    table.setItem(row, 1, QTableWidgetItem(os.path.basename(filetoreaddata)))
-                    table.setItem(row, 2, QTableWidgetItem(x_axis))
-                    combobox.addItem(f"{x_axis}")
-                self.parent.tau_dictionary = dictionary
-                self.parent.state_bad_code = True
-
+                QMessageBox.warning(self.parent, "Unsupported format", "SEF/FFC reading is disabled for T1T2 tab.", QMessageBox.Ok)
+                return
             elif os.path.splitext(selected_files[0])[1] == '.csv':
                 self.parent.state_bad_code = False
                 table.setRowCount(len(selected_files))
@@ -67,12 +56,13 @@ class T1T2TabController(BaseTabController):
                             parts = line.strip().split(",")
                             Time.append(float(parts[0]))
                             Signal.append(float(parts[1]))
-                    dictionary[file]["X Axis"].append(x_axis)
+                    effective_x = preserved_x_axis.get(file, str(x_axis))
+                    dictionary[file]["X Axis"].append(effective_x)
                     dictionary[file]["Time"].extend(Time)
                     dictionary[file]["Signal"].extend(Signal)
                     table.setItem(row, 0, QTableWidgetItem(file))
                     table.setItem(row, 1, QTableWidgetItem(current_file))
-                    table.setItem(row, 2, QTableWidgetItem(str(x_axis)))
+                    table.setItem(row, 2, QTableWidgetItem(str(effective_x)))
                     combobox.addItem(f"{current_file}")
 
             elif os.path.splitext(selected_files[0])[1] == '.txt':
@@ -105,10 +95,10 @@ class T1T2TabController(BaseTabController):
 
                 for row, entry in zip(range(table.rowCount()), dictionary):
                     current_file = os.path.basename(entry)
-                    x_axis = dictionary[entry]["X Axis"][0]
+                    x_axis = preserved_x_axis.get(entry, dictionary[entry]["X Axis"][0])
                     table.setItem(row, 0, QTableWidgetItem(entry))
                     table.setItem(row, 1, QTableWidgetItem(current_file))
-                    table.setItem(row, 2, QTableWidgetItem(str(x_axis)))
+                    table.setItem(row, 2, QTableWidgetItem(str(preserved_x_axis.get(entry, x_axis))))
                     combobox.addItem(f"{current_file}")
             else:
                 self.parent.state_bad_code = False
@@ -133,8 +123,9 @@ class T1T2TabController(BaseTabController):
                         Time, Signal = data[:, 0], data[:, 1]
                     table.setItem(row, 0, QTableWidgetItem(file))
                     table.setItem(row, 1, QTableWidgetItem(current_file))
-                    table.setItem(row, 2, QTableWidgetItem(str(x_axis)))
-                    dictionary[file]["X Axis"].append(x_axis)
+                    effective_x = preserved_x_axis.get(file, str(x_axis))
+                    table.setItem(row, 2, QTableWidgetItem(str(effective_x)))
+                    dictionary[file]["X Axis"].append(effective_x)
                     dictionary[file]["Time"].extend(Time)
                     dictionary[file]["Signal"].extend(Signal)
                     combobox.addItem(f"{current_file}")
@@ -144,35 +135,6 @@ class T1T2TabController(BaseTabController):
 
         self.ui.btn_Plot1.setEnabled(True)
         combobox.setCurrentIndex(-1)
-
-    def process_files(self, file1, file2):
-        zone_to_frequency = {}
-        with open(file1, 'r') as f1:
-            for line in islice(f1, 4, None):
-                parts = line.split()
-                zone_to_frequency[parts[-2]] = parts[0]
-        dictionary = {}
-        current_zone = None
-        with open(file2, 'r') as f2:
-            for line in f2:
-                line = line.strip()
-                if line.startswith("Zone"):
-                    current_zone = line.split()[1]
-                    continue
-                if not line or line.startswith("TAU") or line.startswith("---"):
-                    continue
-                if current_zone in zone_to_frequency:
-                    try:
-                        parts = line.split()
-                        time = float(parts[0]); signal = float(parts[1]); frequency = zone_to_frequency[current_zone]
-                        name = file2 + ' at freq:' + str(frequency)
-                        if name not in dictionary:
-                            dictionary[name] = {"X Axis": frequency, "Time": [], "Signal": []}
-                        dictionary[name]["Time"].append(time)
-                        dictionary[name]["Signal"].append(signal)
-                    except (ValueError, IndexError):
-                        continue
-        return dictionary
 
     def change_exponential_order(self):
         self.ui.DSB_ExpFitting1.setValue(100)
@@ -214,7 +176,6 @@ class T1T2TabController(BaseTabController):
             QMessageBox.warning(self.parent, "No covariance", f"I am sorry, I couldn't fit with {order} exponents. Decrease the order of fitting and try again.", QMessageBox.Ok)
             return
         self.ui.textEdit_error.setText(f"R² {r2}")
-        self.ui.DSB_ExpFitting1.setValue(tau1); self.ui.DSB_ExpFitting2.setValue(tau2); self.ui.DSB_ExpFitting3.setValue(tau3)
         table.setItem(idx, 3, QTableWidgetItem(str(tau1))); table.setItem(idx, 5, QTableWidgetItem(str(tau2))); table.setItem(idx, 7, QTableWidgetItem(str(tau3)))
         table.setItem(idx, 4, QTableWidgetItem(str(a1))); table.setItem(idx, 6, QTableWidgetItem(str(a2))); table.setItem(idx, 8, QTableWidgetItem(str(a3)))
         figure.clear(); figure.plot(t0, s0, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
