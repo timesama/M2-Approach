@@ -312,8 +312,6 @@ class MainWindow(QMainWindow):
         try:
             self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
         except Exception:
-            self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
-        except Exception:
             return
 
         # Update general figures
