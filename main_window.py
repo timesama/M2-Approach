@@ -324,7 +324,8 @@ class MainWindow(QMainWindow):
 
     def clear_list(self):
         if self.tab == 'SE':
-            self.app_state = AppState()
+            self.app_state.dq_files = []
+            self.app_state.dqmq_files = []
             self.selected_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
@@ -490,6 +491,7 @@ class MainWindow(QMainWindow):
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
                 self.app_state.dqmq_files = self.selected_DQMQfile
+                self.dqmq_controller.state.dqmq_files = self.selected_DQMQfile
                 self.dqmq_controller.dq_mq_analysis()
 
     def open_select_dialog(self):
