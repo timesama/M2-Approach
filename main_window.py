@@ -303,8 +303,8 @@ class MainWindow(QMainWindow):
             self.window_array = np.array([])
 
         try:
-            self.process_file_data(file_path, file_path_gly, file_path_empty, i)
-        except:
+            self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
+        except Exception:
             return
 
         # Update general figures
