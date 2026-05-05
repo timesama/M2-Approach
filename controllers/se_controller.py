@@ -6,23 +6,31 @@ import Calculator as Cal
 
 class SETabController(BaseTabController):
     def process_processed_file(self, i, filename, amp, m2, t2, file_path):
+
         match = __import__("re").search(r'.*_(-?\s*\d+\.?\d*).*.dat', filename)
+
         temperature = match.group(1) if match else '0'
+
         short_from = self.ui.SC_short.value() * 2
         short_to = self.ui.SC_short_2.value() * 2
         long_from = self.ui.SC_long.value() * 2
         long_to = self.ui.SC_long_2.value() * 2
         absolute = self.ui.radioButton_absolute.isChecked()
+
         times = [int(short_from), int(short_to), int(long_from), int(long_to)]
+
         sfc = Cal.calculate_SC(amp, times, absolute)
+
         self.ui.table_SE.setRowCount(i)
         self.parent.fill_table(self.ui.table_SE, temperature, sfc, m2, t2, i)
         self.ui.table_SE.setItem(i - 1, 4, __import__("PySide6.QtWidgets", fromlist=["QTableWidgetItem"]).QTableWidgetItem(filename))
+
         if self.ui.radioButton.isChecked():
             self.parent.save_figures(file_path, filename)
         self.update_graphs()
 
     def update_graphs(self):
+
         x = self.read_column_values(self.ui.table_SE, 0)
         text = self.ui.comboBox_SE_chooseY.currentText()
 
@@ -71,6 +79,7 @@ class SETabController(BaseTabController):
         self.highlight_selected_point()
 
     def plot_Arr(self):
+
         self.ui.groupBox_EAct.setHidden(False)
         table = self.ui.table_SE
         graph = self.ui.SEWidget
@@ -79,10 +88,13 @@ class SETabController(BaseTabController):
         sorted_indices = np.argsort(Temperature)
         Temperature = Temperature[sorted_indices]
         T2 = T2[sorted_indices]
+
         if self.ui.checkBox_5.isChecked():
             Temperature = Temperature + 273.15
+
         starting_point = int(self.ui.Eact_start.value())
         ending_point = -(int(self.ui.Eact_end.value()))
+
         if ending_point == 0:
             ending_point = None
         try:
@@ -98,21 +110,25 @@ class SETabController(BaseTabController):
 
             reciprocal_temperature, lnT2 = Cal.calculate_Arrhenius_ax(Temperature, T2)
             Temp_fit, fitted_curve, Eact, R2 = Cal.calculate_Eact(reciprocal_temperature, lnT2, self.ui.radioButton_8.isChecked())
+
             graph.clear()
             graph.plot(reciprocal_temperature, lnT2, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10)
             graph.plot(Temp_fit, fitted_curve, pen='b')
             self.parent.setup_graph(graph, "1000/T, 𝐾⁻¹", "ln(τ)", "")
             self.ui.textEdit_EAct.setText(f"Eact = {Eact}\nR² {R2}")
+
         except Exception as e:
             QMessageBox.warning(self.parent, "Arrhenius fit error", str(e), QMessageBox.Ok)
 
     def hide_Eact(self):
+
         self.ui.groupBox_EAct.setHidden(True)
         self.ui.SEWidget.clear()
         self.parent.setup_graph(self.ui.SEWidget, "", "", "")
         self.parent.update_xaxis(self.ui.table_SE, 0)
 
     def highlight_selected_point(self):
+
         row = self.ui.table_SE.currentRow()
         if row < 0:
             return

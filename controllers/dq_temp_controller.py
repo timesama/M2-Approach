@@ -17,73 +17,104 @@ logger = logging.getLogger(__name__)
 
 
 class DQTempTabController(BaseTabController):
+
     def update_DQ_comparison(self):
+
         with busy_cursor():
             table = self.ui.table_DQ_2
             logger.info("DQ Temp loading %d files", len(self.parent.selected_DQfiles))
             table.setRowCount(len(self.parent.selected_DQfiles))
+
             for row, parent_folder in enumerate(self.parent.selected_DQfiles, start=0):
+
                 logger.info("DQ Temp processing file %d/%d: %s", row + 1, len(self.parent.selected_DQfiles), os.path.basename(parent_folder))
                 foldername = os.path.dirname(parent_folder)
                 filename = os.path.basename(parent_folder)
+
                 try:
                     data = np.loadtxt(parent_folder, delimiter=',')
+
                     if data.shape[1] < 3:
                         QMessageBox.warning(self.parent, "Invalid Data", f"The file {foldername} does not have at least 3 columns and will be removed from the table and file list.", QMessageBox.Ok)
                         table.removeRow(row)
                         del self.parent.selected_DQfiles[row]
+
                 except Exception as e:
                     logger.exception("DQ Temp invalid input file: %s", parent_folder)
                     QMessageBox.warning(self.parent, "Invalid Data", f"The file {foldername} {e} Removed from the table and file list.", QMessageBox.Ok)
                     table.removeRow(row)
                     del self.parent.selected_DQfiles[row]
+                    table.setRowCount(len(self.parent.selected_DQfiles))
+
                 item = QTableWidgetItem(filename)
                 item_name = QTableWidgetItem()
                 pattern = r'Table_DQ_(-?[0-9]+).*.csv'
+
                 try:
                     item_xaxis = float(re.search(pattern, filename).group(1))
                     item_name.setData(Qt.EditRole, item_xaxis)
+
                 except Exception:
                     item_name.setData(Qt.EditRole, float(row + 1))
+
                 table.setItem(row, DQTempColumns.FOLDER, item)
                 table.setItem(row, DQTempColumns.NAME, item_name)
+
             table.resizeColumnsToContents()
             self.launch()
 
     def launch(self):
+
         logger.info("DQ Temp launching comparison fit")
+
         try:
             self.parent.dq_t2 = {}
+
             for row, parent_folder in enumerate(self.parent.selected_DQfiles, start=0):
                 data = np.loadtxt(parent_folder, delimiter=',')
                 self.parent.dq_t2[row] = data[:, [4, 5]]
+
             self.update_DQ_comparison_plot()
+
         except Exception as e:
             logger.exception("DQ Temp launch failed")
             QMessageBox.warning(self.parent, "Corrupted file", f"Couldn't analyse the {os.path.dirname(parent_folder)} because {e}", QMessageBox.Ok)
 
     def update_DQ_comparison_plot(self):
+
         cmap = pg.ColorMap([0, len(self.parent.dq_t2)], [pg.mkColor('b'), pg.mkColor('r')])
         self.parent.dq_comparison_distribution = {'File name': [], 'X axis': [], 'Center': [], 'FWHM': [], 'Lorentz ratio': [], 'Fitting type': [], 'T2 limit': []}
         legend = self.ui.DQ_Widget_4.addLegend(offset=(0, 0))
         legend_fc = self.ui.DQ_Widget_5.addLegend()
         self.ui.DQ_Widget_5.clear(); self.ui.DQ_Widget_4.clear(); self.ui.DQ_Widget_polyFit.clear()
-        if legend is not None: legend.clear(); legend.setPen((0, 0, 0))
-        if legend_fc is not None: legend_fc.clear(); legend_fc.setPen((0, 0, 0))
+
+        if legend is not None:
+            legend.clear(); legend.setPen((0, 0, 0))
+
+        if legend_fc is not None:
+            legend_fc.clear(); legend_fc.setPen((0, 0, 0))
+
         legend.anchor(itemPos=(1, 0), parentPos=(1, 0))
         center_g, center_l, center_v, center_d, comparison_par = [], [], [], [], []
+
         for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.parent.dq_t2.items()):
             file_name_item = self.ui.table_DQ_2.item(row, DQTempColumns.NAME)
             file_item = self.ui.table_DQ_2.item(row, DQTempColumns.FOLDER)
+
             if file_name_item is not None:
                 file_name = file_name_item.text()
+
                 if file_name != 'hide':
+
                     try: _cp = float(file_name)
                     except Exception:
                         _cp = 0; self.ui.table_DQ_2.setItem(row, DQTempColumns.NAME, QTableWidgetItem('0'))
+
                     comparison_par.append(_cp)
+
                 else:
                     continue
+
             t2_lin, dq_norm = data[:, 0], data[:, 1]
             p = [1, 5, 5, 0]; b = ([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, 1, np.inf]); b1 = ([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf])
             t2_fit = np.arange(0, np.max(t2_lin) + 0.001, 0.01)
@@ -97,10 +128,13 @@ class DQTempTabController(BaseTabController):
             self.ui.DQ_Widget_4.plot(t2_fit, y_fit, pen=color)
             self.ui.DQ_Widget_polyFit.plot(t2_lin, dq_norm, pen=None, symbolPen=None, symbol='o', symbolBrush=color, symbolSize=10)
             self.ui.DQ_Widget_polyFit.plot(t2d, ndqd, pen=color)
+
             def set_num(r,c,v):
                 it=QTableWidgetItem(); it.setData(Qt.EditRole, round(float(v),2)); self.ui.table_DQ_2.setItem(r,c,it)
+
             set_num(row, DQTempColumns.CENTER_GAUSS, cen_g); set_num(row, DQTempColumns.CENTER_LORENZ, cen_l); set_num(row, DQTempColumns.CENTER_VOIGT, cen_v); set_num(row, DQTempColumns.CENTER_Y, center_derivative)
             set_num(row, DQTempColumns.FWHM_GAUSS, fwhm_g); set_num(row, DQTempColumns.FWHM_LORENZ, fwhm_l); set_num(row, DQTempColumns.FWHM_VOIGT, fwhm_v)
+
         self.ui.table_DQ_2.resizeColumnsToContents()
         self.ui.DQ_Widget_5.plot(comparison_par, center_g, pen='r', symbolPen=None, symbol='o', symbolBrush='r', name='Gaus')
         self.ui.DQ_Widget_5.plot(comparison_par, center_l, pen='b', symbolPen=None, symbol='o', symbolBrush='b', name='Lorenz')
