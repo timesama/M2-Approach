@@ -17,6 +17,7 @@ class DQMQTabController(BaseTabController):
     def dq_mq_analysis(self):
         table = self.ui.table_DQMQ
         table.clear()
+        table.setColumnCount(4)
         try:
             time, dq, ref = self.plot_original()
         except Exception as e:

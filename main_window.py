@@ -489,6 +489,7 @@ class MainWindow(QMainWindow):
                 self.gs_controller.update_GS_table()
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
+                self.app_state.dqmq_files = self.selected_DQMQfile
                 self.dqmq_controller.dq_mq_analysis()
 
     def open_select_dialog(self):
