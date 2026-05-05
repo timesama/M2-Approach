@@ -91,6 +91,7 @@ class DQTempTabController(BaseTabController):
                 it=QTableWidgetItem(); it.setData(Qt.EditRole, round(float(v),2)); self.ui.table_DQ_2.setItem(r,c,it)
             set_num(row, DQTempColumns.CENTER_GAUSS, cen_g); set_num(row, DQTempColumns.CENTER_LORENZ, cen_l); set_num(row, DQTempColumns.CENTER_VOIGT, cen_v); set_num(row, DQTempColumns.CENTER_Y, center_derivative)
             set_num(row, DQTempColumns.FWHM_GAUSS, fwhm_g); set_num(row, DQTempColumns.FWHM_LORENZ, fwhm_l); set_num(row, DQTempColumns.FWHM_VOIGT, fwhm_v)
+        self.ui.table_DQ_2.resizeColumnsToContents()
         self.ui.DQ_Widget_5.plot(comparison_par, center_g, pen='r', symbolPen=None, symbol='o', symbolBrush='r', name='Gaus')
         self.ui.DQ_Widget_5.plot(comparison_par, center_l, pen='b', symbolPen=None, symbol='o', symbolBrush='b', name='Lorenz')
         self.ui.DQ_Widget_5.plot(comparison_par, center_v, pen='k', symbolPen=None, symbol='o', symbolBrush='k', name='Voigt')

@@ -180,6 +180,7 @@ class MainWindow(QMainWindow):
         self.ui.table_DQ_2.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=DQTempColumns.NAME: self.renameSection(self.ui.table_DQ_2, index=DQTempColumns.NAME)
 )
+        self._apply_table_header_order()
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.dq_controller.update_graphs)
         self.ui.table_SE.itemSelectionChanged.connect(self.update_se_graphs)
@@ -666,6 +667,21 @@ class MainWindow(QMainWindow):
 
         name = table.horizontalHeaderItem(index).text()
         figure.getAxis('bottom').setLabel(name)
+
+    def _apply_table_header_order(self):
+        self.ui.table_T1.setHorizontalHeaderLabels([
+            "X axis", "tau 1", "A 1", "tau 2", "A 2", "tau 3", "A 3", "File name", "Folder"
+        ])
+        self.ui.table_GS.setHorizontalHeaderLabels([
+            "X axis", "sqrt time", "d, nm", "File name", "Folder"
+        ])
+        self.ui.table_DQ_2.setHorizontalHeaderLabels([
+            "Name", "Center Gauss", "Center Lorenz", "Center Voigt", "Center y",
+            "FWHM Gauss", "FWHM Lorenz", "FWHM Voigt", "Folder"
+        ])
+        self.ui.table_T1.resizeColumnsToContents()
+        self.ui.table_GS.resizeColumnsToContents()
+        self.ui.table_DQ_2.resizeColumnsToContents()
 
     # Working with graphs
     def update_graphs(self, x, y1, y2, y3, graph):

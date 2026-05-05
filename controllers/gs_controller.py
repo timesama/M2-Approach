@@ -53,6 +53,7 @@ class GSTabController(BaseTabController):
         except Exception as e:
             QMessageBox.warning(self.parent, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
             self.parent.clear_list()
+        table.resizeColumnsToContents()
 
     def calculate_sqrt_time(self):
         idx = self.ui.comboBox_7.currentIndex()
@@ -83,6 +84,7 @@ class GSTabController(BaseTabController):
             self.ui.textEdit_error_2.setText(f"R² {r2v}")
             table.setItem(idx, GSColumns.SQRT_TIME, QTableWidgetItem(str(sqrtT)))
             table.setItem(idx, GSColumns.D_NM, QTableWidgetItem(str(d)))
+            table.resizeColumnsToContents()
             figure.clear(); figure.plot(time_original, signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
             dictionary[key]['sqrtT'] = sqrtT; dictionary[key]['d'] = d
             self.ui.btn_Plot1.setEnabled(True)

@@ -136,6 +136,7 @@ class T1T2TabController(BaseTabController):
 
         self.ui.btn_Plot1.setEnabled(True)
         combobox.setCurrentIndex(-1)
+        table.resizeColumnsToContents()
 
     def change_exponential_order(self):
         self.ui.DSB_ExpFitting1.setValue(100)
@@ -179,6 +180,7 @@ class T1T2TabController(BaseTabController):
         self.ui.textEdit_error.setText(f"R² {r2}")
         table.setItem(idx, T1Columns.TAU_1, QTableWidgetItem(str(tau1))); table.setItem(idx, T1Columns.TAU_2, QTableWidgetItem(str(tau2))); table.setItem(idx, T1Columns.TAU_3, QTableWidgetItem(str(tau3)))
         table.setItem(idx, T1Columns.A_1, QTableWidgetItem(str(a1))); table.setItem(idx, T1Columns.A_2, QTableWidgetItem(str(a2))); table.setItem(idx, T1Columns.A_3, QTableWidgetItem(str(a3)))
+        table.resizeColumnsToContents()
         figure.clear(); figure.plot(t0, s0, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
         dictionary[key]['T1 1'] = tau1; dictionary[key]['T1 2'] = tau2; dictionary[key]['T1 3'] = tau3
         self.ui.btn_Plot1.setEnabled(True)
