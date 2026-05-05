@@ -60,6 +60,12 @@ class GeneralSEDQController(BaseTabController):
         if mw.window_array.size!=0:
             window=mw.window_array[i-1]; FFT=np.array(savgol_filter(np.real(FFT),window,1)+1j*savgol_filter(np.imag(FFT),window,1))
         amp_spectra,re_spectra,im_spectra=Cal._simple_baseline_correction(FFT); Real_apod=Cal._calculate_apodization(re_spectra,frequency)
+        phased_store = mw.phased_spectra_SE if mw.tab == 'SE' else mw.phased_spectra_DQ
+        phased_record = phased_store.get(filename)
+        if phased_record:
+            re_spectra = np.array(phased_record.get("re", re_spectra))
+            im_spectra = np.array(phased_record.get("im", im_spectra))
+            Real_apod = Cal._calculate_apodization(re_spectra, frequency)
         self.state.spectrum.frequency = frequency
         self.state.spectrum.re_spectra = re_spectra
         self.state.spectrum.im_spectra = im_spectra
@@ -86,6 +92,11 @@ class GeneralSEDQController(BaseTabController):
             self.state.spectrum.re_spectra = re_spectra
             self.state.spectrum.im_spectra = np.zeros_like(re_spectra)
             im_spectra = self.state.spectrum.im_spectra
+        filename = self.ui.comboBox_4.currentText()
+        if mw.tab == 'SE' and filename:
+            mw.phased_spectra_SE[filename] = {"re": re_spectra.tolist(), "im": im_spectra.tolist()}
+        elif mw.tab == 'DQ' and filename:
+            mw.phased_spectra_DQ[filename] = {"re": re_spectra.tolist(), "im": im_spectra.tolist()}
         Real_apod=Cal._calculate_apodization(re_spectra,frequency); Amp_spectra=Cal._calculate_amplitude(re_spectra,im_spectra)
         mw.update_graphs(frequency,Amp_spectra,re_spectra,im_spectra,self.ui.FFTWidget); M2,T2=Cal._calculate_M2(Real_apod,frequency)
         table=self.ui.table_SE if mw.tab=='SE' else self.ui.table_DQ

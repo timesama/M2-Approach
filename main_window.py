@@ -76,6 +76,8 @@ class MainWindow(QMainWindow):
         self.group_data_SE = {}
         self.group_data_T1T2 = {}
         self.group_data_SD = {}
+        self.phased_spectra_SE = {}
+        self.phased_spectra_DQ = {}
         self.tab = None
         self.state_bad_code = False
         self.se_controller = SETabController(ui=self.ui, state=self.app_state, parent=self)
@@ -329,6 +331,7 @@ class MainWindow(QMainWindow):
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
             self.group_data_SE = {}
+            self.phased_spectra_SE = {}
         elif self.tab == 'DQ':
             self.selected_files_DQ_single = []
             self.app_state.dq_files = []
@@ -341,6 +344,7 @@ class MainWindow(QMainWindow):
             self.ui.FFTWidget.clear()
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
+            self.phased_spectra_DQ = {}
         elif self.tab == 'DQ_Temp':
             self.selected_DQfiles = []
             self.dq_t2 = {}
@@ -741,6 +745,11 @@ class MainWindow(QMainWindow):
                 default_name = 'DQMQ_data_'
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
+        if self.tab in ('SE', 'DQ') and dialog.last_saved_file_path:
+            phased_file = os.path.splitext(dialog.last_saved_file_path)[0] + '_phased.json'
+            phased_data = self.phased_spectra_SE if self.tab == 'SE' else self.phased_spectra_DQ
+            with open(phased_file, 'w') as f:
+                json.dump(phased_data, f)
 
         if self.state_bad_code == True:
             self.t1t2_controller.bad_code_makes_more_bad_code()
@@ -769,13 +778,22 @@ class MainWindow(QMainWindow):
             self.ui.comboBox_4.setEnabled(False)
             self.ui.btn_Phasing.setEnabled(False)
 
+        try:
+            phased_path = os.path.splitext(file_path)[0] + '_phased.json'
+            with open(phased_path, 'r') as file:
+                phased = json.load(file)
+        except Exception:
+            phased = {}
+
         if self.tab == 'SE':
             table = self.ui.table_SE
             self.selected_files = files
+            self.phased_spectra_SE = phased
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             self.selected_files_DQ_single = files
             self.app_state.dq_files = files
+            self.phased_spectra_DQ = phased
         elif self.tab == 'DQ_Temp':
             table = self.ui.table_DQ_2
             self.selected_DQfiles = files
