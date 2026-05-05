@@ -20,10 +20,9 @@ class DQTabController(BaseTabController):
         self.update_graphs()
 
     def update_graphs(self):
-        files = getattr(getattr(self.state, "dq", None), "files", None)
-        if files is None:
-            files = getattr(self.state, "dq_files", [])
-        if len(files) > 1:
+        dq_time = self.read_column_values(self.ui.table_DQ, 0)
+        t2_values = self.read_column_values(self.ui.table_DQ, 3)
+        if len(dq_time) > 1 and len(t2_values) > 1:
             self.linearization()
             self.plot_fit()
         else:

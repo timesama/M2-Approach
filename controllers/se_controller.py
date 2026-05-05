@@ -86,6 +86,14 @@ class SETabController(BaseTabController):
         try:
             Temperature = Temperature[starting_point:ending_point]
             T2 = T2[starting_point:ending_point]
+
+            valid_mask = np.isfinite(Temperature) & np.isfinite(T2) & (T2 > 0)
+            Temperature = Temperature[valid_mask]
+            T2 = T2[valid_mask]
+
+            if len(Temperature) < 2:
+                raise ValueError("Not enough valid points for Arrhenius fit (need at least 2 positive T₂* values).")
+
             reciprocal_temperature, lnT2 = Cal.calculate_Arrhenius_ax(Temperature, T2)
             Temp_fit, fitted_curve, Eact, R2 = Cal.calculate_Eact(reciprocal_temperature, lnT2, self.ui.radioButton_8.isChecked())
             graph.clear()
@@ -94,7 +102,7 @@ class SETabController(BaseTabController):
             self.parent.setup_graph(graph, "1000/T, 𝐾⁻¹", "ln(τ)", "")
             self.ui.textEdit_EAct.setText(f"Eact = {Eact}\nR² {R2}")
         except Exception as e:
-            QMessageBox.warning(self.parent, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
+            QMessageBox.warning(self.parent, "Arrhenius fit error", str(e), QMessageBox.Ok)
 
     def hide_Eact(self):
         self.ui.groupBox_EAct.setHidden(True)
