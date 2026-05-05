@@ -76,6 +76,8 @@ class MainWindow(QMainWindow):
         self.group_data_SE = {}
         self.group_data_T1T2 = {}
         self.group_data_SD = {}
+        self.phased_spectra_SE = {}
+        self.phased_spectra_DQ = {}
         self.tab = None
         self.state_bad_code = False
         self.se_controller = SETabController(ui=self.ui, state=self.app_state, parent=self)
@@ -187,6 +189,9 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_17.clicked.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.T1T2_fit_from.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.T1T2_fit_to.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.DSB_ExpFitting1.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.DSB_ExpFitting2.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
+        self.ui.DSB_ExpFitting3.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
 
         self.ui.checkBox_3.clicked.connect(self.gs_controller.calculate_sqrt_time)
         self.ui.radioButton_short.clicked.connect(self.gs_controller.calculate_sqrt_time)
@@ -303,8 +308,8 @@ class MainWindow(QMainWindow):
             self.window_array = np.array([])
 
         try:
-            self.process_file_data(file_path, file_path_gly, file_path_empty, i)
-        except:
+            self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
+        except Exception:
             return
 
         # Update general figures
@@ -319,7 +324,8 @@ class MainWindow(QMainWindow):
 
     def clear_list(self):
         if self.tab == 'SE':
-            self.app_state = AppState()
+            self.app_state.dq_files = []
+            self.app_state.dqmq_files = []
             self.selected_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
@@ -329,6 +335,7 @@ class MainWindow(QMainWindow):
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
             self.group_data_SE = {}
+            self.phased_spectra_SE = {}
         elif self.tab == 'DQ':
             self.selected_files_DQ_single = []
             self.app_state.dq_files = []
@@ -341,6 +348,7 @@ class MainWindow(QMainWindow):
             self.ui.FFTWidget.clear()
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
+            self.phased_spectra_DQ = {}
         elif self.tab == 'DQ_Temp':
             self.selected_DQfiles = []
             self.dq_t2 = {}
@@ -387,9 +395,11 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             table = self.ui.table_SE
             combobox = self.ui.comboBox_4
+            files = self.selected_files
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             combobox = self.ui.comboBox_4
+            files = self.selected_files_DQ_single
         elif self.tab =='T1T2':
             table = self.ui.table_T1
             combobox = self.ui.T1T2_ChooseFileComboBox
@@ -405,16 +415,32 @@ class MainWindow(QMainWindow):
         if row == -1:
             QMessageBox.warning(self, "Cricket sounds", f"Select the row.", QMessageBox.Ok)
             return
-        item = table.item(row,0).text()
+
         table.removeRow(row)
-        combobox.removeItem(row)
+        if combobox.count() > row:
+            combobox.removeItem(row)
 
         try:
-            for file_to_delete in files:
-                if file_to_delete == item:
-                    files.remove(item)
-        except:
-            QMessageBox.warning(self, "Hidden", f"The row is hidden, but the file is not deleted.", QMessageBox.Ok)
+            if files and len(files) > row:
+                files.pop(row)
+            if self.tab in ('SE', 'DQ') and self.selected_files_gly and len(self.selected_files_gly) > row:
+                self.selected_files_gly.pop(row)
+            if self.tab in ('SE', 'DQ') and self.selected_files_empty and len(self.selected_files_empty) > row:
+                self.selected_files_empty.pop(row)
+        except Exception:
+            QMessageBox.warning(self, "Delete warning", "Row was removed from table, but file lists may be out of sync.", QMessageBox.Ok)
+
+        if self.tab == 'SE':
+            self.se_controller.update_graphs()
+        elif self.tab == 'DQ':
+            self.dq_controller.update_graphs()
+
+        if self.tab in ('SE', 'DQ') and combobox.count() > 0:
+            combobox.setCurrentIndex(min(row, combobox.count() - 1))
+            self.update_file()
+        elif self.tab in ('SE', 'DQ'):
+            self.ui.FidWidget.clear()
+            self.ui.FFTWidget.clear()
 
     def highlight_row(self, table, row_selected):
 
@@ -464,6 +490,8 @@ class MainWindow(QMainWindow):
                 self.gs_controller.update_GS_table()
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
+                self.app_state.dqmq_files = self.selected_DQMQfile
+                self.dqmq_controller.state.dqmq_files = self.selected_DQMQfile
                 self.dqmq_controller.dq_mq_analysis()
 
     def open_select_dialog(self):
@@ -723,6 +751,11 @@ class MainWindow(QMainWindow):
                 default_name = 'DQMQ_data_'
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
+        if self.tab in ('SE', 'DQ') and dialog.last_saved_file_path:
+            files_json = os.path.splitext(dialog.last_saved_file_path)[0] + '_files.json'
+            phased_data = self.phased_spectra_SE if self.tab == 'SE' else self.phased_spectra_DQ
+            with open(files_json, 'w') as f:
+                json.dump({"files": files, "phased": phased_data}, f)
 
         if self.state_bad_code == True:
             self.t1t2_controller.bad_code_makes_more_bad_code()
@@ -738,25 +771,35 @@ class MainWindow(QMainWindow):
 
         self.clear_list()
         self.enable_buttons()
+        self.ui.comboBox_4.clear()
 
         file_path = tableName[0]
         try:
             files_list = file_path.strip().split('.')[0] + '_files.json'
             with open(files_list, 'r') as file:
-                files = json.load(file)
+                files_payload = json.load(file)
+                if isinstance(files_payload, dict):
+                    files = files_payload.get("files", [])
+                    phased = files_payload.get("phased", {})
+                else:
+                    files = files_payload
+                    phased = {}
         except Exception as e:
             QMessageBox.warning(self, "File missing", f"Didn't find file list, only the tabular result is available", QMessageBox.Ok)
             files = None
+            phased = {}
             self.ui.comboBox_4.setEnabled(False)
             self.ui.btn_Phasing.setEnabled(False)
 
         if self.tab == 'SE':
             table = self.ui.table_SE
             self.selected_files = files
+            self.phased_spectra_SE = phased
         elif self.tab == 'DQ':
             table = self.ui.table_DQ
             self.selected_files_DQ_single = files
             self.app_state.dq_files = files
+            self.phased_spectra_DQ = phased
         elif self.tab == 'DQ_Temp':
             table = self.ui.table_DQ_2
             self.selected_DQfiles = files
@@ -776,15 +819,28 @@ class MainWindow(QMainWindow):
             table.setRowCount(len(lines))
             for row, line in enumerate(lines):
                 values = line.strip().split(',')
-                self.ui.comboBox_4.addItem(f"File #{row+1}")
                 for col, value in enumerate(values):
                     item = QTableWidgetItem(value)
                     table.setItem(row, col, item)
 
+        if self.tab in ('SE', 'DQ'):
+            if files:
+                for path in files:
+                    self.ui.comboBox_4.addItem(os.path.basename(path))
+            else:
+                for row in range(table.rowCount()):
+                    self.ui.comboBox_4.addItem(f"File #{row+1}")
+
         if self.tab == 'SE':
             self.update_se_graphs()
+            if self.ui.comboBox_4.count() > 0:
+                self.ui.comboBox_4.setCurrentIndex(0)
+                self.update_file()
         elif self.tab == 'DQ':
             self.dq_controller.update_graphs()
+            if self.ui.comboBox_4.count() > 0:
+                self.ui.comboBox_4.setCurrentIndex(0)
+                self.update_file()
         elif self.tab == 'DQ_Temp':
             self.dq_temp_controller.update_DQ_comparison()
         elif self.tab == 'T1T2':
