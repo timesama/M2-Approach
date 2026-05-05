@@ -83,22 +83,9 @@ class GeneralSEDQController(BaseTabController):
         i=self.ui.comboBox_4.currentIndex()
         if i < 0:
             return
-        if i < 0:
-            return
         frequency = self.state.spectrum.frequency
         re_spectra = self.state.spectrum.re_spectra
         im_spectra = self.state.spectrum.im_spectra
-        phased_window = getattr(mw, "phasing_manual_window", None)
-        if phased_window is not None and getattr(phased_window, "Real_freq_phased", None) is not None:
-            re_spectra = phased_window.Real_freq_phased
-            self.state.spectrum.re_spectra = re_spectra
-            self.state.spectrum.im_spectra = np.zeros_like(re_spectra)
-            im_spectra = self.state.spectrum.im_spectra
-        filename = self.ui.comboBox_4.currentText()
-        if mw.tab == 'SE' and filename:
-            mw.phased_spectra_SE[filename] = {"re": re_spectra.tolist(), "im": im_spectra.tolist()}
-        elif mw.tab == 'DQ' and filename:
-            mw.phased_spectra_DQ[filename] = {"re": re_spectra.tolist(), "im": im_spectra.tolist()}
         phased_window = getattr(mw, "phasing_manual_window", None)
         if phased_window is not None and getattr(phased_window, "Real_freq_phased", None) is not None:
             re_spectra = phased_window.Real_freq_phased
