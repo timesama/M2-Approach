@@ -59,11 +59,18 @@ class GeneralSEDQController(BaseTabController):
 
     def analysis_error(self, file_path, files):
 
-        mw=self.parent
         logger.exception("Failed to process file %s", file_path)
+
+        mw=self.parent
         QMessageBox.warning(mw, "Invalid Data", f"Couldn't read the {os.path.basename(file_path)}. Deleting the file.", QMessageBox.Ok)
-        files.remove(file_path); self.ui.btn_SelectFiles.setEnabled(True); self.ui.btn_Start.setStyleSheet("background-color: none")
-        self.ui.FidWidget.clear(); self.ui.FFTWidget.clear(); self.ui.btn_Phasing.setEnabled(False); mw.enable_buttons()
+
+        files.remove(file_path)
+        self.ui.btn_SelectFiles.setEnabled(True)
+        self.ui.btn_Start.setStyleSheet("background-color: none")
+        self.ui.FidWidget.clear()
+        self.ui.FFTWidget.clear()
+        self.ui.btn_Phasing.setEnabled(False)
+        mw.enable_buttons()
 
     def update_legends_and_dq_graphs(self):
 
