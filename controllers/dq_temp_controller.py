@@ -9,6 +9,7 @@ from scipy.optimize import curve_fit
 
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
+from controllers.table_columns import DQTempColumns
 
 
 class DQTempTabController(BaseTabController):
@@ -36,8 +37,8 @@ class DQTempTabController(BaseTabController):
                 item_name.setData(Qt.EditRole, item_xaxis)
             except Exception:
                 item_name.setData(Qt.EditRole, float(row + 1))
-            table.setItem(row, 0, item)
-            table.setItem(row, 1, item_name)
+            table.setItem(row, DQTempColumns.FOLDER, item)
+            table.setItem(row, DQTempColumns.NAME, item_name)
         table.resizeColumnsToContents()
         self.launch()
 
@@ -62,14 +63,14 @@ class DQTempTabController(BaseTabController):
         legend.anchor(itemPos=(1, 0), parentPos=(1, 0))
         center_g, center_l, center_v, center_d, comparison_par = [], [], [], [], []
         for row, (key, data) in zip(range(self.ui.table_DQ_2.rowCount()), self.parent.dq_t2.items()):
-            file_name_item = self.ui.table_DQ_2.item(row, 1)
-            file_item = self.ui.table_DQ_2.item(row, 0)
+            file_name_item = self.ui.table_DQ_2.item(row, DQTempColumns.NAME)
+            file_item = self.ui.table_DQ_2.item(row, DQTempColumns.FOLDER)
             if file_name_item is not None:
                 file_name = file_name_item.text()
                 if file_name != 'hide':
                     try: _cp = float(file_name)
                     except Exception:
-                        _cp = 0; self.ui.table_DQ_2.setItem(row, 1, QTableWidgetItem('0'))
+                        _cp = 0; self.ui.table_DQ_2.setItem(row, DQTempColumns.NAME, QTableWidgetItem('0'))
                     comparison_par.append(_cp)
                 else:
                     continue
@@ -88,8 +89,8 @@ class DQTempTabController(BaseTabController):
             self.ui.DQ_Widget_polyFit.plot(t2d, ndqd, pen=color)
             def set_num(r,c,v):
                 it=QTableWidgetItem(); it.setData(Qt.EditRole, round(float(v),2)); self.ui.table_DQ_2.setItem(r,c,it)
-            set_num(row,2,cen_g); set_num(row,3,cen_l); set_num(row,4,cen_v); set_num(row,5,center_derivative)
-            set_num(row,6,fwhm_g); set_num(row,7,fwhm_l); set_num(row,8,fwhm_v)
+            set_num(row, DQTempColumns.CENTER_GAUSS, cen_g); set_num(row, DQTempColumns.CENTER_LORENZ, cen_l); set_num(row, DQTempColumns.CENTER_VOIGT, cen_v); set_num(row, DQTempColumns.CENTER_Y, center_derivative)
+            set_num(row, DQTempColumns.FWHM_GAUSS, fwhm_g); set_num(row, DQTempColumns.FWHM_LORENZ, fwhm_l); set_num(row, DQTempColumns.FWHM_VOIGT, fwhm_v)
         self.ui.DQ_Widget_5.plot(comparison_par, center_g, pen='r', symbolPen=None, symbol='o', symbolBrush='r', name='Gaus')
         self.ui.DQ_Widget_5.plot(comparison_par, center_l, pen='b', symbolPen=None, symbol='o', symbolBrush='b', name='Lorenz')
         self.ui.DQ_Widget_5.plot(comparison_par, center_v, pen='k', symbolPen=None, symbol='o', symbolBrush='k', name='Voigt')

@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
 from dialogs.save_files_dialog import SaveFilesDialog
+from controllers.table_columns import T1Columns
 
 
 class T1T2TabController(BaseTabController):
@@ -29,8 +30,8 @@ class T1T2TabController(BaseTabController):
         dictionary = self.parent.tau_dictionary
         preserved_x_axis = {}
         for row in range(table.rowCount()):
-            file_item = table.item(row, 0)
-            x_item = table.item(row, 2)
+            file_item = table.item(row, T1Columns.FOLDER)
+            x_item = table.item(row, T1Columns.X_AXIS)
             if file_item is not None and x_item is not None:
                 preserved_x_axis[file_item.text()] = x_item.text()
         dictionary.clear()
@@ -60,9 +61,9 @@ class T1T2TabController(BaseTabController):
                     dictionary[file]["X Axis"].append(effective_x)
                     dictionary[file]["Time"].extend(Time)
                     dictionary[file]["Signal"].extend(Signal)
-                    table.setItem(row, 0, QTableWidgetItem(file))
-                    table.setItem(row, 1, QTableWidgetItem(current_file))
-                    table.setItem(row, 2, QTableWidgetItem(str(effective_x)))
+                    table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(file))
+                    table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(current_file))
+                    table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(effective_x)))
                     combobox.addItem(f"{current_file}")
 
             elif os.path.splitext(selected_files[0])[1] == '.txt':
@@ -96,9 +97,9 @@ class T1T2TabController(BaseTabController):
                 for row, entry in zip(range(table.rowCount()), dictionary):
                     current_file = os.path.basename(entry)
                     x_axis = preserved_x_axis.get(entry, dictionary[entry]["X Axis"][0])
-                    table.setItem(row, 0, QTableWidgetItem(entry))
-                    table.setItem(row, 1, QTableWidgetItem(current_file))
-                    table.setItem(row, 2, QTableWidgetItem(str(preserved_x_axis.get(entry, x_axis))))
+                    table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(entry))
+                    table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(current_file))
+                    table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(preserved_x_axis.get(entry, x_axis))))
                     combobox.addItem(f"{current_file}")
             else:
                 self.parent.state_bad_code = False
@@ -121,10 +122,10 @@ class T1T2TabController(BaseTabController):
                     except Exception:
                         data = np.loadtxt(file)
                         Time, Signal = data[:, 0], data[:, 1]
-                    table.setItem(row, 0, QTableWidgetItem(file))
-                    table.setItem(row, 1, QTableWidgetItem(current_file))
+                    table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(file))
+                    table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(current_file))
                     effective_x = preserved_x_axis.get(file, str(x_axis))
-                    table.setItem(row, 2, QTableWidgetItem(str(effective_x)))
+                    table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(effective_x)))
                     dictionary[file]["X Axis"].append(effective_x)
                     dictionary[file]["Time"].extend(Time)
                     dictionary[file]["Signal"].extend(Signal)
@@ -156,10 +157,10 @@ class T1T2TabController(BaseTabController):
         if idx == -1:
             return
         if self.parent.state_bad_code:
-            key = table.item(idx, 0).text() + ' at freq:' + table.item(idx, 2).text()
+            key = table.item(idx, T1Columns.FOLDER).text() + ' at freq:' + table.item(idx, T1Columns.X_AXIS).text()
             denominator = 0.001
         else:
-            key = table.item(idx, 0).text()
+            key = table.item(idx, T1Columns.FOLDER).text()
         t0 = np.array(dictionary[key]['Time']) / denominator
         s0 = np.array(dictionary[key]['Signal'])
         t, s = t0[start:end], s0[start:end]
@@ -176,8 +177,8 @@ class T1T2TabController(BaseTabController):
             QMessageBox.warning(self.parent, "Fitting failed", f"Fitting failed for a {order}-exponential model. Decrease the coherence order and/or adjust the initial tau values.", QMessageBox.Ok)
             return
         self.ui.textEdit_error.setText(f"R² {r2}")
-        table.setItem(idx, 3, QTableWidgetItem(str(tau1))); table.setItem(idx, 5, QTableWidgetItem(str(tau2))); table.setItem(idx, 7, QTableWidgetItem(str(tau3)))
-        table.setItem(idx, 4, QTableWidgetItem(str(a1))); table.setItem(idx, 6, QTableWidgetItem(str(a2))); table.setItem(idx, 8, QTableWidgetItem(str(a3)))
+        table.setItem(idx, T1Columns.TAU_1, QTableWidgetItem(str(tau1))); table.setItem(idx, T1Columns.TAU_2, QTableWidgetItem(str(tau2))); table.setItem(idx, T1Columns.TAU_3, QTableWidgetItem(str(tau3)))
+        table.setItem(idx, T1Columns.A_1, QTableWidgetItem(str(a1))); table.setItem(idx, T1Columns.A_2, QTableWidgetItem(str(a2))); table.setItem(idx, T1Columns.A_3, QTableWidgetItem(str(a3)))
         figure.clear(); figure.plot(t0, s0, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
         dictionary[key]['T1 1'] = tau1; dictionary[key]['T1 2'] = tau2; dictionary[key]['T1 3'] = tau3
         self.ui.btn_Plot1.setEnabled(True)
@@ -185,13 +186,13 @@ class T1T2TabController(BaseTabController):
     def plot_relaxation_time(self):
         table = self.ui.table_T1
         graph = self.ui.T1_Widget_2
-        column = 3 if self.ui.T1T2_1expPlotButton.isChecked() else 5 if self.ui.T1T2_2expPlotButton.isChecked() else 7
+        column = T1Columns.TAU_1 if self.ui.T1T2_1expPlotButton.isChecked() else T1Columns.TAU_2 if self.ui.T1T2_2expPlotButton.isChecked() else T1Columns.TAU_3
         graph.clear()
         if table.rowCount() < 1:
             return
         x_axis, relaxation_time, number = [], [], 1
         for row in range(table.rowCount()):
-            try: x_axis.append(float(table.item(row, 2).text()))
+            try: x_axis.append(float(table.item(row, T1Columns.X_AXIS).text()))
             except: x_axis.append(number)
             try: relaxation_time.append(float(table.item(row, column).text()))
             except: relaxation_time.append(0)
@@ -214,8 +215,8 @@ class T1T2TabController(BaseTabController):
         row = self.ui.table_T1.currentRow()
         if row < 0:
             return
-        column = 3 if self.ui.T1T2_1expPlotButton.isChecked() else 5 if self.ui.T1T2_2expPlotButton.isChecked() else 7
-        x_item = self.ui.table_T1.item(row, 2)
+        column = T1Columns.TAU_1 if self.ui.T1T2_1expPlotButton.isChecked() else T1Columns.TAU_2 if self.ui.T1T2_2expPlotButton.isChecked() else T1Columns.TAU_3
+        x_item = self.ui.table_T1.item(row, T1Columns.X_AXIS)
         y_item = self.ui.table_T1.item(row, column)
         if x_item is None or y_item is None:
             return

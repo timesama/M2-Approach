@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
+from controllers.table_columns import GSColumns
 
 
 class GSTabController(BaseTabController):
@@ -41,9 +42,9 @@ class GSTabController(BaseTabController):
                     medium.append(float(parts[5]))
                     long.append(float(parts[6]))
                 combobox.addItem(f"{current_file}")
-                table.setItem(row, 0, QTableWidgetItem(file))
-                table.setItem(row, 1, QTableWidgetItem(current_file))
-                table.setItem(row, 2, QTableWidgetItem(str(x_axis)))
+                table.setItem(row, GSColumns.FOLDER, QTableWidgetItem(file))
+                table.setItem(row, GSColumns.FILE_NAME, QTableWidgetItem(current_file))
+                table.setItem(row, GSColumns.X_AXIS, QTableWidgetItem(str(x_axis)))
                 dictionary[file]["X Axis"].append(x_axis)
                 dictionary[file]["sqrtTime"].extend(sqrtTime)
                 dictionary[file]["short"].extend(short)
@@ -60,7 +61,7 @@ class GSTabController(BaseTabController):
         table = self.ui.table_GS
         figure = self.ui.GS_Widget_1
         dictionary = self.parent.GS_dictionary
-        key = table.item(idx, 0).text()
+        key = table.item(idx, GSColumns.FOLDER).text()
         time_original = np.array(dictionary[key]['sqrtTime']).flatten()
         if self.ui.checkBox_3.isChecked():
             time_original = np.sqrt(time_original)
@@ -80,8 +81,8 @@ class GSTabController(BaseTabController):
             tf, fit, sqrtT, r2v = Cal.linear_fit_GS(time, signal)
             d = Cal.calculate_domain_size(sqrtT, self.ui.GS_beta.value(), self.ui.GS_r2.value(), self.ui.GS_m2.value())
             self.ui.textEdit_error_2.setText(f"R² {r2v}")
-            table.setItem(idx, 3, QTableWidgetItem(str(sqrtT)))
-            table.setItem(idx, 4, QTableWidgetItem(str(d)))
+            table.setItem(idx, GSColumns.SQRT_TIME, QTableWidgetItem(str(sqrtT)))
+            table.setItem(idx, GSColumns.D_NM, QTableWidgetItem(str(d)))
             figure.clear(); figure.plot(time_original, signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
             dictionary[key]['sqrtT'] = sqrtT; dictionary[key]['d'] = d
             self.ui.btn_Plot1.setEnabled(True)
@@ -96,9 +97,9 @@ class GSTabController(BaseTabController):
             return
         x_axis, sqrtT, n = [], [], 1
         for row in range(table.rowCount()):
-            try: x_axis.append(float(table.item(row, 2).text()))
+            try: x_axis.append(float(table.item(row, GSColumns.X_AXIS).text()))
             except: x_axis.append(n)
-            try: sqrtT.append(float(table.item(row, 3).text()))
+            try: sqrtT.append(float(table.item(row, GSColumns.SQRT_TIME).text()))
             except: sqrtT.append(0)
             n += 1
         graph.plot(x_axis, sqrtT, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)

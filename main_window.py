@@ -26,6 +26,7 @@ from dialogs.save_files_dialog import SaveFilesDialog
 from dialogs.phasing_manual import PhasingManual
 from widgets.table_copy_enabler import TableCopyEnabler
 from app_state import AppState
+from controllers.table_columns import T1Columns, GSColumns, DQTempColumns
 
 pg.CONFIG_OPTIONS['background'] = 'w'
 pg.CONFIG_OPTIONS['foreground'] = 'k'
@@ -171,13 +172,13 @@ class MainWindow(QMainWindow):
     lambda index=0: self.renameSection(self.ui.table_SE, index=0)
 )
         self.ui.table_T1.horizontalHeader().sectionDoubleClicked.connect(
-    lambda index=2: self.renameSection(self.ui.table_T1, index=2)
+    lambda index=T1Columns.X_AXIS: self.renameSection(self.ui.table_T1, index=T1Columns.X_AXIS)
 )
         self.ui.table_GS.horizontalHeader().sectionDoubleClicked.connect(
-    lambda index=2: self.renameSection(self.ui.table_GS, index=2)
+    lambda index=GSColumns.X_AXIS: self.renameSection(self.ui.table_GS, index=GSColumns.X_AXIS)
 )
         self.ui.table_DQ_2.horizontalHeader().sectionDoubleClicked.connect(
-    lambda index=2: self.renameSection(self.ui.table_DQ_2, index=1)
+    lambda index=DQTempColumns.NAME: self.renameSection(self.ui.table_DQ_2, index=DQTempColumns.NAME)
 )
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.dq_controller.update_graphs)
@@ -828,6 +829,9 @@ class MainWindow(QMainWindow):
 
         with open(file_path, 'r') as f:
             lines = f.readlines()
+            if self._is_probably_old_table_format(lines):
+                self._warn_old_table_format()
+                return
             table.setRowCount(len(lines))
             for row, line in enumerate(lines):
                 values = line.strip().split(',')
@@ -869,6 +873,44 @@ class MainWindow(QMainWindow):
 
         elif self.tab == 'GS':
             self.gs_controller.update_GS_table()
+
+    def _warn_old_table_format(self):
+        QMessageBox.warning(
+            self,
+            "Old saved file format",
+            "You appear to be loading a saved file from an older version of Relaxyzer.\n\n"
+            "The table column order has changed in the current version, so this file cannot be loaded safely.\n\n"
+            "Please open the saved file manually, rearrange the columns to match the new table order, save it again, "
+            "and then try loading it once more.",
+            QMessageBox.Ok
+        )
+
+    def _is_probably_old_table_format(self, lines):
+        if not lines:
+            return False
+        first_values = lines[0].strip().split(',')
+        if self.tab == 'T1T2':
+            if len(first_values) > T1Columns.FOLDER:
+                return self._looks_like_path(first_values[T1Columns.X_AXIS]) or self._looks_numeric(first_values[T1Columns.FOLDER])
+        if self.tab == 'GS':
+            if len(first_values) > GSColumns.FOLDER:
+                return self._looks_like_path(first_values[GSColumns.X_AXIS]) or self._looks_numeric(first_values[GSColumns.FOLDER])
+        if self.tab == 'DQ_Temp':
+            if len(first_values) > DQTempColumns.FOLDER:
+                return self._looks_like_path(first_values[DQTempColumns.NAME]) and not self._looks_like_path(first_values[DQTempColumns.FOLDER])
+        return False
+
+    @staticmethod
+    def _looks_numeric(value):
+        try:
+            float(value)
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    def _looks_like_path(value):
+        return ('/' in value) or ('\\' in value) or value.endswith(('.txt', '.dat', '.csv', '.sef'))
 
     def save_figures(self, file_path, variable):
         parent_folder = os.path.dirname(file_path)
