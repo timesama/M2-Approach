@@ -791,6 +791,13 @@ class MainWindow(QMainWindow):
             self.ui.comboBox_4.setEnabled(False)
             self.ui.btn_Phasing.setEnabled(False)
 
+        try:
+            phased_path = os.path.splitext(file_path)[0] + '_phased.json'
+            with open(phased_path, 'r') as file:
+                phased = json.load(file)
+        except Exception:
+            phased = {}
+
         if self.tab == 'SE':
             table = self.ui.table_SE
             self.selected_files = files
