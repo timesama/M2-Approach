@@ -10,7 +10,7 @@ def _is_target_code(filename: str) -> bool:
     if "site-packages" in parts:
         return False
     # only app code we care about
-    return any(token in parts for token in ("controllers", "dialogs")) or p.name in {"main.py", "main_window.py"}
+    return any(token in parts for token in ("controllers", "dialogs")) or p.name in {"main.py", "mainwindow.py"}
 
 
 def _format_file_lengths(frame):

@@ -6,11 +6,11 @@ from the main window orchestration.
 
 
 class SETabUIController:
-    def __init__(self, main_window):
-        self.main_window = main_window
+    def __init__(self, mainwindow):
+        self.mainwindow = mainwindow
 
     def update_graphs(self):
-        mw = self.main_window
+        mw = self.mainwindow
 
         x = mw.read_column_values(mw.ui.table_SE, 0)
         text = mw.ui.comboBox_SE_chooseY.currentText()
