@@ -303,8 +303,8 @@ class MainWindow(QMainWindow):
             self.window_array = np.array([])
 
         try:
-            self.process_file_data(file_path, file_path_gly, file_path_empty, i)
-        except:
+            self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
+        except Exception:
             return
 
         # Update general figures
@@ -738,6 +738,7 @@ class MainWindow(QMainWindow):
 
         self.clear_list()
         self.enable_buttons()
+        self.ui.comboBox_4.clear()
 
         file_path = tableName[0]
         try:
@@ -776,15 +777,28 @@ class MainWindow(QMainWindow):
             table.setRowCount(len(lines))
             for row, line in enumerate(lines):
                 values = line.strip().split(',')
-                self.ui.comboBox_4.addItem(f"File #{row+1}")
                 for col, value in enumerate(values):
                     item = QTableWidgetItem(value)
                     table.setItem(row, col, item)
 
+        if self.tab in ('SE', 'DQ'):
+            if files:
+                for path in files:
+                    self.ui.comboBox_4.addItem(os.path.basename(path))
+            else:
+                for row in range(table.rowCount()):
+                    self.ui.comboBox_4.addItem(f"File #{row+1}")
+
         if self.tab == 'SE':
             self.update_se_graphs()
+            if self.ui.comboBox_4.count() > 0:
+                self.ui.comboBox_4.setCurrentIndex(0)
+                self.update_file()
         elif self.tab == 'DQ':
             self.dq_controller.update_graphs()
+            if self.ui.comboBox_4.count() > 0:
+                self.ui.comboBox_4.setCurrentIndex(0)
+                self.update_file()
         elif self.tab == 'DQ_Temp':
             self.dq_temp_controller.update_DQ_comparison()
         elif self.tab == 'T1T2':
