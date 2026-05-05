@@ -94,3 +94,25 @@ class DQTempTabController(BaseTabController):
         self.ui.DQ_Widget_5.plot(comparison_par, center_l, pen='b', symbolPen=None, symbol='o', symbolBrush='b', name='Lorenz')
         self.ui.DQ_Widget_5.plot(comparison_par, center_v, pen='k', symbolPen=None, symbol='o', symbolBrush='k', name='Voigt')
         self.ui.DQ_Widget_5.plot(comparison_par, center_d, pen='g', symbolPen=None, symbol='o', symbolBrush='g', name='Derivative')
+        self.highlight_selected_point_widget_5()
+
+    def highlight_selected_point_widget_5(self):
+        row = self.ui.table_DQ_2.currentRow()
+        if row < 0:
+            return
+        x_item = self.ui.table_DQ_2.item(row, 1)
+        if x_item is None:
+            return
+        try:
+            x = float(x_item.text())
+        except ValueError:
+            return
+        for col in (2, 3, 4, 5):
+            y_item = self.ui.table_DQ_2.item(row, col)
+            if y_item is None:
+                continue
+            try:
+                y = float(y_item.text())
+            except ValueError:
+                continue
+            self.ui.DQ_Widget_5.plot([x], [y], pen=None, symbol='o', symbolBrush=(255, 255, 0, 255), symbolPen='k', symbolSize=13)

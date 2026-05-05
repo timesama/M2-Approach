@@ -68,6 +68,8 @@ class SETabController(BaseTabController):
                         symbol='o', symbolBrush=color, symbolPen=None, symbolSize=8
                     )
 
+        self.highlight_selected_point()
+
     def plot_Arr(self):
         self.ui.groupBox_EAct.setHidden(False)
         table = self.ui.table_SE
@@ -109,3 +111,19 @@ class SETabController(BaseTabController):
         self.ui.SEWidget.clear()
         self.parent.setup_graph(self.ui.SEWidget, "", "", "")
         self.parent.update_xaxis(self.ui.table_SE, 0)
+
+    def highlight_selected_point(self):
+        row = self.ui.table_SE.currentRow()
+        if row < 0:
+            return
+        x_item = self.ui.table_SE.item(row, 0)
+        y_col = self.ui.comboBox_SE_chooseY.currentIndex() + 1
+        y_item = self.ui.table_SE.item(row, y_col)
+        if x_item is None or y_item is None:
+            return
+        try:
+            x = float(x_item.text())
+            y = float(y_item.text())
+        except ValueError:
+            return
+        self.ui.SEWidget.plot([x], [y], pen=None, symbol='o', symbolBrush=(255, 255, 0, 255), symbolPen='k', symbolSize=13)

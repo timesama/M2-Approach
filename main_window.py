@@ -181,6 +181,10 @@ class MainWindow(QMainWindow):
 )
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.dq_controller.update_graphs)
+        self.ui.table_SE.itemSelectionChanged.connect(self.se_controller.highlight_selected_point)
+        self.ui.table_DQ.itemSelectionChanged.connect(self.dq_controller.update_graphs)
+        self.ui.table_DQ_2.itemSelectionChanged.connect(self.dq_temp_controller.highlight_selected_point_widget_5)
+        self.ui.table_T1.itemSelectionChanged.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
         self.ui.T1T2_FitWith2ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
         self.ui.T1T2_FitWith3ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
@@ -206,6 +210,8 @@ class MainWindow(QMainWindow):
 
         # Connect combobox signals to slots
         self.ui.comboBox_SE_chooseY.activated.connect(self.update_se_graphs)
+        self.ui.comboBox_SE_chooseY.currentIndexChanged.connect(lambda _i: self.ui.table_SE.clearSelection())
+        self.ui.comboBox_SE_chooseY.currentIndexChanged.connect(lambda _i: self.update_se_graphs())
         self.ui.comboBox_FunctionDQ.activated.connect(self.dq_controller.plot_fit)
         self.ui.T1T2_ChooseFileComboBox.activated.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.gs_controller.calculate_sqrt_time)

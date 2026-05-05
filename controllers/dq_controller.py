@@ -35,6 +35,7 @@ class DQTabController(BaseTabController):
         self.ui.DQ_Widget_1.plot(
             x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10
         )
+        self.highlight_selected_point_widget_1()
 
     def linearization(self):
         time_min = self.ui.dq_min.value()
@@ -92,6 +93,7 @@ class DQTabController(BaseTabController):
         self.ui.DQ_Widget_2.plot(
             new_x, y, pen=None, symbol='o', symbolPen=None, symbolBrush=(255, 0, 0, 255), symbolSize=10
         )
+        self.highlight_selected_point_widget_2()
 
     def plot_fit(self):
         _x = self.read_column_values(self.ui.table_DQ, 4)
@@ -138,3 +140,35 @@ class DQTabController(BaseTabController):
         self.ui.textEdit_4.setText(
             f"R\u00B2: {round(r_squared, 4)} \nX\u2080: {round(cen, 4)} \nFWHM: {round(fwhm, 4)} \nFraction (Lorenz): {round(w,2)}"
         )
+
+    def highlight_selected_point_widget_1(self):
+        row = self.ui.table_DQ.currentRow()
+        if row < 0:
+            return
+        x_item = self.ui.table_DQ.item(row, 0)
+        y_item = self.ui.table_DQ.item(row, 3)
+        if x_item is None or y_item is None:
+            return
+        try:
+            x = float(x_item.text())
+            y = float(y_item.text())
+        except ValueError:
+            return
+        self.ui.DQ_Widget_1.plot([x], [y], pen=None, symbol='o', symbolBrush=(255, 255, 0, 255), symbolPen='k', symbolSize=13)
+
+    def highlight_selected_point_widget_2(self):
+        row = self.ui.table_DQ.currentRow()
+        if row < 0:
+            return
+        x_item = self.ui.table_DQ.item(row, 4)
+        y_item = self.ui.table_DQ.item(row, 5)
+        if x_item is None or y_item is None:
+            return
+        try:
+            x = float(x_item.text())
+            y = float(y_item.text())
+        except ValueError:
+            return
+        if self.ui.radioButton_Log.isChecked() and x > 0:
+            x = np.log10(x)
+        self.ui.DQ_Widget_2.plot([x], [y], pen=None, symbol='o', symbolBrush=(255, 255, 0, 255), symbolPen='k', symbolSize=13)

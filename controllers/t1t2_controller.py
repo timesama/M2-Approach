@@ -197,6 +197,7 @@ class T1T2TabController(BaseTabController):
             except: relaxation_time.append(0)
             number += 1
         graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+        self.highlight_selected_relaxation_point()
 
     def bad_code_makes_more_bad_code(self):
         dictionary = self.parent.tau_dictionary
@@ -208,3 +209,19 @@ class T1T2TabController(BaseTabController):
         dialog.save_file_in_sef(self.parent, dictionary, 'T1 2', 2, basename, save)
         save = not all(data.get('T1 3', 0) == 0 for data in dictionary.values())
         dialog.save_file_in_sef(self.parent, dictionary, 'T1 3', 3, basename, save)
+
+    def highlight_selected_relaxation_point(self):
+        row = self.ui.table_T1.currentRow()
+        if row < 0:
+            return
+        column = 3 if self.ui.T1T2_1expPlotButton.isChecked() else 5 if self.ui.T1T2_2expPlotButton.isChecked() else 7
+        x_item = self.ui.table_T1.item(row, 2)
+        y_item = self.ui.table_T1.item(row, column)
+        if x_item is None or y_item is None:
+            return
+        try:
+            x = float(x_item.text())
+            y = float(y_item.text())
+        except ValueError:
+            return
+        self.ui.T1_Widget_2.plot([x], [y], pen=None, symbol='o', symbolBrush=(255, 255, 0, 255), symbolPen='k', symbolSize=13)
