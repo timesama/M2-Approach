@@ -1632,11 +1632,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </property>
                    <column>
                     <property name="text">
-                     <string>Folder</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
                      <string>Name</string>
                     </property>
                    </column>
@@ -1673,6 +1668,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <column>
                     <property name="text">
                      <string>FWHM Voigt</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>Folder</string>
                     </property>
                    </column>
                   </widget>
@@ -1773,16 +1773,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </property>
                      <column>
                       <property name="text">
-                       <string>Folder</string>
-                      </property>
-                     </column>
-                     <column>
-                      <property name="text">
-                       <string>File name</string>
-                      </property>
-                     </column>
-                     <column>
-                      <property name="text">
                        <string>X Axis</string>
                       </property>
                      </column>
@@ -1814,6 +1804,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <column>
                       <property name="text">
                        <string>A (3)</string>
+                      </property>
+                     </column>
+                     <column>
+                      <property name="text">
+                       <string>File name</string>
+                      </property>
+                     </column>
+                     <column>
+                      <property name="text">
+                       <string>Folder</string>
                       </property>
                      </column>
                     </widget>
@@ -3914,16 +3914,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </property>
                      <column>
                       <property name="text">
-                       <string>Folder</string>
-                      </property>
-                     </column>
-                     <column>
-                      <property name="text">
-                       <string>File name</string>
-                      </property>
-                     </column>
-                     <column>
-                      <property name="text">
                        <string>X Axis</string>
                       </property>
                      </column>
@@ -3935,6 +3925,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <column>
                       <property name="text">
                        <string>d, nm</string>
+                      </property>
+                     </column>
+                     <column>
+                      <property name="text">
+                       <string>File name</string>
+                      </property>
+                     </column>
+                     <column>
+                      <property name="text">
+                       <string>Folder</string>
                       </property>
                      </column>
                     </widget>
