@@ -13,7 +13,7 @@ VALID_KERNELS = ["gaussian", "abragam", "pake", "weibull", "a-l"]
 
 
 def normalize_distribution(p_values, d_values):
-    area = np.trapz(p_values, d_values)
+    area = np.trapezoid(p_values, d_values)
     if area <= 0 or not np.isfinite(area):
         return np.zeros_like(p_values)
     return p_values / area
@@ -57,7 +57,7 @@ def _integrated_ndq_response(time_values, p_values, kernel, beta, k_value=K):
     for tau_i in np.asarray(time_values, dtype=float):
         scaled_dres = D_GRID * tau_i
         kernel_response = dq_kernel(scaled_dres, kernel, beta, k_value)
-        integrated_response = np.trapz(p_values * kernel_response, D_GRID)
+        integrated_response = np.trapezoid(p_values * kernel_response, D_GRID)
         integrated_values.append(0.5 * integrated_response)
 
     return np.array(integrated_values)

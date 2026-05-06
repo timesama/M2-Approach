@@ -303,9 +303,9 @@ class DQMQTabController(BaseTabController):
         ):
             figure.plot(
                 time,
-                result["denominator"],
+                result["diff"],
                 pen=mkPen("k", width=3),
-                name="MQ - tail + noise",
+                name="Ref - DQ",
             )
         if self._is_checked(
             "DQMQ_CheckBox_Fit", "DQMQ_CheckBox_TailFitting", default=False
@@ -364,10 +364,13 @@ class DQMQTabController(BaseTabController):
             "time": arrays["tau"],
             "dq_norm": arrays["DQ"],
             "ref_norm": arrays["Ref"],
+            "diff": arrays["Ref"] - arrays["DQ"],
             "mq_raw_norm": arrays["DQ"] + arrays["Ref"],
             "mq_norm": arrays["DQ"] + arrays["Ref"],
             "tail_fit": np.zeros_like(arrays["tau"]),
+            "noise_weight": np.zeros_like(arrays["tau"]),
             "additive": np.zeros_like(arrays["tau"]),
+            "denominator_base": arrays["DQ"] + arrays["Ref"],
             "denominator": arrays["DQ"] + arrays["Ref"],
             "time0": arrays["Time0"],
             "nDQ": arrays["nDQ0"],

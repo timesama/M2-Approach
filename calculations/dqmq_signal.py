@@ -111,10 +111,13 @@ def calculate_dqmq_analysis(
     dq_norm, ref_norm, ref_max = normalize_to_reference_max(dq_raw, ref_raw)
     mq_raw_norm = dq_norm + ref_norm
     mq_norm, mq_max = normalize_to_own_max(mq_raw_norm)
+    diff = ref_norm - dq_norm
     tail_fit = fit_tail(time, dq_norm, ref_norm, fit_from, fit_to, fitting_exponent)
-    additive = exp_apodization(time, fit_from, noise_level)
-    denominator = mq_raw_norm - tail_fit + 2 * noise_level * additive
-    numerator = dq_norm + noise_level * additive
+    noise_weight = calculate_noise_weight(time, fit_from)
+    additive = 0.5 * noise_level * noise_weight
+    denominator_base = mq_raw_norm - tail_fit
+    denominator = denominator_base + 2 * additive
+    numerator = dq_norm + additive
     n_dq = calculate_safe_ndq(numerator, denominator)
     n_dq = smooth_ndq_if_requested(time, n_dq, smoothing)
     time0 = np.insert(time, 0, 0.0)
@@ -124,10 +127,13 @@ def calculate_dqmq_analysis(
         "time": time,
         "dq_norm": dq_norm,
         "ref_norm": ref_norm,
+        "diff": diff,
         "mq_raw_norm": mq_raw_norm,
         "mq_norm": mq_norm,
         "tail_fit": tail_fit,
+        "noise_weight": noise_weight,
         "additive": additive,
+        "denominator_base": denominator_base,
         "denominator": denominator,
         "time0": time0,
         "nDQ": n_dq0,
@@ -142,7 +148,7 @@ def calculate_dqmq_analysis(
     }
 
 
-def exp_apodization(time, fit_from, noise_level):
+def calculate_noise_weight(time, fit_from):
     time = np.asarray(time, dtype=float)
     noise_tau = fit_from * 0.19 if fit_from != 0 else 1e-9
     exp_function = np.empty_like(time)
@@ -151,7 +157,7 @@ def exp_apodization(time, fit_from, noise_level):
     after_scaled = (fit_from - time[~before_fit]) / noise_tau
     exp_function[before_fit] = np.exp(before_scaled**3)
     exp_function[~before_fit] = 1.0 - np.exp(after_scaled**3)
-    return 0.5 * noise_level * exp_function
+    return exp_function
 
 
 def calculate_safe_ndq(numerator, denominator):
