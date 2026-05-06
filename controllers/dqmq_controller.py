@@ -17,6 +17,17 @@ logger = logging.getLogger(__name__)
 
 
 class DQMQTabController(BaseTabController):
+    PLOT_LINE_COLORS = {
+        "dq": "#ff0000",
+        "reference": "#0000ff",
+        "mq": "#ff00ff",
+        "ndq": "#000000",
+        "difference": "#666666",
+        "tail_fit": "#5a5a5a",
+        "integral_sum": "#006400",
+        "dres_fit": "#000000",
+    }
+
     def __init__(self, ui, state, parent=None):
         super().__init__(ui, state, parent)
         self.raw_data = None
@@ -67,9 +78,6 @@ class DQMQTabController(BaseTabController):
         figure = self.ui.DQMQ_PlotWidget_Signal
         figure.clear()
         self.integral_sum_curve_item = None
-        legend = figure.addLegend()
-        legend.clear()
-        figure.addLegend()
         return figure
 
     def _enable_file_actions(self):
@@ -188,11 +196,18 @@ class DQMQTabController(BaseTabController):
         ref = raw_data["ref_raw"]
 
         if self._is_checked("DQMQ_CheckBox_DQ", default=True):
-            figure.plot(time, dq, pen=mkPen("r", width=3), name="Raw DQ")
+            figure.plot(
+                time, dq, pen=mkPen(self.PLOT_LINE_COLORS["dq"], width=3), name="Raw DQ"
+            )
         if self._is_checked(
             "DQMQ_CheckBox_Ref", "DQMQ_CheckBox_Reference", default=True
         ):
-            figure.plot(time, ref, pen=mkPen("b", width=3), name="Raw Ref")
+            figure.plot(
+                time,
+                ref,
+                pen=mkPen(self.PLOT_LINE_COLORS["reference"], width=3),
+                name="Raw Ref",
+            )
 
         return time, dq, ref
 
@@ -291,20 +306,35 @@ class DQMQTabController(BaseTabController):
         time = result["time"]
 
         if self._is_checked("DQMQ_CheckBox_DQ", default=True):
-            figure.plot(time, result["dq_norm"], pen=mkPen("r", width=3), name="DQ")
+            figure.plot(
+                time,
+                result["dq_norm"],
+                pen=mkPen(self.PLOT_LINE_COLORS["dq"], width=3),
+                name="DQ",
+            )
         if self._is_checked(
             "DQMQ_CheckBox_Ref", "DQMQ_CheckBox_Reference", default=True
         ):
-            figure.plot(time, result["ref_norm"], pen=mkPen("b", width=3), name="Ref")
+            figure.plot(
+                time,
+                result["ref_norm"],
+                pen=mkPen(self.PLOT_LINE_COLORS["reference"], width=3),
+                name="Ref",
+            )
         if self._is_checked("DQMQ_CheckBox_MQ", default=True):
-            figure.plot(time, result["mq_norm"], pen=mkPen("m", width=3), name="MQ")
+            figure.plot(
+                time,
+                result["mq_norm"],
+                pen=mkPen(self.PLOT_LINE_COLORS["mq"], width=3),
+                name="MQ",
+            )
         if self._is_checked(
             "DQMQ_CheckBox_Diff", "DQMQ_CheckBox_Difference", default=True
         ):
             figure.plot(
                 time,
                 result["diff"],
-                pen=mkPen("k", width=3),
+                pen=mkPen(self.PLOT_LINE_COLORS["difference"], width=3),
                 name="Ref - DQ",
             )
         if self._is_checked(
@@ -313,7 +343,7 @@ class DQMQTabController(BaseTabController):
             figure.plot(
                 time,
                 result["tail_fit"],
-                pen=mkPen((90, 90, 90), width=3),
+                pen=mkPen(self.PLOT_LINE_COLORS["tail_fit"], width=3),
                 name="Tail fit",
             )
         if self._is_checked("DQMQ_CheckBox_NDQ", default=True):
@@ -327,9 +357,9 @@ class DQMQTabController(BaseTabController):
             figure.plot(
                 result["time0"],
                 result["nDQ"],
-                pen=mkPen("k", width=3),
+                pen=mkPen(self.PLOT_LINE_COLORS["ndq"], width=3),
                 symbol="o",
-                symbolPen="k",
+                symbolPen=self.PLOT_LINE_COLORS["ndq"],
                 symbolSize=10,
                 name="nDQ",
             )
@@ -339,7 +369,7 @@ class DQMQTabController(BaseTabController):
             figure.plot(
                 self.integral_sum_result["time"],
                 self.integral_sum_result["signal_norm"],
-                pen=mkPen((0, 100, 0), width=3),
+                pen=mkPen(self.PLOT_LINE_COLORS["integral_sum"], width=3),
                 name=f"Integral sum, shift={self.integral_sum_result['shift']:g}",
             )
         if self.dres_result and self._is_checked(
@@ -348,7 +378,9 @@ class DQMQTabController(BaseTabController):
             figure.plot(
                 self.dres_result["fit_x"],
                 self.dres_result["fit_y"],
-                pen=mkPen("k", width=4, style=Qt.DashLine),
+                pen=mkPen(
+                    self.PLOT_LINE_COLORS["dres_fit"], width=4, style=Qt.DashLine
+                ),
                 name="Dres fit",
             )
 
@@ -707,7 +739,7 @@ class DQMQTabController(BaseTabController):
         dres_figure.plot(
             self.dres_result["D_plot"],
             self.dres_result["P"],
-            pen=mkPen("m", width=3),
+            pen=mkPen(self.PLOT_LINE_COLORS["mq"], width=3),
             name="Dres distribution",
         )
         fitted_parameters = self.dres_result["params"]

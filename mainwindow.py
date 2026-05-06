@@ -1,6 +1,6 @@
 # This Python file uses the following encoding: utf-8
 import sys, os, re, csv, requests, winreg
-from PySide6.QtWidgets import QWidget,QTableWidgetItem, QTableWidget, QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea
+from PySide6.QtWidgets import QWidget,QTableWidgetItem, QTableWidget, QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea, QFrame, QHBoxLayout
 from PySide6.QtCore import QCoreApplication, Signal, QEvent, Qt
 from PySide6.QtGui import QColor, QIcon, QKeySequence
 import numpy as np
@@ -152,6 +152,7 @@ class MainWindow(QMainWindow):
         self.ui.DQMQ_DoubleSpinBox_IntegralShift.editingFinished.connect(
             self.dqmq_controller.update_integral_sum_shift
         )
+        self._style_dqmq_plot_controls()
         self._connect_dqmq_workflow_signals()
         self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
@@ -584,6 +585,75 @@ class MainWindow(QMainWindow):
             self.group_data_SD = data
             self.gs_controller.plot_sqrt_time()
 
+
+    def _style_dqmq_plot_controls(self):
+        self.ui.DQMQ_ComboBox_Kernel.setStyleSheet(
+            """
+            QComboBox#DQMQ_ComboBox_Kernel {
+                background-color: white;
+                color: black;
+                selection-background-color: #dbeafe;
+                selection-color: black;
+            }
+            QComboBox#DQMQ_ComboBox_Kernel QAbstractItemView {
+                background-color: white;
+                color: black;
+                selection-background-color: #dbeafe;
+                selection-color: black;
+                outline: 0;
+            }
+            """
+        )
+
+        swatches = {
+            "DQMQ_CheckBox_DQ": self.dqmq_controller.PLOT_LINE_COLORS["dq"],
+            "DQMQ_CheckBox_Reference": self.dqmq_controller.PLOT_LINE_COLORS[
+                "reference"
+            ],
+            "DQMQ_CheckBox_MQ": self.dqmq_controller.PLOT_LINE_COLORS["mq"],
+            "DQMQ_CheckBox_NDQ": self.dqmq_controller.PLOT_LINE_COLORS["ndq"],
+            "DQMQ_CheckBox_Difference": self.dqmq_controller.PLOT_LINE_COLORS[
+                "difference"
+            ],
+            "DQMQ_CheckBox_TailFitting": self.dqmq_controller.PLOT_LINE_COLORS[
+                "tail_fit"
+            ],
+            "DQMQ_CheckBox_IntegralSum": self.dqmq_controller.PLOT_LINE_COLORS[
+                "integral_sum"
+            ],
+            "DQMQ_CheckBox_DresFitting": self.dqmq_controller.PLOT_LINE_COLORS[
+                "dres_fit"
+            ],
+        }
+        layout = self.ui.DQMQ_Layout_CheckBoxesToShow
+        for checkbox_name, color in swatches.items():
+            checkbox = getattr(self.ui, checkbox_name, None)
+            if (
+                checkbox is None
+                or checkbox.parent().objectName().endswith("SwatchRow")
+            ):
+                continue
+
+            index = layout.indexOf(checkbox)
+            if index < 0:
+                continue
+
+            layout.takeAt(index)
+            row = QWidget()
+            row.setObjectName(f"{checkbox_name}_SwatchRow")
+            row_layout = QHBoxLayout(row)
+            row_layout.setContentsMargins(0, 0, 0, 0)
+            row_layout.setSpacing(6)
+
+            line = QFrame(row)
+            line.setFixedSize(28, 4)
+            line.setStyleSheet(f"background-color: {color}; border: 0;")
+
+            checkbox.setParent(row)
+            row_layout.addWidget(line)
+            row_layout.addWidget(checkbox)
+            row_layout.addStretch(1)
+            layout.insertWidget(index, row)
 
     def _connect_dqmq_workflow_signals(self):
         analysis_parameter_widgets = [
