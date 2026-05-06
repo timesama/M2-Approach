@@ -143,6 +143,8 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_4.clicked.connect(self.dqmq_controller.plot_norm)
         self.ui.pushButton_DQMQ_2.clicked.connect(self.dqmq_controller.plot_diff)
         self.ui.pushButton_DQMQ_3.clicked.connect(self.dqmq_controller.plot_nDQ)
+        self.ui.DQMQ_pushButton_CalculateIntegralSum.clicked.connect(self.dqmq_controller.calculate_integral_sum)
+        self.ui.DQMQ_pushButton_CalculateDres.clicked.connect(self.dqmq_controller.calculate_dres_distribution)
         self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 
@@ -776,6 +778,8 @@ class MainWindow(QMainWindow):
                 default_name = 'DQMQ_data_'
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
+        if self.tab == 'DQMQ' and dialog.last_saved_file_path:
+            self.dqmq_controller.save_integral_sum_result(dialog.last_saved_file_path)
         if self.tab in ('SE', 'DQ') and dialog.last_saved_file_path:
             files_json = os.path.splitext(dialog.last_saved_file_path)[0] + '_files.json'
             phased_data = self.phased_spectra_SE if self.tab == 'SE' else self.phased_spectra_DQ
