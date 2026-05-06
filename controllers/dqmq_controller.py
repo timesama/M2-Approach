@@ -6,11 +6,10 @@ import numpy as np
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QTableWidgetItem
 from pyqtgraph import InfiniteLine, mkPen
-from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 
 import Calculator as Cal
-from calculations import dqmq_dres
+from calculations import dqmq_dres, dqmq_signal
 from controllers.base_tab_controller import BaseTabController
 from utils.ui_busy import busy_cursor
 
@@ -221,7 +220,6 @@ class DQMQTabController(BaseTabController):
         if self.ui.DQMQ_Table_Data.rowCount() != len(raw_data["time"]):
             self._write_raw_table(raw_data)
 
-        file_path = raw_data["source_file"]
         fit_from, fit_to, fitting_exponent, baseline_level, time_shift, smoothing = (
             self._analysis_parameters()
         )
@@ -237,12 +235,14 @@ class DQMQTabController(BaseTabController):
 
         try:
             with busy_cursor():
-                self.analysis_result = self._calculate_dqmq_analysis_from_raw(
-                    raw_data=raw_data,
+                self.analysis_result = dqmq_signal.calculate_dqmq_analysis(
+                    raw_time=raw_data["time"],
+                    dq_raw=raw_data["dq_raw"],
+                    ref_raw=raw_data["ref_raw"],
                     fit_from=fit_from,
                     fit_to=fit_to,
                     fitting_exponent=fitting_exponent,
-                    baseline_level=baseline_level,
+                    noise_level=baseline_level,
                     time_shift=time_shift,
                     smoothing=smoothing,
                 )
@@ -258,175 +258,6 @@ class DQMQTabController(BaseTabController):
         self.dres_is_stale = True
         self.render_analysis_plot()
         return self.analysis_result
-
-    def _calculate_dqmq_analysis_from_raw(
-        self,
-        raw_data,
-        fit_from,
-        fit_to,
-        fitting_exponent,
-        baseline_level,
-        time_shift,
-        smoothing,
-    ):
-        raw_time = np.asarray(raw_data["time"], dtype=float)
-        dq_raw = np.asarray(raw_data["dq_raw"], dtype=float)
-        ref_raw = np.asarray(raw_data["ref_raw"], dtype=float)
-        time = raw_time + time_shift
-
-        finite_ref = ref_raw[np.isfinite(ref_raw)]
-        if finite_ref.size == 0:
-            raise ValueError(
-                "Ref data does not contain finite values for normalization."
-            )
-
-        ref_max = np.max(finite_ref)
-        if not np.isfinite(ref_max) or np.isclose(ref_max, 0.0):
-            raise ValueError(
-                "Ref maximum is zero or non-finite; cannot normalize DQMQ data."
-            )
-
-        dq_norm = dq_raw / ref_max
-        ref_norm = ref_raw / ref_max
-        finite_dq_norm = dq_norm[np.isfinite(dq_norm)]
-        if finite_dq_norm.size > 0:
-            dq_norm_max = np.max(finite_dq_norm)
-            if dq_norm_max > 1.05:
-                logger.warning(
-                    "DQMQ normalized DQ exceeds 1.05: max DQ_norm=%s raw DQ max=%s raw Ref max=%s",
-                    dq_norm_max,
-                    np.nanmax(dq_raw),
-                    ref_max,
-                )
-
-        mq_norm = dq_norm + ref_norm
-        tail_fit = self._fit_dqmq_tail(
-            time=time,
-            dq_norm=dq_norm,
-            ref_norm=ref_norm,
-            fit_from=fit_from,
-            fit_to=fit_to,
-            fitting_exponent=fitting_exponent,
-        )
-        denominator = mq_norm - tail_fit
-        n_dq = self._calculate_safe_ndq(dq_norm, denominator)
-        n_dq = self._smooth_ndq_if_requested(time, n_dq, smoothing)
-        time0 = np.insert(time, 0, 0.0)
-        n_dq0 = np.insert(n_dq, 0, 0.0)
-
-        return {
-            "time": time,
-            "dq_norm": dq_norm,
-            "ref_norm": ref_norm,
-            "mq_norm": mq_norm,
-            "tail_fit": tail_fit,
-            "fitted_tail": tail_fit,
-            "denominator": denominator,
-            "diff": denominator,
-            "time0": time0,
-            "nDQ": n_dq0,
-            "fit_from": fit_from,
-            "fit_to": fit_to,
-            "power": fitting_exponent,
-            "noise": baseline_level,
-            "time_shift": time_shift,
-            "smoothing": smoothing,
-            "ref_max": ref_max,
-        }
-
-    def _fit_dqmq_tail(
-        self, time, dq_norm, ref_norm, fit_from, fit_to, fitting_exponent
-    ):
-        tail_target = ref_norm - dq_norm
-        idx_min = self._nearest_index(time, fit_from)
-        idx_max = self._nearest_index(time, fit_to)
-        start_idx = min(idx_min, idx_max)
-        stop_idx = max(idx_min, idx_max) + 1
-        time_cut = time[start_idx:stop_idx]
-        tail_cut = tail_target[start_idx:stop_idx]
-        valid_fit_points = np.isfinite(time_cut) & np.isfinite(tail_cut)
-        time_cut = time_cut[valid_fit_points]
-        tail_cut = tail_cut[valid_fit_points]
-
-        if len(time_cut) < 3:
-            logger.warning("DQMQ tail fitting skipped: fewer than 3 valid fit points.")
-            return np.zeros_like(time, dtype=float)
-
-        def exponent_model(x_values, amplitude, tau, offset):
-            safe_tau = tau + 1e-12
-            scaled_time = x_values / safe_tau
-            exponent = -(scaled_time**fitting_exponent)
-            return amplitude * np.exp(exponent) + offset
-
-        try:
-            amplitude0 = np.max(tail_cut) - np.min(tail_cut)
-            tau0 = max(1e-6, (time_cut[-1] - time_cut[0]) / 4.0)
-            offset0 = np.median(tail_cut[-5:])
-            initial_params = [amplitude0, tau0, offset0]
-            fitted_params, _ = curve_fit(
-                exponent_model,
-                time_cut,
-                tail_cut,
-                p0=initial_params,
-                maxfev=10000000,
-            )
-            return exponent_model(time, *fitted_params)
-        except Exception:
-            logger.exception("DQMQ tail fitting failed; using zero tail fit.")
-            return np.zeros_like(time, dtype=float)
-
-    def _calculate_safe_ndq(self, dq_norm, denominator):
-        n_dq = np.full_like(dq_norm, np.nan, dtype=float)
-        valid_denominator = np.isfinite(denominator) & (denominator > 0)
-        valid_numerator = np.isfinite(dq_norm)
-        valid_points = valid_denominator & valid_numerator
-        n_dq[valid_points] = dq_norm[valid_points] / denominator[valid_points]
-        invalid_count = len(n_dq) - np.count_nonzero(valid_points)
-        if invalid_count:
-            logger.warning(
-                "DQMQ nDQ calculation skipped %d point(s) with invalid denominator or numerator.",
-                invalid_count,
-            )
-        return n_dq
-
-    def _smooth_ndq_if_requested(self, time, n_dq, smoothing):
-        smooth_from, smooth_to, smooth_window = smoothing
-        smoothing_enabled = (
-            smooth_window > 1
-            and smooth_to > smooth_from
-            and np.isfinite(smooth_from)
-            and np.isfinite(smooth_to)
-        )
-        if not smoothing_enabled:
-            return n_dq
-
-        smoothed_n_dq = np.array(n_dq, copy=True)
-        start_idx = self._nearest_index(time, smooth_from)
-        stop_idx = self._nearest_index(time, smooth_to)
-        start_idx, stop_idx = sorted((start_idx, stop_idx))
-        stop_idx += 1
-        segment = smoothed_n_dq[start_idx:stop_idx]
-        finite_segment = np.isfinite(segment)
-        if np.count_nonzero(finite_segment) < smooth_window:
-            return smoothed_n_dq
-
-        filled_segment = np.array(segment, copy=True)
-        if not np.all(finite_segment):
-            valid_indices = np.flatnonzero(finite_segment)
-            all_indices = np.arange(len(segment))
-            filled_segment = np.interp(
-                all_indices, valid_indices, segment[finite_segment]
-            )
-
-        kernel = np.ones(smooth_window) / smooth_window
-        averaged_segment = np.convolve(filled_segment, kernel, mode="same")
-        averaged_segment[~finite_segment] = np.nan
-        smoothed_n_dq[start_idx:stop_idx] = averaged_segment
-        return smoothed_n_dq
-
-    def _nearest_index(self, values, target):
-        values = np.asarray(values, dtype=float)
-        return int(np.nanargmin(np.abs(values - target)))
 
     def plot_norm(self):
         return self.run_full_analysis()
@@ -474,7 +305,7 @@ class DQMQTabController(BaseTabController):
                 time,
                 result["denominator"],
                 pen=mkPen("k", width=3),
-                name="Denominator",
+                name="MQ - tail + noise",
             )
         if self._is_checked(
             "DQMQ_CheckBox_Fit", "DQMQ_CheckBox_TailFitting", default=False
@@ -533,10 +364,11 @@ class DQMQTabController(BaseTabController):
             "time": arrays["tau"],
             "dq_norm": arrays["DQ"],
             "ref_norm": arrays["Ref"],
+            "mq_raw_norm": arrays["DQ"] + arrays["Ref"],
             "mq_norm": arrays["DQ"] + arrays["Ref"],
             "tail_fit": np.zeros_like(arrays["tau"]),
+            "additive": np.zeros_like(arrays["tau"]),
             "denominator": arrays["DQ"] + arrays["Ref"],
-            "diff": arrays["DQ"] + arrays["Ref"],
             "time0": arrays["Time0"],
             "nDQ": arrays["nDQ0"],
             "fit_from": None,
@@ -644,15 +476,6 @@ class DQMQTabController(BaseTabController):
     def calculate_dres(self):
         self.calculate_dres_distribution(show_errors=True)
 
-    def _maybe_auto_calculate_dres(self):
-        logger.info("DQMQ automatic Dres calculation is disabled; use Calculate Dres.")
-
-    def _analysis_has_enough_ndq(self):
-        if not self.analysis_result:
-            return False
-        n_dq = self.analysis_result.get("nDQ")
-        return n_dq is not None and len(n_dq) >= 4
-
     def calculate_dres_distribution(self, show_errors=True):
         try:
             with busy_cursor():
@@ -682,6 +505,10 @@ class DQMQTabController(BaseTabController):
                     "p0": p0,
                     "k_value": k_value,
                 }
+                self._write_fitted_dres_parameters_to_ui(
+                    fit_result["popt"],
+                    n_components,
+                )
                 self.dres_is_stale = False
                 self._plot_dres_distribution()
                 if self.current_plot_mode == "analysis":
@@ -823,19 +650,46 @@ class DQMQTabController(BaseTabController):
         raise ValueError("Select either 1 Dres or 2 Dres components.")
 
     def _dres_k_value(self):
-        return self.ui.DQMQ_DoubleSpinBox_Center1.value()
+        return self.ui.DQMQ_DoubleSpinBox_DresK.value()
 
     def _dres_initial_parameters(self, n_components):
-        center1 = self.ui.DQMQ_DoubleSpinBox_Width1.value()
-        width1 = self.ui.DQMQ_DoubleSpinBox_Center2.value()
-        beta = self.ui.DQMQ_DoubleSpinBox_UnusedDresParameter.value()
+        center1 = self.ui.DQMQ_DoubleSpinBox_DresCenter1.value()
+        width1 = self.ui.DQMQ_DoubleSpinBox_DresWidth1.value()
+        beta = self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta.value()
         if n_components == 1:
             return [center1, width1, beta]
 
-        center2 = self.ui.DQMQ_DoubleSpinBox_Width2.value()
-        width2 = self.ui.DQMQ_DoubleSpinBox_Fraction.value()
-        fraction1 = self.ui.DQMQ_DoubleSpinBox_WeibullBeta.value()
+        center2 = self.ui.DQMQ_DoubleSpinBox_DresCenter2.value()
+        width2 = self.ui.DQMQ_DoubleSpinBox_DresWidth2.value()
+        fraction1 = self.ui.DQMQ_DoubleSpinBox_DresFraction1.value()
         return [center1, width1, center2, width2, fraction1, beta]
+
+    def _write_fitted_dres_parameters_to_ui(self, fitted_parameters, n_components):
+        parameter_widgets = [
+            self.ui.DQMQ_DoubleSpinBox_DresCenter1,
+            self.ui.DQMQ_DoubleSpinBox_DresWidth1,
+            self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta,
+        ]
+        parameter_values = [
+            fitted_parameters[0],
+            fitted_parameters[1],
+            fitted_parameters[-1],
+        ]
+        if n_components == 2:
+            parameter_widgets = [
+                self.ui.DQMQ_DoubleSpinBox_DresCenter1,
+                self.ui.DQMQ_DoubleSpinBox_DresWidth1,
+                self.ui.DQMQ_DoubleSpinBox_DresCenter2,
+                self.ui.DQMQ_DoubleSpinBox_DresWidth2,
+                self.ui.DQMQ_DoubleSpinBox_DresFraction1,
+                self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta,
+            ]
+            parameter_values = fitted_parameters
+
+        for widget, value in zip(parameter_widgets, parameter_values):
+            previous_state = widget.blockSignals(True)
+            widget.setValue(float(value))
+            widget.blockSignals(previous_state)
 
     def mark_dres_stale(self):
         self.dres_is_stale = True

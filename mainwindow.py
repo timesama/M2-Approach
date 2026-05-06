@@ -621,13 +621,13 @@ class MainWindow(QMainWindow):
             )
 
         dres_parameter_widgets = [
-            "DQMQ_DoubleSpinBox_Center1",
-            "DQMQ_DoubleSpinBox_Width1",
-            "DQMQ_DoubleSpinBox_Center2",
-            "DQMQ_DoubleSpinBox_Width2",
-            "DQMQ_DoubleSpinBox_Fraction",
-            "DQMQ_DoubleSpinBox_WeibullBeta",
-            "DQMQ_DoubleSpinBox_UnusedDresParameter",
+            "DQMQ_DoubleSpinBox_DresK",
+            "DQMQ_DoubleSpinBox_DresCenter1",
+            "DQMQ_DoubleSpinBox_DresWidth1",
+            "DQMQ_DoubleSpinBox_DresCenter2",
+            "DQMQ_DoubleSpinBox_DresWidth2",
+            "DQMQ_DoubleSpinBox_DresFraction1",
+            "DQMQ_DoubleSpinBox_DresWeibullBeta",
         ]
         for widget_name in dres_parameter_widgets:
             self._connect_dqmq_signal(
