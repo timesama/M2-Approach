@@ -104,7 +104,7 @@ class GSTabController(BaseTabController):
             figure.clear(); figure.plot(time_original, signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
             dictionary[key]['sqrtT'] = sqrtT; dictionary[key]['d'] = d
             logger.info("GS fit completed: sqrtT=%s d=%s", sqrtT, d)
-            self.ui.btn_Plot1.setEnabled(True)
+            self.ui.btn_Plot_GS.setEnabled(True)
         except Exception as e:
             logger.exception("GS fit failed: index=%d", idx)
             figure.clear(); QMessageBox.warning(self.parent, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)

@@ -1,13 +1,12 @@
+import logging
 import os
 import re
-import logging
 
 import numpy as np
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 
-import Calculator as Cal
+from calculations import t1t2_signal
 from controllers.base_tab_controller import BaseTabController
-from dialogs.save_files_dialog import SaveFilesDialog
 from controllers.table_columns import T1Columns
 from utils.ui_busy import busy_cursor
 
@@ -15,254 +14,401 @@ logger = logging.getLogger(__name__)
 
 
 class T1T2TabController(BaseTabController):
-    def update_T12_table(self):
+    def connect_signals(self):
+        self.ui.T1T2_Button_Plot.clicked.connect(self.plot_relaxation_time_from_user)
+        self.ui.T1T2_Table_Results.horizontalHeader().sectionDoubleClicked.connect(
+            lambda index: self.parent.renameSection(self.ui.T1T2_Table_Results, index)
+        )
+        self.ui.T1T2_Table_Results.itemSelectionChanged.connect(self.plot_relaxation_time)
+        self.ui.T1T2_Button_FitOneExp.clicked.connect(self.change_exponential_order)
+        self.ui.T1T2_Button_FitTwoExp.clicked.connect(self.change_exponential_order)
+        self.ui.T1T2_Button_FitThreeExp.clicked.connect(self.change_exponential_order)
+        self.ui.T1T2_RadioButton_Seconds.clicked.connect(self.calculate_relaxation_time_from_user)
+        self.ui.T1T2_RadioButton_Milliseconds.clicked.connect(self.calculate_relaxation_time_from_user)
+        self.ui.T1T2_DoubleSpinBox_FitFrom.editingFinished.connect(self.calculate_relaxation_time_from_user)
+        self.ui.T1T2_DoubleSpinBox_FitTo.editingFinished.connect(self.calculate_relaxation_time_from_user)
+        self.ui.T1T2_DoubleSpinBox_InitialTau1.editingFinished.connect(self.calculate_relaxation_time_from_user)
+        self.ui.T1T2_DoubleSpinBox_InitialTau2.editingFinished.connect(self.calculate_relaxation_time_from_user)
+        self.ui.T1T2_DoubleSpinBox_InitialTau3.editingFinished.connect(self.calculate_relaxation_time_from_user)
+        self.ui.T1T2_ComboBox_ChooseFile.activated.connect(
+            lambda *_args: self.calculate_relaxation_time_from_user()
+        )
 
+    def update_T12_table(self):
         with busy_cursor():
             self._update_T12_table_impl()
 
     def _update_T12_table_impl(self):
-
-        def clean_line(line):
-
-            while '\t\t' in line:
-                line = line.replace('\t\t', '\t')
-            return line.strip()
-
-        def create_dictionary(dictionary, file, addition, x_axis, Time, Signal):
-
-            dictionary[file + addition]["X Axis"].append(x_axis)
-            dictionary[file + addition]["Time"].extend(Time)
-            dictionary[file + addition]["Signal"].extend(Signal)
-            return dictionary
-
         selected_files = self.parent.selected_T1files
+        if not selected_files:
+            self._warn_no_data("No T1/T2 data available. Select T1/T2 files first.")
+            return
+
+        legacy_files = [path for path in selected_files if path.lower().endswith(".sef")]
+        if legacy_files:
+            QMessageBox.warning(
+                self.parent,
+                "Unsupported T1/T2 file",
+                "Legacy FFC .sef files are no longer supported.\n\n"
+                "Please convert the data to the current supported table/text/CSV format and try again.",
+                QMessageBox.Ok,
+            )
+            self.parent.selected_T1files = [path for path in selected_files if not path.lower().endswith(".sef")]
+            return
 
         logger.info("T1T2 loading %d files", len(selected_files))
-
-        table = self.ui.table_T1
-        combobox = self.ui.T1T2_ChooseFileComboBox
-
-        pattern = r'(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))'
+        table = self.ui.T1T2_Table_Results
+        combobox = self.ui.T1T2_ComboBox_ChooseFile
         dictionary = self.parent.tau_dictionary
-        preserved_x_axis = {}
-
-        for row in range(table.rowCount()):
-            file_item = table.item(row, T1Columns.FOLDER)
-            x_item = table.item(row, T1Columns.X_AXIS)
-
-            if file_item is not None and x_item is not None:
-                preserved_x_axis[file_item.text()] = x_item.text()
-
+        preserved_x_axis = self._preserved_x_axis(table)
         dictionary.clear()
+        combobox.clear()
 
-        try:
-            if os.path.splitext(selected_files[0])[1] == '.csv':
-                logger.info("T1T2 branch: CSV")
-                table.setRowCount(len(selected_files))
-                csv_pattern = r'_(\-?\d+)(?=\.csv$)'
+        extension = os.path.splitext(selected_files[0])[1].lower()
+        failed_files = []
 
-                for row, file in zip(range(table.rowCount()), selected_files):
-                    logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
-                    current_file = os.path.basename(file)
+        if extension == ".csv":
+            failed_files = self._load_csv_files(table, combobox, dictionary, preserved_x_axis, selected_files)
+        elif extension == ".txt":
+            failed_files = self._load_txt_files(table, combobox, dictionary, preserved_x_axis, selected_files)
+        else:
+            failed_files = self._load_default_files(table, combobox, dictionary, preserved_x_axis, selected_files)
 
-                    try:
-                        x_axis = re.search(csv_pattern, current_file).group(1)
+        if failed_files:
+            self._warn_failed_files("Some T1/T2 files could not be read. They were skipped.", failed_files)
 
-                    except Exception:
-                        x_axis = row
-
-                    dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
-                    Time, Signal = [], []
-
-                    with open(file) as f:
-                        for line in f:
-                            parts = line.strip().split(",")
-                            Time.append(float(parts[0]))
-                            Signal.append(float(parts[1]))
-
-                    effective_x = preserved_x_axis.get(file, str(x_axis))
-                    dictionary[file]["X Axis"].append(effective_x)
-                    dictionary[file]["Time"].extend(Time)
-                    dictionary[file]["Signal"].extend(Signal)
-                    table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(file))
-                    table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(current_file))
-                    table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(effective_x)))
-                    combobox.addItem(f"{current_file}")
-
-            elif os.path.splitext(selected_files[0])[1] == '.txt':
-                logger.info("T1T2 branch: TXT")
-                table.setRowCount(len(selected_files * 4))
-                pattern_all = r'T1_.*_(\s?-?\d+).txt'
-
-                for file in selected_files:
-                    logger.info("T1T2 parsing file: %s", os.path.basename(file))
-
-                    try:
-                        x_axis = re.search(pattern_all, os.path.basename(file)).group(1)
-
-                    except Exception:
-                        x_axis = 'Variable'
-
-                    Time, Signal_all, Signal_short, Signal_med, Signal_long = [], [], [], [], []
-                    dictionary[file + '_all'] = {"X Axis": [], "Time": [], "Signal": []}
-                    dictionary[file + '_short'] = {"X Axis": [], "Time": [], "Signal": []}
-                    dictionary[file + '_medium'] = {"X Axis": [], "Time": [], "Signal": []}
-                    dictionary[file + '_long'] = {"X Axis": [], "Time": [], "Signal": []}
-
-                    with open(file, "r") as data:
-                        lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
-
-                        for line in lines[1:]:
-                            parts = line.split('\t')
-                            Time.append(float(parts[0]))
-                            Signal_all.append(float(parts[1]))
-                            Signal_short.append(float(parts[2]))
-                            Signal_med.append(float(parts[3]))
-                            Signal_long.append(float(parts[4]))
-
-                    dictionary = create_dictionary(dictionary, file, '_all', x_axis, Time, Signal_all)
-                    dictionary = create_dictionary(dictionary, file, '_short', x_axis, Time, Signal_short)
-                    dictionary = create_dictionary(dictionary, file, '_medium', x_axis, Time, Signal_med)
-                    dictionary = create_dictionary(dictionary, file, '_long', x_axis, Time, Signal_long)
-
-                for row, entry in zip(range(table.rowCount()), dictionary):
-                    current_file = os.path.basename(entry)
-                    x_axis = preserved_x_axis.get(entry, dictionary[entry]["X Axis"][0])
-                    table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(entry))
-                    table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(current_file))
-                    table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(preserved_x_axis.get(entry, x_axis))))
-                    combobox.addItem(f"{current_file}")
-
-            else:
-                logger.info("T1T2 branch: default")
-                table.setRowCount(len(selected_files))
-
-                for row, file in zip(range(table.rowCount()), selected_files):
-                    logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
-                    dictionary[file] = {"X Axis": [], "Time": [], "Signal": []}
-                    current_file = os.path.basename(file)
-
-                    try:
-                        x_axis = re.search(pattern, current_file).group(2)
-
-                    except Exception:
-                        x_axis = row
-
-                    try:
-                        with open(file, "r") as data:
-                            lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
-                        Time, Signal = [], []
-
-                        for line in lines[1:]:
-                            parts = line.split('\t')
-                            Time.append(float(parts[0]))
-                            Signal.append(float(parts[1]))
-
-                    except Exception:
-                        data = np.loadtxt(file)
-                        Time, Signal = data[:, 0], data[:, 1]
-
-                    table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(file))
-                    table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(current_file))
-                    effective_x = preserved_x_axis.get(file, str(x_axis))
-                    table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(effective_x)))
-                    dictionary[file]["X Axis"].append(effective_x)
-                    dictionary[file]["Time"].extend(Time)
-                    dictionary[file]["Signal"].extend(Signal)
-                    combobox.addItem(f"{current_file}")
-
-        except Exception:
-            logger.exception("T1T2 loading failed")
-            QMessageBox.warning(self.parent, "Error", "Something went wrong. Try again.", QMessageBox.Ok)
-            self.parent.clear_list()
-
-        self.ui.btn_Plot1.setEnabled(True)
         combobox.setCurrentIndex(-1)
         table.resizeColumnsToContents()
 
+    def _load_csv_files(self, table, combobox, dictionary, preserved_x_axis, selected_files):
+        logger.info("T1T2 branch: CSV")
+        table.setRowCount(0)
+        csv_pattern = r"_(\-?\d+)(?=\.csv$)"
+        failed_files = []
+
+        for file_path in selected_files:
+            row = table.rowCount()
+            current_file = os.path.basename(file_path)
+            logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), current_file)
+
+            try:
+                match = re.search(csv_pattern, current_file)
+                x_axis = match.group(1) if match else row
+                time_values, signal_values = self._read_csv(file_path)
+            except Exception:
+                logger.exception("T1T2 CSV parsing failed: %s", file_path)
+                failed_files.append(current_file)
+                continue
+
+            effective_x = preserved_x_axis.get(file_path, str(x_axis))
+            dictionary[file_path] = {"X Axis": [effective_x], "Time": time_values, "Signal": signal_values}
+            self._add_table_row(table, combobox, row, file_path, current_file, effective_x)
+
+        return failed_files
+
+    def _load_txt_files(self, table, combobox, dictionary, preserved_x_axis, selected_files):
+        logger.info("T1T2 branch: TXT")
+        table.setRowCount(0)
+        pattern_all = r"T1_.*_(\s?-?\d+).txt"
+        failed_files = []
+
+        for file_path in selected_files:
+            current_file = os.path.basename(file_path)
+            logger.info("T1T2 parsing file: %s", current_file)
+
+            try:
+                match = re.search(pattern_all, current_file)
+                x_axis = match.group(1) if match else "Variable"
+                time_values, all_signal, short_signal, medium_signal, long_signal = self._read_txt_multi_signal(file_path)
+            except Exception:
+                logger.exception("T1T2 TXT parsing failed: %s", file_path)
+                failed_files.append(current_file)
+                continue
+
+            for suffix, signal_values in (
+                ("_all", all_signal),
+                ("_short", short_signal),
+                ("_medium", medium_signal),
+                ("_long", long_signal),
+            ):
+                key = file_path + suffix
+                dictionary[key] = {"X Axis": [], "Time": [], "Signal": []}
+                t1t2_signal.add_curve(dictionary, file_path, suffix, x_axis, time_values, signal_values)
+                row = table.rowCount()
+                current_entry = os.path.basename(key)
+                effective_x = preserved_x_axis.get(key, dictionary[key]["X Axis"][0])
+                self._add_table_row(table, combobox, row, key, current_entry, effective_x)
+
+        return failed_files
+
+    def _load_default_files(self, table, combobox, dictionary, preserved_x_axis, selected_files):
+        logger.info("T1T2 branch: default")
+        table.setRowCount(0)
+        pattern = r"(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))"
+        failed_files = []
+
+        for file_path in selected_files:
+            row = table.rowCount()
+            current_file = os.path.basename(file_path)
+            logger.info("T1T2 parsing file %d/%d: %s", row + 1, len(selected_files), current_file)
+
+            try:
+                match = re.search(pattern, current_file)
+                x_axis = match.group(2) if match else row
+                time_values, signal_values = self._read_default_signal(file_path)
+            except Exception:
+                logger.exception("T1T2 parsing failed: %s", file_path)
+                failed_files.append(current_file)
+                continue
+
+            effective_x = preserved_x_axis.get(file_path, str(x_axis))
+            dictionary[file_path] = {"X Axis": [effective_x], "Time": list(time_values), "Signal": list(signal_values)}
+            self._add_table_row(table, combobox, row, file_path, current_file, effective_x)
+
+        return failed_files
+
+    def _read_csv(self, file_path):
+        time_values = []
+        signal_values = []
+        with open(file_path) as file:
+            for line in file:
+                parts = line.strip().split(",")
+                time_values.append(float(parts[0]))
+                signal_values.append(float(parts[1]))
+
+        return time_values, signal_values
+
+    def _read_txt_multi_signal(self, file_path):
+        time_values = []
+        all_signal = []
+        short_signal = []
+        medium_signal = []
+        long_signal = []
+
+        with open(file_path, "r") as data:
+            lines = [t1t2_signal.clean_tabbed_line(line.rstrip("\n")) for line in data if line.strip()]
+
+        for line in lines[1:]:
+            parts = line.split("\t")
+            time_values.append(float(parts[0]))
+            all_signal.append(float(parts[1]))
+            short_signal.append(float(parts[2]))
+            medium_signal.append(float(parts[3]))
+            long_signal.append(float(parts[4]))
+
+        return time_values, all_signal, short_signal, medium_signal, long_signal
+
+    def _read_default_signal(self, file_path):
+        try:
+            with open(file_path, "r") as data:
+                lines = [t1t2_signal.clean_tabbed_line(line.rstrip("\n")) for line in data if line.strip()]
+
+            time_values = []
+            signal_values = []
+            for line in lines[1:]:
+                parts = line.split("\t")
+                time_values.append(float(parts[0]))
+                signal_values.append(float(parts[1]))
+            return time_values, signal_values
+        except Exception:
+            data = np.loadtxt(file_path)
+            return data[:, 0], data[:, 1]
+
+    def _add_table_row(self, table, combobox, row, folder, file_name, x_axis):
+        table.insertRow(row)
+        table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(folder))
+        table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(file_name))
+        table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(x_axis)))
+        combobox.addItem(file_name)
+
+    def _preserved_x_axis(self, table):
+        preserved_x_axis = {}
+        for row in range(table.rowCount()):
+            file_item = table.item(row, T1Columns.FOLDER)
+            x_item = table.item(row, T1Columns.X_AXIS)
+            if file_item is not None and x_item is not None:
+                preserved_x_axis[file_item.text()] = x_item.text()
+
+        return preserved_x_axis
+
     def change_exponential_order(self):
-        self.ui.DSB_ExpFitting1.setEnabled(True)
-        self.ui.DSB_ExpFitting2.setEnabled(not self.ui.T1T2_FitWith1ExpButton.isChecked())
-        self.ui.DSB_ExpFitting3.setEnabled(self.ui.T1T2_FitWith3ExpButton.isChecked())
+        self.ui.T1T2_DoubleSpinBox_InitialTau1.setEnabled(True)
+        self.ui.T1T2_DoubleSpinBox_InitialTau2.setEnabled(not self.ui.T1T2_Button_FitOneExp.isChecked())
+        self.ui.T1T2_DoubleSpinBox_InitialTau3.setEnabled(self.ui.T1T2_Button_FitThreeExp.isChecked())
+        self.calculate_relaxation_time(show_warning=True)
 
-        self.calculate_relaxation_time()
+    def calculate_relaxation_time_from_user(self):
+        self.calculate_relaxation_time(show_warning=True)
 
-    def calculate_relaxation_time(self):
-
+    def calculate_relaxation_time(self, show_warning=False):
         with busy_cursor():
-            self._calculate_relaxation_time_impl()
+            self._calculate_relaxation_time_impl(show_warning=show_warning)
 
-    def _calculate_relaxation_time_impl(self):
-
-        table = self.ui.table_T1
-        figure = self.ui.T1_Widget_1
-        idx = self.ui.T1T2_ChooseFileComboBox.currentIndex()
+    def _calculate_relaxation_time_impl(self, show_warning=False):
+        table = self.ui.T1T2_Table_Results
+        figure = self.ui.T1T2_PlotWidget_RawSignal
+        idx = self.ui.T1T2_ComboBox_ChooseFile.currentIndex()
         dictionary = self.parent.tau_dictionary
-        start = int(self.ui.T1T2_fit_from.value())
-        end = -(int(self.ui.T1T2_fit_to.value())) or None
-        denominator = 1 if self.ui.radioButton_16.isChecked() else 1000
-        if idx == -1:
+        if table.rowCount() == 0 or not dictionary:
+            if show_warning:
+                self._warn_no_data("No T1/T2 data available. Select T1/T2 files first.")
             return
 
-        key = table.item(idx, T1Columns.FOLDER).text()
-        t0 = np.array(dictionary[key]['Time']) / denominator
-        s0 = np.array(dictionary[key]['Signal'])
-        t, s = t0[start:end], s0[start:end]
-        t1, t2, t3 = int(self.ui.DSB_ExpFitting1.value()), int(self.ui.DSB_ExpFitting2.value()), int(self.ui.DSB_ExpFitting3.value())
-        if self.ui.T1T2_FitWith1ExpButton.isChecked():
-            order, p = 1, [s[0], t1, 1]
-        elif self.ui.T1T2_FitWith2ExpButton.isChecked():
-            order, p = 2, [s[0], t1, s[0], t2, 1]
+        if idx == -1:
+            if show_warning:
+                QMessageBox.warning(self.parent, "No T1/T2 row selected", "No T1/T2 row selected.", QMessageBox.Ok)
+            return
+
+        item = table.item(idx, T1Columns.FOLDER)
+        if item is None or item.text() not in dictionary:
+            if show_warning:
+                QMessageBox.warning(
+                    self.parent,
+                    "No T1/T2 data",
+                    "Cannot calculate relaxation time because required columns contain non-numeric values.",
+                    QMessageBox.Ok,
+                )
+            return
+
+        start = int(self.ui.T1T2_DoubleSpinBox_FitFrom.value())
+        end = -(int(self.ui.T1T2_DoubleSpinBox_FitTo.value())) or None
+        denominator = 1 if self.ui.T1T2_RadioButton_Seconds.isChecked() else 1000
+        key = item.text()
+        time_values, signal_values, fit_time, fit_signal = t1t2_signal.fit_range(
+            dictionary[key]["Time"],
+            dictionary[key]["Signal"],
+            start,
+            end,
+            denominator,
+        )
+        tau1 = int(self.ui.T1T2_DoubleSpinBox_InitialTau1.value())
+        tau2 = int(self.ui.T1T2_DoubleSpinBox_InitialTau2.value())
+        tau3 = int(self.ui.T1T2_DoubleSpinBox_InitialTau3.value())
+
+        if self.ui.T1T2_Button_FitOneExp.isChecked():
+            order = 1
+        elif self.ui.T1T2_Button_FitTwoExp.isChecked():
+            order = 2
         else:
-            order, p = 3, [s[0], t1, s[0], t2, s[0], t3, 1]
+            order = 3
+
+        try:
+            initial_params = t1t2_signal.initial_parameters(order, fit_signal, tau1, tau2, tau3)
+        except ValueError:
+            if show_warning:
+                QMessageBox.warning(
+                    self.parent,
+                    "Invalid T1/T2 range",
+                    "Cannot fit relaxation data because the selected range is invalid.",
+                    QMessageBox.Ok,
+                )
+            return
+
         logger.info("T1T2 fitting selected curve: index=%d, order=%d", idx, order)
         try:
-            tf, fit, tau1, tau2, tau3, r2, a1, a2, a3 = Cal.fit_exponent(t, s, order, p)
+            fit_time_curve, fit_signal_curve, tau_1, tau_2, tau_3, r2, amp_1, amp_2, amp_3 = t1t2_signal.fit_relaxation(
+                fit_time,
+                fit_signal,
+                order,
+                initial_params,
+            )
         except Exception:
             logger.exception("T1T2 fit failed for index=%d order=%d", idx, order)
-            QMessageBox.warning(self.parent, "Fitting failed", f"Fitting failed for a {order}-exponential model. Decrease the coherence order and/or adjust the initial tau values.", QMessageBox.Ok)
+            QMessageBox.warning(
+                self.parent,
+                "Fitting failed",
+                f"Fitting failed for a {order}-exponential model. Decrease the coherence order and/or adjust the initial tau values.",
+                QMessageBox.Ok,
+            )
             return
-        logger.info("T1T2 fit completed: tau1=%s tau2=%s tau3=%s r2=%s", tau1, tau2, tau3, r2)
-        self.ui.textEdit_error.setText(f"R² {r2}")
-        table.setItem(idx, T1Columns.TAU_1, QTableWidgetItem(str(tau1))); table.setItem(idx, T1Columns.TAU_2, QTableWidgetItem(str(tau2))); table.setItem(idx, T1Columns.TAU_3, QTableWidgetItem(str(tau3)))
-        table.setItem(idx, T1Columns.A_1, QTableWidgetItem(str(a1))); table.setItem(idx, T1Columns.A_2, QTableWidgetItem(str(a2))); table.setItem(idx, T1Columns.A_3, QTableWidgetItem(str(a3)))
+
+        logger.info("T1T2 fit completed: tau1=%s tau2=%s tau3=%s r2=%s", tau_1, tau_2, tau_3, r2)
+        self.ui.T1T2_TextEdit_FitResult.setText(f"R² {r2}")
+        table.setItem(idx, T1Columns.TAU_1, QTableWidgetItem(str(tau_1)))
+        table.setItem(idx, T1Columns.TAU_2, QTableWidgetItem(str(tau_2)))
+        table.setItem(idx, T1Columns.TAU_3, QTableWidgetItem(str(tau_3)))
+        table.setItem(idx, T1Columns.A_1, QTableWidgetItem(str(amp_1)))
+        table.setItem(idx, T1Columns.A_2, QTableWidgetItem(str(amp_2)))
+        table.setItem(idx, T1Columns.A_3, QTableWidgetItem(str(amp_3)))
         table.resizeColumnsToContents()
-        figure.clear(); figure.plot(t0, s0, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
-        dictionary[key]['T1 1'] = tau1; dictionary[key]['T1 2'] = tau2; dictionary[key]['T1 3'] = tau3
-        self.ui.btn_Plot1.setEnabled(True)
+        figure.clear()
+        figure.plot(time_values, signal_values, pen=None, symbolPen=None, symbol="o", symbolBrush="r", symbolSize=10)
+        figure.plot(fit_time_curve, fit_signal_curve, pen="b")
+        dictionary[key]["T1 1"] = tau_1
+        dictionary[key]["T1 2"] = tau_2
+        dictionary[key]["T1 3"] = tau_3
 
-    def plot_relaxation_time(self):
+    def plot_relaxation_time_from_user(self):
+        self.plot_relaxation_time(show_warning=True)
 
-        table = self.ui.table_T1
-        graph = self.ui.T1_Widget_2
-        column = T1Columns.TAU_1 if self.ui.T1T2_1expPlotButton.isChecked() else T1Columns.TAU_2 if self.ui.T1T2_2expPlotButton.isChecked() else T1Columns.TAU_3
+    def plot_relaxation_time(self, show_warning=False):
+        table = self.ui.T1T2_Table_Results
+        graph = self.ui.T1T2_PlotWidget_RelaxationTime
         graph.clear()
         if table.rowCount() < 1:
+            if show_warning:
+                self._warn_no_data("Cannot update T1/T2 plot because the table is empty.")
             return
-        x_axis, relaxation_time, number = [], [], 1
+
+        column = self._selected_relaxation_column()
+        x_axis = []
+        relaxation_time = []
+        number = 1
         for row in range(table.rowCount()):
-            try: x_axis.append(float(table.item(row, T1Columns.X_AXIS).text()))
-            except: x_axis.append(number)
-            try: relaxation_time.append(float(table.item(row, column).text()))
-            except: relaxation_time.append(0)
+            x_item = table.item(row, T1Columns.X_AXIS)
+            y_item = table.item(row, column)
+            try:
+                x_axis.append(float(x_item.text()))
+            except Exception:
+                x_axis.append(number)
+            try:
+                relaxation_time.append(float(y_item.text()))
+            except Exception:
+                relaxation_time.append(0)
             number += 1
-        graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+
+        graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol="o", symbolBrush="r", symbolSize=10)
         self.highlight_selected_relaxation_point()
 
-
     def highlight_selected_relaxation_point(self):
-
-        row = self.ui.table_T1.currentRow()
+        row = self.ui.T1T2_Table_Results.currentRow()
         if row < 0:
             return
-        column = T1Columns.TAU_1 if self.ui.T1T2_1expPlotButton.isChecked() else T1Columns.TAU_2 if self.ui.T1T2_2expPlotButton.isChecked() else T1Columns.TAU_3
-        x_item = self.ui.table_T1.item(row, T1Columns.X_AXIS)
-        y_item = self.ui.table_T1.item(row, column)
+
+        column = self._selected_relaxation_column()
+        x_item = self.ui.T1T2_Table_Results.item(row, T1Columns.X_AXIS)
+        y_item = self.ui.T1T2_Table_Results.item(row, column)
         if x_item is None or y_item is None:
             return
+
         try:
             x = float(x_item.text())
             y = float(y_item.text())
         except ValueError:
             return
-        self.ui.T1_Widget_2.plot([x], [y], pen=None, symbol='o', symbolBrush=(255, 255, 0, 255), symbolPen='k', symbolSize=13)
+
+        self.ui.T1T2_PlotWidget_RelaxationTime.plot(
+            [x],
+            [y],
+            pen=None,
+            symbol="o",
+            symbolBrush=(255, 255, 0, 255),
+            symbolPen="k",
+            symbolSize=13,
+        )
+
+    def _selected_relaxation_column(self):
+        if self.ui.T1T2_RadioButton_PlotTau1.isChecked():
+            return T1Columns.TAU_1
+        if self.ui.T1T2_RadioButton_PlotTau2.isChecked():
+            return T1Columns.TAU_2
+        return T1Columns.TAU_3
+
+    def _warn_no_data(self, message):
+        QMessageBox.warning(self.parent, "No T1/T2 data", message, QMessageBox.Ok)
+
+    def _warn_failed_files(self, message, failed_files):
+        preview = "\n".join(failed_files[:5])
+        if len(failed_files) > 5:
+            preview += f"\n...and {len(failed_files) - 5} more"
+        QMessageBox.warning(self.parent, "T1/T2 load warning", f"{message}\n\n{preview}", QMessageBox.Ok)

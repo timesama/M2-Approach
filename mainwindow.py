@@ -108,25 +108,25 @@ class MainWindow(QMainWindow):
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.DQMQ_Button_Save.clicked.connect(self.save_data)
         self.ui.DQTemp_Button_Save.clicked.connect(self.save_data)
-        self.ui.btn_Save_3.clicked.connect(self.save_data)
+        self.ui.T1T2_Button_Save.clicked.connect(self.save_data)
         self.ui.btn_Save_4.clicked.connect(self.save_data)
 
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.DQTemp_Button_Load.clicked.connect(self.load_data)
-        self.ui.btn_Load_3.clicked.connect(self.load_data)
+        self.ui.T1T2_Button_Load.clicked.connect(self.load_data)
         self.ui.DQMQ_Button_Load.clicked.connect(self.load_data)
         self.ui.btn_Load_5.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.general_se_dq_controller.open_phasing_manual)
 
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
         self.ui.btn_Add.clicked.connect(self.add_select_dialog)
-        self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.T1T2_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.DQMQ_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.DQTemp_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFiles_GS.clicked.connect(self.open_select_comparison_files_dialog)
 
         self.ui.DQTemp_Button_ClearTable.clicked.connect(self.clear_list)
-        self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
+        self.ui.T1T2_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
         self.ui.SE_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.DQ_Button_ClearTable.clicked.connect(self.clear_list)
@@ -152,10 +152,9 @@ class MainWindow(QMainWindow):
             self.dqmq_controller.update_integral_sum_shift
         )
         self._connect_dqmq_workflow_signals()
-        self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 
-        self.ui.pushButton_GroupT1T2.clicked.connect(self.open_group_window)
+        self.ui.T1T2_Button_Group.clicked.connect(self.open_group_window)
         self.ui.pushButton_GroupSD.clicked.connect(self.open_group_window)
 
         # Graph setup
@@ -166,8 +165,8 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQ_PlotWidget_NormIntensity, "X axis", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQTemp_PlotWidget_T2Distribution, "T₂*", "Norm. DQ Intensity", "FunctionFit")
         self.setup_graph(self.ui.DQTemp_PlotWidget_CenterVsXAxis, "X axis", "Center", "")
-        self.setup_graph(self.ui.T1_Widget_1, "Time, ms", "Signal", "")
-        self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, ms", "")
+        self.setup_graph(self.ui.T1T2_PlotWidget_RawSignal, "Time, ms", "Signal", "")
+        self.setup_graph(self.ui.T1T2_PlotWidget_RelaxationTime, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_PlotWidget_Signal, "Time", "NMR signal", "")
         self.setup_graph(self.ui.DQMQ_PlotWidget_Dres, "Dres/2π, KHz", "P(Dres)", "")
         self.setup_graph(self.ui.GS_Widget_1, "√Time, √us", "Signal", "")
@@ -176,31 +175,16 @@ class MainWindow(QMainWindow):
         self.se_controller.connect_signals()
         self.dq_controller.connect_signals()
         self.dq_temp_controller.connect_signals()
+        self.t1t2_controller.connect_signals()
 
         # Table Headers
         self.copy_enabler = TableCopyEnabler(self)
 
-        self.ui.table_T1.horizontalHeader().sectionDoubleClicked.connect(
-    lambda index=T1Columns.X_AXIS: self.renameSection(self.ui.table_T1, index=T1Columns.X_AXIS)
-)
         self.ui.table_GS.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=GSColumns.X_AXIS: self.renameSection(self.ui.table_GS, index=GSColumns.X_AXIS)
 )
         self._apply_table_header_order()
         # Connect table signals to slots
-        self.ui.table_T1.itemSelectionChanged.connect(self.t1t2_controller.plot_relaxation_time)
-        self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
-        self.ui.T1T2_FitWith2ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
-        self.ui.T1T2_FitWith3ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
-
-        self.ui.radioButton_16.clicked.connect(self.t1t2_controller.calculate_relaxation_time)
-        self.ui.radioButton_17.clicked.connect(self.t1t2_controller.calculate_relaxation_time)
-        self.ui.T1T2_fit_from.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
-        self.ui.T1T2_fit_to.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
-        self.ui.DSB_ExpFitting1.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
-        self.ui.DSB_ExpFitting2.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
-        self.ui.DSB_ExpFitting3.valueChanged.connect(self.t1t2_controller.calculate_relaxation_time)
-
         self.ui.checkBox_3.clicked.connect(self.gs_controller.calculate_sqrt_time)
         self.ui.radioButton_short.clicked.connect(self.gs_controller.calculate_sqrt_time)
         self.ui.radioButton_medium.clicked.connect(self.gs_controller.calculate_sqrt_time)
@@ -213,7 +197,6 @@ class MainWindow(QMainWindow):
         self.ui.GS_m2.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
 
         # Connect combobox signals to slots
-        self.ui.T1T2_ChooseFileComboBox.activated.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.gs_controller.calculate_sqrt_time)
 
 
@@ -352,9 +335,9 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             self.selected_T1files = []
             self.tau_dictionary = {}
-            self.ui.table_T1.setRowCount(0)
-            self.ui.T1_Widget_1.clear()
-            self.ui.T1_Widget_2.clear()
+            self.ui.T1T2_Table_Results.setRowCount(0)
+            self.ui.T1T2_PlotWidget_RawSignal.clear()
+            self.ui.T1T2_PlotWidget_RelaxationTime.clear()
             self.group_data_T1T2 = {}
         elif self.tab == 'DQMQ':
             self.selected_DQMQfile = []
@@ -372,7 +355,7 @@ class MainWindow(QMainWindow):
 
 
         if self.tab == 'T1T2':
-            combobox = self.ui.T1T2_ChooseFileComboBox
+            combobox = self.ui.T1T2_ComboBox_ChooseFile
         elif self.tab in ('SE', 'DQ'):
             combobox = self.ui.comboBox_4
         elif self.tab == 'GS':
@@ -395,8 +378,8 @@ class MainWindow(QMainWindow):
             combobox = self.ui.comboBox_4
             files = self.selected_files_DQ_single
         elif self.tab =='T1T2':
-            table = self.ui.table_T1
-            combobox = self.ui.T1T2_ChooseFileComboBox
+            table = self.ui.T1T2_Table_Results
+            combobox = self.ui.T1T2_ComboBox_ChooseFile
             files = self.selected_T1files
         elif self.tab =='GS':
             table = self.ui.table_GS
@@ -409,6 +392,8 @@ class MainWindow(QMainWindow):
         if row == -1:
             if self.tab == "DQ":
                 QMessageBox.warning(self, "No DQ row selected", "No DQ row selected.", QMessageBox.Ok)
+            elif self.tab == "T1T2":
+                QMessageBox.warning(self, "No T1/T2 row selected", "No T1/T2 row selected.", QMessageBox.Ok)
             else:
                 QMessageBox.warning(self, "Cricket sounds", "Select the row.", QMessageBox.Ok)
             return
@@ -474,8 +459,8 @@ class MainWindow(QMainWindow):
                 self.selected_DQfiles.extend(DQfileNames)
                 self.dq_temp_controller.update_DQ_comparison()
             elif self.tab == 'T1T2':
-                while self.ui.T1T2_ChooseFileComboBox.count()>0:
-                    self.ui.T1T2_ChooseFileComboBox.removeItem(0)
+                while self.ui.T1T2_ComboBox_ChooseFile.count()>0:
+                    self.ui.T1T2_ComboBox_ChooseFile.removeItem(0)
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
                 self.t1t2_controller.update_T12_table()
@@ -539,7 +524,15 @@ class MainWindow(QMainWindow):
             self.group_window.copy_table_data(self.ui.SE_Table_Data)
             self.group_data_SE = {}
         elif self.tab == 'T1T2':
-            self.group_window.copy_table_data(self.ui.table_T1)
+            if self.ui.T1T2_Table_Results.rowCount() == 0:
+                QMessageBox.warning(
+                    self,
+                    "No T1/T2 data",
+                    "No T1/T2 data available. Select T1/T2 files first.",
+                    QMessageBox.Ok,
+                )
+                return
+            self.group_window.copy_table_data(self.ui.T1T2_Table_Results)
             self.group_data_T1T2 = {}
         elif self.tab == 'GS':
             self.group_window.copy_table_data(self.ui.table_GS)
@@ -679,7 +672,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_Save.setEnabled(False)
         self.ui.btn_Phasing.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
-        self.ui.btn_Plot1.setEnabled(False)
         self.ui.DQMQ_Button_PlotOriginal.setEnabled(False)
         self.ui.DQMQ_Button_PlotNorm.setEnabled(False)
 
@@ -724,7 +716,7 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             figure = self.ui.SE_PlotWidget_Main
         elif self.tab == 'T1T2':
-            figure = self.ui.T1_Widget_2
+            figure = self.ui.T1T2_PlotWidget_RelaxationTime
         elif self.tab == 'GS':
             figure = self.ui.GS_Widget_2
         elif self.tab == 'DQ_Temp':
@@ -736,7 +728,7 @@ class MainWindow(QMainWindow):
         figure.getAxis('bottom').setLabel(name)
 
     def _apply_table_header_order(self):
-        self.ui.table_T1.setHorizontalHeaderLabels([
+        self.ui.T1T2_Table_Results.setHorizontalHeaderLabels([
             "X axis", "tau 1", "A 1", "tau 2", "A 2", "tau 3", "A 3", "File name", "Folder"
         ])
         self.ui.table_GS.setHorizontalHeaderLabels([
@@ -746,7 +738,7 @@ class MainWindow(QMainWindow):
             "Name", "Center Gauss", "Center Lorenz", "Center Voigt", "Center y",
             "FWHM Gauss", "FWHM Lorenz", "FWHM Voigt", "Folder"
         ])
-        self.ui.table_T1.resizeColumnsToContents()
+        self.ui.T1T2_Table_Results.resizeColumnsToContents()
         self.ui.table_GS.resizeColumnsToContents()
         self.ui.DQTemp_Table_Results.resizeColumnsToContents()
 
@@ -830,8 +822,16 @@ class MainWindow(QMainWindow):
             default_name = 'Table_DQ_comparison'
 
         elif self.tab == 'T1T2':
-            table = self.ui.table_T1
+            table = self.ui.T1T2_Table_Results
             files = self.selected_T1files
+            if table.rowCount() == 0 or not files:
+                QMessageBox.warning(
+                    self,
+                    "No T1/T2 data",
+                    "Load T1/T2 files first.",
+                    QMessageBox.Ok,
+                )
+                return
             default_name = 'T'
 
         elif self.tab == 'GS':
@@ -917,7 +917,7 @@ class MainWindow(QMainWindow):
             table = self.ui.DQTemp_Table_Results
             self.selected_DQfiles = files
         elif self.tab == 'T1T2':
-            table = self.ui.table_T1
+            table = self.ui.T1T2_Table_Results
             self.selected_T1files = files
         elif self.tab == 'DQMQ':
             table = self.ui.DQMQ_Table_Data

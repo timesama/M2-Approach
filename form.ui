@@ -1731,7 +1731,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <item>
                   <layout class="QVBoxLayout" name="A_ButtonsTableContainer">
                    <item>
-                    <widget class="QTableWidget" name="table_T1">
+                    <widget class="QTableWidget" name="T1T2_Table_Results">
                      <property name="minimumSize">
                       <size>
                        <width>300</width>
@@ -1836,7 +1836,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       <number>10</number>
                      </property>
                      <item row="3" column="0">
-                      <widget class="QPushButton" name="btn_Load_3">
+                      <widget class="QPushButton" name="T1T2_Button_Load">
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
@@ -1855,7 +1855,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </widget>
                      </item>
                      <item row="2" column="0">
-                      <widget class="QPushButton" name="btn_Save_3">
+                      <widget class="QPushButton" name="T1T2_Button_Save">
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
@@ -1874,21 +1874,21 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </widget>
                      </item>
                      <item row="2" column="1">
-                      <widget class="QPushButton" name="btn_ClearTable_2">
+                      <widget class="QPushButton" name="T1T2_Button_ClearTable">
                        <property name="text">
                         <string>Clear Table</string>
                        </property>
                       </widget>
                      </item>
                      <item row="1" column="0">
-                      <widget class="QPushButton" name="btn_SelectFiles_T1">
+                      <widget class="QPushButton" name="T1T2_Button_SelectFiles">
                        <property name="text">
                         <string>Select Files</string>
                        </property>
                       </widget>
                      </item>
                      <item row="3" column="1">
-                      <widget class="QPushButton" name="pushButton_GroupT1T2">
+                      <widget class="QPushButton" name="T1T2_Button_Group">
                        <property name="text">
                         <string>Group</string>
                        </property>
@@ -1930,7 +1930,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <number>5</number>
                    </property>
                    <item>
-                    <widget class="QComboBox" name="T1T2_ChooseFileComboBox">
+                    <widget class="QComboBox" name="T1T2_ComboBox_ChooseFile">
                      <property name="minimumSize">
                       <size>
                        <width>300</width>
@@ -2040,7 +2040,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QRadioButton" name="T1T2_FitWith1ExpButton">
+                         <widget class="QRadioButton" name="T1T2_Button_FitOneExp">
                           <property name="text">
                            <string>1 Exp</string>
                           </property>
@@ -2050,14 +2050,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QRadioButton" name="T1T2_FitWith2ExpButton">
+                         <widget class="QRadioButton" name="T1T2_Button_FitTwoExp">
                           <property name="text">
                            <string>2 Exp</string>
                           </property>
                          </widget>
                         </item>
                         <item>
-                         <widget class="QRadioButton" name="T1T2_FitWith3ExpButton">
+                         <widget class="QRadioButton" name="T1T2_Button_FitThreeExp">
                           <property name="text">
                            <string>3 Exp</string>
                           </property>
@@ -2158,7 +2158,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QRadioButton" name="radioButton_16">
+                         <widget class="QRadioButton" name="T1T2_RadioButton_Seconds">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -2171,7 +2171,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QRadioButton" name="radioButton_17">
+                         <widget class="QRadioButton" name="T1T2_RadioButton_Milliseconds">
                           <property name="text">
                            <string>μs</string>
                           </property>
@@ -2267,7 +2267,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QDoubleSpinBox" name="DSB_ExpFitting1">
+                         <widget class="QDoubleSpinBox" name="T1T2_DoubleSpinBox_InitialTau1">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -2292,7 +2292,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QDoubleSpinBox" name="DSB_ExpFitting2">
+                         <widget class="QDoubleSpinBox" name="T1T2_DoubleSpinBox_InitialTau2">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -2317,7 +2317,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QDoubleSpinBox" name="DSB_ExpFitting3">
+                         <widget class="QDoubleSpinBox" name="T1T2_DoubleSpinBox_InitialTau3">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -2415,7 +2415,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QDoubleSpinBox" name="T1T2_fit_from">
+                       <widget class="QDoubleSpinBox" name="T1T2_DoubleSpinBox_FitFrom">
                         <property name="minimumSize">
                          <size>
                           <width>70</width>
@@ -2493,7 +2493,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QDoubleSpinBox" name="T1T2_fit_to">
+                       <widget class="QDoubleSpinBox" name="T1T2_DoubleSpinBox_FitTo">
                         <property name="minimumSize">
                          <size>
                           <width>70</width>
@@ -2521,7 +2521,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QTextEdit" name="textEdit_error">
+                       <widget class="QTextEdit" name="T1T2_TextEdit_FitResult">
                         <property name="maximumSize">
                          <size>
                           <width>200</width>
@@ -2574,7 +2574,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item>
-                    <widget class="PlotWidget" name="T1_Widget_1" native="true">
+                    <widget class="PlotWidget" name="T1T2_PlotWidget_RawSignal" native="true">
                      <property name="minimumSize">
                       <size>
                        <width>400</width>
@@ -2616,7 +2616,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <number>5</number>
                    </property>
                    <item>
-                    <widget class="QPushButton" name="btn_Plot1">
+                    <widget class="QPushButton" name="T1T2_Button_Plot">
                      <property name="text">
                       <string>Plot Comparison</string>
                      </property>
@@ -2719,7 +2719,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QRadioButton" name="T1T2_1expPlotButton">
+                       <widget class="QRadioButton" name="T1T2_RadioButton_PlotTau1">
                         <property name="text">
                          <string>1ˢᵗ Exp</string>
                         </property>
@@ -2729,14 +2729,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QRadioButton" name="T1T2_2expPlotButton">
+                       <widget class="QRadioButton" name="T1T2_RadioButton_PlotTau2">
                         <property name="text">
                          <string>2ⁿᵈ Exp</string>
                         </property>
                        </widget>
                       </item>
                       <item>
-                       <widget class="QRadioButton" name="T1T2_3expPlotButton">
+                       <widget class="QRadioButton" name="T1T2_RadioButton_PlotTau3">
                         <property name="text">
                          <string>3ⁿᵈ Exp</string>
                         </property>
@@ -2746,7 +2746,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item>
-                    <widget class="PlotWidget" name="T1_Widget_2" native="true">
+                    <widget class="PlotWidget" name="T1T2_PlotWidget_RelaxationTime" native="true">
                      <property name="minimumSize">
                       <size>
                        <width>400</width>
