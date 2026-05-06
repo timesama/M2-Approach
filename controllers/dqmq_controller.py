@@ -1,13 +1,14 @@
 import numpy as np
 import logging
 import os
+import importlib.util
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem, QFileDialog
 from pyqtgraph import InfiniteLine, mkPen
-from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 
 import Calculator as Cal
+from calculations import dqmq_dres
 from controllers.base_tab_controller import BaseTabController
 from utils.ui_busy import busy_cursor
 
@@ -15,9 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class DQMQTabController(BaseTabController):
-    DRES_K = 0.4
-    DRES_GRID = np.linspace(0, 0.94, 60000)
-
     def __init__(self, ui, state, parent=None):
         super().__init__(ui, state, parent)
         self.integral_sum_result = None
@@ -65,6 +63,7 @@ class DQMQTabController(BaseTabController):
             return np.array([]), np.array([]), np.array([])
         figure = self.ui.DQMQ_Widget
         figure.clear()
+        self.integral_sum_curve_item = None
         legend = figure.addLegend()
         legend.clear()
         figure.addLegend()
@@ -85,6 +84,7 @@ class DQMQTabController(BaseTabController):
             return
         figure = self.ui.DQMQ_Widget
         figure.clear()
+        self.integral_sum_curve_item = None
         legend = figure.addLegend()
         legend.clear()
         figure.addLegend()
@@ -111,6 +111,7 @@ class DQMQTabController(BaseTabController):
         time_shift = int(self.ui.DQMQtime_shift.value())
         figure = self.ui.DQMQ_Widget
         figure.clear()
+        self.integral_sum_curve_item = None
         legend = figure.addLegend()
         legend.clear()
         figure.addLegend()
@@ -137,6 +138,7 @@ class DQMQTabController(BaseTabController):
         smoothing = [self.ui.DQMQSmooth_from.value(), self.ui.DQMQSmooth_to.value(), int(self.ui.DQMQSmooth_window.value())]
         figure = self.ui.DQMQ_Widget
         figure.clear()
+        self.integral_sum_curve_item = None
         legend = figure.addLegend()
         legend.clear()
         figure.addLegend()
@@ -171,6 +173,7 @@ class DQMQTabController(BaseTabController):
 
         figure = self.ui.DQMQ_Widget
         figure.clear()
+        self.integral_sum_curve_item = None
         legend = figure.addLegend()
         legend.clear()
         figure.addLegend()
@@ -182,27 +185,33 @@ class DQMQTabController(BaseTabController):
         file_path, _ = QFileDialog.getOpenFileName(self.parent, "Select DQ/T2 distribution CSV", "", "CSV Files (*.csv)")
         if not file_path:
             return
-        data = self._read_dqt2_distribution_file(file_path)
-        if data is None:
-            QMessageBox.warning(self.parent, "Invalid file", "Selected file must contain exactly 6 columns.")
-            return
-        t, signal_norm = self._calculate_t2_summed_signal(data)
-        shift = float(self.ui.DQMQSmooth_window_2.value())
-        self._plot_integral_sum(t, signal_norm, shift)
-        self.integral_sum_result = {
-            "time": t + shift,
-            "time_base": t,
-            "signal_norm": signal_norm,
-            "source_file": file_path,
-            "shift": shift,
-        }
+        try:
+            with busy_cursor():
+                data = self._read_dqt2_distribution_file(file_path)
+                t, signal_norm = self._calculate_t2_summed_signal(data)
+                shift = float(self.ui.DQMQSmooth_window_2.value())
+                self._plot_integral_sum(t, signal_norm, shift)
+                self.integral_sum_result = {
+                    "time": t + shift,
+                    "time_base": t,
+                    "signal_norm": signal_norm,
+                    "source_file": file_path,
+                    "shift": shift,
+                }
+        except ValueError as exc:
+            QMessageBox.warning(self.parent, "Invalid file", str(exc))
+        except Exception as exc:
+            logger.exception("Integral sum calculation failed")
+            QMessageBox.warning(self.parent, "Integral sum calculation failed", str(exc))
 
     def _read_dqt2_distribution_file(self, file_path):
         data = np.genfromtxt(file_path, delimiter=",")
+        if data.ndim == 0:
+            raise ValueError("Selected file must contain exactly 6 columns.")
         if data.ndim == 1:
             data = np.atleast_2d(data)
         if data.shape[1] != 6:
-            return None
+            raise ValueError("Selected file must contain exactly 6 columns.")
         return data
 
     def _calculate_t2_summed_signal(self, data, n_points=500):
@@ -213,6 +222,8 @@ class DQMQTabController(BaseTabController):
         amp_dq = amp_dq[valid]
         t2 = t2[valid]
         t_dq = t_dq[valid]
+        if len(t2) == 0:
+            raise ValueError("Selected file does not contain valid positive T2star_lin values.")
         order = np.argsort(t2)
         amp_dq = amp_dq[order]
         t2 = t2[order]
@@ -258,100 +269,202 @@ class DQMQTabController(BaseTabController):
         out = np.column_stack((self.integral_sum_result["time"], self.integral_sum_result["signal_norm"]))
         np.savetxt(save_path, out, delimiter=",", header="time,integral_sum_norm", comments="")
 
+    def calculate_dres(self):
+        self.calculate_dres_distribution()
+
     def calculate_dres_distribution(self):
-        table_data = self._read_dqmq_table_for_dres()
-        if table_data is None:
-            return
         try:
-            tau, ndq = table_data
-            ndq_smoothed = savgol_filter(ndq, 3, 1) if len(ndq) >= 3 else ndq
-            time0 = np.insert(tau + 1, 0, 0.0)
-            ndq0 = np.insert(ndq_smoothed, 0, 0.0)
-            kernel_map = {"Gauss": "gaussian", "Abragam": "abragam", "Pake": "pake", "Weibull": "weibull", "A-L": "a-l"}
-            kernel = kernel_map.get(self.ui.DQMQ_Kernel_comboBox.currentText(), "gaussian")
-            n_components = 2 if self.ui.radioButton_2.isChecked() else 1
-            fit = self._fit_dres(time0, ndq0, kernel, n_components)
-            d_plot, p_dist = self._distribution_from_fit(fit["popt"], n_components)
-            fig = self.ui.DQMQ_Widget_DRes
-            fig.clear()
-            fig.plot(d_plot, p_dist, pen=mkPen('m', width=3), name=f"{kernel} {n_components}D")
-            self.dres_result = {"dres_khz": d_plot, "p_dres": p_dist, "fit": fit}
+            with busy_cursor():
+                arrays = self._read_dqmq_table_arrays()
+                kernel = self._selected_dres_kernel()
+                n_components = self._selected_dres_component_count()
+                fit_result = dqmq_dres.fit_selected_model(
+                    arrays["Time0"],
+                    arrays["nDQ0"],
+                    kernel=kernel,
+                    n_components=n_components,
+                )
+                d_plot, p_dist = dqmq_dres.build_distribution(fit_result)
+                self.dres_result = {
+                    "D_plot": d_plot,
+                    "P": p_dist,
+                    "fit_x": arrays["Time0"],
+                    "fit_y": fit_result["fit"],
+                    "kernel": kernel,
+                    "n_components": n_components,
+                    "params": fit_result["popt"],
+                    "param_names": fit_result["param_names"],
+                }
+                self._plot_dres_result(arrays, self.dres_result)
+        except ValueError as exc:
+            QMessageBox.warning(self.parent, "Dres calculation", str(exc))
         except Exception as exc:
             logger.exception("Dres calculation failed")
             QMessageBox.warning(self.parent, "Dres calculation failed", str(exc))
 
-    def _read_dqmq_table_for_dres(self):
+    def _read_dqmq_table_arrays(self):
         table = self.ui.table_DQMQ
         if table.rowCount() == 0:
-            QMessageBox.warning(self.parent, "No data", "Run DQMQ analysis first so the table contains nDQ values.")
-            return None
-        tau_values, ndq_values = [], []
+            raise ValueError("Run DQMQ analysis first so the table contains nDQ values.")
+
+        values = {"tau": [], "dq": [], "ref": [], "nDQ": []}
+        column_names = [("tau", 0, "Time"), ("dq", 1, "DQ"), ("ref", 2, "Ref"), ("nDQ", 3, "nDQ")]
         for row in range(table.rowCount()):
-            time_item = table.item(row, 0)
-            ndq_item = table.item(row, 3)
-            if time_item is None or ndq_item is None:
-                continue
-            time_text = time_item.text().strip()
-            ndq_text = ndq_item.text().strip()
-            if not time_text or not ndq_text:
-                continue
-            try:
-                tau_values.append(float(time_text))
-                ndq_values.append(float(ndq_text))
-            except ValueError:
-                QMessageBox.warning(self.parent, "Invalid table values", f"Row {row + 1} has non-numeric time or nDQ.")
-                return None
-        if len(tau_values) < 3:
-            QMessageBox.warning(self.parent, "Insufficient data", "Need at least 3 DQMQ rows with nDQ values in the table.")
-            return None
-        return np.asarray(tau_values, dtype=float), np.asarray(ndq_values, dtype=float)
+            row_values = {}
+            row_has_any_value = False
+            for key, column, label in column_names:
+                item = table.item(row, column)
+                text = item.text().strip() if item is not None else ""
+                row_has_any_value = row_has_any_value or bool(text)
+                if not text:
+                    row_values[key] = None
+                    continue
+                try:
+                    row_values[key] = float(text)
+                except ValueError as exc:
+                    raise ValueError(f"Row {row + 1} has a non-numeric {label} value.") from exc
 
-    def _fit_dres(self, time0, ndq0, kernel, n_components):
-        model = self._make_fit_model(kernel, n_components)
-        if n_components == 1:
-            p0, lb, ub = [0.25, 1e-3, 2.0], [1e-7, 1e-7, 1e-7], [1.0, 0.8, 6.0]
+            if not row_has_any_value:
+                continue
+            if any(row_values[key] is None for key, _, _ in column_names):
+                raise ValueError(f"Row {row + 1} is missing one or more DQMQ table values.")
+            for key in values:
+                values[key].append(row_values[key])
+
+        if not values["nDQ"]:
+            raise ValueError("The DQMQ table nDQ column is empty. Run Plot nDQ before calculating Dres.")
+        if len(values["nDQ"]) < 3:
+            raise ValueError("Need at least 3 DQMQ table rows with nDQ values to calculate Dres.")
+
+        tau = np.asarray(values["tau"], dtype=float)
+        dq = np.asarray(values["dq"], dtype=float)
+        ref = np.asarray(values["ref"], dtype=float)
+        ndq_original = np.asarray(values["nDQ"], dtype=float)
+        ndq = savgol_filter(ndq_original, 3, 1) if len(ndq_original) >= 3 else ndq_original
+
+        if np.isclose(tau[0], 0.0):
+            time0 = tau
+            ndq0 = ndq
         else:
-            p0, lb, ub = [0.061, 0.05, 0.313, 0.033, 0.359, 0.96], [1e-3, 1e-4, 1e-5, 1e-15, 0.0, 0.1], [1.0, 1.5, 1.9, 1.1, 1.0, 4.0]
-        popt, pcov = curve_fit(model, time0, ndq0, p0=p0, bounds=(lb, ub), maxfev=5000000)
-        return {"popt": popt, "pcov": pcov}
+            time0 = np.insert(tau, 0, 0.0)
+            ndq0 = np.insert(ndq, 0, 0.0)
 
-    def _make_fit_model(self, kernel, n_components):
-        return (lambda t, mu, sigma, beta: self._ndq_1d(t, mu, sigma, beta, kernel)) if n_components == 1 else (
-            lambda t, mu1, sigma1, mu2, sigma2, frac1, beta: self._ndq_2d(t, mu1, sigma1, mu2, sigma2, frac1, beta, kernel)
+        return {
+            "tau": tau,
+            "DQ": dq,
+            "Ref": ref,
+            "nDQ": ndq,
+            "nDQ_original": ndq_original,
+            "Time0": time0,
+            "nDQ0": ndq0,
+        }
+
+    def _selected_dres_kernel(self):
+        kernel_map = {
+            "Gauss": "gaussian",
+            "Abragam": "abragam",
+            "Pake": "pake",
+            "Weibull": "weibull",
+            "A-L": "a-l",
+        }
+        selected = self.ui.DQMQ_Kernel_comboBox.currentText()
+        if selected not in kernel_map:
+            raise ValueError(f"Unknown Dres kernel: {selected}")
+        return kernel_map[selected]
+
+    def _selected_dres_component_count(self):
+        if self.ui.radioButton_3.isChecked():
+            return 1
+        if self.ui.radioButton_2.isChecked():
+            return 2
+        raise ValueError("Select either 1 Dres or 2 Dres components.")
+
+    def _plot_dres_result(self, arrays, dres_result):
+        dres_figure = self.ui.DQMQ_Widget_DRes
+        dres_figure.clear()
+        dres_figure.addLegend()
+        dres_figure.plot(
+            dres_result["D_plot"],
+            dres_result["P"],
+            pen=mkPen('m', width=3),
+            name="Dres distribution",
         )
 
-    def _dq_kernel(self, x, kernel, beta):
-        beta = max(float(beta), 1e-12)
-        if kernel == "gaussian":
-            return 1.0 - np.exp(-self.DRES_K * x**2)
-        if kernel == "abragam":
-            return 1.0 - np.exp(-self.DRES_K * x**2) * np.sinc(x / np.pi)
-        if kernel == "pake":
-            return 1.0 - np.exp(-self.DRES_K * x**2) * np.cos(x)
-        if kernel == "weibull":
-            return 1.0 - np.exp(-self.DRES_K * x**beta)
-        return 1.0 - np.exp(-self.DRES_K * x**beta) * np.cos(x)
-
-    def _ndq_1d(self, t, mu, sigma, beta, kernel):
-        p = self._p_gaussian(self.DRES_GRID, mu, sigma)
-        return np.array([0.5 * np.trapz(p * self._dq_kernel(self.DRES_GRID * ti, kernel, beta), self.DRES_GRID) for ti in np.asarray(t)])
-
-    def _ndq_2d(self, t, mu1, sigma1, mu2, sigma2, frac1, beta, kernel):
-        p = self._p_gaussian_2d(self.DRES_GRID, mu1, sigma1, mu2, sigma2, frac1)
-        return np.array([0.5 * np.trapz(p * self._dq_kernel(self.DRES_GRID * ti, kernel, beta), self.DRES_GRID) for ti in np.asarray(t)])
-
-    def _p_gaussian(self, d, mu, sigma):
-        sigma = max(float(sigma), 1e-9)
-        p = np.exp(-(d - mu) ** 2 / (2 * sigma**2))
-        area = np.trapz(p, d)
-        return np.zeros_like(p) if area <= 0 else p / area
-
-    def _p_gaussian_2d(self, d, mu1, sigma1, mu2, sigma2, frac1):
-        frac1 = np.clip(frac1, 0.0, 1.0)
-        return frac1 * self._p_gaussian(d, mu1, sigma1) + (1.0 - frac1) * self._p_gaussian(d, mu2, sigma2)
-
-    def _distribution_from_fit(self, popt, n_components):
-        p = self._p_gaussian(self.DRES_GRID, popt[0], popt[1]) if n_components == 1 else self._p_gaussian_2d(
-            self.DRES_GRID, popt[0], popt[1], popt[2], popt[3], popt[4]
+        figure = self.ui.DQMQ_Widget
+        figure.clear()
+        self.integral_sum_curve_item = None
+        figure.addLegend()
+        figure.plot(
+            arrays["Time0"],
+            arrays["nDQ0"],
+            pen=mkPen('k', width=3),
+            symbol='o',
+            symbolPen='k',
+            symbolSize=10,
+            name="nDQ",
         )
-        return self.DRES_GRID / (2 * np.pi) * 1000.0, p
+        figure.plot(
+            dres_result["fit_x"],
+            dres_result["fit_y"],
+            pen=mkPen('k', width=4, style=Qt.DashLine),
+            name="Dres fit",
+        )
+
+    def save_dres_result(self, base_file_path):
+        if not self.dres_result:
+            return
+        root, _ = os.path.splitext(base_file_path)
+        distribution = np.column_stack((self.dres_result["D_plot"], self.dres_result["P"]))
+        fit = np.column_stack((self.dres_result["fit_x"], self.dres_result["fit_y"]))
+        metadata = {
+            "kernel": self.dres_result["kernel"],
+            "n_components": self.dres_result["n_components"],
+            **dict(zip(self.dres_result["param_names"], self.dres_result["params"])),
+        }
+
+        can_write_excel = (
+            importlib.util.find_spec("pandas") is not None
+            and (
+                importlib.util.find_spec("openpyxl") is not None
+                or importlib.util.find_spec("xlsxwriter") is not None
+            )
+        )
+        if can_write_excel:
+            import pandas as pd
+            try:
+                with pd.ExcelWriter(f"{root}_Dres.xlsx") as writer:
+                    pd.DataFrame(distribution, columns=["Dres_over_2pi_kHz", "P_Dres"]).to_excel(
+                        writer,
+                        sheet_name="Dres distribution",
+                        index=False,
+                    )
+                    pd.DataFrame(fit, columns=["time", "fitted_nDQ"]).to_excel(
+                        writer,
+                        sheet_name="Fit",
+                        index=False,
+                    )
+                    pd.DataFrame(metadata.items(), columns=["parameter", "value"]).to_excel(
+                        writer,
+                        sheet_name="Metadata",
+                        index=False,
+                    )
+                return
+            except Exception:
+                logger.exception("Excel Dres export failed; writing CSV fallback files")
+
+        np.savetxt(
+            f"{root}_Dres_distribution.csv",
+            distribution,
+            delimiter=",",
+            header="Dres_over_2pi_kHz,P_Dres",
+            comments="",
+        )
+        metadata_header = "\n".join([f"{key}: {value}" for key, value in metadata.items()])
+        np.savetxt(
+            f"{root}_Dres_fit.csv",
+            fit,
+            delimiter=",",
+            header=f"{metadata_header}\ntime,fitted_nDQ",
+            comments="# ",
+        )
+
