@@ -1,6 +1,7 @@
 import numpy as np
 from PySide6.QtWidgets import QTableWidgetItem
 from scipy.optimize import curve_fit
+from scipy.integrate import trapezoid
 
 import Calculator as Cal
 from controllers.base_tab_controller import BaseTabController
@@ -57,7 +58,7 @@ class DQTabController(BaseTabController):
             return
 
         coeff = np.polyfit(x, y, 1)
-        integral = np.trapz(dq)
+        integral = trapezoid(dq)
         dq_norm = dq / integral
 
         self.ui.table_DQ.setColumnCount(5)

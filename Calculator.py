@@ -4,6 +4,7 @@
 
 import numpy as np
 from scipy.optimize import curve_fit
+from scipy.integrate import trapezoid
 from scipy.signal import savgol_filter
 from sympy import symbols, diff, solve
 
@@ -510,13 +511,13 @@ def _calculate_M2(FFT_real, Frequency):
     # plt.show()
 
     # Take the integral of the REAL PART OF FFT by counts
-    Integral = np.trapz(RealPart)
+    Integral = trapezoid(RealPart)
 
     # Normalize FFT to the Integral value
     Fur_normalized = RealPart / Integral
 
     # Calculate the integral of normalized FFT to receive 1
-    Integral_one = np.trapz(Fur_normalized)
+    Integral_one = trapezoid(Fur_normalized)
 
     # Multiplication (the power ^n will give the nth moment (here it is n=2)
     Multiplication = (Frequency ** 2) * Fur_normalized
@@ -527,7 +528,7 @@ def _calculate_M2(FFT_real, Frequency):
     # Calculate the integral of multiplication - the nth moment
     # The (2pi)^2 are the units to transform from rad/sec to Hz
     # ppbly it should be (2pi)^n for generalized moment calculation
-    M2 = (np.trapz(Multiplication)) * 4 * np.pi ** 2
+    M2 = (trapezoid(Multiplication)) * 4 * np.pi ** 2
 
     # Check the validity
     if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
