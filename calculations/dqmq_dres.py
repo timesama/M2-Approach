@@ -127,21 +127,6 @@ def fit_selected_model(time0, ndq0, kernel="gaussian", n_components=1):
     }
 
 
-def fit_single_reference(time0, ndq0):
-    popt, pcov = curve_fit(
-        ndq_single,
-        time0,
-        ndq0,
-        p0=[0.25],
-        bounds=([0.001], [1.0]),
-        maxfev=20000,
-    )
-    return {
-        "popt": popt,
-        "pcov": pcov,
-        "fit": ndq_single(time0, *popt),
-    }
-
 
 def build_distribution(fit_result):
     n_components = fit_result["n_components"]
@@ -153,6 +138,14 @@ def build_distribution(fit_result):
         p_values = p_gaussian_2d(D_GRID, popt[0], popt[1], popt[2], popt[3], popt[4])
     else:
         raise ValueError("n_components must be 1 or 2")
+
+    d_plot = D_GRID / (2 * np.pi) * 1000.0
+    return d_plot, p_values
+
+def build_singular_distribution(center, sigma):
+
+    p_values = p_gaussian(D_GRID, center, sigma)
+
 
     d_plot = D_GRID / (2 * np.pi) * 1000.0
     return d_plot, p_values

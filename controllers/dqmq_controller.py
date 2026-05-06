@@ -391,6 +391,23 @@ class DQMQTabController(BaseTabController):
             name="Dres distribution",
         )
 
+        fitted_parameters = dres_result.fit_result
+
+        # Plot Center 1 as a point TODO: should be a vertical center
+        dres_figure.plot(
+        fitted_parameters[0],
+        1,
+        symbol='o', symbolPen=None,
+        symbolBrush=(255, 0, 0, 255),
+        symbolSize=10
+        )
+
+        # TODO: add if there are two components: plot the | vertical line on the second center
+
+        # TODO: plot separate distributions - notcumulative
+        # if n components 2
+        # in dqmq_dres take function build_singular_distribution(center, sigma) with corresponding popt for centers and plot them as thin green line
+
         figure = self.ui.DQMQ_Widget
         figure.clear()
         self.integral_sum_curve_item = None
