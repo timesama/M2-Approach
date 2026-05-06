@@ -145,6 +145,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_DQMQ_3.clicked.connect(self.dqmq_controller.plot_nDQ)
         self.ui.DQMQ_pushButton_CalculateIntegralSum.clicked.connect(self.dqmq_controller.calculate_integral_sum)
         self.ui.DQMQ_pushButton_CalculateDres.clicked.connect(self.dqmq_controller.calculate_dres_distribution)
+        self.ui.DQMQSmooth_window_2.editingFinished.connect(self.dqmq_controller.update_integral_sum_shift)
         self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 

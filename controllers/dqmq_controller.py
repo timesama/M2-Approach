@@ -21,6 +21,7 @@ class DQMQTabController(BaseTabController):
     def __init__(self, ui, state, parent=None):
         super().__init__(ui, state, parent)
         self.integral_sum_result = None
+        self.integral_sum_curve_item = None
         self.dres_result = None
 
     def _get_current_file(self):
@@ -190,6 +191,7 @@ class DQMQTabController(BaseTabController):
         self._plot_integral_sum(t, signal_norm, shift)
         self.integral_sum_result = {
             "time": t + shift,
+            "time_base": t,
             "signal_norm": signal_norm,
             "source_file": file_path,
             "shift": shift,
@@ -224,11 +226,28 @@ class DQMQTabController(BaseTabController):
         return t, signal_norm
 
     def _plot_integral_sum(self, t, signal_norm, shift):
-        self.ui.DQMQ_Widget.plot(
-            t + shift,
-            signal_norm,
-            pen=mkPen((0, 100, 0), width=3),
-            name=f"Integral sum, shift={shift:g}",
+        shifted_time = t + shift
+        if self.integral_sum_curve_item is None:
+            self.integral_sum_curve_item = self.ui.DQMQ_Widget.plot(
+                shifted_time,
+                signal_norm,
+                pen=mkPen((0, 100, 0), width=3),
+                name=f"Integral sum, shift={shift:g}",
+            )
+        else:
+            self.integral_sum_curve_item.setData(shifted_time, signal_norm)
+            self.integral_sum_curve_item.setName(f"Integral sum, shift={shift:g}")
+
+    def update_integral_sum_shift(self):
+        if not self.integral_sum_result:
+            return
+        shift = float(self.ui.DQMQSmooth_window_2.value())
+        self.integral_sum_result["shift"] = shift
+        self.integral_sum_result["time"] = self.integral_sum_result["time_base"] + shift
+        self._plot_integral_sum(
+            self.integral_sum_result["time_base"],
+            self.integral_sum_result["signal_norm"],
+            shift,
         )
 
     def save_integral_sum_result(self, base_file_path):
@@ -240,19 +259,11 @@ class DQMQTabController(BaseTabController):
         np.savetxt(save_path, out, delimiter=",", header="time,integral_sum_norm", comments="")
 
     def calculate_dres_distribution(self):
-        file_path = self._get_current_file()
-        if not file_path:
-            QMessageBox.warning(self.parent, "No data", "Load a DQMQ file first.")
+        table_data = self._read_dqmq_table_for_dres()
+        if table_data is None:
             return
         try:
-            data = np.genfromtxt(file_path, delimiter=",")
-            if data.ndim == 1:
-                data = np.atleast_2d(data)
-            tau = data[:, 0].astype(float)
-            dq = data[:, 1].astype(float)
-            ref = data[:, 2].astype(float)
-            ndq = data[:, 3].astype(float)
-            ref_max = np.max(ref)
+            tau, ndq = table_data
             ndq_smoothed = savgol_filter(ndq, 3, 1) if len(ndq) >= 3 else ndq
             time0 = np.insert(tau + 1, 0, 0.0)
             ndq0 = np.insert(ndq_smoothed, 0, 0.0)
@@ -268,6 +279,32 @@ class DQMQTabController(BaseTabController):
         except Exception as exc:
             logger.exception("Dres calculation failed")
             QMessageBox.warning(self.parent, "Dres calculation failed", str(exc))
+
+    def _read_dqmq_table_for_dres(self):
+        table = self.ui.table_DQMQ
+        if table.rowCount() == 0:
+            QMessageBox.warning(self.parent, "No data", "Run DQMQ analysis first so the table contains nDQ values.")
+            return None
+        tau_values, ndq_values = [], []
+        for row in range(table.rowCount()):
+            time_item = table.item(row, 0)
+            ndq_item = table.item(row, 3)
+            if time_item is None or ndq_item is None:
+                continue
+            time_text = time_item.text().strip()
+            ndq_text = ndq_item.text().strip()
+            if not time_text or not ndq_text:
+                continue
+            try:
+                tau_values.append(float(time_text))
+                ndq_values.append(float(ndq_text))
+            except ValueError:
+                QMessageBox.warning(self.parent, "Invalid table values", f"Row {row + 1} has non-numeric time or nDQ.")
+                return None
+        if len(tau_values) < 3:
+            QMessageBox.warning(self.parent, "Insufficient data", "Need at least 3 DQMQ rows with nDQ values in the table.")
+            return None
+        return np.asarray(tau_values, dtype=float), np.asarray(ndq_values, dtype=float)
 
     def _fit_dres(self, time0, ndq0, kernel, n_components):
         model = self._make_fit_model(kernel, n_components)
