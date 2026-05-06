@@ -101,24 +101,44 @@ def make_fit_model(kernel, n_components):
     raise ValueError("n_components must be 1 or 2")
 
 
-def fit_selected_model(time0, ndq0, kernel="gaussian", n_components=1):
+def fit_selected_model(time0, ndq0, kernel="gaussian", n_components=1, p0=None):
     kernel = kernel.lower()
     if kernel not in VALID_KERNELS:
         raise ValueError(f"kernel must be one of {VALID_KERNELS}")
 
     model = make_fit_model(kernel, n_components)
     if n_components == 1:
-        p0 = [0.25, 1e-3, 2.0]
+        default_p0 = [0.25, 1e-3, 2.0]
         bounds_min = [1e-7, 1e-7, 1e-7]
         bounds_max = [1.000, 0.8, 6.0]
         param_names = ["mu", "sigma", "beta"]
     elif n_components == 2:
-        p0 = [0.061, 0.05, 0.313, 0.033, 0.359, 0.96]
+        default_p0 = [0.061, 0.05, 0.313, 0.033, 0.359, 0.96]
         bounds_min = [1e-3, 1e-4, 1e-5, 1e-15, 0.0, 1e-7]
         bounds_max = [1.0000, 1.5, 1.9000, 1.1, 1.0, 6.0]
         param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1", "beta"]
     else:
         raise ValueError("n_components must be 1 or 2")
+
+    if p0 is None:
+        p0 = default_p0
+    if len(p0) != len(default_p0):
+        raise ValueError(
+            f"Expected {len(default_p0)} initial parameters for {n_components} Dres component(s)."
+        )
+
+    p0 = np.asarray(p0, dtype=float)
+    if not np.all(np.isfinite(p0)):
+        raise ValueError("Dres initial parameters must be finite numbers.")
+
+    bounds_min = np.asarray(bounds_min, dtype=float)
+    bounds_max = np.asarray(bounds_max, dtype=float)
+    below_bounds = p0 < bounds_min
+    above_bounds = p0 > bounds_max
+    if np.any(below_bounds) or np.any(above_bounds):
+        raise ValueError(
+            "Dres initial parameters are outside the allowed fitting bounds."
+        )
 
     popt, pcov = curve_fit(
         model,

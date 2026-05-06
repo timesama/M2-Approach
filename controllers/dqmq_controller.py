@@ -1,9 +1,10 @@
-import numpy as np
+import importlib.util
 import logging
 import os
-import importlib.util
+
+import numpy as np
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMessageBox, QTableWidgetItem, QFileDialog
+from PySide6.QtWidgets import QFileDialog, QMessageBox, QTableWidgetItem
 from pyqtgraph import InfiniteLine, mkPen
 from scipy.signal import savgol_filter
 
@@ -18,9 +19,28 @@ logger = logging.getLogger(__name__)
 class DQMQTabController(BaseTabController):
     def __init__(self, ui, state, parent=None):
         super().__init__(ui, state, parent)
+        self.raw_data = None
+        self.analysis_result = None
         self.integral_sum_result = None
         self.integral_sum_curve_item = None
         self.dres_result = None
+        self.dres_is_stale = False
+        self.dres_auto_calculated = False
+        self.current_plot_mode = "raw"
+
+    def reset_cached_results(self, clear_raw=True):
+        if clear_raw:
+            self.raw_data = None
+        self.analysis_result = None
+        self.integral_sum_result = None
+        self.integral_sum_curve_item = None
+        self.dres_result = None
+        self.dres_is_stale = False
+        self.dres_auto_calculated = False
+        self.current_plot_mode = "raw"
+        if clear_raw:
+            self.ui.DQMQ_PlotWidget_Signal.clear()
+        self.ui.DQMQ_PlotWidget_Dres.clear()
 
     def _get_current_file(self):
         files = self.state.dqmq_files or []
@@ -28,140 +48,179 @@ class DQMQTabController(BaseTabController):
             return None
         return files[0]
 
-    def dq_mq_analysis(self):
-        with busy_cursor():
-            table = self.ui.DQMQ_Table_Data
-            logger.info("DQMQ analysis started")
-        table.clear()
-        table.setColumnCount(4)
-        try:
-            time, dq, ref = self.plot_original()
-        except Exception as e:
-            logger.exception("DQMQ analysis failed")
-            QMessageBox.warning(
-                self.parent,
-                "Corrupt File",
-                f"Couldn't read the file beacuse {e}",
-                QMessageBox.Ok,
-            )
-            if self.parent is not None:
-                self.parent.clear_list()
-            return
+    def _get_widget(self, *names):
+        for name in names:
+            widget = getattr(self.ui, name, None)
+            if widget is not None:
+                return widget
 
-        table.setRowCount(len(time))
-        for row in range(len(time)):
-            table.setItem(row, 0, QTableWidgetItem(str(time[row])))
-            table.setItem(row, 1, QTableWidgetItem(str(dq[row])))
-            table.setItem(row, 2, QTableWidgetItem(str(ref[row])))
+        logger.warning("Missing DQMQ UI widget. Tried: %s", ", ".join(names))
+        return None
 
-        table.resizeColumnsToContents()
-        table.setHorizontalHeaderLabels(["Time", "DQ", "Ref", "nDQ"])
-        self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
-        self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
-        logger.info("DQMQ analysis completed: %d points", len(time))
+    def _is_checked(self, *names, default=True):
+        widget = self._get_widget(*names)
+        if widget is None:
+            return default
+        return widget.isChecked()
 
-    def plot_original(self):
-        file_path = self._get_current_file()
-        if file_path is None:
-            return np.array([]), np.array([]), np.array([])
+    def _clear_signal_plot(self):
         figure = self.ui.DQMQ_PlotWidget_Signal
         figure.clear()
         self.integral_sum_curve_item = None
         legend = figure.addLegend()
         legend.clear()
         figure.addLegend()
+        return figure
+
+    def _enable_file_actions(self):
+        self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
+        self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
+        self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
+        self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
+        self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
+
+    def _read_raw_data_from_file(self, file_path):
         try:
             time, dq, ref = Cal.read_data(file_path, 1)
         except Exception:
             time, dq, ref = Cal.read_data(file_path, 0)
 
-        time = time + int(self.ui.DQMQ_DoubleSpinBox_TimeShift.value())
-        figure.plot(time, dq, pen=mkPen("r", width=3), name="DQ")
-        figure.plot(time, ref, pen=mkPen("b", width=3), name="Ref")
+        self.raw_data = {
+            "time": time,
+            "dq_raw": dq,
+            "ref_raw": ref,
+            "source_file": file_path,
+        }
+        return self.raw_data
+
+    def _ensure_raw_data(self):
+        file_path = self._get_current_file()
+        if file_path is None:
+            QMessageBox.warning(
+                self.parent,
+                "DQMQ file missing",
+                "Select a DQMQ file before plotting.",
+                QMessageBox.Ok,
+            )
+            return None
+
+        if self.raw_data and self.raw_data.get("source_file") == file_path:
+            return self.raw_data
+
+        return self._read_raw_data_from_file(file_path)
+
+    def _write_raw_table(self, raw_data):
+        table = self.ui.DQMQ_Table_Data
+        time = raw_data["time"]
+        dq = raw_data["dq_raw"]
+        ref = raw_data["ref_raw"]
+
+        table.clear()
+        table.setColumnCount(4)
+        table.setRowCount(len(time))
+        table.setHorizontalHeaderLabels(["Time", "DQ", "Ref", "nDQ"])
+        for row in range(len(time)):
+            table.setItem(row, 0, QTableWidgetItem(str(time[row])))
+            table.setItem(row, 1, QTableWidgetItem(str(dq[row])))
+            table.setItem(row, 2, QTableWidgetItem(str(ref[row])))
+            table.setItem(row, 3, QTableWidgetItem(""))
+
+        table.resizeColumnsToContents()
+
+    def _write_ndq_to_table(self, time, n_dq):
+        table = self.ui.DQMQ_Table_Data
+        required_rows = len(time)
+        if table.rowCount() < required_rows:
+            table.setRowCount(required_rows)
+
+        for row in range(required_rows):
+            table.setItem(row, 3, QTableWidgetItem(str(round(n_dq[row + 1], 4))))
+
+        table.resizeColumnsToContents()
+
+    def dq_mq_analysis(self):
+        with busy_cursor():
+            logger.info("DQMQ raw load started")
+            file_path = self._get_current_file()
+            if file_path is None:
+                QMessageBox.warning(
+                    self.parent,
+                    "DQMQ file missing",
+                    "Select a DQMQ file before loading DQMQ data.",
+                    QMessageBox.Ok,
+                )
+                return
+
+            try:
+                raw_data = self._read_raw_data_from_file(file_path)
+            except Exception as exc:
+                logger.exception("DQMQ raw load failed")
+                QMessageBox.warning(
+                    self.parent,
+                    "Corrupt File",
+                    f"Couldn't read the file because {exc}",
+                    QMessageBox.Ok,
+                )
+                if self.parent is not None:
+                    self.parent.clear_list()
+                return
+
+            self.reset_cached_results(clear_raw=False)
+            self._write_raw_table(raw_data)
+            self._enable_file_actions()
+            self.render_raw_plot()
+            logger.info("DQMQ raw load completed: %d points", len(raw_data["time"]))
+
+    def render_raw_plot(self):
+        raw_data = self._ensure_raw_data()
+        if raw_data is None:
+            return np.array([]), np.array([]), np.array([])
+
+        self.current_plot_mode = "raw"
+        figure = self._clear_signal_plot()
+        time = raw_data["time"]
+        dq = raw_data["dq_raw"]
+        ref = raw_data["ref_raw"]
+
+        if self._is_checked("DQMQ_CheckBox_DQ", default=True):
+            figure.plot(time, dq, pen=mkPen("r", width=3), name="Raw DQ")
+        if self._is_checked(
+            "DQMQ_CheckBox_Ref", "DQMQ_CheckBox_Reference", default=True
+        ):
+            figure.plot(time, ref, pen=mkPen("b", width=3), name="Raw Ref")
+
         return time, dq, ref
 
-    def plot_norm(self):
-        logger.info("DQMQ normalization started")
-        file_path = self._get_current_file()
-        if file_path is None:
-            return
-        figure = self.ui.DQMQ_PlotWidget_Signal
-        figure.clear()
-        self.integral_sum_curve_item = None
-        legend = figure.addLegend()
-        legend.clear()
-        figure.addLegend()
-        baseline_level = self.ui.DQMQ_DoubleSpinBox_Noise.value()
-        time_shift = int(self.ui.DQMQ_DoubleSpinBox_TimeShift.value())
-        time, dq_norm, ref_norm, _, _, _, _, _, _, _ = Cal.dqmq(
-            file_path, 40, 100, 1, baseline_level, time_shift
-        )
+    def plot_original(self):
+        return self.render_raw_plot()
 
-        figure.plot(time, dq_norm, pen=mkPen("r", width=3), name="DQ")
-        figure.plot(time, ref_norm, pen=mkPen("b", width=3), name="Ref")
-        self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
-        self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
-        self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
-
-    def plot_diff(self):
-        file_path = self._get_current_file()
-        if file_path is None:
-            return
+    def _analysis_parameters(self):
         fit_from = self.ui.DQMQ_DoubleSpinBox_FitFrom.value()
         fit_to = self.ui.DQMQ_DoubleSpinBox_FitTo.value()
         fitting_exponent = self.ui.DQMQ_DoubleSpinBox_Power.value()
         baseline_level = self.ui.DQMQ_DoubleSpinBox_Noise.value()
-        logger.info(
-            "DQMQ diff fit: from=%s to=%s exponent=%s baseline=%s",
-            fit_from,
-            fit_to,
-            fitting_exponent,
-            baseline_level,
-        )
-        time_shift = int(self.ui.DQMQ_DoubleSpinBox_TimeShift.value())
-        figure = self.ui.DQMQ_PlotWidget_Signal
-        figure.clear()
-        self.integral_sum_curve_item = None
-        legend = figure.addLegend()
-        legend.clear()
-        figure.addLegend()
-        time, _, _, diff, dq_norm, ref_norm, _, _, fitted_curve, _ = Cal.dqmq(
-            file_path, fit_from, fit_to, fitting_exponent, baseline_level, time_shift
-        )
-        figure.plot(time, dq_norm, pen=mkPen("r", width=2), name="DQ")
-        figure.plot(time, ref_norm, pen=mkPen("b", width=2), name="Ref")
-        figure.plot(time, diff, pen=mkPen("k", width=3), name="Diff")
-        figure.plot(time, fitted_curve, pen=mkPen("m", width=3), name="fitting")
-
-    def plot_nDQ(self):
-        file_path = self._get_current_file()
-        if file_path is None:
-            return
-        fit_from = self.ui.DQMQ_DoubleSpinBox_FitFrom.value()
-        fit_to = self.ui.DQMQ_DoubleSpinBox_FitTo.value()
-        fitting_exponent = self.ui.DQMQ_DoubleSpinBox_Power.value()
-        baseline_level = self.ui.DQMQ_DoubleSpinBox_Noise.value()
-        logger.info(
-            "DQMQ nDQ fit: from=%s to=%s exponent=%s baseline=%s",
-            fit_from,
-            fit_to,
-            fitting_exponent,
-            baseline_level,
-        )
         time_shift = int(self.ui.DQMQ_DoubleSpinBox_TimeShift.value())
         smoothing = [
             self.ui.DQMQ_DoubleSpinBox_SmoothFrom.value(),
             self.ui.DQMQ_DoubleSpinBox_SmoothTo.value(),
             int(self.ui.DQMQ_DoubleSpinBox_SmoothWindow.value()),
         ]
-        figure = self.ui.DQMQ_PlotWidget_Signal
-        figure.clear()
-        self.integral_sum_curve_item = None
-        legend = figure.addLegend()
-        legend.clear()
-        figure.addLegend()
-        time, _, _, _, dq_normal, ref_normal, time0, n_dq, _, mq_normal = Cal.dqmq(
-            file_path,
+        return fit_from, fit_to, fitting_exponent, baseline_level, time_shift, smoothing
+
+    def run_full_analysis(self):
+        raw_data = self._ensure_raw_data()
+        if raw_data is None:
+            return None
+
+        if self.ui.DQMQ_Table_Data.rowCount() != len(raw_data["time"]):
+            self._write_raw_table(raw_data)
+
+        file_path = raw_data["source_file"]
+        fit_from, fit_to, fitting_exponent, baseline_level, time_shift, smoothing = (
+            self._analysis_parameters()
+        )
+        logger.info(
+            "DQMQ full analysis: from=%s to=%s exponent=%s baseline=%s time_shift=%s smoothing=%s",
             fit_from,
             fit_to,
             fitting_exponent,
@@ -169,65 +228,171 @@ class DQMQTabController(BaseTabController):
             time_shift,
             smoothing,
         )
-        figure.addItem(
-            InfiniteLine(
-                pos=0.5,
-                angle=0,
-                pen=mkPen(color=(200, 200, 255), width=2, style=Qt.DashLine),
+
+        try:
+            with busy_cursor():
+                (
+                    time,
+                    dq_norm,
+                    ref_norm,
+                    diff,
+                    dq_normal,
+                    ref_normal,
+                    time0,
+                    n_dq,
+                    fitted_curve,
+                    mq_normal,
+                ) = Cal.dqmq(
+                    file_path,
+                    fit_from,
+                    fit_to,
+                    fitting_exponent,
+                    baseline_level,
+                    time_shift,
+                    smoothing,
+                )
+        except Exception as exc:
+            logger.exception("DQMQ full analysis failed")
+            QMessageBox.warning(self.parent, "DQMQ analysis failed", str(exc))
+            return None
+
+        self.analysis_result = {
+            "time": time,
+            "dq_norm": dq_normal,
+            "ref_norm": ref_normal,
+            "diff": diff,
+            "mq_norm": mq_normal,
+            "time0": time0,
+            "nDQ": n_dq,
+            "fitted_tail": fitted_curve,
+            "raw_dq_norm": dq_norm,
+            "raw_ref_norm": ref_norm,
+            "fit_from": fit_from,
+            "fit_to": fit_to,
+            "power": fitting_exponent,
+            "noise": baseline_level,
+            "time_shift": time_shift,
+            "smoothing": smoothing,
+        }
+        self._write_ndq_to_table(time, n_dq)
+        self.dres_is_stale = True
+        self.render_analysis_plot()
+        self._maybe_auto_calculate_dres()
+        return self.analysis_result
+
+    def plot_norm(self):
+        return self.run_full_analysis()
+
+    def plot_diff(self):
+        return self.run_full_analysis()
+
+    def plot_nDQ(self):
+        return self.run_full_analysis()
+
+    def on_analysis_parameter_editing_finished(self):
+        if self.raw_data is None and self._get_current_file() is None:
+            return
+        self.run_full_analysis()
+
+    def on_visibility_checkbox_changed(self):
+        if self.current_plot_mode == "raw":
+            self.render_raw_plot()
+            return
+        if self.current_plot_mode == "analysis":
+            self.render_analysis_plot()
+
+    def render_analysis_plot(self):
+        if self.analysis_result is None:
+            self.render_raw_plot()
+            return
+
+        self.current_plot_mode = "analysis"
+        figure = self._clear_signal_plot()
+        result = self.analysis_result
+        time = result["time"]
+
+        if self._is_checked("DQMQ_CheckBox_DQ", default=True):
+            figure.plot(time, result["dq_norm"], pen=mkPen("r", width=3), name="DQ")
+        if self._is_checked(
+            "DQMQ_CheckBox_Ref", "DQMQ_CheckBox_Reference", default=True
+        ):
+            figure.plot(time, result["ref_norm"], pen=mkPen("b", width=3), name="Ref")
+        if self._is_checked("DQMQ_CheckBox_MQ", default=True):
+            figure.plot(time, result["mq_norm"], pen=mkPen("m", width=3), name="MQ")
+        if self._is_checked(
+            "DQMQ_CheckBox_Diff", "DQMQ_CheckBox_Difference", default=True
+        ):
+            figure.plot(time, result["diff"], pen=mkPen("k", width=3), name="Diff")
+        if self._is_checked(
+            "DQMQ_CheckBox_Fit", "DQMQ_CheckBox_TailFitting", default=False
+        ):
+            figure.plot(
+                time,
+                result["fitted_tail"],
+                pen=mkPen((90, 90, 90), width=3),
+                name="Tail fit",
             )
-        )
-        figure.plot(time, dq_normal, pen=mkPen("r", width=3), name="DQ")
-        figure.plot(time, ref_normal, pen=mkPen("b", width=3), name="Ref")
-        figure.plot(time, mq_normal, pen=mkPen("m", width=3), name="MQ")
-        figure.plot(
-            time0,
-            n_dq,
-            pen=mkPen("k", width=3),
-            symbol="o",
-            symbolPen="k",
-            symbolSize=10,
-            name="nDQ",
-        )
-        for row in range(len(time)):
-            self.ui.DQMQ_Table_Data.setItem(
-                row, 3, QTableWidgetItem(str(round(n_dq[row + 1], 4)))
+        if self._is_checked("DQMQ_CheckBox_NDQ", default=True):
+            figure.addItem(
+                InfiniteLine(
+                    pos=0.5,
+                    angle=0,
+                    pen=mkPen(color=(200, 200, 255), width=2, style=Qt.DashLine),
+                )
             )
-        self.ui.DQMQ_Table_Data.resizeColumnsToContents()
+            figure.plot(
+                result["time0"],
+                result["nDQ"],
+                pen=mkPen("k", width=3),
+                symbol="o",
+                symbolPen="k",
+                symbolSize=10,
+                name="nDQ",
+            )
+        if self.integral_sum_result and self._is_checked(
+            "DQMQ_CheckBox_IntegralSum", default=False
+        ):
+            figure.plot(
+                self.integral_sum_result["time"],
+                self.integral_sum_result["signal_norm"],
+                pen=mkPen((0, 100, 0), width=3),
+                name=f"Integral sum, shift={self.integral_sum_result['shift']:g}",
+            )
+        if self.dres_result and self._is_checked(
+            "DQMQ_CheckBox_DresFit", "DQMQ_CheckBox_DresFitting", default=False
+        ):
+            figure.plot(
+                self.dres_result["fit_x"],
+                self.dres_result["fit_y"],
+                pen=mkPen("k", width=4, style=Qt.DashLine),
+                name="Dres fit",
+            )
 
     def plot_nDQ_on_Load(self):
-        table = self.ui.DQMQ_Table_Data
-        table.resizeColumnsToContents()
-        time, dq_normal, ref_normal, n_dq = [], [], [], []
-        for row in range(table.rowCount()):
-            time.append(float(table.item(row, 0).text()))
-            dq_normal.append(float(table.item(row, 1).text()))
-            ref_normal.append(float(table.item(row, 2).text()))
-            n_dq.append(float(table.item(row, 3).text()))
+        try:
+            arrays = self._read_dqmq_table_arrays()
+        except ValueError:
+            self.analysis_result = None
+            self.render_raw_plot()
+            return
 
-        time = np.array(time)
-        dq_normal = np.array(dq_normal)
-        ref_normal = np.array(ref_normal)
-        dq_normal, ref_normal, _ = Cal.normalize_mq(dq_normal, ref_normal, "plus")
-        n_dq = np.insert(np.array(n_dq), 0, 0)
-        time0 = np.insert(time, 0, 0)
-
-        figure = self.ui.DQMQ_PlotWidget_Signal
-        figure.clear()
-        self.integral_sum_curve_item = None
-        legend = figure.addLegend()
-        legend.clear()
-        figure.addLegend()
-        figure.plot(time, dq_normal, pen=mkPen("r", width=3), name="DQ")
-        figure.plot(time, ref_normal, pen=mkPen("b", width=3), name="Ref")
-        figure.plot(
-            time0,
-            n_dq,
-            pen=mkPen("k", width=3),
-            symbol="o",
-            symbolPen="k",
-            symbolSize=10,
-            name="nDQ",
-        )
+        self.analysis_result = {
+            "time": arrays["tau"],
+            "dq_norm": arrays["DQ"],
+            "ref_norm": arrays["Ref"],
+            "diff": np.zeros_like(arrays["tau"]),
+            "mq_norm": np.zeros_like(arrays["tau"]),
+            "time0": arrays["Time0"],
+            "nDQ": arrays["nDQ0"],
+            "fitted_tail": np.zeros_like(arrays["tau"]),
+            "fit_from": None,
+            "fit_to": None,
+            "power": None,
+            "noise": None,
+            "time_shift": None,
+            "smoothing": None,
+        }
+        self.render_analysis_plot()
 
     def calculate_integral_sum(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -240,7 +405,6 @@ class DQMQTabController(BaseTabController):
                 data = self._read_dqt2_distribution_file(file_path)
                 t, signal_norm = self._calculate_t2_summed_signal(data)
                 shift = float(self.ui.DQMQ_DoubleSpinBox_IntegralShift.value())
-                self._plot_integral_sum(t, signal_norm, shift)
                 self.integral_sum_result = {
                     "time": t + shift,
                     "time_base": t,
@@ -248,6 +412,8 @@ class DQMQTabController(BaseTabController):
                     "source_file": file_path,
                     "shift": shift,
                 }
+                if self.current_plot_mode == "analysis":
+                    self.render_analysis_plot()
         except ValueError as exc:
             QMessageBox.warning(self.parent, "Invalid file", str(exc))
         except Exception as exc:
@@ -300,30 +466,14 @@ class DQMQTabController(BaseTabController):
             signal_norm = (signal - s_min) / signal_range
         return t, signal_norm
 
-    def _plot_integral_sum(self, t, signal_norm, shift):
-        shifted_time = t + shift
-        if self.integral_sum_curve_item is None:
-            self.integral_sum_curve_item = self.ui.DQMQ_PlotWidget_Signal.plot(
-                shifted_time,
-                signal_norm,
-                pen=mkPen((0, 100, 0), width=3),
-                name=f"Integral sum, shift={shift:g}",
-            )
-        else:
-            self.integral_sum_curve_item.setData(shifted_time, signal_norm)
-            self.integral_sum_curve_item.setName(f"Integral sum, shift={shift:g}")
-
     def update_integral_sum_shift(self):
         if not self.integral_sum_result:
             return
         shift = float(self.ui.DQMQ_DoubleSpinBox_IntegralShift.value())
         self.integral_sum_result["shift"] = shift
         self.integral_sum_result["time"] = self.integral_sum_result["time_base"] + shift
-        self._plot_integral_sum(
-            self.integral_sum_result["time_base"],
-            self.integral_sum_result["signal_norm"],
-            shift,
-        )
+        if self.current_plot_mode == "analysis":
+            self.render_analysis_plot()
 
     def save_integral_sum_result(self, base_file_path):
         if not self.integral_sum_result:
@@ -338,19 +488,36 @@ class DQMQTabController(BaseTabController):
         )
 
     def calculate_dres(self):
-        self.calculate_dres_distribution()
+        self.calculate_dres_distribution(show_errors=True)
 
-    def calculate_dres_distribution(self):
+    def _maybe_auto_calculate_dres(self):
+        if self.dres_auto_calculated:
+            return
+        if not self._analysis_has_enough_ndq():
+            return
+
+        self.dres_auto_calculated = True
+        self.calculate_dres_distribution(show_errors=False)
+
+    def _analysis_has_enough_ndq(self):
+        if not self.analysis_result:
+            return False
+        n_dq = self.analysis_result.get("nDQ")
+        return n_dq is not None and len(n_dq) >= 4
+
+    def calculate_dres_distribution(self, show_errors=True):
         try:
             with busy_cursor():
-                arrays = self._read_dqmq_table_arrays()
+                arrays = self._dres_input_arrays()
                 kernel = self._selected_dres_kernel()
                 n_components = self._selected_dres_component_count()
+                p0 = self._dres_initial_parameters(n_components)
                 fit_result = dqmq_dres.fit_selected_model(
                     arrays["Time0"],
                     arrays["nDQ0"],
                     kernel=kernel,
                     n_components=n_components,
+                    p0=p0,
                 )
                 d_plot, p_dist = dqmq_dres.build_distribution(fit_result)
                 self.dres_result = {
@@ -362,13 +529,33 @@ class DQMQTabController(BaseTabController):
                     "n_components": n_components,
                     "params": fit_result["popt"],
                     "param_names": fit_result["param_names"],
+                    "p0": p0,
                 }
-                self._plot_dres_result(arrays, self.dres_result)
+                self.dres_is_stale = False
+                self._plot_dres_distribution()
+                if self.current_plot_mode == "analysis":
+                    self.render_analysis_plot()
         except ValueError as exc:
-            QMessageBox.warning(self.parent, "Dres calculation", str(exc))
+            if show_errors:
+                QMessageBox.warning(self.parent, "Dres calculation", str(exc))
+            else:
+                logger.warning("Skipping automatic Dres calculation: %s", exc)
         except Exception as exc:
             logger.exception("Dres calculation failed")
-            QMessageBox.warning(self.parent, "Dres calculation failed", str(exc))
+            if show_errors:
+                QMessageBox.warning(self.parent, "Dres calculation failed", str(exc))
+
+    def _dres_input_arrays(self):
+        if self.analysis_result is not None:
+            return {
+                "tau": self.analysis_result["time"],
+                "DQ": self.analysis_result["dq_norm"],
+                "Ref": self.analysis_result["ref_norm"],
+                "nDQ": self.analysis_result["nDQ"][1:],
+                "Time0": self.analysis_result["time0"],
+                "nDQ0": self.analysis_result["nDQ"],
+            }
+        return self._read_dqmq_table_arrays()
 
     def _read_dqmq_table_arrays(self):
         table = self.ui.DQMQ_Table_Data
@@ -412,7 +599,7 @@ class DQMQTabController(BaseTabController):
 
         if not values["nDQ"]:
             raise ValueError(
-                "The DQMQ table nDQ column is empty. Run Plot nDQ before calculating Dres."
+                "The DQMQ table nDQ column is empty. Run Plot Norm before calculating Dres."
             )
         if len(values["nDQ"]) < 3:
             raise ValueError(
@@ -466,20 +653,37 @@ class DQMQTabController(BaseTabController):
             return 2
         raise ValueError("Select either 1 Dres or 2 Dres components.")
 
-    def _plot_dres_result(self, arrays, dres_result):
+    def _dres_initial_parameters(self, n_components):
+        # The current UI object names are used as-is; these fields correspond to
+        # the visible Dres initial-parameter labels in form.ui.
+        center1 = self.ui.DQMQ_DoubleSpinBox_Width1.value()
+        width1 = self.ui.DQMQ_DoubleSpinBox_Center2.value()
+        beta = self.ui.DQMQ_DoubleSpinBox_UnusedDresParameter.value()
+        if n_components == 1:
+            return [center1, width1, beta]
+
+        center2 = self.ui.DQMQ_DoubleSpinBox_Width2.value()
+        width2 = self.ui.DQMQ_DoubleSpinBox_Fraction.value()
+        fraction1 = self.ui.DQMQ_DoubleSpinBox_WeibullBeta.value()
+        return [center1, width1, center2, width2, fraction1, beta]
+
+    def mark_dres_stale(self):
+        self.dres_is_stale = True
+        logger.info("DQMQ Dres parameters changed; Dres result is stale")
+
+    def _plot_dres_distribution(self):
+        if not self.dres_result:
+            return
+
         dres_figure = self.ui.DQMQ_PlotWidget_Dres
         dres_figure.clear()
-
         dres_figure.plot(
-            dres_result["D_plot"],
-            dres_result["P"],
+            self.dres_result["D_plot"],
+            self.dres_result["P"],
             pen=mkPen("m", width=3),
             name="Dres distribution",
         )
-
-        fitted_parameters = dres_result.fit_result
-
-        # Plot Center 1 as a point TODO: should be a vertical center
+        fitted_parameters = self.dres_result["params"]
         dres_figure.plot(
             fitted_parameters[0],
             1,
@@ -487,32 +691,6 @@ class DQMQTabController(BaseTabController):
             symbolPen=None,
             symbolBrush=(255, 0, 0, 255),
             symbolSize=10,
-        )
-
-        # TODO: add if there are two components: plot the | vertical line on the second center
-
-        # TODO: plot separate distributions - notcumulative
-        # if n components 2
-        # in dqmq_dres take function build_singular_distribution(center, sigma) with corresponding popt for centers and plot them as thin green line
-
-        figure = self.ui.DQMQ_PlotWidget_Signal
-        figure.clear()
-        self.integral_sum_curve_item = None
-        figure.addLegend()
-        figure.plot(
-            arrays["Time0"],
-            arrays["nDQ0"],
-            pen=mkPen("k", width=3),
-            symbol="o",
-            symbolPen="k",
-            symbolSize=10,
-            name="nDQ",
-        )
-        figure.plot(
-            dres_result["fit_x"],
-            dres_result["fit_y"],
-            pen=mkPen("k", width=4, style=Qt.DashLine),
-            name="Dres fit",
         )
 
     def save_dres_result(self, base_file_path):

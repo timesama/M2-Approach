@@ -138,16 +138,21 @@ class MainWindow(QMainWindow):
 
         self.ui.btn_Start.clicked.connect(self.general_se_dq_controller.analysis)
 
-        self.ui.DQMQ_Button_PlotOriginal.clicked.connect(self.dqmq_controller.plot_original)
+        self.ui.DQMQ_Button_PlotOriginal.clicked.connect(
+            self.dqmq_controller.plot_original
+        )
         self.ui.radioButton_Log.clicked.connect(self.dq_controller.plot_fit)
         self.ui.DQMQ_Button_PlotNorm.clicked.connect(self.dqmq_controller.plot_norm)
         self.ui.DQMQ_Button_CalculateIntegralSum.clicked.connect(
             self.dqmq_controller.calculate_integral_sum
         )
-        self.ui.DQMQ_Button_CalculateDres.clicked.connect(self.dqmq_controller.calculate_dres)
+        self.ui.DQMQ_Button_CalculateDres.clicked.connect(
+            self.dqmq_controller.calculate_dres
+        )
         self.ui.DQMQ_DoubleSpinBox_IntegralShift.editingFinished.connect(
             self.dqmq_controller.update_integral_sum_shift
         )
+        self._connect_dqmq_workflow_signals()
         self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 
@@ -238,9 +243,6 @@ class MainWindow(QMainWindow):
         self.ui.dq_min.valueChanged.connect(self.dq_controller.update_graphs)
         self.ui.dq_max.valueChanged.connect(self.dq_controller.update_graphs)
         self.ui.comboBox_4.activated.connect(self.update_file)
-        self.ui.DQMQ_DoubleSpinBox_FitFrom.valueChanged.connect(self.dqmq_controller.plot_diff)
-        self.ui.DQMQ_DoubleSpinBox_FitTo.valueChanged.connect(self.dqmq_controller.plot_diff)
-        self.ui.DQMQ_DoubleSpinBox_Power.valueChanged.connect(self.dqmq_controller.plot_diff)
 
         # Disable buttons initially
         self.disable_buttons()
@@ -381,6 +383,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'DQMQ':
             self.selected_DQMQfile = []
             self.app_state.dqmq_files = []
+            self.dqmq_controller.reset_cached_results()
         elif self.tab == 'GS':
             self.selected_GSfiles = []
             self.GS_dictionary = {}
@@ -580,6 +583,94 @@ class MainWindow(QMainWindow):
         elif self.tab == 'GS':
             self.group_data_SD = data
             self.gs_controller.plot_sqrt_time()
+
+
+    def _connect_dqmq_workflow_signals(self):
+        analysis_parameter_widgets = [
+            "DQMQ_DoubleSpinBox_FitFrom",
+            "DQMQ_DoubleSpinBox_FitTo",
+            "DQMQ_DoubleSpinBox_Power",
+            "DQMQ_DoubleSpinBox_Noise",
+            "DQMQ_DoubleSpinBox_TimeShift",
+            "DQMQ_DoubleSpinBox_SmoothFrom",
+            "DQMQ_DoubleSpinBox_SmoothTo",
+            "DQMQ_DoubleSpinBox_SmoothWindow",
+        ]
+        for widget_name in analysis_parameter_widgets:
+            self._connect_dqmq_signal(
+                widget_name,
+                "editingFinished",
+                self.dqmq_controller.on_analysis_parameter_editing_finished,
+            )
+
+        visibility_checkboxes = [
+            "DQMQ_CheckBox_DQ",
+            "DQMQ_CheckBox_Reference",
+            "DQMQ_CheckBox_MQ",
+            "DQMQ_CheckBox_NDQ",
+            "DQMQ_CheckBox_Difference",
+            "DQMQ_CheckBox_TailFitting",
+            "DQMQ_CheckBox_IntegralSum",
+            "DQMQ_CheckBox_DresFitting",
+        ]
+        for widget_name in visibility_checkboxes:
+            self._connect_dqmq_signal(
+                widget_name,
+                "toggled",
+                self.dqmq_controller.on_visibility_checkbox_changed,
+            )
+
+        dres_parameter_widgets = [
+            "DQMQ_DoubleSpinBox_Center1",
+            "DQMQ_DoubleSpinBox_Width1",
+            "DQMQ_DoubleSpinBox_Center2",
+            "DQMQ_DoubleSpinBox_Width2",
+            "DQMQ_DoubleSpinBox_Fraction",
+            "DQMQ_DoubleSpinBox_WeibullBeta",
+            "DQMQ_DoubleSpinBox_UnusedDresParameter",
+        ]
+        for widget_name in dres_parameter_widgets:
+            self._connect_dqmq_signal(
+                widget_name,
+                "editingFinished",
+                self.dqmq_controller.mark_dres_stale,
+            )
+
+        self._connect_dqmq_signal(
+            "DQMQ_ComboBox_Kernel",
+            "currentIndexChanged",
+            self.dqmq_controller.mark_dres_stale,
+        )
+        self._connect_dqmq_signal(
+            "DQMQ_RadioButton_OneDres",
+            "toggled",
+            self.dqmq_controller.mark_dres_stale,
+        )
+        self._connect_dqmq_signal(
+            "DQMQ_RadioButton_TwoDres",
+            "toggled",
+            self.dqmq_controller.mark_dres_stale,
+        )
+
+    def _connect_dqmq_signal(self, widget_name, signal_name, slot):
+        widget = getattr(self.ui, widget_name, None)
+        if widget is None:
+            logger.warning(
+                "DQMQ widget %s is missing; signal not connected",
+                widget_name,
+            )
+            return
+
+        signal = getattr(widget, signal_name, None)
+        if signal is None:
+            logger.warning(
+                "DQMQ widget %s has no %s signal; signal not connected",
+                widget_name,
+                signal_name,
+            )
+            return
+
+        signal.connect(lambda *args: slot())
 
     def state(self):
         current_tab_index =  self.ui.tabWidget.currentIndex()
