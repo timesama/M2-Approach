@@ -129,19 +129,18 @@ class MainWindow(QMainWindow):
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
         self.ui.SE_Button_ClearTable.clicked.connect(self.clear_list)
-        self.ui.btn_ClearTable_5.clicked.connect(self.clear_list)
+        self.ui.DQ_Button_ClearTable.clicked.connect(self.clear_list)
 
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.SE_Button_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
-        self.ui.btn_DeleteRow_3.clicked.connect(self.delete_row)
+        self.ui.DQ_Button_DeleteRow.clicked.connect(self.delete_row)
 
         self.ui.btn_Start.clicked.connect(self.general_se_dq_controller.analysis)
 
         self.ui.DQMQ_Button_PlotOriginal.clicked.connect(
             self.dqmq_controller.plot_original
         )
-        self.ui.radioButton_Log.clicked.connect(self.dq_controller.plot_fit)
         self.ui.DQMQ_Button_PlotNorm.clicked.connect(self.dqmq_controller.plot_norm)
         self.ui.DQMQ_Button_CalculateIntegralSum.clicked.connect(
             self.dqmq_controller.calculate_integral_sum
@@ -163,8 +162,8 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
         self.setup_graph(self.ui.FidWidget, "Time, μs", "Amplitude", "NMR Signal")
         self.setup_graph(self.ui.SE_PlotWidget_Main, "Temperature, °C", "Choose", "")
-        self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T₂*", "")
-        self.setup_graph(self.ui.DQ_Widget_2, "X axis", "Norm. DQ Intensity", "")
+        self.setup_graph(self.ui.DQ_PlotWidget_T2, "DQ Filtering Time", "T₂*", "")
+        self.setup_graph(self.ui.DQ_PlotWidget_NormIntensity, "X axis", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQ_Widget_4, "T₂*", "Norm. DQ Intensity", "FunctionFit")
         self.setup_graph(self.ui.DQ_Widget_5, "X axis", "Center", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time, ms", "Signal", "")
@@ -175,6 +174,7 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.GS_Widget_2, "X axis", "√Time, √us", "")
         self.setup_graph(self.ui.DQ_Widget_polyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
         self.se_controller.connect_signals()
+        self.dq_controller.connect_signals()
 
         # Table Headers
         self.copy_enabler = TableCopyEnabler(self)
@@ -190,8 +190,6 @@ class MainWindow(QMainWindow):
 )
         self._apply_table_header_order()
         # Connect table signals to slots
-        self.ui.table_DQ.currentItemChanged.connect(self.dq_controller.update_graphs)
-        self.ui.table_DQ.itemSelectionChanged.connect(self.dq_controller.update_graphs)
         self.ui.table_T1.itemSelectionChanged.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
         self.ui.T1T2_FitWith2ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
@@ -217,14 +215,11 @@ class MainWindow(QMainWindow):
         self.ui.GS_m2.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
 
         # Connect combobox signals to slots
-        self.ui.comboBox_FunctionDQ.activated.connect(self.dq_controller.plot_fit)
         self.ui.T1T2_ChooseFileComboBox.activated.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.gs_controller.calculate_sqrt_time)
 
 
         # Connect change events
-        self.ui.dq_min.valueChanged.connect(self.dq_controller.update_graphs)
-        self.ui.dq_max.valueChanged.connect(self.dq_controller.update_graphs)
         self.ui.comboBox_4.activated.connect(self.update_file)
 
         # Disable buttons initially
@@ -314,7 +309,7 @@ class MainWindow(QMainWindow):
 
         # Update general figures
         if self.tab == 'DQ':
-            self.highlight_row(self.ui.table_DQ, i)
+            self.highlight_row(self.ui.DQ_Table_Data, i)
             self.dq_controller.update_graphs()
         elif self.tab == 'SE':
             self.highlight_row(self.ui.SE_Table_Data, i)
@@ -341,10 +336,10 @@ class MainWindow(QMainWindow):
             self.app_state.dq_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
-            self.ui.table_DQ.setRowCount(0)
-            self.ui.DQ_Widget_1.clear()
-            self.ui.DQ_Widget_2.clear()
-            self.ui.DQ_Widget_4.clear()
+            self.ui.DQ_Table_Data.setRowCount(0)
+            self.ui.DQ_PlotWidget_T2.clear()
+            self.ui.DQ_PlotWidget_NormIntensity.clear()
+            self.ui.DQ_TextEdit_FitResult.setText("")
             self.ui.FFTWidget.clear()
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
@@ -398,7 +393,7 @@ class MainWindow(QMainWindow):
             combobox = self.ui.comboBox_4
             files = self.selected_files
         elif self.tab == 'DQ':
-            table = self.ui.table_DQ
+            table = self.ui.DQ_Table_Data
             combobox = self.ui.comboBox_4
             files = self.selected_files_DQ_single
         elif self.tab =='T1T2':
@@ -414,7 +409,10 @@ class MainWindow(QMainWindow):
 
         row = table.currentRow()
         if row == -1:
-            QMessageBox.warning(self, "Cricket sounds", f"Select the row.", QMessageBox.Ok)
+            if self.tab == "DQ":
+                QMessageBox.warning(self, "No DQ row selected", "No DQ row selected.", QMessageBox.Ok)
+            else:
+                QMessageBox.warning(self, "Cricket sounds", "Select the row.", QMessageBox.Ok)
             return
 
         table.removeRow(row)
@@ -682,10 +680,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_Start.setEnabled(False)
         self.ui.btn_Save.setEnabled(False)
         self.ui.btn_Phasing.setEnabled(False)
-        self.ui.dq_min.setEnabled(False)
-        self.ui.dq_max.setEnabled(False)
-        self.ui.comboBox_FunctionDQ.setEnabled(False)
-        self.ui.radioButton_Log.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
         self.ui.btn_Plot1.setEnabled(False)
         self.ui.DQMQ_Button_PlotOriginal.setEnabled(False)
@@ -697,9 +691,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_Save.setEnabled(True)
         self.ui.radioButton.setEnabled(True)
         self.ui.btn_Load.setEnabled(True)
-        self.ui.dq_min.setEnabled(True)
-        self.ui.dq_max.setEnabled(True)
-        self.ui.comboBox_FunctionDQ.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
 
@@ -821,7 +812,7 @@ class MainWindow(QMainWindow):
             files = self.selected_files
             default_name = 'SE_'
         elif self.tab == 'DQ':
-            table = self.ui.table_DQ
+            table = self.ui.DQ_Table_Data
             files = self.selected_files_DQ_single
             default_name = 'Table_DQ_' + os.path.split(os.path.dirname(files[0]))[1]
         elif self.tab == 'DQ_Temp':
@@ -911,7 +902,7 @@ class MainWindow(QMainWindow):
             self.selected_files = files
             self.phased_spectra_SE = phased
         elif self.tab == 'DQ':
-            table = self.ui.table_DQ
+            table = self.ui.DQ_Table_Data
             self.selected_files_DQ_single = files
             self.app_state.dq_files = files
             self.phased_spectra_DQ = phased

@@ -31,11 +31,10 @@ class GeneralSEDQController(BaseTabController):
                 self.ui.SE_ComboBox_YAxis.setCurrentIndex(-1)
             else:
                 files = mw.selected_files_DQ_single
-                self.ui.DQ_Widget_1.clear()
-                self.ui.DQ_Widget_2.clear()
-                self.ui.DQ_Widget_4.clear()
-                self.ui.textEdit_4.setText("")
-                self.ui.comboBox_FunctionDQ.setCurrentIndex(-1)
+                self.ui.DQ_PlotWidget_T2.clear()
+                self.ui.DQ_PlotWidget_NormIntensity.clear()
+                self.ui.DQ_TextEdit_FitResult.setText("")
+                self.ui.DQ_ComboBox_FitFunction.setCurrentIndex(-1)
 
             if len(files) == 0:
                 return
@@ -216,7 +215,7 @@ class GeneralSEDQController(BaseTabController):
         if mw.tab == "SE":
             table = self.ui.SE_Table_Data
         else:
-            table = self.ui.table_DQ
+            table = self.ui.DQ_Table_Data
 
         table.setItem(i, 2, QTableWidgetItem(str(round(m2, 6))))
         table.setItem(i, 3, QTableWidgetItem(str(round(t2, 3))))

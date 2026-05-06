@@ -1082,7 +1082,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <number>10</number>
                  </property>
                  <item row="0" column="2" rowspan="2">
-                  <widget class="PlotWidget" name="DQ_Widget_2" native="true">
+                  <widget class="PlotWidget" name="DQ_PlotWidget_NormIntensity" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>100</width>
@@ -1092,7 +1092,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item row="3" column="0">
-                  <widget class="QPushButton" name="btn_ClearTable_5">
+                  <widget class="QPushButton" name="DQ_Button_ClearTable">
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
@@ -1105,7 +1105,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item row="0" column="0" rowspan="3">
-                  <widget class="QTableWidget" name="table_DQ">
+                  <widget class="QTableWidget" name="DQ_Table_Data">
                    <property name="editTriggers">
                     <set>QAbstractItemView::AllEditTriggers</set>
                    </property>
@@ -1138,7 +1138,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item row="0" column="1" rowspan="2">
-                  <widget class="PlotWidget" name="DQ_Widget_1" native="true">
+                  <widget class="PlotWidget" name="DQ_PlotWidget_T2" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>100</width>
@@ -1148,14 +1148,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item row="4" column="0">
-                  <widget class="QPushButton" name="btn_DeleteRow_3">
+                  <widget class="QPushButton" name="DQ_Button_DeleteRow">
                    <property name="text">
                     <string>Delete row</string>
                    </property>
                   </widget>
                  </item>
                  <item row="2" column="1" rowspan="3">
-                  <layout class="QFormLayout" name="Filter">
+                  <layout class="QFormLayout" name="DQ_FormLayout_Filter">
                    <property name="horizontalSpacing">
                     <number>0</number>
                    </property>
@@ -1166,7 +1166,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <number>50</number>
                    </property>
                    <item row="0" column="0">
-                    <widget class="QTextEdit" name="textEdit_7">
+                    <widget class="QTextEdit" name="DQ_TextEdit_FilterTitle">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                        <horstretch>0</horstretch>
@@ -1222,7 +1222,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item row="0" column="1">
-                    <widget class="QDoubleSpinBox" name="dq_min">
+                    <widget class="QDoubleSpinBox" name="DQ_DoubleSpinBox_FilterFrom">
                      <property name="maximumSize">
                       <size>
                        <width>100</width>
@@ -1250,7 +1250,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item row="1" column="0">
-                    <widget class="QTextEdit" name="textEdit_8">
+                    <widget class="QTextEdit" name="DQ_TextEdit_FilterToLabel">
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
@@ -1294,7 +1294,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item row="1" column="1">
-                    <widget class="QDoubleSpinBox" name="dq_max">
+                    <widget class="QDoubleSpinBox" name="DQ_DoubleSpinBox_FilterTo">
                      <property name="maximumSize">
                       <size>
                        <width>100</width>
@@ -1322,7 +1322,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item row="2" column="0" colspan="2">
-                    <widget class="QTextEdit" name="textEdit_4">
+                    <widget class="QTextEdit" name="DQ_TextEdit_FitResult">
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
@@ -1385,12 +1385,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </layout>
                  </item>
                  <item row="2" column="2" rowspan="3">
-                  <layout class="QVBoxLayout" name="Log">
+                  <layout class="QVBoxLayout" name="DQ_VBoxLayout_Fit">
                    <property name="leftMargin">
                     <number>30</number>
                    </property>
                    <item>
-                    <widget class="QRadioButton" name="radioButton_Log">
+                    <widget class="QRadioButton" name="DQ_RadioButton_LogScale">
                      <property name="maximumSize">
                       <size>
                        <width>100</width>
@@ -1403,7 +1403,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item>
-                    <widget class="QComboBox" name="comboBox_FunctionDQ">
+                    <widget class="QComboBox" name="DQ_ComboBox_FitFunction">
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
