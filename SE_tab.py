@@ -12,29 +12,29 @@ class SETabUIController:
     def update_graphs(self):
         mw = self.mainwindow
 
-        x = mw.read_column_values(mw.ui.table_SE, 0)
-        text = mw.ui.comboBox_SE_chooseY.currentText()
+        x = mw.read_column_values(mw.ui.SE_Table_Data, 0)
+        text = mw.ui.SE_ComboBox_YAxis.currentText()
 
         if text == "SC":
-            y = mw.read_column_values(mw.ui.table_SE, 1)
-            mw.ui.SEWidget.getAxis('left').setLabel("SC")
+            y = mw.read_column_values(mw.ui.SE_Table_Data, 1)
+            mw.ui.SE_PlotWidget_Main.getAxis('left').setLabel("SC")
 
         elif text == "M₂":
-            y = mw.read_column_values(mw.ui.table_SE, 2)
-            mw.ui.SEWidget.getAxis('left').setLabel("M₂")
+            y = mw.read_column_values(mw.ui.SE_Table_Data, 2)
+            mw.ui.SE_PlotWidget_Main.getAxis('left').setLabel("M₂")
 
         elif text == "T₂*":
-            y = mw.read_column_values(mw.ui.table_SE, 3)
-            mw.ui.SEWidget.getAxis('left').setLabel("T₂*")
+            y = mw.read_column_values(mw.ui.SE_Table_Data, 3)
+            mw.ui.SE_PlotWidget_Main.getAxis('left').setLabel("T₂*")
 
         else:  # Set y
             y = [0]
             x = [0]
-            mw.ui.SEWidget.getAxis('left').setLabel("Not Set")
+            mw.ui.SE_PlotWidget_Main.getAxis('left').setLabel("Not Set")
             return
 
-        mw.ui.SEWidget.clear()
-        mw.ui.SEWidget.plot(
+        mw.ui.SE_PlotWidget_Main.clear()
+        mw.ui.SE_PlotWidget_Main.plot(
             x, y, pen=None,
             symbol='o', symbolPen=None,
             symbolBrush=(255, 0, 0, 255),
@@ -42,7 +42,7 @@ class SETabUIController:
         )
 
         if mw.group_data_SE:
-            y_index = mw.ui.comboBox_SE_chooseY.currentIndex()
+            y_index = mw.ui.SE_ComboBox_YAxis.currentIndex()
             y_col = y_index + 1
 
             for i, (_group_number, group_rows) in enumerate(mw.group_data_SE.items()):
@@ -64,7 +64,7 @@ class SETabUIController:
 
                     color = mw.tab10_colors[i % len(mw.tab10_colors)]
 
-                    mw.ui.SEWidget.plot(
+                    mw.ui.SE_PlotWidget_Main.plot(
                         xs, ys,
                         pen={'color': color, 'width': 2},
                         symbol='o',

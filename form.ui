@@ -616,7 +616,7 @@
                   <number>5</number>
                  </property>
                  <item>
-                  <widget class="QTableWidget" name="table_SE">
+                  <widget class="QTableWidget" name="SE_Table_Data">
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
@@ -669,7 +669,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btn_ClearTable_4">
+                  <widget class="QPushButton" name="SE_Button_ClearTable">
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
@@ -682,14 +682,14 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btn_DeleteRow_1">
+                  <widget class="QPushButton" name="SE_Button_DeleteRow">
                    <property name="text">
                     <string>Delete row</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton_Eact">
+                  <widget class="QPushButton" name="SE_Button_EAct">
                    <property name="text">
                     <string>Calculate Eact</string>
                    </property>
@@ -700,14 +700,14 @@
                <item>
                 <layout class="QHBoxLayout" name="Figure">
                  <item>
-                  <widget class="PlotWidget" name="SEWidget" native="true">
+                  <widget class="PlotWidget" name="SE_PlotWidget_Main" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>500</width>
                      <height>300</height>
                     </size>
                    </property>
-                   <widget class="QComboBox" name="comboBox_SE_chooseY">
+                   <widget class="QComboBox" name="SE_ComboBox_YAxis">
                     <property name="geometry">
                      <rect>
                       <x>50</x>
@@ -744,7 +744,7 @@
                      </property>
                     </item>
                    </widget>
-                   <widget class="QPushButton" name="pushButton_GroupSE">
+                   <widget class="QPushButton" name="SE_Button_Group">
                     <property name="geometry">
                      <rect>
                       <x>640</x>
@@ -762,7 +762,7 @@
                 </layout>
                </item>
                <item>
-                <widget class="QGroupBox" name="groupBox_EAct">
+                <widget class="QGroupBox" name="SE_GroupBox_EAct">
                  <property name="minimumSize">
                   <size>
                    <width>200</width>
@@ -774,7 +774,7 @@
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_4">
                   <item>
-                   <widget class="QGroupBox" name="groupBox_10">
+                   <widget class="QGroupBox" name="SE_GroupBox_EActUnits">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -790,7 +790,7 @@
                     <property name="title">
                      <string>Units</string>
                     </property>
-                    <widget class="QRadioButton" name="radioButton_7">
+                    <widget class="QRadioButton" name="SE_RadioButton_EActKCal">
                      <property name="geometry">
                       <rect>
                        <x>10</x>
@@ -803,7 +803,7 @@
                       <string>kCal</string>
                      </property>
                     </widget>
-                    <widget class="QRadioButton" name="radioButton_8">
+                    <widget class="QRadioButton" name="SE_RadioButton_EActKJ">
                      <property name="geometry">
                       <rect>
                        <x>10</x>
@@ -822,7 +822,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="checkBox_5">
+                   <widget class="QCheckBox" name="SE_CheckBox_EActToKelvin">
                     <property name="text">
                      <string>to Kelvin</string>
                     </property>
@@ -832,7 +832,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QTextEdit" name="textEdit_23">
+                   <widget class="QTextEdit" name="SE_TextEdit_EActStartLabel">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -882,7 +882,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </widget>
                   </item>
                   <item>
-                   <widget class="QDoubleSpinBox" name="Eact_end">
+                   <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_EActStart">
                     <property name="prefix">
                      <string/>
                     </property>
@@ -904,7 +904,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </widget>
                   </item>
                   <item>
-                   <widget class="QTextEdit" name="textEdit_22">
+                   <widget class="QTextEdit" name="SE_TextEdit_EActEndLabel">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -954,7 +954,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </widget>
                   </item>
                   <item>
-                   <widget class="QDoubleSpinBox" name="Eact_start">
+                   <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_EActEnd">
                     <property name="prefix">
                      <string/>
                     </property>
@@ -976,7 +976,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </widget>
                   </item>
                   <item>
-                   <widget class="QTextEdit" name="textEdit_EAct">
+                   <widget class="QTextEdit" name="SE_TextEdit_EActResult">
                     <property name="maximumSize">
                      <size>
                       <width>200</width>
@@ -1042,7 +1042,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    </spacer>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_Done">
+                   <widget class="QPushButton" name="SE_Button_EActDone">
                     <property name="text">
                      <string>Done</string>
                     </property>
@@ -5544,7 +5544,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                <property name="title">
                 <string>Solid Content Settings</string>
                </property>
-               <widget class="QRadioButton" name="radioButton_absolute">
+               <widget class="QRadioButton" name="SE_RadioButton_SCAbsolute">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -5599,7 +5599,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;SC = (S-L)/S&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SC_short">
+               <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_SCShortStart">
                 <property name="geometry">
                  <rect>
                   <x>110</x>
@@ -5698,7 +5698,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <set>Qt::NoTextInteraction</set>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SC_short_2">
+               <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_SCShortEnd">
                 <property name="geometry">
                  <rect>
                   <x>210</x>
@@ -5797,7 +5797,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <set>Qt::NoTextInteraction</set>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SC_long_2">
+               <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_SCLongEnd">
                 <property name="geometry">
                  <rect>
                   <x>210</x>
@@ -5840,7 +5840,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <double>80.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SC_long">
+               <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_SCLongStart">
                 <property name="geometry">
                  <rect>
                   <x>110</x>

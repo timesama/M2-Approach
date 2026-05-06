@@ -128,11 +128,11 @@ class MainWindow(QMainWindow):
         self.ui.btn_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_2.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
-        self.ui.btn_ClearTable_4.clicked.connect(self.clear_list)
+        self.ui.SE_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.btn_ClearTable_5.clicked.connect(self.clear_list)
 
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
-        self.ui.btn_DeleteRow_1.clicked.connect(self.delete_row)
+        self.ui.SE_Button_DeleteRow.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
         self.ui.btn_DeleteRow_3.clicked.connect(self.delete_row)
 
@@ -156,16 +156,13 @@ class MainWindow(QMainWindow):
         self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 
-        self.ui.pushButton_Eact.clicked.connect(self.se_controller.plot_Arr)
-
-        self.ui.pushButton_GroupSE.clicked.connect(self.open_group_window)
         self.ui.pushButton_GroupT1T2.clicked.connect(self.open_group_window)
         self.ui.pushButton_GroupSD.clicked.connect(self.open_group_window)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
         self.setup_graph(self.ui.FidWidget, "Time, μs", "Amplitude", "NMR Signal")
-        self.setup_graph(self.ui.SEWidget, "Temperature, °C", "Choose", "")
+        self.setup_graph(self.ui.SE_PlotWidget_Main, "Temperature, °C", "Choose", "")
         self.setup_graph(self.ui.DQ_Widget_1, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_Widget_2, "X axis", "Norm. DQ Intensity", "")
         self.setup_graph(self.ui.DQ_Widget_4, "T₂*", "Norm. DQ Intensity", "FunctionFit")
@@ -177,13 +174,11 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.GS_Widget_1, "√Time, √us", "Signal", "")
         self.setup_graph(self.ui.GS_Widget_2, "X axis", "√Time, √us", "")
         self.setup_graph(self.ui.DQ_Widget_polyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
+        self.se_controller.connect_signals()
 
         # Table Headers
         self.copy_enabler = TableCopyEnabler(self)
 
-        self.ui.table_SE.horizontalHeader().sectionDoubleClicked.connect(
-    lambda index=0: self.renameSection(self.ui.table_SE, index=0)
-)
         self.ui.table_T1.horizontalHeader().sectionDoubleClicked.connect(
     lambda index=T1Columns.X_AXIS: self.renameSection(self.ui.table_T1, index=T1Columns.X_AXIS)
 )
@@ -196,7 +191,6 @@ class MainWindow(QMainWindow):
         self._apply_table_header_order()
         # Connect table signals to slots
         self.ui.table_DQ.currentItemChanged.connect(self.dq_controller.update_graphs)
-        self.ui.table_SE.itemSelectionChanged.connect(self.update_se_graphs)
         self.ui.table_DQ.itemSelectionChanged.connect(self.dq_controller.update_graphs)
         self.ui.table_T1.itemSelectionChanged.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.T1T2_FitWith1ExpButton.clicked.connect(self.t1t2_controller.change_exponential_order)
@@ -223,20 +217,9 @@ class MainWindow(QMainWindow):
         self.ui.GS_m2.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
 
         # Connect combobox signals to slots
-        self.ui.comboBox_SE_chooseY.activated.connect(self.update_se_graphs)
-        self.ui.comboBox_SE_chooseY.currentIndexChanged.connect(lambda _i: self.ui.table_SE.clearSelection())
-        self.ui.comboBox_SE_chooseY.currentIndexChanged.connect(lambda _i: self.update_se_graphs())
         self.ui.comboBox_FunctionDQ.activated.connect(self.dq_controller.plot_fit)
         self.ui.T1T2_ChooseFileComboBox.activated.connect(self.t1t2_controller.calculate_relaxation_time)
         self.ui.comboBox_7.activated.connect(self.gs_controller.calculate_sqrt_time)
-
-        # Eact
-        self.ui.radioButton_7.clicked.connect(self.se_controller.plot_Arr)
-        self.ui.radioButton_8.clicked.connect(self.se_controller.plot_Arr)
-        self.ui.checkBox_5.clicked.connect(self.se_controller.plot_Arr)
-        self.ui.Eact_start.valueChanged.connect(self.se_controller.plot_Arr)
-        self.ui.Eact_end.valueChanged.connect(self.se_controller.plot_Arr)
-        self.ui.pushButton_Done.clicked.connect(self.se_controller.hide_Eact)
 
 
         # Connect change events
@@ -246,7 +229,7 @@ class MainWindow(QMainWindow):
 
         # Disable buttons initially
         self.disable_buttons()
-        self.ui.groupBox_EAct.setHidden(True)
+        self.ui.SE_GroupBox_EAct.setHidden(True)
 
         self.tab10_colors = [
             mkColor('#1f77b4'),  # blue
@@ -334,7 +317,7 @@ class MainWindow(QMainWindow):
             self.highlight_row(self.ui.table_DQ, i)
             self.dq_controller.update_graphs()
         elif self.tab == 'SE':
-            self.highlight_row(self.ui.table_SE, i)
+            self.highlight_row(self.ui.SE_Table_Data, i)
             self.update_se_graphs()
 
         #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
@@ -346,8 +329,8 @@ class MainWindow(QMainWindow):
             self.selected_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
-            self.ui.table_SE.setRowCount(0)
-            self.ui.SEWidget.clear()
+            self.ui.SE_Table_Data.setRowCount(0)
+            self.ui.SE_PlotWidget_Main.clear()
             self.ui.FFTWidget.clear()
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
@@ -411,7 +394,7 @@ class MainWindow(QMainWindow):
     def delete_row(self):
 
         if self.tab == 'SE':
-            table = self.ui.table_SE
+            table = self.ui.SE_Table_Data
             combobox = self.ui.comboBox_4
             files = self.selected_files
         elif self.tab == 'DQ':
@@ -474,8 +457,8 @@ class MainWindow(QMainWindow):
             if item_selected is not None:
                 item_selected.setBackground(QColor(255, 255, 0))
 
-        # self.ui.table_SE.selectRow(5)
-        # self.ui.table_SE.currentRow()
+        # self.ui.SE_Table_Data.selectRow(5)
+        # self.ui.SE_Table_Data.currentRow()
 
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
@@ -557,7 +540,7 @@ class MainWindow(QMainWindow):
         self.group_window = GroupWindow()
 
         if self.tab == 'SE':
-            self.group_window.copy_table_data(self.ui.table_SE)
+            self.group_window.copy_table_data(self.ui.SE_Table_Data)
             self.group_data_SE = {}
         elif self.tab == 'T1T2':
             self.group_window.copy_table_data(self.ui.table_T1)
@@ -701,7 +684,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_Phasing.setEnabled(False)
         self.ui.dq_min.setEnabled(False)
         self.ui.dq_max.setEnabled(False)
-        self.ui.comboBox_SE_chooseY.setEnabled(False)
         self.ui.comboBox_FunctionDQ.setEnabled(False)
         self.ui.radioButton_Log.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
@@ -717,7 +699,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_Load.setEnabled(True)
         self.ui.dq_min.setEnabled(True)
         self.ui.dq_max.setEnabled(True)
-        self.ui.comboBox_SE_chooseY.setEnabled(True)
         self.ui.comboBox_FunctionDQ.setEnabled(True)
         self.ui.comboBox_4.setEnabled(True)
         self.ui.btn_Add.setEnabled(True)
@@ -752,7 +733,7 @@ class MainWindow(QMainWindow):
     def update_xaxis(self, table, index):
 
         if self.tab == 'SE':
-            figure = self.ui.SEWidget
+            figure = self.ui.SE_PlotWidget_Main
         elif self.tab == 'T1T2':
             figure = self.ui.T1_Widget_2
         elif self.tab == 'GS':
@@ -836,7 +817,7 @@ class MainWindow(QMainWindow):
     # Save and load data
     def save_data(self):
         if self.tab == 'SE':
-            table = self.ui.table_SE
+            table = self.ui.SE_Table_Data
             files = self.selected_files
             default_name = 'SE_'
         elif self.tab == 'DQ':
@@ -926,7 +907,7 @@ class MainWindow(QMainWindow):
             phased = {}
 
         if self.tab == 'SE':
-            table = self.ui.table_SE
+            table = self.ui.SE_Table_Data
             self.selected_files = files
             self.phased_spectra_SE = phased
         elif self.tab == 'DQ':
