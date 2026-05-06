@@ -1499,7 +1499,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <number>5</number>
                  </property>
                  <item row="0" column="2">
-                  <widget class="PlotWidget" name="DQ_Widget_polyFit" native="true">
+                  <widget class="PlotWidget" name="DQTemp_PlotWidget_PolyFit" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>200</width>
@@ -1509,7 +1509,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="PlotWidget" name="DQ_Widget_4" native="true">
+                  <widget class="PlotWidget" name="DQTemp_PlotWidget_T2Distribution" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>200</width>
@@ -1536,7 +1536,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <number>5</number>
                    </property>
                    <item row="0" column="0">
-                    <widget class="QPushButton" name="btn_SelectFilesDQ">
+                    <widget class="QPushButton" name="DQTemp_Button_SelectFiles">
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
@@ -1549,7 +1549,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item row="1" column="1">
-                    <widget class="QPushButton" name="btn_ClearTable">
+                    <widget class="QPushButton" name="DQTemp_Button_ClearTable">
                      <property name="maximumSize">
                       <size>
                        <width>16777215</width>
@@ -1562,7 +1562,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item row="2" column="0">
-                    <widget class="QPushButton" name="btn_Load_2">
+                    <widget class="QPushButton" name="DQTemp_Button_Load">
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
@@ -1581,7 +1581,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item row="1" column="0">
-                    <widget class="QPushButton" name="btn_Save_6">
+                    <widget class="QPushButton" name="DQTemp_Button_Save">
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
@@ -1602,7 +1602,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </layout>
                  </item>
                  <item row="0" column="0" rowspan="2">
-                  <widget class="QTableWidget" name="table_DQ_2">
+                  <widget class="QTableWidget" name="DQTemp_Table_Results">
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
@@ -1678,7 +1678,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item row="1" column="1" rowspan="2" colspan="2">
-                  <widget class="PlotWidget" name="DQ_Widget_5" native="true">
+                  <widget class="PlotWidget" name="DQTemp_PlotWidget_CenterVsXAxis" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>200</width>
