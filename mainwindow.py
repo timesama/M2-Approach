@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
         self.ui.tabWidget.currentChanged.connect(self.state)
 
         self.ui.btn_Save.clicked.connect(self.save_data)
-        self.ui.btn_Save_2.clicked.connect(self.save_data)
+        self.ui.DQMQ_Button_Save.clicked.connect(self.save_data)
         self.ui.btn_Save_6.clicked.connect(self.save_data)
         self.ui.btn_Save_3.clicked.connect(self.save_data)
         self.ui.btn_Save_4.clicked.connect(self.save_data)
@@ -114,14 +114,14 @@ class MainWindow(QMainWindow):
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.btn_Load_2.clicked.connect(self.load_data)
         self.ui.btn_Load_3.clicked.connect(self.load_data)
-        self.ui.btn_Load_4.clicked.connect(self.load_data)
+        self.ui.DQMQ_Button_Load.clicked.connect(self.load_data)
         self.ui.btn_Load_5.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.general_se_dq_controller.open_phasing_manual)
 
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
         self.ui.btn_Add.clicked.connect(self.add_select_dialog)
         self.ui.btn_SelectFiles_T1.clicked.connect(self.open_select_comparison_files_dialog)
-        self.ui.btn_SelectFilesDQMQ.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.DQMQ_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFilesDQ.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.btn_SelectFiles_GS.clicked.connect(self.open_select_comparison_files_dialog)
 
@@ -138,14 +138,16 @@ class MainWindow(QMainWindow):
 
         self.ui.btn_Start.clicked.connect(self.general_se_dq_controller.analysis)
 
-        self.ui.pushButton_DQMQ_1.clicked.connect(self.dqmq_controller.plot_original)
+        self.ui.DQMQ_Button_PlotOriginal.clicked.connect(self.dqmq_controller.plot_original)
         self.ui.radioButton_Log.clicked.connect(self.dq_controller.plot_fit)
-        self.ui.pushButton_DQMQ_4.clicked.connect(self.dqmq_controller.plot_norm)
-        # self.ui.pushButton_DQMQ_2.clicked.connect(self.dqmq_controller.plot_diff)
-        # self.ui.pushButton_DQMQ_3.clicked.connect(self.dqmq_controller.plot_nDQ)
-        self.ui.DQMQ_pushButton_CalculateIntegralSum.clicked.connect(self.dqmq_controller.calculate_integral_sum)
-        self.ui.DQMQ_pushButton_CalculateDres.clicked.connect(self.dqmq_controller.calculate_dres)
-        self.ui.DQMQSmooth_window_2.editingFinished.connect(self.dqmq_controller.update_integral_sum_shift)
+        self.ui.DQMQ_Button_PlotNorm.clicked.connect(self.dqmq_controller.plot_norm)
+        self.ui.DQMQ_Button_CalculateIntegralSum.clicked.connect(
+            self.dqmq_controller.calculate_integral_sum
+        )
+        self.ui.DQMQ_Button_CalculateDres.clicked.connect(self.dqmq_controller.calculate_dres)
+        self.ui.DQMQ_DoubleSpinBox_IntegralShift.editingFinished.connect(
+            self.dqmq_controller.update_integral_sum_shift
+        )
         self.ui.btn_Plot1.clicked.connect(self.t1t2_controller.plot_relaxation_time)
         self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 
@@ -165,8 +167,8 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.DQ_Widget_5, "X axis", "Center", "")
         self.setup_graph(self.ui.T1_Widget_1, "Time, ms", "Signal", "")
         self.setup_graph(self.ui.T1_Widget_2, "X axis", "τ, ms", "")
-        self.setup_graph(self.ui.DQMQ_Widget, "Time", "NMR signal", "")
-        self.setup_graph(self.ui.DQMQ_Widget_DRes, "Dres/2π, KHz", "P(Dres)", "")
+        self.setup_graph(self.ui.DQMQ_PlotWidget_Signal, "Time", "NMR signal", "")
+        self.setup_graph(self.ui.DQMQ_PlotWidget_Dres, "Dres/2π, KHz", "P(Dres)", "")
         self.setup_graph(self.ui.GS_Widget_1, "√Time, √us", "Signal", "")
         self.setup_graph(self.ui.GS_Widget_2, "X axis", "√Time, √us", "")
         self.setup_graph(self.ui.DQ_Widget_polyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
@@ -236,9 +238,9 @@ class MainWindow(QMainWindow):
         self.ui.dq_min.valueChanged.connect(self.dq_controller.update_graphs)
         self.ui.dq_max.valueChanged.connect(self.dq_controller.update_graphs)
         self.ui.comboBox_4.activated.connect(self.update_file)
-        self.ui.dq_min_3.valueChanged.connect(self.dqmq_controller.plot_diff)
-        self.ui.dq_max_3.valueChanged.connect(self.dqmq_controller.plot_diff)
-        self.ui.power.valueChanged.connect(self.dqmq_controller.plot_diff)
+        self.ui.DQMQ_DoubleSpinBox_FitFrom.valueChanged.connect(self.dqmq_controller.plot_diff)
+        self.ui.DQMQ_DoubleSpinBox_FitTo.valueChanged.connect(self.dqmq_controller.plot_diff)
+        self.ui.DQMQ_DoubleSpinBox_Power.valueChanged.connect(self.dqmq_controller.plot_diff)
 
         # Disable buttons initially
         self.disable_buttons()
@@ -613,10 +615,8 @@ class MainWindow(QMainWindow):
         self.ui.radioButton_Log.setEnabled(False)
         self.ui.btn_Add.setEnabled(False)
         self.ui.btn_Plot1.setEnabled(False)
-        self.ui.pushButton_DQMQ_1.setEnabled(False)
-        # self.ui.pushButton_DQMQ_2.setEnabled(False)
-        # self.ui.pushButton_DQMQ_3.setEnabled(False)
-        self.ui.pushButton_DQMQ_4.setEnabled(False)
+        self.ui.DQMQ_Button_PlotOriginal.setEnabled(False)
+        self.ui.DQMQ_Button_PlotNorm.setEnabled(False)
 
     def enable_buttons(self):
         self.ui.btn_SelectFiles.setEnabled(True)
@@ -770,12 +770,14 @@ class MainWindow(QMainWindow):
             default_name = 'SpinDiffusion_'
 
         elif self.tab == 'DQMQ':
-            table = self.ui.table_DQMQ
+            table = self.ui.DQMQ_Table_Data
             files = self.selected_DQMQfile
             pattern = r'.*_(.*)'
             try:
-                default_name = 'DQMQ_data_' + re.search(pattern, os.path.split(os.path.dirname(files[0]))[1] ).group(1)
-            except:
+                selected_folder = os.path.split(os.path.dirname(files[0]))[1]
+                match = re.search(pattern, selected_folder)
+                default_name = 'DQMQ_data_' + match.group(1)
+            except (IndexError, AttributeError, TypeError):
                 default_name = 'DQMQ_data_'
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
@@ -848,7 +850,7 @@ class MainWindow(QMainWindow):
             table = self.ui.table_T1
             self.selected_T1files = files
         elif self.tab == 'DQMQ':
-            table = self.ui.table_DQMQ
+            table = self.ui.DQMQ_Table_Data
             self.selected_DQMQfile = files
             self.app_state.dqmq_files = files
         elif self.tab == 'GS':
@@ -890,13 +892,11 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             self.t1t2_controller.update_T12_table()
         elif self.tab == 'DQMQ':
-            self.ui.pushButton_DQMQ_1.setEnabled(True)
-            # self.ui.pushButton_DQMQ_2.setEnabled(True)
-            # self.ui.pushButton_DQMQ_3.setEnabled(True)
-            self.ui.pushButton_DQMQ_4.setEnabled(True)
-            self.ui.dq_min_3.setEnabled(True)
-            self.ui.dq_max_3.setEnabled(True)
-            self.ui.power.setEnabled(True)
+            self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
+            self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
+            self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
+            self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
+            self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
             self.dqmq_controller.plot_nDQ_on_Load()
 
         elif self.tab == 'GS':

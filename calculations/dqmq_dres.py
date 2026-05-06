@@ -21,7 +21,9 @@ def normalize_distribution(p_values, d_values):
 
 def p_gaussian(d_values, mu, sigma):
     sigma = max(float(sigma), 1e-9)
-    p_values = np.exp(-((d_values - mu) ** 2) / (2 * sigma**2))
+    squared_offset = (d_values - mu) ** 2
+    variance_scale = 2 * sigma**2
+    p_values = np.exp(-squared_offset / variance_scale)
     return normalize_distribution(p_values, d_values)
 
 
@@ -50,24 +52,31 @@ def dq_kernel(x_values, kernel, beta=2.0):
     raise ValueError(f"Unknown kernel: {kernel}. Use one of {VALID_KERNELS}")
 
 
+def _integrated_ndq_response(time_values, p_values, kernel, beta):
+    integrated_values = []
+    for tau_i in np.asarray(time_values, dtype=float):
+        scaled_dres = D_GRID * tau_i
+        kernel_response = dq_kernel(scaled_dres, kernel, beta)
+        integrated_response = np.trapz(p_values * kernel_response, D_GRID)
+        integrated_values.append(0.5 * integrated_response)
+
+    return np.array(integrated_values)
+
+
 def ndq_1d(time_values, mu, sigma, beta, kernel):
     p_values = p_gaussian(D_GRID, mu, sigma)
-    return np.array([
-        0.5 * np.trapz(p_values * dq_kernel(D_GRID * tau_i, kernel, beta), D_GRID)
-        for tau_i in np.asarray(time_values, dtype=float)
-    ])
+    return _integrated_ndq_response(time_values, p_values, kernel, beta)
 
 
 def ndq_2d(time_values, mu1, sigma1, mu2, sigma2, frac1, beta, kernel):
     p_values = p_gaussian_2d(D_GRID, mu1, sigma1, mu2, sigma2, frac1)
-    return np.array([
-        0.5 * np.trapz(p_values * dq_kernel(D_GRID * tau_i, kernel, beta), D_GRID)
-        for tau_i in np.asarray(time_values, dtype=float)
-    ])
+    return _integrated_ndq_response(time_values, p_values, kernel, beta)
 
 
 def ndq_single(time_values, dres):
-    return 0.5 * (1.0 - np.exp(-K * dres**2 * np.asarray(time_values, dtype=float) ** 2))
+    time_array = np.asarray(time_values, dtype=float)
+    exponent = -K * dres**2 * time_array**2
+    return 0.5 * (1.0 - np.exp(exponent))
 
 
 def make_fit_model(kernel, n_components):
@@ -76,13 +85,17 @@ def make_fit_model(kernel, n_components):
         raise ValueError(f"kernel must be one of {VALID_KERNELS}")
 
     if n_components == 1:
+
         def model(time_values, mu, sigma, beta):
             return ndq_1d(time_values, mu, sigma, beta, kernel)
+
         return model
 
     if n_components == 2:
+
         def model(time_values, mu1, sigma1, mu2, sigma2, frac1, beta):
             return ndq_2d(time_values, mu1, sigma1, mu2, sigma2, frac1, beta, kernel)
+
         return model
 
     raise ValueError("n_components must be 1 or 2")
@@ -127,7 +140,6 @@ def fit_selected_model(time0, ndq0, kernel="gaussian", n_components=1):
     }
 
 
-
 def build_distribution(fit_result):
     n_components = fit_result["n_components"]
     popt = fit_result["popt"]
@@ -142,10 +154,9 @@ def build_distribution(fit_result):
     d_plot = D_GRID / (2 * np.pi) * 1000.0
     return d_plot, p_values
 
+
 def build_singular_distribution(center, sigma):
-
     p_values = p_gaussian(D_GRID, center, sigma)
-
 
     d_plot = D_GRID / (2 * np.pi) * 1000.0
     return d_plot, p_values
