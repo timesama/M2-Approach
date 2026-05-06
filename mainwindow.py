@@ -109,13 +109,13 @@ class MainWindow(QMainWindow):
         self.ui.DQMQ_Button_Save.clicked.connect(self.save_data)
         self.ui.DQTemp_Button_Save.clicked.connect(self.save_data)
         self.ui.T1T2_Button_Save.clicked.connect(self.save_data)
-        self.ui.btn_Save_4.clicked.connect(self.save_data)
+        self.ui.GS_Button_Save.clicked.connect(self.save_data)
 
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.DQTemp_Button_Load.clicked.connect(self.load_data)
         self.ui.T1T2_Button_Load.clicked.connect(self.load_data)
         self.ui.DQMQ_Button_Load.clicked.connect(self.load_data)
-        self.ui.btn_Load_5.clicked.connect(self.load_data)
+        self.ui.GS_Button_Load.clicked.connect(self.load_data)
         self.ui.btn_Phasing.clicked.connect(self.general_se_dq_controller.open_phasing_manual)
 
         self.ui.btn_SelectFiles.clicked.connect(self.open_select_dialog)
@@ -123,17 +123,17 @@ class MainWindow(QMainWindow):
         self.ui.T1T2_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.DQMQ_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.DQTemp_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
-        self.ui.btn_SelectFiles_GS.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.GS_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
 
         self.ui.DQTemp_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.T1T2_Button_ClearTable.clicked.connect(self.clear_list)
-        self.ui.btn_ClearTable_3.clicked.connect(self.clear_list)
+        self.ui.GS_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.SE_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.DQ_Button_ClearTable.clicked.connect(self.clear_list)
 
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.SE_Button_DeleteRow.clicked.connect(self.delete_row)
-        self.ui.btn_DeleteRow_2.clicked.connect(self.delete_row)
+        self.ui.GS_Button_DeleteRow.clicked.connect(self.delete_row)
         self.ui.DQ_Button_DeleteRow.clicked.connect(self.delete_row)
 
         self.ui.btn_Start.clicked.connect(self.general_se_dq_controller.analysis)
@@ -152,10 +152,9 @@ class MainWindow(QMainWindow):
             self.dqmq_controller.update_integral_sum_shift
         )
         self._connect_dqmq_workflow_signals()
-        self.ui.btn_Plot_GS.clicked.connect(self.gs_controller.plot_sqrt_time)
 
         self.ui.T1T2_Button_Group.clicked.connect(self.open_group_window)
-        self.ui.pushButton_GroupSD.clicked.connect(self.open_group_window)
+        self.ui.GS_Button_Group.clicked.connect(self.open_group_window)
 
         # Graph setup
         self.setup_graph(self.ui.FFTWidget, "Frequency, MHz", "Amplitude, a.u", "FFT")
@@ -169,36 +168,19 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.T1T2_PlotWidget_RelaxationTime, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_PlotWidget_Signal, "Time", "NMR signal", "")
         self.setup_graph(self.ui.DQMQ_PlotWidget_Dres, "Dres/2π, KHz", "P(Dres)", "")
-        self.setup_graph(self.ui.GS_Widget_1, "√Time, √us", "Signal", "")
-        self.setup_graph(self.ui.GS_Widget_2, "X axis", "√Time, √us", "")
+        self.setup_graph(self.ui.GS_PlotWidget_RawSignal, "√Time, √us", "Signal", "")
+        self.setup_graph(self.ui.GS_PlotWidget_SqrtTime, "X axis", "√Time, √us", "")
         self.setup_graph(self.ui.DQTemp_PlotWidget_PolyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
         self.se_controller.connect_signals()
         self.dq_controller.connect_signals()
         self.dq_temp_controller.connect_signals()
         self.t1t2_controller.connect_signals()
+        self.gs_controller.connect_signals()
 
         # Table Headers
         self.copy_enabler = TableCopyEnabler(self)
 
-        self.ui.table_GS.horizontalHeader().sectionDoubleClicked.connect(
-    lambda index=GSColumns.X_AXIS: self.renameSection(self.ui.table_GS, index=GSColumns.X_AXIS)
-)
         self._apply_table_header_order()
-        # Connect table signals to slots
-        self.ui.checkBox_3.clicked.connect(self.gs_controller.calculate_sqrt_time)
-        self.ui.radioButton_short.clicked.connect(self.gs_controller.calculate_sqrt_time)
-        self.ui.radioButton_medium.clicked.connect(self.gs_controller.calculate_sqrt_time)
-        self.ui.radioButton_long.clicked.connect(self.gs_controller.calculate_sqrt_time)
-        self.ui.GS_fit_from_1.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
-        self.ui.GS_fit_to_1.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
-
-        self.ui.GS_beta.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
-        self.ui.GS_r2.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
-        self.ui.GS_m2.valueChanged.connect(self.gs_controller.calculate_sqrt_time)
-
-        # Connect combobox signals to slots
-        self.ui.comboBox_7.activated.connect(self.gs_controller.calculate_sqrt_time)
-
 
         # Connect change events
         self.ui.comboBox_4.activated.connect(self.update_file)
@@ -346,9 +328,9 @@ class MainWindow(QMainWindow):
         elif self.tab == 'GS':
             self.selected_GSfiles = []
             self.GS_dictionary = {}
-            self.ui.table_GS.setRowCount(0)
-            self.ui.GS_Widget_1.clear()
-            self.ui.GS_Widget_2.clear()
+            self.ui.GS_Table_Results.setRowCount(0)
+            self.ui.GS_PlotWidget_RawSignal.clear()
+            self.ui.GS_PlotWidget_SqrtTime.clear()
             self.group_data_SD = {}
         elif self.tab == 'Extra':
             pass
@@ -359,7 +341,7 @@ class MainWindow(QMainWindow):
         elif self.tab in ('SE', 'DQ'):
             combobox = self.ui.comboBox_4
         elif self.tab == 'GS':
-            combobox = self.ui.comboBox_7
+            combobox = self.ui.GS_ComboBox_ChooseFile
 
         if self.tab != 'DQMQ' and  self.tab != 'DQ_Temp':
             while combobox.count()>0:
@@ -381,9 +363,9 @@ class MainWindow(QMainWindow):
             table = self.ui.T1T2_Table_Results
             combobox = self.ui.T1T2_ComboBox_ChooseFile
             files = self.selected_T1files
-        elif self.tab =='GS':
-            table = self.ui.table_GS
-            combobox = self.ui.comboBox_7
+        elif self.tab == 'GS':
+            table = self.ui.GS_Table_Results
+            combobox = self.ui.GS_ComboBox_ChooseFile
             files = self.selected_GSfiles
         else:
             return
@@ -394,6 +376,13 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "No DQ row selected", "No DQ row selected.", QMessageBox.Ok)
             elif self.tab == "T1T2":
                 QMessageBox.warning(self, "No T1/T2 row selected", "No T1/T2 row selected.", QMessageBox.Ok)
+            elif self.tab == "GS":
+                QMessageBox.warning(
+                    self,
+                    "No spin diffusion row selected",
+                    "No spin diffusion row selected.",
+                    QMessageBox.Ok,
+                )
             else:
                 QMessageBox.warning(self, "Cricket sounds", "Select the row.", QMessageBox.Ok)
             return
@@ -465,8 +454,8 @@ class MainWindow(QMainWindow):
                 self.selected_T1files.extend(T1fileNames)
                 self.t1t2_controller.update_T12_table()
             elif self.tab == 'GS':
-                while self.ui.comboBox_7.count()>0:
-                    self.ui.comboBox_7.removeItem(0)
+                while self.ui.GS_ComboBox_ChooseFile.count() > 0:
+                    self.ui.GS_ComboBox_ChooseFile.removeItem(0)
                 GSfileNames = dlg.selectedFiles()
                 self.selected_GSfiles.extend(GSfileNames)
                 self.gs_controller.update_GS_table()
@@ -535,7 +524,15 @@ class MainWindow(QMainWindow):
             self.group_window.copy_table_data(self.ui.T1T2_Table_Results)
             self.group_data_T1T2 = {}
         elif self.tab == 'GS':
-            self.group_window.copy_table_data(self.ui.table_GS)
+            if self.ui.GS_Table_Results.rowCount() == 0:
+                QMessageBox.warning(
+                    self,
+                    "No spin diffusion data",
+                    "No spin diffusion data available. Select spin diffusion files first.",
+                    QMessageBox.Ok,
+                )
+                return
+            self.group_window.copy_table_data(self.ui.GS_Table_Results)
             self.group_data_SD = {}
 
         if self.group_window.exec_() == QDialog.Accepted:
@@ -718,7 +715,7 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             figure = self.ui.T1T2_PlotWidget_RelaxationTime
         elif self.tab == 'GS':
-            figure = self.ui.GS_Widget_2
+            figure = self.ui.GS_PlotWidget_SqrtTime
         elif self.tab == 'DQ_Temp':
             figure = self.ui.DQTemp_PlotWidget_CenterVsXAxis
         else:
@@ -731,7 +728,7 @@ class MainWindow(QMainWindow):
         self.ui.T1T2_Table_Results.setHorizontalHeaderLabels([
             "X axis", "tau 1", "A 1", "tau 2", "A 2", "tau 3", "A 3", "File name", "Folder"
         ])
-        self.ui.table_GS.setHorizontalHeaderLabels([
+        self.ui.GS_Table_Results.setHorizontalHeaderLabels([
             "X axis", "sqrt time", "d, nm", "File name", "Folder"
         ])
         self.ui.DQTemp_Table_Results.setHorizontalHeaderLabels([
@@ -739,7 +736,7 @@ class MainWindow(QMainWindow):
             "FWHM Gauss", "FWHM Lorenz", "FWHM Voigt", "Folder"
         ])
         self.ui.T1T2_Table_Results.resizeColumnsToContents()
-        self.ui.table_GS.resizeColumnsToContents()
+        self.ui.GS_Table_Results.resizeColumnsToContents()
         self.ui.DQTemp_Table_Results.resizeColumnsToContents()
 
     # Working with graphs
@@ -835,8 +832,16 @@ class MainWindow(QMainWindow):
             default_name = 'T'
 
         elif self.tab == 'GS':
-            table = self.ui.table_GS
+            table = self.ui.GS_Table_Results
             files = self.selected_GSfiles
+            if table.rowCount() == 0 or not files:
+                QMessageBox.warning(
+                    self,
+                    "No spin diffusion data",
+                    "Load spin diffusion files first.",
+                    QMessageBox.Ok,
+                )
+                return
             default_name = 'SpinDiffusion_'
 
         elif self.tab == 'DQMQ':
@@ -924,7 +929,7 @@ class MainWindow(QMainWindow):
             self.selected_DQMQfile = files
             self.app_state.dqmq_files = files
         elif self.tab == 'GS':
-            table = self.ui.table_GS
+            table = self.ui.GS_Table_Results
             self.selected_GSfiles = files
 
         with open(file_path, 'r') as f:

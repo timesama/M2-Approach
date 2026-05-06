@@ -1,11 +1,9 @@
-import os
-import re
 import logging
+import os
 
-import numpy as np
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 
-import Calculator as Cal
+from calculations import gs_signal
 from controllers.base_tab_controller import BaseTabController
 from controllers.table_columns import GSColumns
 from utils.ui_busy import busy_cursor
@@ -14,112 +12,261 @@ logger = logging.getLogger(__name__)
 
 
 class GSTabController(BaseTabController):
+    def connect_signals(self):
+        self.ui.GS_Table_Results.horizontalHeader().sectionDoubleClicked.connect(
+            lambda index: self.parent.renameSection(self.ui.GS_Table_Results, index)
+        )
+        self.ui.GS_Table_Results.itemSelectionChanged.connect(self.plot_sqrt_time)
+        self.ui.GS_Button_Plot.clicked.connect(self.plot_sqrt_time_from_user)
+        self.ui.GS_CheckBox_UseSqrtTime.clicked.connect(self.calculate_sqrt_time)
+        self.ui.GS_RadioButton_Short.clicked.connect(self.calculate_sqrt_time)
+        self.ui.GS_RadioButton_Medium.clicked.connect(self.calculate_sqrt_time)
+        self.ui.GS_RadioButton_Long.clicked.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_FitFrom.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_FitTo.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_Beta.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_R2.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_M2.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_ComboBox_ChooseFile.activated.connect(lambda *_args: self.calculate_sqrt_time())
+
     def update_GS_table(self):
         with busy_cursor():
             self._update_GS_table_impl()
 
     def _update_GS_table_impl(self):
-        def clean_line(line):
-            while '\t\t' in line:
-                line = line.replace('\t\t', '\t')
-            return line.strip()
-
         selected_files = self.parent.selected_GSfiles
+        if not selected_files:
+            self._warn_no_data("No spin diffusion data available. Select spin diffusion files first.")
+            return
+
         logger.info("GS loading %d files", len(selected_files))
-        table = self.ui.table_GS
-        combobox = self.ui.comboBox_7
-        pattern = r'_([0-9]+)\.dat$'
+        table = self.ui.GS_Table_Results
+        combobox = self.ui.GS_ComboBox_ChooseFile
         dictionary = self.parent.GS_dictionary
         dictionary.clear()
+        table.setRowCount(0)
+        combobox.clear()
+        failed_files = []
 
-        try:
-            table.setRowCount(len(selected_files))
-            for row, file in zip(range(table.rowCount()), selected_files):
-                logger.info("GS processing file %d/%d: %s", row + 1, len(selected_files), os.path.basename(file))
-                dictionary[file] = {"X Axis": [], "sqrtTime": [], "short": [], "medium": [], "long": []}
-                sqrtTime, short, medium, long = [], [], [], []
-                current_file = os.path.basename(file)
-                try:
-                    x_axis = re.search(pattern, current_file).group(1)
-                except Exception:
-                    x_axis = row
-                with open(file, "r") as data:
-                    lines = [clean_line(line.rstrip('\n')) for line in data if line.strip()]
-                for line in lines[1:]:
-                    parts = line.split('\t')
-                    sqrtTime.append(float(parts[0]))
-                    short.append(float(parts[4]))
-                    medium.append(float(parts[5]))
-                    long.append(float(parts[6]))
-                combobox.addItem(f"{current_file}")
-                table.setItem(row, GSColumns.FOLDER, QTableWidgetItem(file))
-                table.setItem(row, GSColumns.FILE_NAME, QTableWidgetItem(current_file))
-                table.setItem(row, GSColumns.X_AXIS, QTableWidgetItem(str(x_axis)))
-                dictionary[file]["X Axis"].append(x_axis)
-                dictionary[file]["sqrtTime"].extend(sqrtTime)
-                dictionary[file]["short"].extend(short)
-                dictionary[file]["medium"].extend(medium)
-                dictionary[file]["long"].extend(long)
-        except Exception as e:
-            logger.exception("GS table loading failed")
-            QMessageBox.warning(self.parent, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
-            self.parent.clear_list()
+        for file_path in selected_files:
+            current_file = os.path.basename(file_path)
+            row = table.rowCount()
+            logger.info("GS processing file %d/%d: %s", row + 1, len(selected_files), current_file)
+
+            try:
+                sqrt_time, short_signal, medium_signal, long_signal = gs_signal.read_spin_diffusion_file(file_path)
+                x_axis = gs_signal.x_axis_from_filename(file_path, row)
+            except Exception:
+                logger.exception("GS file could not be read: %s", file_path)
+                failed_files.append(current_file)
+                continue
+
+            dictionary[file_path] = {
+                "X Axis": [x_axis],
+                "sqrtTime": list(sqrt_time),
+                "short": list(short_signal),
+                "medium": list(medium_signal),
+                "long": list(long_signal),
+            }
+            self._add_table_row(table, combobox, row, file_path, current_file, x_axis)
+
+        if failed_files:
+            self._warn_failed_files("Some spin diffusion files could not be read. They were skipped.", failed_files)
+
+        combobox.setCurrentIndex(-1)
         table.resizeColumnsToContents()
 
-    def calculate_sqrt_time(self):
+    def _add_table_row(self, table, combobox, row, folder, file_name, x_axis):
+        table.insertRow(row)
+        table.setItem(row, GSColumns.FOLDER, QTableWidgetItem(folder))
+        table.setItem(row, GSColumns.FILE_NAME, QTableWidgetItem(file_name))
+        table.setItem(row, GSColumns.X_AXIS, QTableWidgetItem(str(x_axis)))
+        combobox.addItem(file_name)
+
+    def calculate_sqrt_time(self, *_args, show_warning=True):
         with busy_cursor():
-            self._calculate_sqrt_time_impl()
+            self._calculate_sqrt_time_impl(show_warning=show_warning)
 
-    def _calculate_sqrt_time_impl(self):
-        idx = self.ui.comboBox_7.currentIndex()
-        if idx == -1:
-            return
-        logger.info("GS fit started: index=%d", idx)
-        table = self.ui.table_GS
-        figure = self.ui.GS_Widget_1
+    def _calculate_sqrt_time_impl(self, show_warning=True):
+        table = self.ui.GS_Table_Results
+        figure = self.ui.GS_PlotWidget_RawSignal
         dictionary = self.parent.GS_dictionary
-        key = table.item(idx, GSColumns.FOLDER).text()
-        time_original = np.array(dictionary[key]['sqrtTime']).flatten()
-        if self.ui.checkBox_3.isChecked():
-            time_original = np.sqrt(time_original)
-        short_original = np.array(dictionary[key]['short']).flatten()
-        medium_original = np.array(dictionary[key]['medium']).flatten()
-        long_original = np.array(dictionary[key]['long']).flatten()
-        self.ui.GS_fit_from_1.setMinimum(time_original[0]); self.ui.GS_fit_from_1.setMaximum(time_original[-1])
-        self.ui.GS_fit_to_1.setMinimum(time_original[15]); self.ui.GS_fit_to_1.setMaximum(time_original[-1])
-        from_val, to_val = self.ui.GS_fit_from_1.value(), self.ui.GS_fit_to_1.value()
-        sp = (np.abs(time_original - from_val)).argmin(); ep = (np.abs(time_original - to_val)).argmin() + 1
-        time = time_original[sp:ep]
-        short = short_original[sp:ep]; medium = medium_original[sp:ep]; long = long_original[sp:ep]
-        if self.ui.radioButton_short.isChecked(): signal, signal_original = short, short_original
-        elif self.ui.radioButton_medium.isChecked(): signal, signal_original = medium, medium_original
-        else: signal, signal_original = long, long_original
-        try:
-            tf, fit, sqrtT, r2v = Cal.linear_fit_GS(time, signal)
-            d = Cal.calculate_domain_size(sqrtT, self.ui.GS_beta.value(), self.ui.GS_r2.value(), self.ui.GS_m2.value())
-            self.ui.textEdit_error_2.setText(f"R² {r2v}")
-            table.setItem(idx, GSColumns.SQRT_TIME, QTableWidgetItem(str(sqrtT)))
-            table.setItem(idx, GSColumns.D_NM, QTableWidgetItem(str(d)))
-            table.resizeColumnsToContents()
-            figure.clear(); figure.plot(time_original, signal_original, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10); figure.plot(tf, fit, pen='b')
-            dictionary[key]['sqrtT'] = sqrtT; dictionary[key]['d'] = d
-            logger.info("GS fit completed: sqrtT=%s d=%s", sqrtT, d)
-            self.ui.btn_Plot_GS.setEnabled(True)
-        except Exception as e:
-            logger.exception("GS fit failed: index=%d", idx)
-            figure.clear(); QMessageBox.warning(self.parent, "Error", f"Something {e} went wrong. Try again.", QMessageBox.Ok)
+        idx = self.ui.GS_ComboBox_ChooseFile.currentIndex()
 
-    def plot_sqrt_time(self):
-        table = self.ui.table_GS
-        graph = self.ui.GS_Widget_2
-        graph.clear()
-        if table.rowCount() < 1:
+        if table.rowCount() == 0 or not dictionary:
+            if show_warning:
+                self._warn_no_data("No spin diffusion data available. Select spin diffusion files first.")
             return
-        x_axis, sqrtT, n = [], [], 1
+
+        if idx == -1:
+            if show_warning:
+                QMessageBox.warning(
+                    self.parent,
+                    "No spin diffusion row selected",
+                    "No spin diffusion row selected.",
+                    QMessageBox.Ok,
+                )
+            return
+
+        item = table.item(idx, GSColumns.FOLDER)
+        if item is None or item.text() not in dictionary:
+            if show_warning:
+                QMessageBox.warning(
+                    self.parent,
+                    "No spin diffusion data",
+                    "Cannot calculate spin diffusion result because required columns contain non-numeric values.",
+                    QMessageBox.Ok,
+                )
+            return
+
+        key = item.text()
+        dictionary_entry = dictionary[key]
+        time_original = gs_signal.transformed_time(
+            dictionary_entry["sqrtTime"],
+            self.ui.GS_CheckBox_UseSqrtTime.isChecked(),
+        )
+        if len(time_original) == 0:
+            if show_warning:
+                self._warn_invalid_range()
+            return
+
+        self._update_fit_limits(time_original)
+        signals = gs_signal.signal_arrays(dictionary_entry)
+        source = self._selected_signal_source()
+        signal_original = gs_signal.selected_signal(signals, source)
+        fit_from = self.ui.GS_DoubleSpinBox_FitFrom.value()
+        fit_to = self.ui.GS_DoubleSpinBox_FitTo.value()
+        fit_time, fit_signal = gs_signal.fit_range(time_original, signal_original, fit_from, fit_to)
+
+        if not gs_signal.is_valid_fit_range(time_original, fit_time, fit_signal):
+            if show_warning:
+                self._warn_invalid_range()
+            return
+
+        try:
+            fit_time_curve, fit_signal_curve, sqrt_time, r2_value, diffusion_distance = gs_signal.fit_spin_diffusion(
+                fit_time,
+                fit_signal,
+                self.ui.GS_DoubleSpinBox_Beta.value(),
+                self.ui.GS_DoubleSpinBox_R2.value(),
+                self.ui.GS_DoubleSpinBox_M2.value(),
+            )
+        except Exception:
+            logger.exception("GS fit failed: index=%d", idx)
+            figure.clear()
+            QMessageBox.warning(
+                self.parent,
+                "Fitting failed",
+                "Cannot fit spin diffusion data because the selected range is invalid.",
+                QMessageBox.Ok,
+            )
+            return
+
+        self.ui.GS_TextEdit_FitResult.setText(f"R² {r2_value}")
+        table.setItem(idx, GSColumns.SQRT_TIME, QTableWidgetItem(str(sqrt_time)))
+        table.setItem(idx, GSColumns.D_NM, QTableWidgetItem(str(diffusion_distance)))
+        table.resizeColumnsToContents()
+        figure.clear()
+        figure.plot(
+            time_original,
+            signal_original,
+            pen=None,
+            symbolPen=None,
+            symbol="o",
+            symbolBrush="r",
+            symbolSize=10,
+        )
+        figure.plot(fit_time_curve, fit_signal_curve, pen="b")
+        dictionary_entry["sqrtT"] = sqrt_time
+        dictionary_entry["d"] = diffusion_distance
+        logger.info("GS fit completed: sqrtT=%s d=%s", sqrt_time, diffusion_distance)
+
+    def _update_fit_limits(self, time_original):
+        self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(time_original[0])
+        self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(time_original[-1])
+        self.ui.GS_DoubleSpinBox_FitTo.setMinimum(time_original[min(15, len(time_original) - 1)])
+        self.ui.GS_DoubleSpinBox_FitTo.setMaximum(time_original[-1])
+
+    def _selected_signal_source(self):
+        if self.ui.GS_RadioButton_Short.isChecked():
+            return "short"
+        if self.ui.GS_RadioButton_Medium.isChecked():
+            return "medium"
+
+        return "long"
+
+    def plot_sqrt_time_from_user(self):
+        self.plot_sqrt_time(show_warning=True)
+
+    def plot_sqrt_time(self, show_warning=False):
+        table = self.ui.GS_Table_Results
+        graph = self.ui.GS_PlotWidget_SqrtTime
+        graph.clear()
+
+        if table.rowCount() < 1:
+            if show_warning:
+                QMessageBox.warning(
+                    self.parent,
+                    "No spin diffusion data",
+                    "Cannot update spin diffusion plot because the table is empty.",
+                    QMessageBox.Ok,
+                )
+            return
+
+        x_axis = []
+        sqrt_time_values = []
+        fallback_x_axis = 1
+        invalid_result_count = 0
+
         for row in range(table.rowCount()):
-            try: x_axis.append(float(table.item(row, GSColumns.X_AXIS).text()))
-            except: x_axis.append(n)
-            try: sqrtT.append(float(table.item(row, GSColumns.SQRT_TIME).text()))
-            except: sqrtT.append(0)
-            n += 1
-        graph.plot(x_axis, sqrtT, pen=None, symbolPen=None, symbol='o', symbolBrush='r', symbolSize=10)
+            x_item = table.item(row, GSColumns.X_AXIS)
+            sqrt_time_item = table.item(row, GSColumns.SQRT_TIME)
+
+            try:
+                x_axis.append(float(x_item.text()))
+            except Exception:
+                x_axis.append(fallback_x_axis)
+
+            try:
+                sqrt_time_values.append(float(sqrt_time_item.text()))
+            except Exception:
+                sqrt_time_values.append(0)
+                invalid_result_count += 1
+
+            fallback_x_axis += 1
+
+        if invalid_result_count == table.rowCount() and show_warning:
+            QMessageBox.warning(
+                self.parent,
+                "No spin diffusion data",
+                "Cannot calculate spin diffusion result because required columns contain non-numeric values.",
+                QMessageBox.Ok,
+            )
+            return
+
+        graph.plot(
+            x_axis,
+            sqrt_time_values,
+            pen=None,
+            symbolPen=None,
+            symbol="o",
+            symbolBrush="r",
+            symbolSize=10,
+        )
+
+    def _warn_no_data(self, message):
+        QMessageBox.warning(self.parent, "No spin diffusion data", message, QMessageBox.Ok)
+
+    def _warn_invalid_range(self):
+        QMessageBox.warning(
+            self.parent,
+            "Invalid spin diffusion range",
+            "Cannot fit spin diffusion data because the selected range is invalid.",
+            QMessageBox.Ok,
+        )
+
+    def _warn_failed_files(self, message, failed_files):
+        preview = "\n".join(failed_files[:5])
+        if len(failed_files) > 5:
+            preview += f"\n...and {len(failed_files) - 5} more"
+        QMessageBox.warning(self.parent, "Spin diffusion load warning", f"{message}\n\n{preview}", QMessageBox.Ok)

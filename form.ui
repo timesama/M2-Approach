@@ -4462,7 +4462,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <number>5</number>
                    </property>
                    <item>
-                    <widget class="QTableWidget" name="table_GS">
+                    <widget class="QTableWidget" name="GS_Table_Results">
                      <property name="styleSheet">
                       <string notr="true"/>
                      </property>
@@ -4526,7 +4526,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       <number>10</number>
                      </property>
                      <item row="1" column="0">
-                      <widget class="QPushButton" name="btn_Save_4">
+                      <widget class="QPushButton" name="GS_Button_Save">
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
@@ -4545,21 +4545,21 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </widget>
                      </item>
                      <item row="1" column="1">
-                      <widget class="QPushButton" name="btn_ClearTable_3">
+                      <widget class="QPushButton" name="GS_Button_ClearTable">
                        <property name="text">
                         <string>Clear Table</string>
                        </property>
                       </widget>
                      </item>
                      <item row="0" column="0">
-                      <widget class="QPushButton" name="btn_SelectFiles_GS">
+                      <widget class="QPushButton" name="GS_Button_SelectFiles">
                        <property name="text">
                         <string>Select Files</string>
                        </property>
                       </widget>
                      </item>
                      <item row="0" column="1">
-                      <widget class="QPushButton" name="btn_DeleteRow_2">
+                      <widget class="QPushButton" name="GS_Button_DeleteRow">
                        <property name="enabled">
                         <bool>true</bool>
                        </property>
@@ -4569,7 +4569,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </widget>
                      </item>
                      <item row="2" column="0">
-                      <widget class="QPushButton" name="btn_Load_5">
+                      <widget class="QPushButton" name="GS_Button_Load">
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
@@ -4588,7 +4588,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </widget>
                      </item>
                      <item row="2" column="1">
-                      <widget class="QPushButton" name="pushButton_GroupSD">
+                      <widget class="QPushButton" name="GS_Button_Group">
                        <property name="text">
                         <string>Group</string>
                        </property>
@@ -4623,7 +4623,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <number>5</number>
                    </property>
                    <item>
-                    <widget class="QComboBox" name="comboBox_7">
+                    <widget class="QComboBox" name="GS_ComboBox_ChooseFile">
                      <property name="minimumSize">
                       <size>
                        <width>300</width>
@@ -4639,7 +4639,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item>
-                    <widget class="QGroupBox" name="groupBox_6">
+                    <widget class="QGroupBox" name="GS_GroupBox_Source">
                      <property name="minimumSize">
                       <size>
                        <width>100</width>
@@ -4657,7 +4657,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </property>
                      <layout class="QGridLayout" name="gridLayout_9">
                       <item row="1" column="1">
-                       <widget class="QRadioButton" name="radioButton_medium">
+                       <widget class="QRadioButton" name="GS_RadioButton_Medium">
                         <property name="text">
                          <string>Medium</string>
                         </property>
@@ -4667,21 +4667,21 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item row="1" column="2">
-                       <widget class="QRadioButton" name="radioButton_long">
+                       <widget class="QRadioButton" name="GS_RadioButton_Long">
                         <property name="text">
                          <string>Long</string>
                         </property>
                        </widget>
                       </item>
                       <item row="1" column="0">
-                       <widget class="QRadioButton" name="radioButton_short">
+                       <widget class="QRadioButton" name="GS_RadioButton_Short">
                         <property name="text">
                          <string>Short</string>
                         </property>
                        </widget>
                       </item>
                       <item row="0" column="0">
-                       <widget class="QCheckBox" name="checkBox_3">
+                       <widget class="QCheckBox" name="GS_CheckBox_UseSqrtTime">
                         <property name="text">
                          <string>to √time</string>
                         </property>
@@ -4710,7 +4710,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </spacer>
                    </item>
                    <item>
-                    <widget class="QGroupBox" name="groupBox_9">
+                    <widget class="QGroupBox" name="GS_GroupBox_FitRange">
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
@@ -4728,7 +4728,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </property>
                      <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,2,0,2,2">
                       <item>
-                       <widget class="QTextEdit" name="textEdit_20">
+                       <widget class="QTextEdit" name="GS_Label_FitFrom">
                         <property name="minimumSize">
                          <size>
                           <width>0</width>
@@ -4778,7 +4778,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QDoubleSpinBox" name="GS_fit_from_1">
+                       <widget class="QDoubleSpinBox" name="GS_DoubleSpinBox_FitFrom">
                         <property name="minimumSize">
                          <size>
                           <width>70</width>
@@ -4809,7 +4809,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QTextEdit" name="textEdit_21">
+                       <widget class="QTextEdit" name="GS_Label_FitTo">
                         <property name="minimumSize">
                          <size>
                           <width>0</width>
@@ -4859,7 +4859,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QDoubleSpinBox" name="GS_fit_to_1">
+                       <widget class="QDoubleSpinBox" name="GS_DoubleSpinBox_FitTo">
                         <property name="minimumSize">
                          <size>
                           <width>70</width>
@@ -4893,7 +4893,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QTextEdit" name="textEdit_error_2">
+                       <widget class="QTextEdit" name="GS_TextEdit_FitResult">
                         <property name="maximumSize">
                          <size>
                           <width>200</width>
@@ -4946,7 +4946,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                    <item>
-                    <widget class="PlotWidget" name="GS_Widget_1" native="true">
+                    <widget class="PlotWidget" name="GS_PlotWidget_RawSignal" native="true">
                      <property name="minimumSize">
                       <size>
                        <width>400</width>
@@ -4991,14 +4991,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <number>5</number>
                    </property>
                    <item>
-                    <widget class="QPushButton" name="btn_Plot_GS">
+                    <widget class="QPushButton" name="GS_Button_Plot">
                      <property name="text">
                       <string>Plot</string>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QGroupBox" name="groupBox_7">
+                    <widget class="QGroupBox" name="GS_GroupBox_DomainSize">
                      <property name="minimumSize">
                       <size>
                        <width>190</width>
@@ -5025,7 +5025,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        <number>5</number>
                       </property>
                       <item row="0" column="0">
-                       <widget class="QTextEdit" name="textEdit_24">
+                       <widget class="QTextEdit" name="GS_Label_R2">
                         <property name="minimumSize">
                          <size>
                           <width>20</width>
@@ -5075,7 +5075,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item row="0" column="1">
-                       <widget class="QDoubleSpinBox" name="GS_beta">
+                       <widget class="QDoubleSpinBox" name="GS_DoubleSpinBox_Beta">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -5112,7 +5112,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item row="1" column="0">
-                       <widget class="QTextEdit" name="textEdit_25">
+                       <widget class="QTextEdit" name="GS_Label_Beta">
                         <property name="minimumSize">
                          <size>
                           <width>20</width>
@@ -5162,7 +5162,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item row="1" column="1">
-                       <widget class="QDoubleSpinBox" name="GS_r2">
+                       <widget class="QDoubleSpinBox" name="GS_DoubleSpinBox_R2">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -5199,7 +5199,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item row="2" column="0">
-                       <widget class="QTextEdit" name="textEdit_26">
+                       <widget class="QTextEdit" name="GS_Label_M2">
                         <property name="minimumSize">
                          <size>
                           <width>20</width>
@@ -5249,7 +5249,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        </widget>
                       </item>
                       <item row="2" column="1">
-                       <widget class="QDoubleSpinBox" name="GS_m2">
+                       <widget class="QDoubleSpinBox" name="GS_DoubleSpinBox_M2">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                           <horstretch>1</horstretch>
@@ -5308,7 +5308,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </spacer>
                    </item>
                    <item>
-                    <widget class="PlotWidget" name="GS_Widget_2" native="true">
+                    <widget class="PlotWidget" name="GS_PlotWidget_SqrtTime" native="true">
                      <property name="minimumSize">
                       <size>
                        <width>400</width>
