@@ -101,8 +101,8 @@ def fit_selected_model(time0, ndq0, kernel="gaussian", n_components=1):
         param_names = ["mu", "sigma", "beta"]
     elif n_components == 2:
         p0 = [0.061, 0.05, 0.313, 0.033, 0.359, 0.96]
-        bounds_min = [1e-3, 1e-4, 1e-5, 1e-15, 0.0, 0.1]
-        bounds_max = [1.0000, 1.5, 1.9000, 1.1, 1.0, 4.0]
+        bounds_min = [1e-3, 1e-4, 1e-5, 1e-15, 0.0, 1e-7]
+        bounds_max = [1.0000, 1.5, 1.9000, 1.1, 1.0, 6.0]
         param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1", "beta"]
     else:
         raise ValueError("n_components must be 1 or 2")

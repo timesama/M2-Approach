@@ -52,8 +52,8 @@ class DQMQTabController(BaseTabController):
         table.resizeColumnsToContents()
         table.setHorizontalHeaderLabels(['Time', 'DQ', 'Ref', 'nDQ'])
         self.ui.pushButton_DQMQ_1.setEnabled(True)
-        self.ui.pushButton_DQMQ_2.setEnabled(False)
-        self.ui.pushButton_DQMQ_3.setEnabled(False)
+        # self.ui.pushButton_DQMQ_2.setEnabled(False)
+        # self.ui.pushButton_DQMQ_3.setEnabled(False)
         self.ui.pushButton_DQMQ_4.setEnabled(True)
         logger.info("DQMQ analysis completed: %d points", len(time))
 
@@ -91,10 +91,11 @@ class DQMQTabController(BaseTabController):
         noise_level = self.ui.noise.value()
         time_shift = int(self.ui.DQMQtime_shift.value())
         time, dq_norm, ref_norm, _, _, _, _, _, _, _ = Cal.dqmq(file_path, 40, 100, 1, noise_level, time_shift)
+
         figure.plot(time, dq_norm, pen=mkPen('r', width=3), name='DQ')
         figure.plot(time, ref_norm, pen=mkPen('b', width=3), name='Ref')
-        self.ui.pushButton_DQMQ_2.setEnabled(True)
-        self.ui.pushButton_DQMQ_3.setEnabled(True)
+        # self.ui.pushButton_DQMQ_2.setEnabled(True)
+        # self.ui.pushButton_DQMQ_3.setEnabled(True)
         self.ui.dq_min_3.setEnabled(True)
         self.ui.dq_max_3.setEnabled(True)
         self.ui.power.setEnabled(True)
@@ -122,8 +123,8 @@ class DQMQTabController(BaseTabController):
         figure.plot(time, ref_norm, pen=mkPen('b', width=2), name='Ref')
         figure.plot(time, diff, pen=mkPen('k', width=3), name='Diff')
         figure.plot(time, fitted_curve, pen=mkPen('m', width=3), name='fitting')
-        self.ui.pushButton_DQMQ_2.setEnabled(True)
-        self.ui.pushButton_DQMQ_3.setEnabled(True)
+        # self.ui.pushButton_DQMQ_2.setEnabled(True)
+        # self.ui.pushButton_DQMQ_3.setEnabled(True)
 
     def plot_nDQ(self):
         file_path = self._get_current_file()
@@ -382,7 +383,7 @@ class DQMQTabController(BaseTabController):
     def _plot_dres_result(self, arrays, dres_result):
         dres_figure = self.ui.DQMQ_Widget_DRes
         dres_figure.clear()
-        dres_figure.addLegend()
+
         dres_figure.plot(
             dres_result["D_plot"],
             dres_result["P"],
