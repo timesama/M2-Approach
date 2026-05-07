@@ -2294,7 +2294,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <item>
                          <widget class="QDoubleSpinBox" name="T1T2_DoubleSpinBox_InitialTau2">
                           <property name="enabled">
-                           <bool>false</bool>
+                           <bool>true</bool>
                           </property>
                           <property name="prefix">
                            <string>t2 </string>
@@ -2319,7 +2319,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <item>
                          <widget class="QDoubleSpinBox" name="T1T2_DoubleSpinBox_InitialTau3">
                           <property name="enabled">
-                           <bool>false</bool>
+                           <bool>true</bool>
                           </property>
                           <property name="prefix">
                            <string>t3 </string>
