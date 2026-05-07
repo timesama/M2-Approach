@@ -232,9 +232,9 @@ class T1T2TabController(BaseTabController):
         return preserved_x_axis
 
     def change_exponential_order(self):
-        self.ui.T1T2_DoubleSpinBox_InitialTau1.setEnabled(True)
-        self.ui.T1T2_DoubleSpinBox_InitialTau2.setEnabled(not self.ui.T1T2_Button_FitOneExp.isChecked())
-        self.ui.T1T2_DoubleSpinBox_InitialTau3.setEnabled(self.ui.T1T2_Button_FitThreeExp.isChecked())
+        # self.ui.T1T2_DoubleSpinBox_InitialTau1.setEnabled(True)
+        # self.ui.T1T2_DoubleSpinBox_InitialTau2.setEnabled(not self.ui.T1T2_Button_FitOneExp.isChecked())
+        # self.ui.T1T2_DoubleSpinBox_InitialTau3.setEnabled(self.ui.T1T2_Button_FitThreeExp.isChecked())
         self.calculate_relaxation_time(show_warning=True)
 
     def calculate_relaxation_time_from_user(self):

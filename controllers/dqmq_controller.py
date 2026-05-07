@@ -73,11 +73,12 @@ class DQMQTabController(BaseTabController):
         return figure
 
     def _enable_file_actions(self):
-        self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
-        self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
-        self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
-        self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
-        self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
+        pass
+        # self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
+        # self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
+        # self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
+        # self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
+        # self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
 
     def _read_raw_data_from_file(self, file_path):
         try:

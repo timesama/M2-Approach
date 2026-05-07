@@ -224,7 +224,7 @@ class MainWindow(QMainWindow):
 
     def update_file(self):
         """Load the selected SE/DQ file into the shared FID/FFT preview widgets."""
-        self.ui.btn_Phasing.setEnabled(True)
+        # self.ui.btn_Phasing.setEnabled(True)
 
         filename = self.ui.comboBox_4.currentText()
         if self.tab == 'SE':
@@ -467,9 +467,9 @@ class MainWindow(QMainWindow):
             files = []
             fileNames = dlg.selectedFiles()
             files.extend(fileNames)
-            self.ui.btn_Start.setEnabled(True)
+            # self.ui.btn_Start.setEnabled(True)
             self.ui.btn_Start.setStyleSheet("background-color: green")
-            self.ui.btn_Add.setEnabled(True)
+            # self.ui.btn_Add.setEnabled(True)
 
         if self.tab == 'SE':
             self.selected_files = files
@@ -490,9 +490,9 @@ class MainWindow(QMainWindow):
         if dlg.exec():
             fileNames = dlg.selectedFiles()
             files.extend(fileNames)
-            self.ui.btn_Start.setEnabled(True)
+            # self.ui.btn_Start.setEnabled(True)
             self.ui.btn_Start.setStyleSheet("background-color: green")
-            self.ui.btn_Add.setEnabled(True)
+            # self.ui.btn_Add.setEnabled(True)
 
         if self.tab == 'SE':
             self.selected_files = files
@@ -663,21 +663,23 @@ class MainWindow(QMainWindow):
             self.ui.BOX_up.setHidden(False)
 
     def disable_buttons(self):
-        self.ui.btn_Start.setEnabled(False)
-        self.ui.btn_Save.setEnabled(False)
-        self.ui.btn_Phasing.setEnabled(False)
-        self.ui.btn_Add.setEnabled(False)
-        self.ui.DQMQ_Button_PlotOriginal.setEnabled(False)
-        self.ui.DQMQ_Button_PlotNorm.setEnabled(False)
+        pass
+        # self.ui.btn_Start.setEnabled(False)
+        # self.ui.btn_Save.setEnabled(False)
+        # self.ui.btn_Phasing.setEnabled(False)
+        # self.ui.btn_Add.setEnabled(False)
+        # self.ui.DQMQ_Button_PlotOriginal.setEnabled(False)
+        # self.ui.DQMQ_Button_PlotNorm.setEnabled(False)
 
     def enable_buttons(self):
-        self.ui.btn_SelectFiles.setEnabled(True)
-        self.ui.btn_Start.setEnabled(True)
-        self.ui.btn_Save.setEnabled(True)
-        self.ui.radioButton.setEnabled(True)
-        self.ui.btn_Load.setEnabled(True)
-        self.ui.comboBox_4.setEnabled(True)
-        self.ui.btn_Add.setEnabled(True)
+        pass
+        # self.ui.btn_SelectFiles.setEnabled(True)
+        # self.ui.btn_Start.setEnabled(True)
+        # self.ui.btn_Save.setEnabled(True)
+        # self.ui.radioButton.setEnabled(True)
+        # self.ui.btn_Load.setEnabled(True)
+        # self.ui.comboBox_4.setEnabled(True)
+        # self.ui.btn_Add.setEnabled(True)
 
     def default_folder(self):
         """Store the Settings tab default folder in the user registry."""
@@ -863,7 +865,7 @@ class MainWindow(QMainWindow):
     def load_data(self):
         """Load a saved results table for the active tab."""
         dlg = OpenFilesDialog(self)
-        self.ui.btn_Save.setEnabled(False)
+        # self.ui.btn_Save.setEnabled(False)
         if dlg.exec():
             tableName = dlg.selectedFiles()
             self.load_table_from_csv(tableName)
@@ -894,8 +896,8 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "File missing", f"Didn't find file list, only the tabular result is available", QMessageBox.Ok)
             files = None
             phased = {}
-            self.ui.comboBox_4.setEnabled(False)
-            self.ui.btn_Phasing.setEnabled(False)
+            # self.ui.comboBox_4.setEnabled(False)
+            # self.ui.btn_Phasing.setEnabled(False)
 
         try:
             phased_path = os.path.splitext(file_path)[0] + '_phased.json'
@@ -962,11 +964,11 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             self.t1t2_controller.update_T12_table()
         elif self.tab == 'DQMQ':
-            self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
-            self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
-            self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
-            self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
-            self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
+            # self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
+            # self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
+            # self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
+            # self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
+            # self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
             self.dqmq_controller.plot_nDQ_on_Load()
 
         elif self.tab == 'GS':

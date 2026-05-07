@@ -54,10 +54,12 @@ class GeneralSEDQController(BaseTabController):
             if self.ui.Settings_CheckBox_Baseline.isChecked() and mw.selected_files_empty == []:
                 self.open_select_dialog_baseline()
 
-            mw.disable_buttons()
-            self.ui.btn_SelectFiles.setEnabled(False)
-            self.ui.btn_Load.setEnabled(False)
-            self.ui.radioButton.setEnabled(False)
+            # mw.disable_buttons()
+
+            # self.ui.btn_SelectFiles.setEnabled(False)
+            # self.ui.btn_Load.setEnabled(False)
+            # self.ui.radioButton.setEnabled(False)
+
             self.ui.comboBox_4.setCurrentIndex(-1)
             if self.ui.Settings_CheckBox_SmoothFft.isChecked():
                 mw.window_array = np.linspace(
@@ -101,12 +103,12 @@ class GeneralSEDQController(BaseTabController):
         )
 
         files.remove(file_path)
-        self.ui.btn_SelectFiles.setEnabled(True)
+        # self.ui.btn_SelectFiles.setEnabled(True)
         self.ui.btn_Start.setStyleSheet("background-color: none")
         self.ui.FidWidget.clear()
         self.ui.FFTWidget.clear()
-        self.ui.btn_Phasing.setEnabled(False)
-        mw.enable_buttons()
+        # self.ui.btn_Phasing.setEnabled(False)
+        # mw.enable_buttons()
 
     def update_legends_and_dq_graphs(self):
         self.parent.enable_buttons()
@@ -240,13 +242,13 @@ class GeneralSEDQController(BaseTabController):
         dlg.setWindowTitle("Select Glycerol Files")
         if dlg.exec():
             self.parent.selected_files_gly.extend(dlg.selectedFiles())
-        self.ui.btn_Start.setEnabled(True)
-        self.ui.btn_Add.setEnabled(True)
+        # self.ui.btn_Start.setEnabled(True)
+        # self.ui.btn_Add.setEnabled(True)
 
     def open_select_dialog_baseline(self):
         dlg = OpenFilesDialog(self.parent)
         dlg.setWindowTitle("Select Baseline Files")
         if dlg.exec():
             self.parent.selected_files_empty.extend(dlg.selectedFiles())
-        self.ui.btn_Start.setEnabled(True)
-        self.ui.btn_Add.setEnabled(True)
+        # self.ui.btn_Start.setEnabled(True)
+        # self.ui.btn_Add.setEnabled(True)
