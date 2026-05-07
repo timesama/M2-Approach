@@ -232,6 +232,20 @@ class GeneralSEDQController(BaseTabController):
         phasing_manual_module.Frequency = self.state.spectrum.frequency
         phasing_manual_module.Re_spectra = self.state.spectrum.re_spectra
         phasing_manual_module.Im_spectra = self.state.spectrum.im_spectra
+
+        if(
+            self.state.spectrum.frequency is None
+            or self.state.spectrum.re_spectra is None
+            or self.state.spectrum.im_spectra is None
+        ):
+            QMessageBox.warning(
+            self.parent,
+            "No spectrum data",
+            "Load data before opening manual phasing.",
+            QMessageBox.Ok,
+            )
+            return
+
         mw.phasing_manual_window = PhasingManual()
         mw.phasing_manual_window.read_data()
         mw.phasing_manual_window.show()

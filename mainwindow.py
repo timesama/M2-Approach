@@ -794,18 +794,34 @@ class MainWindow(QMainWindow):
             table = self.ui.SE_Table_Data
             files = self.selected_files
             default_name = 'SE_'
+            if table.rowCount() == 0 or not files:
+                QMessageBox.warning(
+                    self,
+                    "No data loaded",
+                    "Load data files first.",
+                    QMessageBox.Ok,
+                )
+                return
         elif self.tab == 'DQ':
             table = self.ui.DQ_Table_Data
             files = self.selected_files_DQ_single
             default_name = 'Table_DQ_' + os.path.split(os.path.dirname(files[0]))[1]
+            if table.rowCount() == 0 or not files:
+                QMessageBox.warning(
+                    self,
+                    "No DQ data loaded",
+                    "Load DQ data files first.",
+                    QMessageBox.Ok,
+                )
+                return
         elif self.tab == 'DQ_Temp':
             table = self.ui.DQTemp_Table_Results
             files = self.selected_DQfiles
             if table.rowCount() == 0 or not files:
                 QMessageBox.warning(
                     self,
-                    "No DQ temperature data",
-                    "Load DQ temperature comparison files first.",
+                    "No DQ data",
+                    "Load DQ comparison files first.",
                     QMessageBox.Ok,
                 )
                 return
@@ -850,6 +866,16 @@ class MainWindow(QMainWindow):
                 default_name = 'DQMQ_data_' + match.group(1)
             except (IndexError, AttributeError, TypeError):
                 default_name = 'DQMQ_data_'
+
+            if table.rowCount() == 0 or not files:
+                QMessageBox.warning(
+                    self,
+                    "No DQMQ data",
+                    "Load DQMQ file first.",
+                    QMessageBox.Ok,
+                )
+                return
+
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
         if self.tab == 'DQMQ' and dialog.last_saved_file_path:
