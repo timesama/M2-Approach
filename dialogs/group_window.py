@@ -1,6 +1,9 @@
+import logging
+
 from PySide6.QtWidgets import QDialog, QTableWidgetItem
 from ui_GroupForm import Ui_GroupForm
 
+logger = logging.getLogger(__name__)
 
 class GroupWindow(QDialog):
     def __init__(self, parent=None, data=None, array=None):
@@ -17,10 +20,11 @@ class GroupWindow(QDialog):
         self.group_dict = {}
 
     def done_clicked(self):
-        print("Done clicked. Sending data back...")
-        self.accept()  # This will close the dialog and return QDialog.Accepted
+        """Accept the dialog and expose the grouped rows to the caller."""
+        self.accept()
 
     def copy_table_data(self, source_table):
+        """Copy source table contents and append an editable Group column."""
         rows = source_table.rowCount()
         cols = source_table.columnCount()
 
@@ -45,11 +49,12 @@ class GroupWindow(QDialog):
         self.ui.tableWidget.setSortingEnabled(True)
 
     def create_group(self):
+        """Assign the selected table rows to the next group id."""
         selected_rows = set()
         for item in self.ui.tableWidget.selectedItems():
             selected_rows.add(item.row())
         if not selected_rows:
-            print("No rows selected.")
+            logger.info("No rows selected for grouping.")
             return
         selected_rows = sorted(selected_rows)
 
@@ -66,6 +71,7 @@ class GroupWindow(QDialog):
         self.group_counter += 1
 
     def clear(self):
+        """Clear all group assignments from the dialog table."""
         self.group_counter = 1
         self.group_dict = {}
 

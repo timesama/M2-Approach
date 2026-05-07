@@ -32,11 +32,11 @@ class SETabController(BaseTabController):
         match = re.search(r".*_(-?\s*\d+\.?\d*).*.dat", filename)
         temperature = match.group(1) if match else "0"
 
-        short_from = self.ui.SE_DoubleSpinBox_SCShortStart.value() * 2
-        short_to = self.ui.SE_DoubleSpinBox_SCShortEnd.value() * 2
-        long_from = self.ui.SE_DoubleSpinBox_SCLongStart.value() * 2
-        long_to = self.ui.SE_DoubleSpinBox_SCLongEnd.value() * 2
-        absolute = self.ui.SE_RadioButton_SCAbsolute.isChecked()
+        short_from = self.ui.Settings_DoubleSpinBox_SCShortStart.value() * 2
+        short_to = self.ui.Settings_DoubleSpinBox_SCShortEnd.value() * 2
+        long_from = self.ui.Settings_DoubleSpinBox_SCLongStart.value() * 2
+        long_to = self.ui.Settings_DoubleSpinBox_SCLongEnd.value() * 2
+        absolute = self.ui.Settings_RadioButton_SCAbsolute.isChecked()
 
         times = [int(short_from), int(short_to), int(long_from), int(long_to)]
         sfc = Cal.calculate_SC(amp, times, absolute)

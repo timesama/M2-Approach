@@ -42,16 +42,16 @@ class GeneralSEDQController(BaseTabController):
             logger.info("%s analysis started: %d files", mw.tab, len(files))
             logger.info(
                 "Options - glycerol:%s baseline:%s long_component:%s smoothing:%s",
-                self.ui.checkBox_glycerol.isChecked(),
-                self.ui.checkBox_baseline.isChecked(),
-                self.ui.checkBox_long_component.isChecked(),
-                self.ui.checkBox_Smooth.isChecked(),
+                self.ui.Settings_CheckBox_Glycerol.isChecked(),
+                self.ui.Settings_CheckBox_Baseline.isChecked(),
+                self.ui.Settings_CheckBox_LongComponent.isChecked(),
+                self.ui.Settings_CheckBox_SmoothFft.isChecked(),
             )
 
-            if self.ui.checkBox_glycerol.isChecked() and mw.selected_files_gly == []:
+            if self.ui.Settings_CheckBox_Glycerol.isChecked() and mw.selected_files_gly == []:
                 self.open_select_dialog_glycerol()
 
-            if self.ui.checkBox_baseline.isChecked() and mw.selected_files_empty == []:
+            if self.ui.Settings_CheckBox_Baseline.isChecked() and mw.selected_files_empty == []:
                 self.open_select_dialog_baseline()
 
             mw.disable_buttons()
@@ -59,10 +59,10 @@ class GeneralSEDQController(BaseTabController):
             self.ui.btn_Load.setEnabled(False)
             self.ui.radioButton.setEnabled(False)
             self.ui.comboBox_4.setCurrentIndex(-1)
-            if self.ui.checkBox_Smooth.isChecked():
+            if self.ui.Settings_CheckBox_SmoothFft.isChecked():
                 mw.window_array = np.linspace(
-                    self.ui.SmoothWindowFrom.value(),
-                    self.ui.SmoothWindowTo.value(),
+                    self.ui.Settings_DoubleSpinBox_SmoothWindowFrom.value(),
+                    self.ui.Settings_DoubleSpinBox_SmoothWindowTo.value(),
                     len(files),
                     dtype=np.int32,
                 )
@@ -79,8 +79,8 @@ class GeneralSEDQController(BaseTabController):
                 )
 
                 try:
-                    file_path_gly = mw.selected_files_gly[i - 1] if self.ui.checkBox_glycerol.isChecked() else []
-                    file_path_empty = mw.selected_files_empty[i - 1] if self.ui.checkBox_baseline.isChecked() else []
+                    file_path_gly = mw.selected_files_gly[i - 1] if self.ui.Settings_CheckBox_Glycerol.isChecked() else []
+                    file_path_empty = mw.selected_files_empty[i - 1] if self.ui.Settings_CheckBox_Baseline.isChecked() else []
                     self.process_file_data(file_path, file_path_gly, file_path_empty, i)
                 except Exception:
                     self.analysis_error(file_path, files)
@@ -117,12 +117,12 @@ class GeneralSEDQController(BaseTabController):
     def process_file_data(self, file_path, file_path_gly, file_path_empty, i):
         mw = self.parent
         filename = os.path.basename(file_path)
-        subtract = self.ui.checkBox_baseline.isChecked()
+        subtract = self.ui.Settings_CheckBox_Baseline.isChecked()
         data = np.loadtxt(file_path)
         x, y, z = data[:, 0], data[:, 1], data[:, 2]
         time, re_signal, im_signal = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
 
-        if self.ui.checkBox_glycerol.isChecked():
+        if self.ui.Settings_CheckBox_Glycerol.isChecked():
             time_reference, re_reference, im_reference = Cal.analysis_time_domain(file_path_gly, [], False)
             time, re_signal, im_signal = Cal.magnet_inhomogenity_correction(
                 time,
@@ -133,7 +133,7 @@ class GeneralSEDQController(BaseTabController):
                 im_reference,
             )
 
-        if self.ui.checkBox_long_component.isChecked():
+        if self.ui.Settings_CheckBox_LongComponent.isChecked():
             time, re_signal, im_signal = Cal.subtract_long_component(time, re_signal, im_signal)
 
         amplitude = Cal._calculate_amplitude(re_signal, im_signal)

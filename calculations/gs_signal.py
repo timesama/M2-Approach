@@ -10,12 +10,14 @@ X_AXIS_PATTERN = r"_([0-9]+)\.dat$"
 
 
 def clean_tabbed_line(line):
+    """Collapse repeated tabs from Spin Diffusion text rows."""
     while "\t\t" in line:
         line = line.replace("\t\t", "\t")
     return line.strip()
 
 
 def x_axis_from_filename(file_path, fallback):
+    """Extract the x-axis value from a GS filename or use a fallback row."""
     current_file = os.path.basename(file_path)
     match = re.search(X_AXIS_PATTERN, current_file)
     if match:
@@ -25,6 +27,7 @@ def x_axis_from_filename(file_path, fallback):
 
 
 def read_spin_diffusion_file(file_path):
+    """Read time and short/medium/long signals from a GS data file."""
     sqrt_time = []
     short_signal = []
     medium_signal = []
@@ -44,6 +47,7 @@ def read_spin_diffusion_file(file_path):
 
 
 def transformed_time(time_values, use_sqrt_time):
+    """Return the raw or square-root transformed GS time axis."""
     time_array = np.array(time_values).flatten()
     if use_sqrt_time:
         return np.sqrt(time_array)
@@ -52,6 +56,7 @@ def transformed_time(time_values, use_sqrt_time):
 
 
 def signal_arrays(dictionary_entry):
+    """Convert stored GS signal lists into NumPy arrays by source."""
     return {
         "short": np.array(dictionary_entry["short"]).flatten(),
         "medium": np.array(dictionary_entry["medium"]).flatten(),
@@ -60,10 +65,12 @@ def signal_arrays(dictionary_entry):
 
 
 def selected_signal(signals, source):
+    """Return the signal array selected by the GS source radio buttons."""
     return signals[source]
 
 
 def fit_range(time_values, signal_values, fit_from, fit_to):
+    """Slice GS data to the nearest requested fit bounds."""
     start_index = (np.abs(time_values - fit_from)).argmin()
     end_index = (np.abs(time_values - fit_to)).argmin() + 1
     fit_time = time_values[start_index:end_index]
@@ -72,10 +79,12 @@ def fit_range(time_values, signal_values, fit_from, fit_to):
 
 
 def fit_spin_diffusion(time_values, signal_values, beta, r2, m2):
+    """Fit the GS line and calculate the domain size from it."""
     fit_time_curve, fit_signal_curve, sqrt_time, r2_value = Cal.linear_fit_GS(time_values, signal_values)
     diffusion_distance = Cal.calculate_domain_size(sqrt_time, beta, r2, m2)
     return fit_time_curve, fit_signal_curve, sqrt_time, r2_value, diffusion_distance
 
 
 def is_valid_fit_range(time_values, fit_time, fit_signal):
+    """Check that the selected GS fit range has enough points."""
     return len(time_values) > 0 and len(fit_time) >= 2 and len(fit_signal) >= 2

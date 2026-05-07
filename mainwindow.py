@@ -1,44 +1,37 @@
 # This Python file uses the following encoding: utf-8
-import sys, os, re, csv, requests, winreg
-from PySide6.QtWidgets import QWidget,QTableWidgetItem, QTableWidget, QApplication, QMainWindow, QFileDialog, QTableWidgetItem, QInputDialog, QDialog, QMessageBox, QScrollArea
-from PySide6.QtCore import QCoreApplication, Signal, QEvent, Qt
-from PySide6.QtGui import QColor, QIcon, QKeySequence
-import numpy as np
+import csv
 import json
-from scipy.optimize import curve_fit
-from scipy.signal import savgol_filter
+import logging
+import os
+import re
+import winreg
 from webbrowser import open as open_application
-from itertools import islice
+
+import numpy as np
 import pyqtgraph as pg
-from pyqtgraph import mkPen, ColorMap, mkColor, InfiniteLine
 import pyqtgraph.exporters
+import requests
+from PySide6.QtCore import QCoreApplication, Qt
+from PySide6.QtGui import QColor, QIcon
+from PySide6.QtWidgets import QApplication, QFileDialog, QDialog, QInputDialog, QMainWindow, QMessageBox, QScrollArea, QTableWidgetItem
+from pyqtgraph import mkColor, mkPen
 from ui_Form import Ui_NMR
-import Calculator as Cal # Mathematical procedures
 from controllers import (
     SETabController, DQTabController, DQTempTabController,
     T1T2TabController, DQMQTabController, GSTabController, GeneralSEDQController
 )
 from dialogs.open_files_dialog import OpenFilesDialog
 import dialogs.open_files_dialog as open_files_dialog_module
-from dialogs.notification_dialog import NotificationDialog
 from dialogs.group_window import GroupWindow
 from dialogs.save_files_dialog import SaveFilesDialog
-from dialogs.phasing_manual import PhasingManual
 from widgets.table_copy_enabler import TableCopyEnabler
 from app_state import AppState
 from controllers.table_columns import T1Columns, GSColumns, DQTempColumns
 from utils.ui_busy import busy_cursor
-import logging
-
 logger = logging.getLogger(__name__)
 
 pg.CONFIG_OPTIONS['background'] = 'w'
 pg.CONFIG_OPTIONS['foreground'] = 'k'
-
-# IF you have ever wondered how bad code in Python looks like:
-# here is the generous example of the masterpiece in bad coding.
-# but it works and I don't care
-
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -98,9 +91,8 @@ class MainWindow(QMainWindow):
 
         self.state()
 
-        # Connect buttons to their respective slots
-        self.ui.pushButton_DefaultFolder.clicked.connect(self.default_folder)
-        self.ui.commandLinkButton.clicked.connect(self.open_url)
+        self.ui.Settings_Button_DefaultFolder.clicked.connect(self.default_folder)
+        self.ui.Settings_Button_OpenProjectPage.clicked.connect(self.open_url)
         self.check_for_updates()
 
         self.ui.tabWidget.currentChanged.connect(self.state)
@@ -203,16 +195,15 @@ class MainWindow(QMainWindow):
         ]
 
     def check_for_updates(self):
+        """Check GitHub releases and prompt when a newer app version exists."""
         current_version = '0.2.2'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
-            # Make a GET request to fetch the latest release data
             response = requests.get(url)
-            response.raise_for_status()  # Raise an error for bad status codes
+            response.raise_for_status()
             latest_release = response.json()
             latest_version = latest_release['tag_name']
 
-            # Compare the versions
             if latest_version != current_version:
                 msg = QMessageBox(self)
                 msg.setIcon(QMessageBox.Information)
@@ -225,12 +216,14 @@ class MainWindow(QMainWindow):
                     self.open_url()
 
         except requests.RequestException as e:
-            print(f"Failed to check for updates: {e}")
+            logger.warning("Failed to check for updates: %s", e)
 
     def open_url(self):
+        """Open the GitHub releases page used by the Settings tab."""
         open_application('https://github.com/timesama/M2-Approach/releases')
 
-    def update_file(self): # It detects the file ny its position in the table - should not be so. Take the filename from the dictionary
+    def update_file(self):
+        """Load the selected SE/DQ file into the shared FID/FFT preview widgets."""
         self.ui.btn_Phasing.setEnabled(True)
 
         filename = self.ui.comboBox_4.currentText()
@@ -245,22 +238,22 @@ class MainWindow(QMainWindow):
         except:
             return
 
-        if self.ui.checkBox_glycerol.isChecked() and self.ui.checkBox_baseline.isChecked():
+        if self.ui.Settings_CheckBox_Glycerol.isChecked() and self.ui.Settings_CheckBox_Baseline.isChecked():
             file_path_gly = self.selected_files_gly[i-1]
             file_path_empty = self.selected_files_empty[i-1]
-        elif self.ui.checkBox_glycerol.isChecked():
+        elif self.ui.Settings_CheckBox_Glycerol.isChecked():
             file_path_gly = self.selected_files_gly[i-1]
             file_path_empty=[]
-        elif self.ui.checkBox_baseline.isChecked():
+        elif self.ui.Settings_CheckBox_Baseline.isChecked():
             file_path_gly = []
             file_path_empty = self.selected_files_empty[i-1]
         else:
             file_path_gly = []
             file_path_empty = []
 
-        if self.ui.checkBox_Smooth.isChecked():
-            window_first_value = self.ui.SmoothWindowFrom.value()
-            window_last_value = self.ui.SmoothWindowTo.value()
+        if self.ui.Settings_CheckBox_SmoothFft.isChecked():
+            window_first_value = self.ui.Settings_DoubleSpinBox_SmoothWindowFrom.value()
+            window_last_value = self.ui.Settings_DoubleSpinBox_SmoothWindowTo.value()
             self.window_array = np.linspace(window_first_value, window_last_value, len(files), dtype=np.int32)
         else:
             self.window_array = np.array([])
@@ -270,7 +263,6 @@ class MainWindow(QMainWindow):
         except Exception:
             return
 
-        # Update general figures
         if self.tab == 'DQ':
             self.highlight_row(self.ui.DQ_Table_Data, i)
             self.dq_controller.update_graphs()
@@ -278,9 +270,9 @@ class MainWindow(QMainWindow):
             self.highlight_row(self.ui.SE_Table_Data, i)
             self.update_se_graphs()
 
-        #TODO sometime I should add the highlight of the certain point on graph, but I am too lazy
 
     def clear_list(self):
+        """Clear data, plots, and file lists for the active tab."""
         if self.tab == 'SE':
             self.app_state.dq_files = []
             self.app_state.dqmq_files = []
@@ -333,8 +325,7 @@ class MainWindow(QMainWindow):
             self.ui.GS_PlotWidget_SqrtTime.clear()
             self.group_data_SD = {}
         elif self.tab == 'Extra':
-            pass
-
+            return
 
         if self.tab == 'T1T2':
             combobox = self.ui.T1T2_ComboBox_ChooseFile
@@ -350,7 +341,7 @@ class MainWindow(QMainWindow):
         self.window_array = np.array([])
 
     def delete_row(self):
-
+        """Delete the selected row and keep the active tab file list in sync."""
         if self.tab == 'SE':
             table = self.ui.SE_Table_Data
             combobox = self.ui.comboBox_4
@@ -436,6 +427,7 @@ class MainWindow(QMainWindow):
         graph_widget.setTitle(title)
 
     def open_select_comparison_files_dialog(self):
+        """Open the multi/single-file picker for comparison-style tabs."""
         if self.tab == 'DQMQ':
             open_files_dialog_module.State_multiple_files = False
         else:
@@ -466,6 +458,7 @@ class MainWindow(QMainWindow):
                 self.dqmq_controller.dq_mq_analysis()
 
     def open_select_dialog(self):
+        """Open the primary SE/DQ file picker."""
         open_files_dialog_module.State_multiple_files = True
         dlg = OpenFilesDialog(self)
 
@@ -485,6 +478,7 @@ class MainWindow(QMainWindow):
             self.app_state.dq_files = files
 
     def add_select_dialog(self):
+        """Append files to the active SE/DQ selection."""
         open_files_dialog_module.State_multiple_files = True
         dlg = OpenFilesDialog(self)
 
@@ -507,6 +501,7 @@ class MainWindow(QMainWindow):
             self.app_state.dq_files = files
 
     def open_group_window(self):
+        """Open the grouping dialog for tabs that support grouped plots."""
         self.group_window = GroupWindow()
 
         if self.tab == 'SE':
@@ -537,9 +532,9 @@ class MainWindow(QMainWindow):
 
         if self.group_window.exec_() == QDialog.Accepted:
             data = self.group_window.group_dict
-            # print("Group data received:", data)
         else:
-            print("Group window was cancelled.")
+            logger.info("Group window was cancelled.")
+            return
 
         if self.tab == 'SE':
             self.group_data_SE = data
@@ -555,6 +550,7 @@ class MainWindow(QMainWindow):
 
 
     def _connect_dqmq_workflow_signals(self):
+        """Connect DQMQ edit signals without recalculating while users type."""
         analysis_parameter_widgets = [
             "DQMQ_DoubleSpinBox_FitFrom",
             "DQMQ_DoubleSpinBox_FitTo",
@@ -622,6 +618,7 @@ class MainWindow(QMainWindow):
         )
 
     def _connect_dqmq_signal(self, widget_name, signal_name, slot):
+        """Connect a DQMQ widget signal when the generated UI exposes it."""
         widget = getattr(self.ui, widget_name, None)
         if widget is None:
             logger.warning(
@@ -642,6 +639,7 @@ class MainWindow(QMainWindow):
         signal.connect(lambda *args: slot())
 
     def state(self):
+        """Update the cached tab name when the user changes tabs."""
         current_tab_index =  self.ui.tabWidget.currentIndex()
 
         if current_tab_index == 0:
@@ -682,6 +680,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_Add.setEnabled(True)
 
     def default_folder(self):
+        """Store the Settings tab default folder in the user registry."""
         folder_path = QFileDialog.getExistingDirectory(self, "Select Default Directory")
 
         if folder_path:
@@ -689,11 +688,12 @@ class MainWindow(QMainWindow):
                 key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\MyApp")
                 winreg.SetValueEx(key, "SelectedFolder", 0, winreg.REG_SZ, folder_path)
                 winreg.CloseKey(key)
-                print(f"Default folder saved to registry: {folder_path}")
+                logger.info("Default folder saved to registry: %s", folder_path)
             except Exception as e:
-                print(f"Failed to save the default folder to the registry: {e}")
+                logger.warning("Failed to save the default folder to the registry: %s", e)
 
     def renameSection(self, table, index):
+        """Rename a table header and mirror it to the linked x-axis label."""
         current_header = table.horizontalHeaderItem(index).text()
         new_header, ok = QInputDialog.getText(self, "Rename Column", 
                                             f"Enter new name for the column '{current_header}':")
@@ -701,15 +701,8 @@ class MainWindow(QMainWindow):
             table.horizontalHeaderItem(index).setText(new_header)
             self.update_xaxis(table, index)
 
-    def extract_info(self, pattern):
-        if pattern:
-            info = pattern.group(1)
-        else:
-            info = '0'
-        return info
-
     def update_xaxis(self, table, index):
-
+        """Update the active comparison plot x-axis label from a table header."""
         if self.tab == 'SE':
             figure = self.ui.SE_PlotWidget_Main
         elif self.tab == 'T1T2':
@@ -725,6 +718,7 @@ class MainWindow(QMainWindow):
         figure.getAxis('bottom').setLabel(name)
 
     def _apply_table_header_order(self):
+        """Restore table headers that Qt Designer does not keep in controller order."""
         self.ui.T1T2_Table_Results.setHorizontalHeaderLabels([
             "X axis", "tau 1", "A 1", "tau 2", "A 2", "tau 3", "A 3", "File name", "Folder"
         ])
@@ -739,20 +733,19 @@ class MainWindow(QMainWindow):
         self.ui.GS_Table_Results.resizeColumnsToContents()
         self.ui.DQTemp_Table_Results.resizeColumnsToContents()
 
-    # Working with graphs
     def update_graphs(self, x, y1, y2, y3, graph):
+        """Draw the shared raw time/frequency preview curves."""
         graph.clear()
         graph.plot(x, y1, pen=mkPen('k', width=3))
         graph.plot(x, y2, pen=mkPen('r', width=2))
         graph.plot(x, y3, pen=mkPen('b', width=2))
 
-    # Working with SE graphs
     def update_se_graphs(self):
+        """Refresh the SE result plot from the SE controller."""
         self.se_controller.update_graphs()
 
-
     def write_collective_dictionary(self, dictionary, save_path_name):
-        # file = name of the file
+        """Write dictionary list values as aligned CSV columns."""
         data = dictionary
         headers = data.keys()
 
@@ -794,6 +787,7 @@ class MainWindow(QMainWindow):
 
     # Save and load data
     def save_data(self):
+        """Save the active tab results table and associated source file list."""
         if self.tab == 'SE':
             table = self.ui.SE_Table_Data
             files = self.selected_files
@@ -867,6 +861,7 @@ class MainWindow(QMainWindow):
 
 
     def load_data(self):
+        """Load a saved results table for the active tab."""
         dlg = OpenFilesDialog(self)
         self.ui.btn_Save.setEnabled(False)
         if dlg.exec():
@@ -978,6 +973,7 @@ class MainWindow(QMainWindow):
             self.gs_controller.update_GS_table()
 
     def _warn_old_table_format(self):
+        """Warn when a saved table appears to use an obsolete column order."""
         QMessageBox.warning(
             self,
             "Old saved file format",
@@ -1016,6 +1012,7 @@ class MainWindow(QMainWindow):
         return ('/' in value) or ('\\' in value) or value.endswith(('.txt', '.dat', '.csv'))
 
     def save_figures(self, file_path, variable):
+        """Export FID/FFT preview images and CSV data beside source files."""
         parent_folder = os.path.dirname(file_path)
         result_folder = os.path.join(parent_folder, 'Result')
         os.makedirs(result_folder, exist_ok=True)
@@ -1059,50 +1056,3 @@ class MainWindow(QMainWindow):
             writer = csv.writer(csvfile)
             for xi, y2i, y3i in zip(x, y2, y3):
                 writer.writerow([xi, y2i, y3i])
-
-    def load_data_and_check_validity(self, file_path):
-        try:
-            data = np.loadtxt(file_path)
-            filename = os.path.basename(file_path)
-            # Check that there are 3 columns
-            if data.shape[1] != 3:
-                QMessageBox.warning(self, "Invalid Data Format", f"I can't read the {filename} file, it should have 3 columns exactly, deleting it.", QMessageBox.Ok)
-                self.ui.btn_SelectFiles.setEnabled(True)
-                self.ui.radioButton.setEnabled(True)
-
-                if self.tab =='SE':
-                    files = self.selected_files
-                else:
-                    files = self.selected_files_DQ_single
-                files.clear()
-                return False
-            return True
-
-        except:
-            QMessageBox.warning(self, "Invalid Data", f"I can't read the {filename} file, deleting it.", QMessageBox.Ok)
-            self.selected_files.remove(file_path)
-            self.ui.btn_Start.setStyleSheet("background-color: none")
-
-            if self.selected_files == []:
-                self.disable_buttons()
-                return False
-            else:
-                return False
-
-    # Math procedures
-    def FFT_handmade(self, Fid, Time, Freq):
-        N = len(Freq)
-        Fur = np.zeros(N, dtype=complex)
-
-
-        cos_values = np.cos(2 * np.pi * Time[:, None] * Freq)
-        sin_values = np.sin(2 * np.pi * Time[:, None] * Freq)
-
-        for i in range(N):
-            c = i + 1
-            progress = round((c / N) * 100, 3)
-            self.ui.progressBar.setValue(progress)
-
-            Fur[i] = np.sum(Fid * (cos_values[:, i] - 1j * sin_values[:, i]))
-        QCoreApplication.processEvents()
-        return Fur

@@ -10,6 +10,7 @@ DEFAULT_FILTER_TO = 20
 
 
 def calculate_linearization(dq_time, t2, dq, time_min, time_max):
+    """Build DQ linearization arrays for the selected DQ time window."""
     selected_mask = (dq_time >= time_min) & (dq_time <= time_max)
     selected_time = dq_time[selected_mask]
 
@@ -41,6 +42,7 @@ def calculate_linearization(dq_time, t2, dq, time_min, time_max):
 
 
 def prepare_t2_axis(t2_linearized, use_log_scale):
+    """Return the T2 axis values and label for linear/log plotting."""
     if use_log_scale:
         return np.log10(t2_linearized), "log(T₂*)"
 
@@ -48,6 +50,7 @@ def prepare_t2_axis(t2_linearized, use_log_scale):
 
 
 def fit_distribution(x_values, y_values, fit_function, use_log_scale):
+    """Fit the selected DQ distribution model without touching the UI."""
     if use_log_scale:
         x = np.log10(x_values)
         initial_params = [1, 1, 1, 0]

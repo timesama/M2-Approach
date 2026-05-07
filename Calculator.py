@@ -1,6 +1,6 @@
-# This is a distinct calculation part
-
 # This Python file uses the following encoding: utf-8
+
+import logging
 
 import numpy as np
 from scipy.optimize import curve_fit
@@ -8,12 +8,7 @@ from scipy.integrate import trapezoid
 from scipy.signal import savgol_filter
 from sympy import symbols, diff, solve
 
-# Math procedures
-
-# def moving_average(arr, window_size):
-#     kernel = np.ones(window_size) / window_size
-#     return np.convolve(arr, kernel, mode='valid')
-
+logger = logging.getLogger(__name__)
 
 def moving_average(arr, window_size):
     kernel = np.ones(window_size) / window_size
@@ -100,7 +95,7 @@ def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None
             smooth_nDQ = moving_average(new_nDQ, smoothing[2])
             nDQ[smooth_from_idx:smooth_to_idx] = smooth_nDQ
         except Exception as e:
-            print(f'couldnt proceed because {e}')
+            logger.warning("Could not smooth nDQ segment: %s", e)
 
 
     return Time, DQ_norm, Ref_norm, Diff, DQ_normal, Ref_normal, Time0, nDQ, fitted_curve, MQ_normal
@@ -173,7 +168,6 @@ def _reference_long_component(Time, Component, Amplitude_gly, coeff):
     # 3. Cut the ranges for fitting
     minimum = _find_nearest(Time, 80)
     maximum = _find_nearest(Time, 200)
-    # TODO: The user can adjust these numbers
 
     Time_range = Time[minimum:maximum]
     Component_n_range = Component_n[minimum:maximum]
@@ -256,11 +250,9 @@ def final_analysis_time_domain(Time, Real, Imaginary, number_of_points):
     # 6. Add zeros
     Tim, Fid = _add_zeros(Time, Re_ap, Im_ap, number_of_points)
 
-    #stophere
     return Tim, Fid
 
 def frequency_domain_analysis(FFT, Frequency):
-    # TODO: Not used!
     # 8. Simple baseline
     _, Re, _ = _simple_baseline_correction(FFT)
 
@@ -292,7 +284,7 @@ def _crop_time_zero(Time, Real, Imaginary):
             Time_cropped = Time[1:]
             Real_cropped = Real[1:]
             Imaginary_cropped = Imaginary[1:]
-            print('The file is corrupted, the zero time might be not exactly zero. This is the bug from Relax, I have nothing to do with that.')
+            logger.warning("Zero-time crop skipped because the input appears corrupted.")
 
         return Time_cropped, Real_cropped, Imaginary_cropped
     else:
@@ -313,7 +305,6 @@ def _time_domain_phase(Real, Imaginary):
         delta[phi] = np.mean(Ma_cut - Re_cut)
 
     idx = np.argmin(delta)
-    #print(idx)
 
     Re = Real * np.cos(np.deg2rad(idx)) - Imaginary * np.sin(np.deg2rad(idx))
     Im = Real * np.sin(np.deg2rad(idx)) + Imaginary * np.cos(np.deg2rad(idx))
@@ -368,7 +359,7 @@ def _adjust_frequency(Frequency, Re, Im):
         popt_fitting = fit_fft_with_voigh(Frequency, FFT)
         index_max = np.argmax(voigt(Frequency, *popt_fitting))
     except:
-        print('The fitting of the FFT to adjust the frequency couldnt be done. Using simple adjustemnt')
+        logger.warning("FFT frequency fit failed; using simple adjustment.")
         index_max = np.argmax(FFT)
 
     # Find index of zero (frequency)
@@ -376,11 +367,10 @@ def _adjust_frequency(Frequency, Re, Im):
 
     # Find difference
     delta_index = index_max - index_zero
-    # print(f'The max is {Frequency[index_max]}')
 
     # To avoid over correction
     if delta_index == 0:
-        print('The frequency was not adjusted, it is already perfect')
+        logger.info("Frequency adjustment skipped because the peak is already centered.")
         return Re, Im
 
     # Shift the spectra (amplitude) by the difference in indices
@@ -392,12 +382,6 @@ def _adjust_frequency(Frequency, Re, Im):
     # Define Real, Imaginary and Amplitude
     Re_shifted = np.real(Fid_shifted)
     Im_shifted = np.imag(Fid_shifted)
-
-    # plt.plot(Frequency, FFT, label="original")
-    # plt.plot(Frequency, FFT_shifted, label="shifted")
-    # plt.plot(Frequency, voigt(Frequency, *popt_fitting), 'r--', label="Gaussian fit")
-
-    # plt.show()
 
     return Re_shifted, Im_shifted
 
@@ -436,7 +420,7 @@ def _add_zeros(Time, Real, Imaginary, number_of_points):
     # private api
     while len(Time) > number_of_points:
         number_of_points = number_of_points*2
-        print(f'Increased the number of points for FFT to be {number_of_points}')
+        logger.info("Increased FFT point count to %s", number_of_points)
     length_diff = number_of_points - len(Time)
     amount_to_add = np.zeros(length_diff+1)
 
@@ -506,10 +490,6 @@ def _calculate_M2(FFT_real, Frequency):
 
     RealPart = np.real(FFT_real)
 
-    # print(len(RealPart))
-    # plt.plot(Frequency, RealPart)
-    # plt.show()
-
     # Take the integral of the REAL PART OF FFT by counts
     Integral = trapezoid(RealPart)
 
@@ -522,9 +502,6 @@ def _calculate_M2(FFT_real, Frequency):
     # Multiplication (the power ^n will give the nth moment (here it is n=2)
     Multiplication = (Frequency ** 2) * Fur_normalized
 
-    # plt.plot(Frequency, Multiplication)
-    # plt.show()
-
     # Calculate the integral of multiplication - the nth moment
     # The (2pi)^2 are the units to transform from rad/sec to Hz
     # ppbly it should be (2pi)^n for generalized moment calculation
@@ -532,7 +509,7 @@ def _calculate_M2(FFT_real, Frequency):
 
     # Check the validity
     if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
-        print('Apodization is wrong!')
+        logger.warning("Apodization check failed; multiplication baseline is non-zero.")
 
     if M2 < 0:
         M2 = 0
@@ -554,7 +531,7 @@ def calculate_SC(Amplitude, times, absolute):
             solid_content = (S-L)/S
         return solid_content
     except Exception as e:
-        print(f'Because {e} couldnt calculate SC, making it 0')
+        logger.warning("Could not calculate solid content; using 0: %s", e)
         solid_content = 0
 
 def calculate_DQ_intensity(Time, Amplitude):
@@ -600,7 +577,7 @@ def fit_exponent(Time, Signal, order, initial_parameters):
             p = initial_parameters
             popt_, _ = curve_fit(decaying_2exponential, Time, Signal, p0 = p, bounds = b, maxfev=10000000)
         except:
-            print('No covariance for exp fitting of the 2d order')
+            logger.warning("No covariance for 2nd-order exponential fit.")
             return
         fitted_curve = decaying_2exponential(Time_fit, *popt_)
         popt = np.round(popt_, 3)

@@ -5332,11 +5332,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="z_Extra">
+             <widget class="QWidget" name="Settings_Tab">
               <attribute name="title">
                <string>Settings</string>
               </attribute>
-              <widget class="QCommandLinkButton" name="commandLinkButton">
+              <widget class="QCommandLinkButton" name="Settings_Button_OpenProjectPage">
                <property name="geometry">
                 <rect>
                  <x>20</x>
@@ -5349,7 +5349,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <string>Check for the newest version and bug report</string>
                </property>
               </widget>
-              <widget class="QWidget" name="verticalLayoutWidget_5">
+              <widget class="QWidget" name="Settings_Widget_MainLayoutContainer">
                <property name="geometry">
                 <rect>
                  <x>20</x>
@@ -5360,11 +5360,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                </property>
                <layout class="QVBoxLayout" name="verticalLayout">
                 <item>
-                 <widget class="QGroupBox" name="groupBox_3">
+                 <widget class="QGroupBox" name="Settings_GroupBox_Software">
                   <property name="title">
                    <string>Software settings</string>
                   </property>
-                  <widget class="QPushButton" name="pushButton_DefaultFolder">
+                  <widget class="QPushButton" name="Settings_Button_DefaultFolder">
                    <property name="geometry">
                     <rect>
                      <x>10</x>
@@ -5380,11 +5380,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  </widget>
                 </item>
                 <item>
-                 <widget class="QGroupBox" name="groupBox_2">
+                 <widget class="QGroupBox" name="Settings_GroupBox_AnalysisPreferences">
                   <property name="title">
                    <string>Analysis preferences</string>
                   </property>
-                  <widget class="QCheckBox" name="checkBox_baseline">
+                  <widget class="QCheckBox" name="Settings_CheckBox_Baseline">
                    <property name="geometry">
                     <rect>
                      <x>10</x>
@@ -5397,7 +5397,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <string>Baseline</string>
                    </property>
                   </widget>
-                  <widget class="QCheckBox" name="checkBox_glycerol">
+                  <widget class="QCheckBox" name="Settings_CheckBox_Glycerol">
                    <property name="geometry">
                     <rect>
                      <x>10</x>
@@ -5410,7 +5410,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <string>Glycerol</string>
                    </property>
                   </widget>
-                  <widget class="QCheckBox" name="checkBox_long_component">
+                  <widget class="QCheckBox" name="Settings_CheckBox_LongComponent">
                    <property name="geometry">
                     <rect>
                      <x>110</x>
@@ -5423,7 +5423,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <string>Long component subtraction</string>
                    </property>
                   </widget>
-                  <widget class="QCheckBox" name="checkBox_Smooth">
+                  <widget class="QCheckBox" name="Settings_CheckBox_SmoothFft">
                    <property name="geometry">
                     <rect>
                      <x>110</x>
@@ -5436,7 +5436,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <string>Smooth FFT with window:</string>
                    </property>
                   </widget>
-                  <widget class="QDoubleSpinBox" name="SmoothWindowFrom">
+                  <widget class="QDoubleSpinBox" name="Settings_DoubleSpinBox_SmoothWindowFrom">
                    <property name="geometry">
                     <rect>
                      <x>110</x>
@@ -5455,7 +5455,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <double>150.000000000000000</double>
                    </property>
                   </widget>
-                  <widget class="QDoubleSpinBox" name="SmoothWindowTo">
+                  <widget class="QDoubleSpinBox" name="Settings_DoubleSpinBox_SmoothWindowTo">
                    <property name="geometry">
                     <rect>
                      <x>190</x>
@@ -5478,7 +5478,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 </item>
                </layout>
               </widget>
-              <widget class="QTextEdit" name="textEdit_15">
+              <widget class="QTextEdit" name="Settings_TextEdit_ProjectHelp">
                <property name="geometry">
                 <rect>
                  <x>30</x>
@@ -5532,7 +5532,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <string notr="true"/>
                </property>
               </widget>
-              <widget class="QGroupBox" name="groupBox_4">
+              <widget class="QGroupBox" name="Settings_GroupBox_SolidContent">
                <property name="geometry">
                 <rect>
                  <x>390</x>
@@ -5544,7 +5544,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                <property name="title">
                 <string>Solid Content Settings</string>
                </property>
-               <widget class="QRadioButton" name="SE_RadioButton_SCAbsolute">
+               <widget class="QRadioButton" name="Settings_RadioButton_SCAbsolute">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -5560,7 +5560,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <bool>false</bool>
                 </property>
                </widget>
-               <widget class="QRadioButton" name="radioButton_relative">
+               <widget class="QRadioButton" name="Settings_RadioButton_SCRelative">
                 <property name="geometry">
                  <rect>
                   <x>10</x>
@@ -5576,7 +5576,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <bool>true</bool>
                 </property>
                </widget>
-               <widget class="QTextEdit" name="textEdit">
+               <widget class="QTextEdit" name="Settings_Label_SCFormula">
                 <property name="geometry">
                  <rect>
                   <x>20</x>
@@ -5599,7 +5599,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;SC = (S-L)/S&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_SCShortStart">
+               <widget class="QDoubleSpinBox" name="Settings_DoubleSpinBox_SCShortStart">
                 <property name="geometry">
                  <rect>
                   <x>110</x>
@@ -5642,7 +5642,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <double>1.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QTextEdit" name="textEdit_31">
+               <widget class="QTextEdit" name="Settings_Label_SCShortInterval">
                 <property name="geometry">
                  <rect>
                   <x>14</x>
@@ -5698,7 +5698,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <set>Qt::NoTextInteraction</set>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_SCShortEnd">
+               <widget class="QDoubleSpinBox" name="Settings_DoubleSpinBox_SCShortEnd">
                 <property name="geometry">
                  <rect>
                   <x>210</x>
@@ -5741,7 +5741,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <double>10.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QTextEdit" name="textEdit_32">
+               <widget class="QTextEdit" name="Settings_Label_SCLongInterval">
                 <property name="geometry">
                  <rect>
                   <x>14</x>
@@ -5797,7 +5797,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <set>Qt::NoTextInteraction</set>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_SCLongEnd">
+               <widget class="QDoubleSpinBox" name="Settings_DoubleSpinBox_SCLongEnd">
                 <property name="geometry">
                  <rect>
                   <x>210</x>
@@ -5840,7 +5840,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <double>80.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SE_DoubleSpinBox_SCLongStart">
+               <widget class="QDoubleSpinBox" name="Settings_DoubleSpinBox_SCLongStart">
                 <property name="geometry">
                  <rect>
                   <x>110</x>

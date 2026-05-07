@@ -9,6 +9,7 @@ GAUSS_LORENZ_BOUNDS = ([0, 0, 0, -10], [np.inf, np.inf, np.inf, np.inf])
 
 
 def load_distribution_file(file_path):
+    """Load saved DQ distribution columns needed by temperature comparison."""
     data = np.loadtxt(file_path, delimiter=",")
     if data.ndim != 2 or data.shape[1] < 6:
         raise ValueError("file must contain at least 6 columns")
@@ -17,6 +18,7 @@ def load_distribution_file(file_path):
 
 
 def fit_distribution(data):
+    """Fit Gauss/Lorenz/Voigt summaries for one DQ temperature file."""
     t2_linearized = data[:, 0]
     dq_normalized = data[:, 1]
     t2_fit = np.arange(0, np.max(t2_linearized) + 0.001, 0.01)
@@ -63,6 +65,7 @@ def fit_distribution(data):
 
 
 def finite_xy(x_values, y_values):
+    """Return finite x/y pairs for robust summary plotting."""
     x_array = np.asarray(x_values, dtype=float)
     y_array = np.asarray(y_values, dtype=float)
     mask = np.isfinite(x_array) & np.isfinite(y_array)

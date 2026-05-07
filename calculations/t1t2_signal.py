@@ -4,12 +4,14 @@ import Calculator as Cal
 
 
 def clean_tabbed_line(line):
+    """Collapse repeated tabs from exported T1/T2 text rows."""
     while "\t\t" in line:
         line = line.replace("\t\t", "\t")
     return line.strip()
 
 
 def add_curve(dictionary, file_path, suffix, x_axis, time_values, signal_values):
+    """Append one parsed T1/T2 curve to the controller dictionary."""
     key = file_path + suffix
     dictionary[key]["X Axis"].append(x_axis)
     dictionary[key]["Time"].extend(time_values)
@@ -18,6 +20,7 @@ def add_curve(dictionary, file_path, suffix, x_axis, time_values, signal_values)
 
 
 def fit_range(time_values, signal_values, start, end, denominator):
+    """Prepare full and sliced arrays for T1/T2 exponential fitting."""
     time_array = np.array(time_values) / denominator
     signal_array = np.array(signal_values)
     fit_time = time_array[start:end]
@@ -26,6 +29,7 @@ def fit_range(time_values, signal_values, start, end, denominator):
 
 
 def initial_parameters(order, signal_values, tau1, tau2, tau3):
+    """Build initial exponential parameters from the selected fit order."""
     if len(signal_values) == 0:
         raise ValueError("selected range contains no signal points")
 
@@ -39,4 +43,5 @@ def initial_parameters(order, signal_values, tau1, tau2, tau3):
 
 
 def fit_relaxation(time_values, signal_values, order, initial_params):
+    """Delegate T1/T2 exponential fitting to the shared calculator."""
     return Cal.fit_exponent(time_values, signal_values, order, initial_params)
