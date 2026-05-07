@@ -3865,7 +3865,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        <item>
                         <widget class="QCheckBox" name="DQMQ_CheckBox_Difference">
                          <property name="text">
-                          <string>Difference</string>
+                          <string>Ref - DQ</string>
                          </property>
                          <property name="checked">
                           <bool>true</bool>
