@@ -575,6 +575,7 @@ class MainWindow(QMainWindow):
             "DQMQ_CheckBox_NDQ",
             "DQMQ_CheckBox_Difference",
             "DQMQ_CheckBox_TailFitting",
+            "DQMQ_CheckBox_MQTailDiff",
             "DQMQ_CheckBox_IntegralSum",
             "DQMQ_CheckBox_DresFitting",
         ]

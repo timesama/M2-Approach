@@ -317,6 +317,17 @@ class DQMQTabController(BaseTabController):
                 pen=mkPen((90, 90, 90), width=3),
                 name="Tail fit",
             )
+
+        if self._is_checked(
+            "DQMQ_CheckBox_Fit", "DQMQ_CheckBox_MQTailDiff", default=False):
+
+            figure.plot(
+                time,
+                result["denominator_base_norm"],
+                pen=mkPen((90, 90, 90), width=3),
+                name="MQ-Tail",
+            )
+
         if self._is_checked("DQMQ_CheckBox_NDQ", default=True):
             figure.addItem(
                 InfiniteLine(
@@ -369,9 +380,11 @@ class DQMQTabController(BaseTabController):
             "mq_raw_norm": arrays["DQ"] + arrays["Ref"],
             "mq_norm": arrays["DQ"] + arrays["Ref"],
             "tail_fit": np.zeros_like(arrays["tau"]),
+            "mq_tail": np.zeros_like(arrays["tau"]),
             "noise_weight": np.zeros_like(arrays["tau"]),
             "additive": np.zeros_like(arrays["tau"]),
             "denominator_base": arrays["DQ"] + arrays["Ref"],
+            "denominator_base_norm": np.zeros_like(arrays["tau"]),
             "denominator": arrays["DQ"] + arrays["Ref"],
             "time0": arrays["Time0"],
             "nDQ": arrays["nDQ0"],

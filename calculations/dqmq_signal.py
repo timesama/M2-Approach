@@ -116,6 +116,7 @@ def calculate_dqmq_analysis(
     noise_weight = calculate_noise_weight(time, fit_from)
     additive = 0.5 * noise_level * noise_weight
     denominator_base = mq_raw_norm - tail_fit
+    denominator_base_norm, _ = normalize_to_own_max(denominator_base)
     denominator = denominator_base + 2 * additive
     numerator = dq_norm + additive
     n_dq = calculate_safe_ndq(numerator, denominator)
@@ -134,6 +135,7 @@ def calculate_dqmq_analysis(
         "noise_weight": noise_weight,
         "additive": additive,
         "denominator_base": denominator_base,
+        "denominator_base_norm": denominator_base_norm,
         "denominator": denominator,
         "time0": time0,
         "nDQ": n_dq0,

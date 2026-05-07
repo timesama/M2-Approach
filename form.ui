@@ -567,7 +567,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>4</number>
+              <number>0</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -3876,6 +3876,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <widget class="QCheckBox" name="DQMQ_CheckBox_TailFitting">
                          <property name="text">
                           <string>Tail Fitting</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="DQMQ_CheckBox_MQTailDiff">
+                         <property name="text">
+                          <string>MQ - Tail</string>
                          </property>
                         </widget>
                        </item>
