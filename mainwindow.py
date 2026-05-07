@@ -793,7 +793,7 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             table = self.ui.SE_Table_Data
             files = self.selected_files
-            default_name = 'SE_'
+            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_SE_MSE_FID'
             if table.rowCount() == 0 or not files:
                 QMessageBox.warning(
                     self,
@@ -802,6 +802,7 @@ class MainWindow(QMainWindow):
                     QMessageBox.Ok,
                 )
                 return
+
         elif self.tab == 'DQ':
             table = self.ui.DQ_Table_Data
             files = self.selected_files_DQ_single
@@ -814,6 +815,7 @@ class MainWindow(QMainWindow):
                     QMessageBox.Ok,
                 )
                 return
+
         elif self.tab == 'DQ_Temp':
             table = self.ui.DQTemp_Table_Results
             files = self.selected_DQfiles
@@ -841,7 +843,7 @@ class MainWindow(QMainWindow):
                     QMessageBox.Ok,
                 )
                 return
-            default_name = 'T'
+            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_T'
 
         elif self.tab == 'GS':
             table = self.ui.GS_Table_Results
@@ -854,18 +856,13 @@ class MainWindow(QMainWindow):
                     QMessageBox.Ok,
                 )
                 return
-            default_name = 'SpinDiffusion_'
+            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_SpinDiffusion'
 
         elif self.tab == 'DQMQ':
             table = self.ui.DQMQ_Table_Data
             files = self.selected_DQMQfile
-            pattern = r'.*_(.*)'
-            try:
-                selected_folder = os.path.split(os.path.dirname(files[0]))[1]
-                match = re.search(pattern, selected_folder)
-                default_name = 'DQMQ_data_' + match.group(1)
-            except (IndexError, AttributeError, TypeError):
-                default_name = 'DQMQ_data_'
+
+            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_DQMQ_data'
 
             if table.rowCount() == 0 or not files:
                 QMessageBox.warning(
@@ -878,12 +875,15 @@ class MainWindow(QMainWindow):
 
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
+
         if self.tab == 'DQMQ' and dialog.last_saved_file_path:
             self.dqmq_controller.save_integral_sum_result(dialog.last_saved_file_path)
             self.dqmq_controller.save_dres_result(dialog.last_saved_file_path)
+
         if self.tab in ('SE', 'DQ') and dialog.last_saved_file_path:
             files_json = os.path.splitext(dialog.last_saved_file_path)[0] + '_files.json'
             phased_data = self.phased_spectra_SE if self.tab == 'SE' else self.phased_spectra_DQ
+
             with open(files_json, 'w') as f:
                 json.dump({"files": files, "phased": phased_data}, f)
 
