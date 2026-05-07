@@ -567,7 +567,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>4</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -3995,6 +3995,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                           <property name="decimals">
                            <number>1</number>
                           </property>
+                          <property name="minimum">
+                           <double>0.000000000000000</double>
+                          </property>
                           <property name="maximum">
                            <double>10.000000000000000</double>
                           </property>
@@ -4344,7 +4347,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                            <number>3</number>
                           </property>
                           <property name="maximum">
-                           <double>1.000000000000000</double>
+                           <double>2.000000000000000</double>
                           </property>
                           <property name="singleStep">
                            <double>0.010000000000000</double>
@@ -4737,7 +4740,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                         <property name="maximumSize">
                          <size>
-                          <width>100</width>
+                          <width>50</width>
                           <height>30</height>
                          </size>
                         </property>
@@ -4818,7 +4821,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                         <property name="maximumSize">
                          <size>
-                          <width>100</width>
+                          <width>40</width>
                           <height>30</height>
                          </size>
                         </property>
@@ -5883,6 +5886,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <double>60.000000000000000</double>
                 </property>
                </widget>
+              </widget>
+              <widget class="QPushButton" name="Settings_Button_InteractiveDres">
+               <property name="geometry">
+                <rect>
+                 <x>730</x>
+                 <y>30</y>
+                 <width>224</width>
+                 <height>24</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Interactive Dres</string>
+               </property>
               </widget>
              </widget>
             </widget>
