@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import pyqtgraph as pg
 import pyqtgraph.exporters
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
@@ -42,6 +43,7 @@ class RecFIDController(BaseTabController):
         self.extrapolation = None
         self.build_result = {}
         self.time_analysis_result = {}
+        self._clear_original_signal_gradient_label()
         self._close_time_analysis_dialog()
         if clear_plots:
             self.initialize_plots()
@@ -359,6 +361,7 @@ class RecFIDController(BaseTabController):
 
     # Backward-compatible method aliases used by previous controller wiring/tests.
     reset = reset_tab
+    clear_all = reset_tab
     run = run_full_pipeline
     compare = run_basic_data_analysis
     se_analysis = run_se_analysis
@@ -489,18 +492,16 @@ class RecFIDController(BaseTabController):
         divider = self._validated_mse_divider()
         if divider is None:
             return None
-        # In MSE mode the divider represents phase averaging; apply it before
-        # plotting, extrapolation, and build-up so FID and MSE amplitudes share
-        # the same scaled reference frame.
+        # MSE divider applies only to the MSE data amplitude, not the FID reference.
         return recfid.SignalAnalysisResult(
             time_data=result.time_data,
             signal_data=result.signal_data / divider,
             time_fid=result.time_fid,
-            signal_fid=result.signal_fid / divider,
+            signal_fid=result.signal_fid,
             frequency_data=result.frequency_data,
             spectrum_data=result.spectrum_data / divider,
             frequency_fid=result.frequency_fid,
-            spectrum_fid=result.spectrum_fid / divider,
+            spectrum_fid=result.spectrum_fid,
             m2_data=result.m2_data,
             t2_data=result.t2_data,
             m2_fid=result.m2_fid,
@@ -534,7 +535,7 @@ class RecFIDController(BaseTabController):
         graph_nmr.plot(
             self.fid_result["Time_td_fid"],
             self.fid_result["Re_td"],
-            pen=mkPen(QColor(220, 20, 60), width=3),
+            pen=mkPen(QColor(0, 0, 0), width=3),
             symbol=None,
         )
         for index, result in enumerate(self.data_results.values()):
@@ -544,7 +545,63 @@ class RecFIDController(BaseTabController):
                 pen=mkPen(self._winter_color(index, max(len(self.data_results), 1)), width=2),
                 symbol=None,
             )
-        self._status("Original NMR plot: red = FID; data curves use a winter color scale by echo time/file order.")
+        # Gradient label is the compact visible color-scale indicator for data curves.
+        self._add_original_signal_gradient_label(graph_nmr)
+        self._status("Original NMR plot: black = FID; data curves use a winter color scale by echo time/file order.")
+
+    def _add_original_signal_gradient_label(self, graph):
+        if not self.data_results:
+            return
+        self._clear_original_signal_gradient_label()
+        scale_text = self._original_signal_color_scale_text()
+        html = (
+            '<div style="background-color:rgba(255,255,255,210); padding:4px; border:1px solid #444;">'
+            '<span style="color:#000000; font-weight:bold;">FID: black</span><br>'
+            '<span style="color:#0033ff; font-weight:bold;">■</span>'
+            '<span style="color:#007fbf; font-weight:bold;">■</span>'
+            '<span style="color:#00bf80; font-weight:bold;">■</span>'
+            '<span style="color:#00ff7f; font-weight:bold;">■</span>'
+            f' Data winter scale<br>{scale_text}'
+            '</div>'
+        )
+        label = pg.TextItem(html=html, anchor=(0, 0))
+        graph.addItem(label)
+        x_position, y_position = self._original_signal_label_position()
+        label.setPos(x_position, y_position)
+        self.original_signal_gradient_label = label
+
+    def _original_signal_color_scale_text(self):
+        if self.recfid_mode == "se" and self.se_max_result.get("echo_time") is not None:
+            echo_times = np.asarray(self.se_max_result.get("echo_time", []), dtype=float)
+            if echo_times.size > 1 and np.all(np.isfinite(echo_times)):
+                return f"Echo time: {np.min(echo_times):g} → {np.max(echo_times):g}"
+        if len(self.data_results) > 1:
+            return f"File order: 1 → {len(self.data_results)}"
+        return "Data"
+
+    def _original_signal_label_position(self):
+        x_values = []
+        y_values = []
+        if self.fid_result:
+            x_values.extend(np.asarray(self.fid_result["Time_td_fid"], dtype=float))
+            y_values.extend(np.asarray(self.fid_result["Re_td"], dtype=float))
+        for result in self.data_results.values():
+            x_values.extend(np.asarray(result["Time_td"], dtype=float))
+            y_values.extend(np.asarray(result["Re_td"], dtype=float))
+        if not x_values or not y_values:
+            return 0, 0
+        return float(np.nanmin(x_values)), float(np.nanmax(y_values))
+
+    def _clear_original_signal_gradient_label(self):
+        label = getattr(self, "original_signal_gradient_label", None)
+        if label is not None:
+            graph = getattr(self.ui, "RecFID_PlotWidget_OriginalNMRSignal", None)
+            if graph is not None:
+                try:
+                    graph.removeItem(label)
+                except (RuntimeError, ValueError):
+                    logger.debug("RecFID gradient label was already removed", exc_info=True)
+            self.original_signal_gradient_label = None
 
     def _prepare_plot(self, graph):
         graph.clear()
@@ -617,6 +674,8 @@ class RecFIDController(BaseTabController):
         widget = getattr(self.ui, widget_name, None)
         if widget is None:
             return
+        if widget_name == "RecFID_PlotWidget_OriginalNMRSignal":
+            self._clear_original_signal_gradient_label()
         widget.clear()
         legend = getattr(widget.plotItem, "legend", None)
         if legend is not None:
