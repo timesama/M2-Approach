@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.integrate import trapezoid
 from scipy.signal import savgol_filter
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QMessageBox
@@ -85,7 +86,7 @@ class PhasingManual(QDialog):
 
     def update_text(self):
 
-        Integral=np.trapz(self.Real_freq_phased)
+        Integral=trapezoid(self.Real_freq_phased)
         delta=np.mean(self.Real_freq_phased[:100])-np.mean(self.Real_freq_phased[-100:])
         M2,T2=Cal._calculate_M2(Cal._calculate_apodization(self.Real_freq_phased, Frequency), Frequency)
 
