@@ -1,0 +1,546 @@
+Implement the old Build-up FID / RecFID software inside the new main application tab g_RecFID.
+
+This is a large feature migration. Do not paste the old software into MainWindow as one giant block. Integrate it using the current app architecture:
+
+- controller for UI orchestration
+- calculations module for numerical logic
+- dialogs module for manual echo-time assignment and optional result windows
+- MainWindow only wires the controller and global save/load dispatch where needed
+
+The old standalone software files are reference material:
+- old main window logic: main.py
+- old numerical logic: Math.py
+- old manual echo-time dialog: manual.ui / ui_manual.py
+- old statistics helper: makestatistics.py
+- old data/result dialog: ui_Data.py
+- current main app form.ui contains the new g_RecFID tab
+
+Use the new main app design as the source of truth. Do not recreate the old UI layout. Implement the old functionality into the new g_RecFID tab.
+
+Important old behavior to preserve:
+The old software loads FID, data, optional empty FID, optional empty data, runs correction/analysis, extrapolates SE maxima, builds up a reconstructed FID, plots original and built-up time/frequency signals, supports manual echo-time assignment, time-range analysis, and has its own save/export flow. The old code contains these main workflows: file loading, `basic_data_analysis`, `se_analysis`, `build_up`, `extrapolate`, `compare`, `run`, `rebuild`, `manual_assignment`, `time_analysis`, `save_statistics`, and `exportSEMaxT2`. Use those as the behavior reference, but reorganize them into the new architecture. :contentReference[oaicite:0]{index=0}
+
+TASK 1 — Create new RecFID controller
+
+Create:
+
+    controllers/recfid_controller.py
+
+with:
+
+    class RecFIDController(BaseTabController):
+
+The controller should own all UI behavior for the new g_RecFID tab:
+- selecting files
+- clearing/resetting the tab
+- running analysis
+- plotting
+- manual echo-time dialog
+- saving/exporting RecFID-specific results
+- user-facing validation/errors
+
+MainWindow should instantiate it like other controllers:
+
+    self.recfid_controller = RecFIDController(ui=self.ui, state=self.app_state, parent=self)
+
+and connect it to the tab’s buttons/signals.
+
+If the app uses controllers/__init__.py, export RecFIDController there.
+
+Do not put RecFID workflow logic directly into MainWindow.
+
+TASK 2 — Create calculation module
+
+Create:
+
+    calculations/recfid_signal.py
+
+Move the old numerical functions from old Math.py into this module where they are RecFID-specific.
+
+The old Math.py contains the relevant numerical pipeline:
+- read_data
+- calculate_frequency_scale
+- calculate_amplitude
+- smooth_noisy_signal
+- adjust_phase
+- fit_fft_with_voigh / voigt
+- adjust_frequency
+- simple_baseline_correction
+- apodization_fft
+- add_zeros
+- apodization
+- cut_beginning
+- normalize_to_fid
+- reference_long_component
+- calculate_M2
+- freq_domain_correction
+- time_domain_correction
+- nmr_signal_correction
+- build_up_fid
+- find_maximum_se
+- fit/build-up model helpers
+
+Use the old Math.py as the reference, but clean it into regular Python style and update deprecated code. :contentReference[oaicite:1]{index=1}
+
+Rules for calculations/recfid_signal.py:
+- pure numerical functions only
+- no PySide6
+- no QMessageBox
+- no pyqtgraph
+- no UI references
+- no matplotlib windows except if a pure plotting helper is explicitly needed, but preferably none
+- use logging instead of print where needed
+- replace np.trapz with np.trapezoid
+- keep mathematical behavior equivalent unless explicitly changed below
+
+General math that is already in Calculator.py and used by several tabs can stay in Calculator.py. RecFID-only math should live in calculations/recfid_signal.py.
+
+TASK 3 — Use new g_RecFID UI, not old UI
+
+Inspect current form.ui and find the new `g_RecFID` tab and all widgets in it.
+
+Rename g_RecFID widget object names to comprehensive names if they are still generic.
+
+Use naming convention:
+
+    RecFID_<ObjectType>_<ShortPurpose>
+
+Examples:
+    RecFID_Button_LoadFID
+    RecFID_Button_LoadData
+    RecFID_Button_LoadFIDEmpty
+    RecFID_Button_LoadDataEmpty
+    RecFID_Button_Clear
+    RecFID_Button_Run
+    RecFID_Button_ManualEchoTimes
+    RecFID_Button_TimeAnalysis
+    RecFID_Button_SaveStatistics
+    RecFID_Button_ExportSEMaxT2
+
+    RecFID_CheckBox_SubtractEmpty
+    RecFID_CheckBox_CutBeginning
+    RecFID_CheckBox_NormalizeToFID
+    RecFID_CheckBox_LongComponent
+    RecFID_CheckBox_TimeDomainApodization
+    RecFID_CheckBox_AdjustFrequencyPhase
+    RecFID_CheckBox_AdjustZero
+    RecFID_CheckBox_Smooth
+
+    RecFID_DoubleSpinBox_NormalizeFrom
+    RecFID_DoubleSpinBox_NormalizeTo
+    RecFID_DoubleSpinBox_LongComponentEnd
+    RecFID_DoubleSpinBox_ZeroShift
+    RecFID_DoubleSpinBox_ApodizationSigma
+    RecFID_DoubleSpinBox_SEFitFrom
+    RecFID_DoubleSpinBox_SEFitTo
+    RecFID_DoubleSpinBox_BuildFrom
+    RecFID_DoubleSpinBox_BuildTo
+    RecFID_DoubleSpinBox_MseDivider
+
+    RecFID_SpinBox_SmoothOrder
+    RecFID_SpinBox_SmoothWindow
+    RecFID_SpinBox_TimeAnalysisRange
+
+    RecFID_ComboBox_BuildFunction
+
+    RecFID_PlotWidget_OriginalNMRSignal
+    RecFID_PlotWidget_OriginalSpectra
+    RecFID_PlotWidget_SEMax
+    RecFID_PlotWidget_BuildUpNMRSignal
+    RecFID_PlotWidget_BuildUpSpectra
+
+    RecFID_TextEdit_OriginalResults
+    RecFID_TextEdit_SEMaxResult
+    RecFID_TextEdit_BuildUpResults
+
+Use the real labels/text from the current form.ui. Do not blindly copy old names. The old software used names like pushButtonFID, pushButtonData, widgetOriginalNMRSignal, widgetBUSpectra, doubleSpinBox_7, doubleSpinBox_6, doubleSpinBox_begin, doubleSpinBox_finish, etc.; the new names should be meaningful. :contentReference[oaicite:2]{index=2}
+
+Regenerate ui_Form.py after updating form.ui if this project uses generated UI.
+
+TASK 4 — State logic: no SE/MSE radio switch in new app
+
+Important design difference:
+The new program does not have an explicit SE/MSE radio switch. That is okay.
+
+Determine RecFID mode from the number of files loaded by the main data-load button.
+
+Specifically:
+- User presses the RecFID data-load button, corresponding to old pushButtonData / new RecFID_Button_LoadData.
+- If the user loads exactly one data file:
+      mode = "mse"
+- If the user loads more than one data file:
+      mode = "se"
+
+Do the same for optional empty data files:
+- one empty data file can be MSE empty
+- multiple empty data files can be SE empty
+- if empty data count does not match the data count when required, show a QMessageBox warning and proceed safely or clear empty files.
+
+Do not require a radio button to choose SE/MSE.
+Remove or ignore old radioButtonSE/radioButtonMSE logic.
+
+Controller state fields should include:
+
+    self.recfid_mode = "none" | "mse" | "se" | "single_se"
+    self.selected_fid_files = []
+    self.selected_data_files = []
+    self.selected_fid_empty_files = []
+    self.selected_data_empty_files = []
+    self.echo_time_values = []
+    self.manual_echo_time_enabled = False
+    self.fid_result = {}
+    self.data_results = {}
+    self.se_max_result = {}
+    self.extrapolation = None
+
+TASK 5 — File loading behavior
+
+Map old buttons to new g_RecFID buttons:
+
+Old:
+    pushButtonFID -> load FID
+    pushButtonData -> load SE/MSE data
+    pushButtonFIDEmpty -> load empty FID
+    pushButtonDataEmpty -> load empty data
+    pushButtonClear -> clear/reset
+    pushButtonGO -> run full pipeline
+    pushButton_analyse -> time-range analysis
+    pushButton_manual -> manual echo-time assignment
+    Btn_SaveStatistics -> save statistics
+    pushButtonExportMaxT2 -> export SE max/T2
+
+New:
+Use the actual g_RecFID widget names after renaming.
+
+File dialog behavior:
+- FID load: single file
+- Data load:
+    - allow selecting multiple files
+    - if one file selected, set mode = "mse"
+    - if more than one, set mode = "se"
+- Empty FID load: single file
+- Empty data load:
+    - allow selecting one or multiple files
+    - validate against RecFID mode during analysis
+
+Do not disable buttons globally. If the user presses Run without files, show a clear QMessageBox warning.
+
+TASK 6 — Processing pipeline
+
+Preserve the old mathematical workflow but reorganize it.
+
+Controller methods may be:
+
+    reset_tab()
+    connect_signals()
+    load_fid_files()
+    load_data_files()
+    load_empty_fid_files()
+    load_empty_data_files()
+    run_full_pipeline()
+    rebuild()
+    run_basic_data_analysis()
+    run_se_analysis()
+    extrapolate()
+    build_up()
+    run_time_analysis()
+    save_statistics()
+    export_se_max_t2()
+    open_manual_echo_time_dialog()
+
+Numerical functions must be in calculations/recfid_signal.py.
+
+The old calculation flow to preserve:
+
+1. Read FID and data files.
+2. Apply time-domain correction:
+    - phase
+    - optional smoothing
+    - optional empty subtraction
+    - optional zero shift
+    - optional cut beginning
+    - optional normalize-to-FID
+    - optional long-component subtraction
+3. Optional time-domain apodization.
+4. Frequency-domain correction:
+    - FFT
+    - optional phase/frequency adjustment
+    - zero filling
+    - baseline correction
+    - FFT apodization
+5. For SE mode:
+    - process all SE files
+    - infer echo time from filename if possible
+    - if echo time cannot be read, open manual echo-time assignment dialog
+    - calculate max amplitude for each SE
+    - extrapolate maximum SE amplitude
+6. For MSE mode:
+    - process the single data file
+    - maximum/extrapolation comes from max processed data signal
+    - divide by user-controlled MSE divider
+7. Build up reconstructed FID from original FID and extrapolation.
+8. Plot original and built-up time/frequency signals.
+9. Save/export RecFID-specific results using the old software’s save behavior.
+
+TASK 7 — MSE divider from new doubleSpinBox_8
+
+Old behavior:
+For MSE, the old code did:
+
+    self.Extrapolation = self.Extrapolation / 2
+
+with a comment about 4 phases. :contentReference[oaicite:3]{index=3}
+
+New behavior:
+The new program has a double spin box currently named doubleSpinBox_8. This should become:
+
+    RecFID_DoubleSpinBox_MseDivider
+
+Use it as the user-controlled MSE divider.
+
+For MSE:
+    extrapolation = max(processed_mse_signal) / mse_divider
+
+Validate:
+- mse_divider must be positive and finite
+- if invalid, show QMessageBox warning and use no result
+
+Do not keep hardcoded division by 2 or 4.
+
+TASK 8 — Missing T2*/M2 result fields are fine
+
+The old software displayed resulting T2* and M2 in several text fields. Some of these fields are absent in the new g_RecFID tab.
+
+Do not add new fields just for T2*/M2 unless already present in the new design.
+
+If the new tab has text result widgets:
+- show concise summary only where appropriate
+- otherwise store values internally for saving/export
+- do not fail because a T2*/M2 UI field is absent
+
+TASK 9 — Original NMR signal plot should show all loaded spectra
+
+Important new plotting requirement:
+In the new program, RecFID_PlotWidget_OriginalNMRSignal / old widgetOriginalNMRSignal should show ALL loaded processed spectra/signals, not only the first data and FID.
+
+When running analysis:
+- plot the FID signal
+- plot every loaded SE/MSE data signal
+- plot all loaded processed signals in the time domain
+- use a winter palette for the data curves
+
+Color requirement:
+Use a winter-like palette for multiple loaded spectra:
+- matplotlib winter palette is acceptable
+- or manually generate equivalent RGB colors
+- pyqtgraph plots should receive colors converted to QColor/RGB
+
+Implementation idea:
+
+    import matplotlib.cm as cm
+    colors = cm.get_cmap("winter", n_curves)
+
+or if avoiding matplotlib dependency in controller:
+    create a small utility to generate blue-green gradient colors.
+
+Plot labels:
+- FID
+- Data 1 / basename
+- Data 2 / basename
+- etc.
+
+Do not only plot the first file.
+
+The old compare() plotted only one data signal and one FID signal. Change this behavior for the new app. :contentReference[oaicite:4]{index=4}
+
+TASK 10 — Preserve save/export behavior
+
+The saving process for RecFID is different from the general app save/load.
+
+Do not force it into the generic save_data/load_data if that would break the old intended behavior.
+
+Implement RecFID-specific save/export methods in RecFIDController:
+- save_statistics()
+- export_se_max_t2()
+- any build-up FID export used by the old software
+
+Use the old save behavior as reference:
+- old exportSEMaxT2 writes max extrapolation, echo time, T2, ratio, echo amplitude
+- old save_statistics likely writes statistical analysis across time ranges
+- old makestatistics.py reads statistical_analysis.txt and plots histograms/heatmaps; keep compatibility with that text output if applicable. :contentReference[oaicite:5]{index=5}
+
+If old save_statistics implementation is in the truncated part of main.py, inspect it fully before implementing.
+
+Do not ask the user for unnecessary extra save dialogs if the old behavior saved related outputs automatically after one chosen location.
+
+TASK 11 — Manual echo-time assignment dialog
+
+The old software used a manual echo-time dialog from manual.ui / ui_manual.py with:
+- tableWidget
+- pushButton accept
+- filename column
+- echo time column
+
+In the new app:
+- create a dialog under dialogs/, for example:
+
+    dialogs/recfid_echo_time_dialog.py
+
+- Use the old manual.ui as reference, but rename objects meaningfully:
+    RecFIDManual_Table_EchoTimes
+    RecFIDManual_Button_Accept
+
+The old generated UI shows a two-column table: Filename and Echo Time, plus an accept button. Preserve that behavior. :contentReference[oaicite:6]{index=6}
+
+Controller behavior:
+- If automatic echo-time parsing fails for SE filenames, open this dialog.
+- Let the user enter echo times manually.
+- Store values in self.echo_time_values.
+- Mark manual echo-time state as enabled.
+- Re-run SE analysis if appropriate or allow user to rerun.
+
+TASK 12 — Optional time-analysis matplotlib window
+
+The old software uses a matplotlib window to display time-analysis heatmaps/plots.
+
+If the new g_RecFID design has a button for time analysis:
+- preserve this feature
+- put the matplotlib window in dialogs/ or plotmat/
+- ensure closing the matplotlib window actually closes it
+- do not leave stale matplotlib figures in memory
+- use non-blocking show if opened from the Qt app
+
+If this is too much for the first pass, implement the core run/build-up pipeline first and leave time-analysis as a guarded method with a QMessageBox:
+    “Time analysis is not implemented yet.”
+But prefer implementing if the old code is complete and low-risk.
+
+TASK 13 — Signal behavior
+
+Use editingFinished for spin boxes that trigger expensive rebuilds.
+
+Old software connected many valueChanged signals directly to rebuild:
+    doubleSpinBox_7.valueChanged.connect(self.rebuild)
+    doubleSpinBox_6.valueChanged.connect(self.rebuild)
+    doubleSpinBox_begin.valueChanged.connect(self.rebuild)
+    doubleSpinBox_finish.valueChanged.connect(self.rebuild)
+
+New behavior:
+Use editingFinished:
+    RecFID_DoubleSpinBox_SEFitFrom.editingFinished.connect(self.rebuild)
+    RecFID_DoubleSpinBox_SEFitTo.editingFinished.connect(self.rebuild)
+    RecFID_DoubleSpinBox_BuildFrom.editingFinished.connect(self.rebuild)
+    RecFID_DoubleSpinBox_BuildTo.editingFinished.connect(self.rebuild)
+    RecFID_DoubleSpinBox_MseDivider.editingFinished.connect(self.rebuild)
+
+Buttons/checkboxes/comboboxes may trigger immediately if reasonable.
+
+TASK 14 — User-facing validation/errors
+
+Do not crash on missing data. Show QMessageBox warnings.
+
+Examples:
+- “Load an FID file first.”
+- “Load SE/MSE data files first.”
+- “For SE mode, empty data file count must match data file count.”
+- “MSE divider must be greater than zero.”
+- “Could not parse echo time from filenames. Please enter echo times manually.”
+- “Cannot build reconstructed FID before running the analysis.”
+- “Cannot export SE Max/T2 because no SE analysis result exists.”
+
+No broad silent try/except.
+Use logger.exception for unexpected errors.
+
+TASK 15 — MainWindow integration
+
+Add RecFIDController to the main app:
+- import controller
+- instantiate with ui, state, parent
+- call connect_signals()
+- include tab state if the app has a tab-state method
+- include clear/reset path if global clear button dispatches by tab
+- include save/export paths only if needed
+
+If the tab name is g_RecFID, ensure MainWindow.state() recognizes it and sets:
+
+    self.tab = "RecFID"
+
+or equivalent.
+
+Do not pollute MainWindow with old Main class logic.
+
+TASK 16 — Code style
+
+The old software contains compressed/commented code and old-style naming. Clean it while migrating.
+
+Required:
+- regular readable Python
+- no semicolon-packed statements
+- no one-line if bodies
+- meaningful local variable names
+- no large commented-out old blocks
+- no print debugging
+- use logger where needed
+- short useful docstrings for public controller/calculation functions
+
+TASK 17 — Validate build
+
+Run:
+
+    python -m py_compile main.py mainwindow.py controllers/*.py dialogs/*.py utils/*.py calculations/*.py plotmat/*.py
+
+If Windows glob issues occur, use:
+
+    python -m compileall .
+
+Search:
+
+    grep -R "pushButtonFID" .
+    grep -R "pushButtonData" .
+    grep -R "radioButtonSE" .
+    grep -R "radioButtonMSE" .
+    grep -R "doubleSpinBox_8" .
+    grep -R "widgetOriginalNMRSignal" .
+    grep -R "widgetBUSpectra" .
+    grep -R "np.trapz" .
+    grep -R "print(" controllers calculations dialogs plotmat
+
+Expected:
+- old standalone widget names are not used in the new app code except old reference files if kept outside active app
+- RecFID tab widgets have meaningful RecFID_* object names
+- no hardcoded MSE divide-by-2 remains
+- RecFID MSE divider comes from RecFID_DoubleSpinBox_MseDivider
+- no np.trapz remains in active RecFID calculation code
+- no old radio SE/MSE state logic remains in the new controller
+- app compiles
+
+Manual validation:
+1. Launch app.
+2. Open g_RecFID tab.
+3. Press Run before loading files.
+   Expected: clear warning, no crash.
+4. Load one data file using RecFID data-load button.
+   Expected: mode becomes MSE.
+5. Load multiple data files.
+   Expected: mode becomes SE.
+6. Load FID file.
+7. Run full analysis.
+   Expected:
+   - original NMR signal plot shows FID and all loaded data signals
+   - winter palette is used for multiple data curves
+   - original spectra plot updates
+   - SE maximum plot updates for SE mode
+   - build-up FID and build-up spectra plots update
+8. In MSE mode, change RecFID_DoubleSpinBox_MseDivider and press Enter / focus out.
+   Expected: rebuild uses the new divider.
+9. If echo-time parsing fails in SE mode:
+   Expected: manual echo-time dialog opens.
+10. Export SE Max/T2.
+   Expected: file format compatible with old behavior.
+11. Save statistics if implemented.
+   Expected: old-compatible statistics output.
+12. Confirm other tabs still launch.
+
+Commit message:
+    Integrate RecFID build-up workflow
+
+Proceed with code changes. Do not return only a plan.
