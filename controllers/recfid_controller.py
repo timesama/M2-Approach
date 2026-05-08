@@ -424,7 +424,7 @@ class RecFIDController(BaseTabController):
             long_component_from=self._value("RecFID_DoubleSpinBox_LongComponentEnd", 55.0),
             apodize_time_domain=self._checked("RecFID_CheckBox_TimeDomainApodization", True),
             apodization_time=self._value("RecFID_DoubleSpinBox_ApodizationSigma", 100.0),
-            adjust_frequency_phase=self._checked("RecFID_CheckBox_AdjustFrequencyPhase", True),
+            adjust_frequency_phase=True,
             adjust_fid_zero=self._checked("RecFID_CheckBox_AdjustZero", False),
             fid_zero_shift=self._value("RecFID_DoubleSpinBox_ZeroShift", 0.0),
             smooth=self._checked("RecFID_CheckBox_Smooth", False),
@@ -535,14 +535,14 @@ class RecFIDController(BaseTabController):
         graph_nmr.plot(
             self.fid_result["Time_td_fid"],
             self.fid_result["Re_td"],
-            pen=mkPen(QColor(0, 0, 0), width=3),
+            pen=mkPen(QColor(255, 0, 0), width=4),
             symbol=None,
         )
         for index, result in enumerate(self.data_results.values()):
             graph_nmr.plot(
                 result["Time_td"],
                 result["Re_td"],
-                pen=mkPen(self._winter_color(index, max(len(self.data_results), 1)), width=2),
+                pen=mkPen(self._winter_color(index, max(len(self.data_results), 1)), width=3),
                 symbol=None,
             )
         # Gradient label is the compact visible color-scale indicator for data curves.
@@ -636,12 +636,12 @@ class RecFIDController(BaseTabController):
         graph_build_fid = getattr(self.ui, "RecFID_PlotWidget_BuildUpNMRSignal", None)
         if graph_build_fid is not None:
             graph_build_fid.clear()
-            graph_build_fid.plot(time_build, data_build, pen=mkPen("b", width=3), symbol=None)
+            graph_build_fid.plot(time_build, data_build, pen=mkPen("b", width=4), symbol=None)
             graph_build_fid.plot(self.fid_result["Time_td_fid"], self.fid_result["Re_td"], pen=mkPen("r", width=3), symbol=None)
         graph_build_fft = getattr(self.ui, "RecFID_PlotWidget_BuildUpSpectra", None)
         if graph_build_fft is not None:
             graph_build_fft.clear()
-            graph_build_fft.plot(freq_build, spectrum_build, pen=mkPen("b", width=3), symbol=None)
+            graph_build_fft.plot(freq_build, spectrum_build, pen=mkPen("b", width=4), symbol=None)
             graph_build_fft.plot(self.fid_result["Freq"], self.fid_result["Real_fft"], pen=mkPen("r", width=3), symbol=None)
 
     def _clear_or_hide(self, widget_name, hide=False):

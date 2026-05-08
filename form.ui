@@ -5639,16 +5639,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QCheckBox" name="RecFID_CheckBox_AdjustFrequencyPhase">
-                      <property name="text">
-                       <string>Adjust Frequency/Phase</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
                      <widget class="QCheckBox" name="RecFID_CheckBox_TimeDomainApodization">
                       <property name="text">
                        <string>TD Apodization</string>
