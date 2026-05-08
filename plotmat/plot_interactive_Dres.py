@@ -1,11 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, RadioButtons
-
-try:
-    trapz = np.trapezoid
-except AttributeError:
-    trapz = np.trapz
+from scipy.integrate import trapezoid as trapz
 
 # -----------------------------
 # Constants / grid
