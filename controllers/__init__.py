@@ -6,3 +6,5 @@ from .dqmq_controller import DQMQTabController
 from .gs_controller import GSTabController
 
 from .general_se_dq_controller import GeneralSEDQController
+
+from .recfid_controller import RecFIDController
