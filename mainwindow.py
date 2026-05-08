@@ -103,8 +103,6 @@ class MainWindow(QMainWindow):
         self.ui.DQTemp_Button_Save.clicked.connect(self.save_data)
         self.ui.T1T2_Button_Save.clicked.connect(self.save_data)
         self.ui.GS_Button_Save.clicked.connect(self.save_data)
-        if hasattr(self.ui, "pushButtonSaveRecFID"):
-            self.ui.pushButtonSaveRecFID.clicked.connect(self.save_data)
 
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.DQTemp_Button_Load.clicked.connect(self.load_data)

@@ -5377,7 +5377,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <number>5</number>
                  </property>
                  <item>
-                  <widget class="QGroupBox" name="groupBox">
+                  <widget class="QGroupBox" name="RecFID_GroupBox_LoadExport">
                    <property name="minimumSize">
                     <size>
                      <width>150</width>
@@ -5407,56 +5407,63 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <number>5</number>
                     </property>
                     <item>
-                     <widget class="QPushButton" name="pushButton">
+                     <widget class="QPushButton" name="RecFID_Button_LoadFID">
                       <property name="text">
                        <string>Load FID</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButton_2">
+                     <widget class="QPushButton" name="RecFID_Button_LoadData">
                       <property name="text">
                        <string>Load (M)SE</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButton_3">
+                     <widget class="QPushButton" name="RecFID_Button_LoadFIDEmpty">
                       <property name="text">
                        <string>Load FID Empty</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButton_4">
+                     <widget class="QPushButton" name="RecFID_Button_LoadDataEmpty">
                       <property name="text">
                        <string>Load (M)SE Empty</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButton_5">
+                     <widget class="QPushButton" name="RecFID_Button_ManualEchoTimes">
                       <property name="text">
                        <string>Manual Echo Time</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="Btn_SaveStatistics">
+                     <widget class="QPushButton" name="RecFID_Button_Clear">
+                      <property name="text">
+                       <string>Clear</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_SaveStatistics">
                       <property name="text">
                        <string>Export T2 Map</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButtonExportMaxT2">
+                     <widget class="QPushButton" name="RecFID_Button_ExportSEMaxT2">
                       <property name="text">
                        <string>Export SE max and T2</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButtonGO">
+                     <widget class="QPushButton" name="RecFID_Button_Run">
                       <property name="enabled">
                        <bool>true</bool>
                       </property>
@@ -5469,7 +5476,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="QGroupBox" name="groupBox_4">
+                  <widget class="QGroupBox" name="RecFID_GroupBox_DataAdjustment">
                    <property name="minimumSize">
                     <size>
                      <width>100</width>
@@ -5499,7 +5506,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <number>5</number>
                     </property>
                     <item>
-                     <widget class="QCheckBox" name="checkBox_subempty">
+                     <widget class="QCheckBox" name="RecFID_CheckBox_SubtractEmpty">
                       <property name="text">
                        <string>Subtract Empty</string>
                       </property>
@@ -5509,7 +5516,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QCheckBox" name="checkBox_cutbegin">
+                     <widget class="QCheckBox" name="RecFID_CheckBox_CutBeginning">
                       <property name="text">
                        <string>Cut the beginning</string>
                       </property>
@@ -5519,7 +5526,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QCheckBox" name="checkBox_normtofid">
+                     <widget class="QCheckBox" name="RecFID_CheckBox_NormalizeToFID">
                       <property name="text">
                        <string>Normalize to FID</string>
                       </property>
@@ -5529,7 +5536,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QDoubleSpinBox" name="doubleSpinBox">
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_NormalizeFrom">
                       <property name="prefix">
                        <string>from </string>
                       </property>
@@ -5548,7 +5555,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_NormalizeTo">
                       <property name="prefix">
                        <string>to </string>
                       </property>
@@ -5567,7 +5574,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QCheckBox" name="checkBox_longcomp">
+                     <widget class="QCheckBox" name="RecFID_CheckBox_LongComponent">
                       <property name="text">
                        <string>Long Component</string>
                       </property>
@@ -5577,7 +5584,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_LongComponentEnd">
                       <property name="prefix">
                        <string>from </string>
                       </property>
@@ -5596,14 +5603,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QCheckBox" name="checkBoxSmooth">
+                     <widget class="QCheckBox" name="RecFID_CheckBox_Smooth">
                       <property name="text">
                        <string>Smooth</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="spinBoxOrder">
+                     <widget class="QSpinBox" name="RecFID_SpinBox_SmoothOrder">
                       <property name="suffix">
                        <string/>
                       </property>
@@ -5619,7 +5626,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="spinBoxWindow">
+                     <widget class="QSpinBox" name="RecFID_SpinBox_SmoothWindow">
                       <property name="prefix">
                        <string>window </string>
                       </property>
@@ -5632,7 +5639,17 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QCheckBox" name="checkBox_td_apodization">
+                     <widget class="QCheckBox" name="RecFID_CheckBox_AdjustFrequencyPhase">
+                      <property name="text">
+                       <string>Adjust Frequency/Phase</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="RecFID_CheckBox_TimeDomainApodization">
                       <property name="text">
                        <string>TD Apodization</string>
                       </property>
@@ -5642,7 +5659,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_ApodizationSigma">
                       <property name="prefix">
                        <string>at </string>
                       </property>
@@ -5658,7 +5675,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QCheckBox" name="checkBox_adjust_zero">
+                     <widget class="QCheckBox" name="RecFID_CheckBox_AdjustZero">
                       <property name="text">
                        <string>Shift NMR Signal</string>
                       </property>
@@ -5668,7 +5685,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_ZeroShift">
                       <property name="minimum">
                        <double>-10.000000000000000</double>
                       </property>
@@ -5700,7 +5717,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <number>5</number>
                  </property>
                  <item>
-                  <widget class="PlotWidget" name="widgetOriginalNMRSignal" native="true">
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_OriginalNMRSignal" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>300</width>
@@ -5716,7 +5733,23 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="PlotWidget" name="widgetSEMax" native="true">
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_OriginalSpectra" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>300</width>
+                     <height>300</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_SEMax" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>300</width>
@@ -5761,7 +5794,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QGroupBox" name="groupBox_7">
+                  <widget class="QGroupBox" name="RecFID_GroupBox_Reconstruction">
                    <property name="minimumSize">
                     <size>
                      <width>150</width>
@@ -5794,7 +5827,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <number>5</number>
                     </property>
                     <item>
-                     <widget class="QComboBox" name="comboBox">
+                     <widget class="QComboBox" name="RecFID_ComboBox_BuildFunction">
                       <property name="styleSheet">
                        <string notr="true">background: white</string>
                       </property>
@@ -5824,7 +5857,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QDoubleSpinBox" name="doubleSpinBox_begin">
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_BuildFrom">
                       <property name="suffix">
                        <string>μs</string>
                       </property>
@@ -5843,7 +5876,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QDoubleSpinBox" name="doubleSpinBox_finish">
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_BuildTo">
                       <property name="suffix">
                        <string>μs</string>
                       </property>
@@ -5859,14 +5892,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButton_analyse">
+                     <widget class="QPushButton" name="RecFID_Button_TimeAnalysis">
                       <property name="text">
                        <string>Analyse Times</string>
                       </property>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QSpinBox" name="spinBoxTimeRange">
+                     <widget class="QSpinBox" name="RecFID_SpinBox_TimeAnalysisRange">
                       <property name="singleStep">
                        <number>1</number>
                       </property>
@@ -5892,7 +5925,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QGroupBox" name="groupBox_5">
+                  <widget class="QGroupBox" name="RecFID_GroupBox_Maximum">
                    <property name="minimumSize">
                     <size>
                      <width>150</width>
@@ -5922,7 +5955,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <number>5</number>
                     </property>
                     <item>
-                     <widget class="QGroupBox" name="groupBox_9">
+                     <widget class="QGroupBox" name="RecFID_GroupBox_SE">
                       <property name="title">
                        <string>SE</string>
                       </property>
@@ -5940,7 +5973,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <number>5</number>
                        </property>
                        <item>
-                        <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_SEFitFrom">
                          <property name="prefix">
                           <string>cut from </string>
                          </property>
@@ -5953,7 +5986,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </widget>
                        </item>
                        <item>
-                        <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_SEFitTo">
                          <property name="prefix">
                           <string>cut to </string>
                          </property>
@@ -5969,7 +6002,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                     <item>
-                     <widget class="QGroupBox" name="groupBox_10">
+                     <widget class="QGroupBox" name="RecFID_GroupBox_MSE">
                       <property name="title">
                        <string>MSE</string>
                       </property>
@@ -5987,7 +6020,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <number>5</number>
                        </property>
                        <item>
-                        <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
+                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_MseDivider">
                          <property name="prefix">
                           <string>derive by </string>
                          </property>
@@ -6038,7 +6071,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <number>5</number>
                  </property>
                  <item>
-                  <widget class="PlotWidget" name="widgetBUNMRSignal" native="true">
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_BuildUpNMRSignal" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>300</width>
@@ -6054,7 +6087,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="PlotWidget" name="widgetBUFFT" native="true">
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_BuildUpSpectra" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>300</width>
