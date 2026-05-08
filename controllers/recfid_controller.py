@@ -552,7 +552,9 @@ class RecFIDController(BaseTabController):
     def _add_original_signal_gradient_label(self, graph):
         if not self.data_results:
             return
+
         self._clear_original_signal_gradient_label()
+
         scale_text = self._original_signal_color_scale_text()
         html = (
             '<div style="background-color:rgba(255,255,255,210); padding:4px; border:1px solid #444;">'
@@ -564,11 +566,21 @@ class RecFIDController(BaseTabController):
             f' Data winter scale<br>{scale_text}'
             '</div>'
         )
-        label = pg.TextItem(html=html, anchor=(0, 0))
-        graph.addItem(label)
-        x_position, y_position = self._original_signal_label_position()
-        label.setPos(x_position, y_position)
+
+        label = pg.TextItem(html=html, anchor=(1, 0))
+        view_box = graph.getViewBox()
+        label.setParentItem(view_box)
+        label.setZValue(10_000)
+
+        def update_position():
+            rect = view_box.sceneBoundingRect()
+            label.setPos(rect.width() - 10, 10)
+
+        update_position()
+        view_box.sigResized.connect(update_position)
+
         self.original_signal_gradient_label = label
+        self.original_signal_gradient_label_update = update_position
 
     def _original_signal_color_scale_text(self):
         if self.recfid_mode == "se" and self.se_max_result.get("echo_time") is not None:
@@ -578,19 +590,6 @@ class RecFIDController(BaseTabController):
         if len(self.data_results) > 1:
             return f"File order: 1 → {len(self.data_results)}"
         return "Data"
-
-    def _original_signal_label_position(self):
-        x_values = []
-        y_values = []
-        if self.fid_result:
-            x_values.extend(np.asarray(self.fid_result["Time_td_fid"], dtype=float))
-            y_values.extend(np.asarray(self.fid_result["Re_td"], dtype=float))
-        for result in self.data_results.values():
-            x_values.extend(np.asarray(result["Time_td"], dtype=float))
-            y_values.extend(np.asarray(result["Re_td"], dtype=float))
-        if not x_values or not y_values:
-            return 0, 0
-        return float(np.nanmin(x_values)), float(np.nanmax(y_values))
 
     def _clear_original_signal_gradient_label(self):
         label = getattr(self, "original_signal_gradient_label", None)
