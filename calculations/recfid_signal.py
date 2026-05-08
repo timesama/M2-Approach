@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Sequence
 
 import numpy as np
+from scipy.integrate import trapezoid
 from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 
@@ -287,12 +288,12 @@ def reference_long_component(time, component, end):
 def calculate_M2(fft_real, frequency):
     fft_real = np.asarray(fft_real, dtype=float)
     frequency = np.asarray(frequency, dtype=float)
-    integral = np.trapezoid(np.real(fft_real))
+    integral = trapezoid(np.real(fft_real))
     if integral == 0:
         raise ValueError("Cannot calculate M2 because FFT integral is zero.")
     fur_normalized = np.real(fft_real) / integral
     multiplication = (frequency**2) * fur_normalized
-    m2 = np.trapezoid(multiplication) * 4 * np.pi**2
+    m2 = trapezoid(multiplication) * 4 * np.pi**2
     if np.abs(np.mean(multiplication[:10])) > 10**-6:
         logger.warning("FFT edge moment is high; apodization may be insufficient.")
     if m2 < 0:

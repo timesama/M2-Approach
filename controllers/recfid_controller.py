@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
@@ -18,112 +17,116 @@ from utils.ui_busy import busy_cursor
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class RecFIDState:
-    fid_files: list[str] = field(default_factory=list)
-    data_files: list[str] = field(default_factory=list)
-    fid_empty_files: list[str] = field(default_factory=list)
-    data_empty_files: list[str] = field(default_factory=list)
-    manual_echo_times: list[float] = field(default_factory=list)
-    manual_assignment: bool = False
-    mode: str = "none"
-    fid_result: dict = field(default_factory=dict)
-    data_results: dict = field(default_factory=dict)
-    se_max: np.ndarray = field(default_factory=lambda: np.array([]))
-    se_t2: np.ndarray = field(default_factory=lambda: np.array([]))
-    echo_time_array: np.ndarray = field(default_factory=lambda: np.array([]))
-    extrapolation: float | None = None
-    build_result: dict = field(default_factory=dict)
-
-
 class RecFIDController(BaseTabController):
     """UI orchestration for the g_RecFID tab."""
 
     def __init__(self, ui, state, parent=None):
         super().__init__(ui, state, parent)
-        self.recfid_state = RecFIDState()
-        if not hasattr(self.state, "recfid"):
-            self.state.recfid = self.recfid_state
+        self.reset_tab(clear_plots=False)
+
+    def reset_tab(self, clear_plots=True):
+        self.recfid_mode = "none"
+        self.selected_fid_files = []
+        self.selected_data_files = []
+        self.selected_fid_empty_files = []
+        self.selected_data_empty_files = []
+        self.echo_time_values = []
+        self.manual_echo_time_enabled = False
+        self.fid_result = {}
+        self.data_results = {}
+        self.se_max_result = {}
+        self.extrapolation = None
+        self.build_result = {}
+        if clear_plots:
+            self.initialize_plots()
 
     def connect_signals(self):
-        self._connect("pushButton", "clicked", lambda: self.select_files("fid"))
-        self._connect("pushButton_2", "clicked", lambda: self.select_files("data"))
-        self._connect("pushButton_3", "clicked", lambda: self.select_files("fid_empty"))
-        self._connect("pushButton_4", "clicked", lambda: self.select_files("data_empty"))
-        self._connect("pushButton_5", "clicked", self.manual_assignment)
-        self._connect("Btn_SaveStatistics", "clicked", self.save_statistics)
-        self._connect("pushButtonExportMaxT2", "clicked", self.exportSEMaxT2)
-        self._connect("pushButtonGO", "clicked", self.run)
-        self._connect("pushButton_analyse", "clicked", self.time_analysis)
-        for widget_name in ("doubleSpinBox_7", "doubleSpinBox_6", "comboBox", "doubleSpinBox_begin", "doubleSpinBox_finish"):
-            signal = "activated" if widget_name == "comboBox" else "valueChanged"
+        self._connect("RecFID_Button_LoadFID", "clicked", self.load_fid_files)
+        self._connect("RecFID_Button_LoadData", "clicked", self.load_data_files)
+        self._connect("RecFID_Button_LoadFIDEmpty", "clicked", self.load_empty_fid_files)
+        self._connect("RecFID_Button_LoadDataEmpty", "clicked", self.load_empty_data_files)
+        self._connect("RecFID_Button_Clear", "clicked", self.reset_tab)
+        self._connect("RecFID_Button_ManualEchoTimes", "clicked", self.open_manual_echo_time_dialog)
+        self._connect("RecFID_Button_SaveStatistics", "clicked", self.save_statistics)
+        self._connect("RecFID_Button_ExportSEMaxT2", "clicked", self.export_se_max_t2)
+        self._connect("RecFID_Button_Run", "clicked", self.run_full_pipeline)
+        self._connect("RecFID_Button_TimeAnalysis", "clicked", self.run_time_analysis)
+        for widget_name in (
+            "RecFID_DoubleSpinBox_SEFitFrom",
+            "RecFID_DoubleSpinBox_SEFitTo",
+            "RecFID_ComboBox_BuildFunction",
+            "RecFID_DoubleSpinBox_BuildFrom",
+            "RecFID_DoubleSpinBox_BuildTo",
+        ):
+            signal = "activated" if widget_name == "RecFID_ComboBox_BuildFunction" else "valueChanged"
             self._connect(widget_name, signal, lambda *_args: self.rebuild(show_warning=False))
 
     def initialize_plots(self):
-        self._setup_graph("widgetOriginalNMRSignal", "Time, μs", "Amplitude", "FID / data")
-        self._setup_graph("widgetSEMax", "Echo Time, μs", "Amplitude", "SE Max")
-        self._setup_graph("widgetBUNMRSignal", "Time, μs", "Amplitude", "FID Build")
-        self._setup_graph("widgetBUFFT", "Frequency, MHz", "Amplitude, a.u", "FFT Build")
+        self._setup_graph("RecFID_PlotWidget_OriginalNMRSignal", "Time, μs", "Amplitude", "FID / data")
+        self._setup_graph("RecFID_PlotWidget_OriginalSpectra", "Frequency, MHz", "Amplitude, a.u", "FFT")
+        self._setup_graph("RecFID_PlotWidget_SEMax", "Echo Time, μs", "Amplitude", "SE Max")
+        self._setup_graph("RecFID_PlotWidget_BuildUpNMRSignal", "Time, μs", "Amplitude", "FID Build")
+        self._setup_graph("RecFID_PlotWidget_BuildUpSpectra", "Frequency, MHz", "Amplitude, a.u", "FFT Build")
 
-    def reset(self):
-        self.recfid_state = RecFIDState()
-        self.state.recfid = self.recfid_state
-        self.initialize_plots()
-
-    def select_files(self, kind):
-        multiple = kind in {"data", "data_empty"}
-        file_mode = QFileDialog.ExistingFiles if multiple else QFileDialog.ExistingFile
-        dialog = QFileDialog(self.parent)
-        dialog.setFileMode(file_mode)
-        dialog.setNameFilter("Data (*.dat *.txt *.csv)")
-        if dialog.exec():
-            files = dialog.selectedFiles()
-        else:
+    def load_fid_files(self):
+        files = self._select_files(multiple=False)
+        if files is None:
             return
-        target = {
-            "fid": self.recfid_state.fid_files,
-            "data": self.recfid_state.data_files,
-            "fid_empty": self.recfid_state.fid_empty_files,
-            "data_empty": self.recfid_state.data_empty_files,
-        }[kind]
-        target.clear()
-        target.extend(files)
-        if kind == "data":
-            self._update_mode_from_data_files()
-            self.recfid_state.manual_assignment = False
-            self.recfid_state.manual_echo_times = []
-        self._status(f"Loaded {len(files)} RecFID {kind.replace('_', ' ')} file(s).")
+        self.selected_fid_files = files
+        self._status(f"Loaded {len(files)} RecFID FID file(s).")
 
-    def run(self):
+    def load_data_files(self):
+        files = self._select_files(multiple=True)
+        if files is None:
+            return
+        self.selected_data_files = files
+        self.recfid_mode = "mse" if len(files) == 1 else "se" if len(files) > 1 else "none"
+        self.echo_time_values = []
+        self.manual_echo_time_enabled = False
+        self._status(f"Loaded {len(files)} RecFID data file(s); mode={self.recfid_mode}.")
+
+    def load_empty_fid_files(self):
+        files = self._select_files(multiple=False)
+        if files is None:
+            return
+        self.selected_fid_empty_files = files
+        self._status(f"Loaded {len(files)} RecFID empty FID file(s).")
+
+    def load_empty_data_files(self):
+        files = self._select_files(multiple=True)
+        if files is None:
+            return
+        self.selected_data_empty_files = files
+        self._status(f"Loaded {len(files)} RecFID empty data file(s).")
+
+    def run_full_pipeline(self):
         with busy_cursor():
-            if not self._validate_required_files():
+            if not self._validate_required_files() or not self._validate_empty_data_files():
                 return
             try:
-                self.compare()
+                self.run_basic_data_analysis()
                 self.extrapolate()
-                begin = self._value("doubleSpinBox_begin", 9.0)
-                finish = self._value("doubleSpinBox_finish", 20.0)
-                self.build_up(begin, finish)
+                self.build_up()
             except Exception as exc:
                 logger.exception("RecFID analysis failed")
                 self._warn("Couldn't analyse", f"Couldn't analyse the RecFID data because {exc}.")
 
     def rebuild(self, show_warning=True):
-        if not self.recfid_state.fid_result or not self.recfid_state.data_files:
+        if not self.fid_result or not self.selected_data_files:
             return
         with busy_cursor():
             try:
                 self.extrapolate()
-                self.build_up(self._value("doubleSpinBox_begin", 9.0), self._value("doubleSpinBox_finish", 20.0))
+                self.build_up()
             except Exception as exc:
                 logger.exception("RecFID rebuild failed")
                 if show_warning:
                     self._warn("Couldn't rebuild", f"Couldn't rebuild the RecFID result because {exc}.")
 
-    def compare(self):
+    def run_basic_data_analysis(self):
         data, data_empty, fid, fid_empty = self._choose_files_for_comparison(0)
         result = recfid.analyze_signal(data, fid, data_empty, fid_empty, self._analysis_options())
-        self.recfid_state.fid_result = {
+        self.fid_result = {
             "Time_td_fid": result.time_fid,
             "Re_td": result.signal_fid,
             "Freq": result.frequency_fid,
@@ -131,30 +134,24 @@ class RecFIDController(BaseTabController):
             "M2": result.m2_fid,
             "T2": result.t2_fid,
         }
-        graph_nmr = getattr(self.ui, "widgetOriginalNMRSignal", None)
-        if graph_nmr is not None:
-            graph_nmr.clear()
-            graph_nmr.plot(result.time_data, result.signal_data, pen=mkPen("r", width=3), symbol=None)
-            graph_nmr.plot(result.time_fid, result.signal_fid, pen=mkPen("b", width=3), symbol=None)
+        self._plot_original_analysis(result)
         self._status(
             f"FID T₂*={result.t2_fid}, M₂={result.m2_fid}; data T₂*={result.t2_data}, M₂={result.m2_data}"
         )
         return result
 
-    def se_analysis(self, start, finish):
-        state = self.recfid_state
-        state.data_results = {}
+    def run_se_analysis(self):
+        self.data_results = {}
         se_max = []
         se_t2 = []
         echo_time = self._echo_times_for_se_files()
-        fid = state.fid_files[0]
-        fid_empty = state.fid_empty_files[0] if state.fid_empty_files and self._checked("checkBox_subempty", True) else None
-        if state.data_empty_files and len(state.data_empty_files) != len(state.data_files):
-            raise ValueError("Please load the same number of data and empty data files.")
-        for idx, file_name in enumerate(state.data_files):
-            data_empty = state.data_empty_files[idx] if state.data_empty_files else None
+        fid = self.selected_fid_files[0]
+        fid_empty = self.selected_fid_empty_files[0] if self.selected_fid_empty_files and self._checked("RecFID_CheckBox_SubtractEmpty", True) else None
+
+        for index, file_name in enumerate(self.selected_data_files):
+            data_empty = self.selected_data_empty_files[index] if self.selected_data_empty_files else None
             result = recfid.analyze_signal(file_name, fid, data_empty, fid_empty, self._analysis_options())
-            state.data_results[file_name] = {
+            self.data_results[file_name] = {
                 "Time_td": result.time_data,
                 "Re_td": result.signal_data,
                 "Freq": result.frequency_data,
@@ -164,67 +161,61 @@ class RecFIDController(BaseTabController):
             }
             se_max.append(float(np.max(result.signal_data)))
             se_t2.append(result.t2_data)
-        extrapolation, fitting_curve, fittingx = recfid.find_maximum_se(echo_time, se_max, start, finish)
-        state.se_max = np.asarray(se_max, dtype=float)
-        state.se_t2 = np.asarray(se_t2, dtype=float)
-        state.echo_time_array = np.asarray(echo_time, dtype=float)
-        return extrapolation, state.echo_time_array, state.se_max, fittingx, fitting_curve
+
+        extrapolation, fitting_curve, fittingx = recfid.find_maximum_se(
+            echo_time,
+            se_max,
+            self._value("RecFID_DoubleSpinBox_SEFitFrom", 0.0),
+            self._value("RecFID_DoubleSpinBox_SEFitTo", 0.0),
+        )
+        self.se_max_result = {
+            "echo_time": np.asarray(echo_time, dtype=float),
+            "maximum": np.asarray(se_max, dtype=float),
+            "t2": np.asarray(se_t2, dtype=float),
+            "fit_x": fittingx,
+            "fit_y": fitting_curve,
+        }
+        return extrapolation
 
     def extrapolate(self):
-        state = self.recfid_state
-        graph_se = getattr(self.ui, "widgetSEMax", None)
-        self._update_mode_from_data_files()
-        if state.mode == "se":
-            start = self._value("doubleSpinBox_7", 0.0)
-            end = self._value("doubleSpinBox_6", 0.0)
-            extrapolation, echo_time, maximum_se, fittingx, fittingy = self.se_analysis(start, end)
-            state.extrapolation = extrapolation
-            if graph_se is not None:
-                graph_se.clear()
-                graph_se.show()
-                graph_se.plot([0], [extrapolation], pen="r", symbolPen=None, symbol="o", symbolBrush="r")
-                graph_se.plot(fittingx, fittingy, pen=mkPen("k", width=3, style=Qt.DashLine), symbol=None)
-                graph_se.plot(echo_time, maximum_se, pen=None, symbolPen=None, symbol="o", symbolBrush="b")
-        else:
-            result = self.compare()
-            extrapolation = float(np.max(result.signal_data))
-            if state.mode == "mse":
-                extrapolation /= max(self._value("doubleSpinBox_8", 2.0), 1.0)
-            state.extrapolation = extrapolation
-            state.se_max = np.array([float(np.max(result.signal_data))])
-            state.se_t2 = np.array([result.t2_data])
-            state.echo_time_array = np.array([0.0])
-            state.data_results[state.mode.upper()] = {
-                "Time_td": result.time_data,
-                "Re_td": result.signal_data,
-                "Freq": result.frequency_data,
-                "Real_fft": result.spectrum_data,
-                "M2": result.m2_data,
-                "T2": result.t2_data,
+        if self.recfid_mode == "se":
+            extrapolation = self.run_se_analysis()
+            self.extrapolation = extrapolation
+            self._plot_se_maximum()
+        elif self.recfid_mode == "mse":
+            result = self.run_basic_data_analysis()
+            raw_maximum = float(np.max(result.signal_data))
+            divider = max(self._value("RecFID_DoubleSpinBox_MseDivider", 2.0), 1.0)
+            self.extrapolation = raw_maximum / divider
+            self.se_max_result = {
+                "echo_time": np.array([0.0]),
+                "maximum": np.array([raw_maximum]),
+                "t2": np.array([result.t2_data]),
             }
-            if graph_se is not None:
-                graph_se.clear()
-                graph_se.hide()
-        self._status(f"RecFID max = {round(state.extrapolation, 2)}")
-        return state.extrapolation
+            self._clear_or_hide("RecFID_PlotWidget_SEMax", hide=True)
+        else:
+            raise ValueError("Load one data file for MSE mode or multiple data files for SE mode before running.")
 
-    def build_up(self, begin, finish):
-        state = self.recfid_state
-        if state.extrapolation is None:
+        self._status(f"RecFID max = {round(self.extrapolation, 2)}")
+        return self.extrapolation
+
+    def build_up(self):
+        if self.extrapolation is None:
             raise ValueError("Run extrapolation before build-up.")
-        fid = state.fid_result
-        if not fid:
+        if not self.fid_result:
             raise ValueError("Run FID/data analysis before build-up.")
+        begin = self._value("RecFID_DoubleSpinBox_BuildFrom", 9.0)
+        finish = self._value("RecFID_DoubleSpinBox_BuildTo", 20.0)
         time_build, data_build, data_fit, freq_build, spectrum_build, m2_build, t2_build = recfid.analyze_build_up(
-            fid["Time_td_fid"],
-            fid["Re_td"],
-            state.extrapolation,
-            self._text("comboBox", "Gaussian"),
+            self.fid_result["Time_td_fid"],
+            self.fid_result["Re_td"],
+            self.extrapolation,
+            self._text("RecFID_ComboBox_BuildFunction", "Gaussian"),
             begin,
             finish,
-            self._value("doubleSpinBox_5", 100.0),
+            self._value("RecFID_DoubleSpinBox_ApodizationSigma", 100.0),
         )
-        state.build_result = {
+        self.build_result = {
             "Time": time_build,
             "Re": data_build,
             "Fit": data_fit,
@@ -233,41 +224,21 @@ class RecFIDController(BaseTabController):
             "M2": float(m2_build),
             "T2": float(t2_build),
         }
-        graph_build_fid = getattr(self.ui, "widgetBUNMRSignal", None)
-        if graph_build_fid is not None:
-            graph_build_fid.clear()
-            graph_build_fid.plot(time_build, data_build, pen=mkPen("b", width=3), symbol=None)
-            graph_build_fid.plot(fid["Time_td_fid"], fid["Re_td"], pen=mkPen("r", width=3), symbol=None)
-        graph_build_fft = getattr(self.ui, "widgetBUFFT", None)
-        if graph_build_fft is not None:
-            graph_build_fft.clear()
-            graph_build_fft.plot(freq_build, spectrum_build, pen=mkPen("b", width=3), symbol=None)
-            graph_build_fft.plot(fid["Freq"], fid["Real_fft"], pen=mkPen("r", width=3), symbol=None)
+        self._plot_build_up(freq_build, spectrum_build, time_build, data_build)
         self._status(
-            f"Build-up T₂*={round(t2_build, 5)}, M₂={round(m2_build, 5)}; FID T₂*={fid['T2']}, M₂={fid['M2']}"
+            f"Build-up T₂*={round(t2_build, 5)}, M₂={round(m2_build, 5)}; "
+            f"FID T₂*={self.fid_result['T2']}, M₂={self.fid_result['M2']}"
         )
         return m2_build, t2_build
 
-    def manual_assignment(self):
-        if not self.recfid_state.data_files:
-            self._warn("No SE files", "Load (M)SE files before assigning echo times manually.")
-            return
-        dialog = RecFIDManualEchoTimeDialog(
-            self.recfid_state.data_files, self.recfid_state.manual_echo_times, self.parent
-        )
-        if dialog.exec():
-            try:
-                self.recfid_state.manual_echo_times = dialog.echo_times()
-                self.recfid_state.manual_assignment = True
-            except ValueError as exc:
-                self._warn("Invalid echo time", str(exc))
-
-    def time_analysis(self):
-        if not self.recfid_state.fid_result:
+    def run_time_analysis(self):
+        if not self.fid_result or self.extrapolation is None:
             self._warn("No build-up data", "Run RecFID analysis before analysing time ranges.")
             return
         with busy_cursor():
-            start_range, finish_range, m2_values, t2_values = self._calculate_time_analysis(self._text("comboBox", "Gaussian"))
+            start_range, finish_range, m2_values, t2_values = self._calculate_time_analysis(
+                self._text("RecFID_ComboBox_BuildFunction", "Gaussian")
+            )
         dialog = RecFIDTimeAnalysisDialog(self.parent)
         dialog.plot_data(start_range, finish_range, t2_values, m2_values)
         dialog.setWindowTitle("RecFID T2 Map")
@@ -276,7 +247,7 @@ class RecFIDController(BaseTabController):
         self._plot_window = dialog
 
     def save_statistics(self):
-        if not self.recfid_state.fid_result:
+        if not self.fid_result or self.extrapolation is None:
             self._warn("No build-up data", "Run RecFID analysis before exporting a T2 map.")
             return
         file_path, _ = QFileDialog.getSaveFileName(
@@ -288,17 +259,17 @@ class RecFIDController(BaseTabController):
         )
         if not file_path:
             return
+        combo = getattr(self.ui, "RecFID_ComboBox_BuildFunction")
         with busy_cursor():
-            for index in range(getattr(self.ui, "comboBox").count()):
-                self.ui.comboBox.setCurrentIndex(index)
-                start_range, finish_range, _m2, t2 = self._calculate_time_analysis(self.ui.comboBox.currentText())
+            for index in range(combo.count()):
+                combo.setCurrentIndex(index)
+                start_range, finish_range, _m2, t2 = self._calculate_time_analysis(combo.currentText())
                 ranges = [(begin, finish) for begin in start_range for finish in finish_range]
-                self._write_frequencies_t2(ranges, t2.flatten(), file_path, self.ui.comboBox.currentText())
+                self._write_frequencies_t2(ranges, t2.flatten(), file_path, combo.currentText())
         self._status(f"Saved RecFID statistics to {file_path}")
 
-    def exportSEMaxT2(self):
-        state = self.recfid_state
-        if state.extrapolation is None or state.se_max.size == 0:
+    def export_se_max_t2(self):
+        if self.extrapolation is None or not self.se_max_result:
             self._warn("No SE maxima", "Run RecFID analysis before exporting SE maxima and T2 values.")
             return
         file_path, _ = QFileDialog.getSaveFileName(
@@ -311,35 +282,75 @@ class RecFIDController(BaseTabController):
         if not file_path:
             return
         with open(file_path, "a", encoding="utf-8") as handle:
-            handle.write(f"Max Extrapolation: {state.extrapolation}\n")
+            handle.write(f"Max Extrapolation: {self.extrapolation}\n")
             handle.write("Echo Time\tT2\tRatio\tEcho Amp\n")
-            for echo_time, maximum, t2 in zip(state.echo_time_array, state.se_max, state.se_t2):
-                ratio = state.extrapolation / maximum if maximum else 0
+            for echo_time, maximum, t2 in zip(
+                self.se_max_result.get("echo_time", []),
+                self.se_max_result.get("maximum", []),
+                self.se_max_result.get("t2", []),
+            ):
+                ratio = self.extrapolation / maximum if maximum else 0
                 handle.write(f"{echo_time}\t{t2}\t{ratio}\t{maximum}\t\n")
             handle.write("\n")
         self._status(f"Saved RecFID SE maxima and T2 values to {file_path}")
 
+    def open_manual_echo_time_dialog(self):
+        if not self.selected_data_files:
+            self._warn("No SE files", "Load (M)SE files before assigning echo times manually.")
+            return
+        dialog = RecFIDManualEchoTimeDialog(self.selected_data_files, self.echo_time_values, self.parent)
+        if dialog.exec():
+            try:
+                self.echo_time_values = dialog.echo_times()
+                self.manual_echo_time_enabled = True
+            except ValueError as exc:
+                self._warn("Invalid echo time", str(exc))
+
     def save_results(self):
-        if not self.recfid_state.build_result:
+        if not self.build_result:
             self._warn("No RecFID result", "Run RecFID analysis before saving reconstructed FID results.")
             return
         directory = QFileDialog.getExistingDirectory(self.parent, "Select RecFID export directory")
         if not directory:
             return
         base = Path(directory)
-        build = self.recfid_state.build_result
-        np.savetxt(base / "recfid_built_fid.csv", np.column_stack((build["Time"], build["Re"])), delimiter=",", header="Time,Re", comments="")
-        np.savetxt(base / "recfid_built_fft.csv", np.column_stack((build["Freq"], build["Real_fft"])), delimiter=",", header="Frequency,Amplitude", comments="")
-        for widget_name, file_name in (("widgetBUNMRSignal", "recfid_built_fid.png"), ("widgetBUFFT", "recfid_built_fft.png")):
+        np.savetxt(
+            base / "recfid_built_fid.csv",
+            np.column_stack((self.build_result["Time"], self.build_result["Re"])),
+            delimiter=",",
+            header="Time,Re",
+            comments="",
+        )
+        np.savetxt(
+            base / "recfid_built_fft.csv",
+            np.column_stack((self.build_result["Freq"], self.build_result["Real_fft"])),
+            delimiter=",",
+            header="Frequency,Amplitude",
+            comments="",
+        )
+        for widget_name, file_name in (
+            ("RecFID_PlotWidget_BuildUpNMRSignal", "recfid_built_fid.png"),
+            ("RecFID_PlotWidget_BuildUpSpectra", "recfid_built_fft.png"),
+        ):
             widget = getattr(self.ui, widget_name, None)
             if widget is not None:
                 exporter = pyqtgraph.exporters.ImageExporter(widget.plotItem)
                 exporter.export(str(base / file_name))
         self._status(f"Saved RecFID results to {directory}")
 
+    # Backward-compatible method aliases used by previous controller wiring/tests.
+    reset = reset_tab
+    run = run_full_pipeline
+    compare = run_basic_data_analysis
+    se_analysis = run_se_analysis
+    manual_assignment = open_manual_echo_time_dialog
+    time_analysis = run_time_analysis
+    exportSEMaxT2 = export_se_max_t2
+
     def _calculate_time_analysis(self, function_name):
-        fid = self.recfid_state.fid_result
-        start_range, finish_range = recfid.time_range_grid(fid["Time_td_fid"], self._value("spinBoxTimeRange", 24))
+        start_range, finish_range = recfid.time_range_grid(
+            self.fid_result["Time_td_fid"], self._value("RecFID_SpinBox_TimeAnalysisRange", 24)
+        )
         m2 = []
         t2 = []
         for begin in start_range:
@@ -349,8 +360,14 @@ class RecFIDController(BaseTabController):
                     t2_build = 0
                 else:
                     try:
-                        _tb, _db, _df, freq, spectrum, m2_build, t2_build = recfid.analyze_build_up(
-                            fid["Time_td_fid"], fid["Re_td"], self.recfid_state.extrapolation, function_name, begin, finish, self._value("doubleSpinBox_5", 100.0)
+                        _tb, _db, _df, _freq, _spectrum, m2_build, t2_build = recfid.analyze_build_up(
+                            self.fid_result["Time_td_fid"],
+                            self.fid_result["Re_td"],
+                            self.extrapolation,
+                            function_name,
+                            begin,
+                            finish,
+                            self._value("RecFID_DoubleSpinBox_ApodizationSigma", 100.0),
                         )
                     except Exception:
                         logger.exception("RecFID time-analysis point failed: begin=%s finish=%s", begin, finish)
@@ -367,8 +384,8 @@ class RecFIDController(BaseTabController):
 
     def _write_frequencies_t2(self, ranges, t2s, file_path, function_name):
         with open(file_path, "a", encoding="utf-8") as handle:
-            handle.write(f"Name: {self.recfid_state.fid_files}\n")
-            handle.write(f"Mode: {self.recfid_state.mode}\n")
+            handle.write(f"Name: {self.selected_fid_files}\n")
+            handle.write(f"Mode: {self.recfid_mode}\n")
             handle.write(f"Function: {function_name}\n\n")
             for range_bf, t2 in zip(ranges, t2s):
                 handle.write(f"{range_bf[0]}\t{range_bf[1]}\t{t2}\t\n")
@@ -376,67 +393,129 @@ class RecFIDController(BaseTabController):
 
     def _analysis_options(self):
         return recfid.AnalysisOptions(
-            subtract_empty=self._checked("checkBox_subempty", True),
-            cut_beginning=self._checked("checkBox_cutbegin", True),
-            normalize_to_fid=self._checked("checkBox_normtofid", True),
-            normalize_from=self._value("doubleSpinBox", 70.0),
-            normalize_to=self._value("doubleSpinBox_2", 90.0),
-            long_component=self._checked("checkBox_longcomp", False),
-            long_component_from=self._value("doubleSpinBox_4", 55.0),
-            apodize_time_domain=self._checked("checkBox_td_apodization", True),
-            apodization_time=self._value("doubleSpinBox_5", 100.0),
-            adjust_frequency_phase=True,
-            adjust_fid_zero=self._checked("checkBox_adjust_zero", False),
-            fid_zero_shift=self._value("doubleSpinBox_3", 0.0),
-            smooth=self._checked("checkBoxSmooth", False),
-            smooth_order=int(self._value("spinBoxOrder", 1)),
-            smooth_window=int(self._value("spinBoxWindow", 5)),
+            subtract_empty=self._checked("RecFID_CheckBox_SubtractEmpty", True),
+            cut_beginning=self._checked("RecFID_CheckBox_CutBeginning", True),
+            normalize_to_fid=self._checked("RecFID_CheckBox_NormalizeToFID", True),
+            normalize_from=self._value("RecFID_DoubleSpinBox_NormalizeFrom", 70.0),
+            normalize_to=self._value("RecFID_DoubleSpinBox_NormalizeTo", 90.0),
+            long_component=self._checked("RecFID_CheckBox_LongComponent", False),
+            long_component_from=self._value("RecFID_DoubleSpinBox_LongComponentEnd", 55.0),
+            apodize_time_domain=self._checked("RecFID_CheckBox_TimeDomainApodization", True),
+            apodization_time=self._value("RecFID_DoubleSpinBox_ApodizationSigma", 100.0),
+            adjust_frequency_phase=self._checked("RecFID_CheckBox_AdjustFrequencyPhase", True),
+            adjust_fid_zero=self._checked("RecFID_CheckBox_AdjustZero", False),
+            fid_zero_shift=self._value("RecFID_DoubleSpinBox_ZeroShift", 0.0),
+            smooth=self._checked("RecFID_CheckBox_Smooth", False),
+            smooth_order=int(self._value("RecFID_SpinBox_SmoothOrder", 1)),
+            smooth_window=int(self._value("RecFID_SpinBox_SmoothWindow", 5)),
         )
 
     def _choose_files_for_comparison(self, number):
-        state = self.recfid_state
-        if state.mode == "se":
-            data = state.data_files[number]
-            data_empty = state.data_empty_files[number] if state.data_empty_files else None
+        if self.recfid_mode == "se":
+            data = self.selected_data_files[number]
+            data_empty = self.selected_data_empty_files[number] if self.selected_data_empty_files else None
         else:
-            data = state.data_files[0]
-            data_empty = state.data_empty_files[0] if state.data_empty_files else None
-        return data, data_empty, state.fid_files[0], state.fid_empty_files[0] if state.fid_empty_files else None
+            data = self.selected_data_files[0]
+            data_empty = self.selected_data_empty_files[0] if self.selected_data_empty_files else None
+        fid_empty = self.selected_fid_empty_files[0] if self.selected_fid_empty_files else None
+        return data, data_empty, self.selected_fid_files[0], fid_empty
 
     def _echo_times_for_se_files(self):
-        state = self.recfid_state
-        if state.manual_assignment:
-            return state.manual_echo_times
-        echo_time = []
+        if self.manual_echo_time_enabled:
+            return self.echo_time_values
+        echo_times = []
         try:
-            for file_name in state.data_files:
-                echo_time.append(recfid.extract_echo_time(file_name))
+            for file_name in self.selected_data_files:
+                echo_times.append(recfid.extract_echo_time(file_name))
         except ValueError:
-            self.manual_assignment()
-            if not state.manual_assignment:
+            self.open_manual_echo_time_dialog()
+            if not self.manual_echo_time_enabled:
                 raise
-            echo_time = state.manual_echo_times
-        return echo_time
-
-    def _update_mode_from_data_files(self):
-        count = len(self.recfid_state.data_files)
-        if count > 4:
-            self.recfid_state.mode = "se"
-        elif count == 1:
-            self.recfid_state.mode = "mse"
-        elif count > 1:
-            self.recfid_state.mode = "single_se"
-        else:
-            self.recfid_state.mode = "none"
+            echo_times = self.echo_time_values
+        return echo_times
 
     def _validate_required_files(self):
-        if not self.recfid_state.fid_files:
+        if not self.selected_fid_files:
             self._warn("No FID file", "Load a FID file first.")
             return False
-        if not self.recfid_state.data_files:
+        if not self.selected_data_files:
             self._warn("No (M)SE file", "Load (M)SE data first.")
             return False
+        if self.recfid_mode not in {"mse", "se"}:
+            self.recfid_mode = "mse" if len(self.selected_data_files) == 1 else "se" if len(self.selected_data_files) > 1 else "none"
         return True
+
+    def _validate_empty_data_files(self):
+        if not self._checked("RecFID_CheckBox_SubtractEmpty", True) or not self.selected_data_empty_files:
+            return True
+        if self.recfid_mode == "mse" and len(self.selected_data_empty_files) == 1:
+            return True
+        if self.recfid_mode == "se" and len(self.selected_data_empty_files) == len(self.selected_data_files):
+            return True
+        self._warn(
+            "Different amount of files",
+            "The number of empty data files must match the number of data files when subtracting empty data. Empty data files were cleared.",
+        )
+        self.selected_data_empty_files = []
+        return True
+
+    def _plot_original_analysis(self, result):
+        graph_nmr = getattr(self.ui, "RecFID_PlotWidget_OriginalNMRSignal", None)
+        if graph_nmr is not None:
+            graph_nmr.clear()
+            graph_nmr.show()
+            graph_nmr.plot(result.time_data, result.signal_data, pen=mkPen("r", width=3), symbol=None)
+            graph_nmr.plot(result.time_fid, result.signal_fid, pen=mkPen("b", width=3), symbol=None)
+        graph_fft = getattr(self.ui, "RecFID_PlotWidget_OriginalSpectra", None)
+        if graph_fft is not None:
+            graph_fft.clear()
+            graph_fft.show()
+            graph_fft.plot(result.frequency_data, result.spectrum_data, pen=mkPen("r", width=3), symbol=None)
+            graph_fft.plot(result.frequency_fid, result.spectrum_fid, pen=mkPen("b", width=3), symbol=None)
+
+    def _plot_se_maximum(self):
+        graph = getattr(self.ui, "RecFID_PlotWidget_SEMax", None)
+        if graph is None:
+            return
+        graph.clear()
+        graph.show()
+        graph.plot([0], [self.extrapolation], pen="r", symbolPen=None, symbol="o", symbolBrush="r")
+        graph.plot(self.se_max_result["fit_x"], self.se_max_result["fit_y"], pen=mkPen("k", width=3, style=Qt.DashLine), symbol=None)
+        graph.plot(
+            self.se_max_result["echo_time"],
+            self.se_max_result["maximum"],
+            pen=None,
+            symbolPen=None,
+            symbol="o",
+            symbolBrush="b",
+        )
+
+    def _plot_build_up(self, freq_build, spectrum_build, time_build, data_build):
+        graph_build_fid = getattr(self.ui, "RecFID_PlotWidget_BuildUpNMRSignal", None)
+        if graph_build_fid is not None:
+            graph_build_fid.clear()
+            graph_build_fid.plot(time_build, data_build, pen=mkPen("b", width=3), symbol=None)
+            graph_build_fid.plot(self.fid_result["Time_td_fid"], self.fid_result["Re_td"], pen=mkPen("r", width=3), symbol=None)
+        graph_build_fft = getattr(self.ui, "RecFID_PlotWidget_BuildUpSpectra", None)
+        if graph_build_fft is not None:
+            graph_build_fft.clear()
+            graph_build_fft.plot(freq_build, spectrum_build, pen=mkPen("b", width=3), symbol=None)
+            graph_build_fft.plot(self.fid_result["Freq"], self.fid_result["Real_fft"], pen=mkPen("r", width=3), symbol=None)
+
+    def _clear_or_hide(self, widget_name, hide=False):
+        widget = getattr(self.ui, widget_name, None)
+        if widget is not None:
+            widget.clear()
+            if hide:
+                widget.hide()
+
+    def _select_files(self, multiple):
+        dialog = QFileDialog(self.parent)
+        dialog.setFileMode(QFileDialog.ExistingFiles if multiple else QFileDialog.ExistingFile)
+        dialog.setNameFilter("Data (*.dat *.txt *.csv)")
+        if dialog.exec():
+            return dialog.selectedFiles()
+        return None
 
     def _connect(self, widget_name, signal_name, slot):
         widget = getattr(self.ui, widget_name, None)
@@ -454,6 +533,7 @@ class RecFIDController(BaseTabController):
         if widget is None:
             return
         widget.clear()
+        widget.show()
         widget.getAxis("left").setLabel(ylabel)
         widget.getAxis("bottom").setLabel(xlabel)
         widget.setTitle(title)
