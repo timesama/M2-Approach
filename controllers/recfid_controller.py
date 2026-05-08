@@ -14,6 +14,8 @@ from calculations import recfid_signal as recfid
 from controllers.base_tab_controller import BaseTabController
 from dialogs.recfid_dialogs import RecFIDTimeAnalysisDialog
 from dialogs.recfid_echo_time_dialog import RecFIDEchoTimeDialog
+from dialogs.open_files_dialog import OpenFilesDialog
+import dialogs.open_files_dialog as open_files_dialog_module
 from utils.ui_busy import busy_cursor
 
 logger = logging.getLogger(__name__)
@@ -39,8 +41,11 @@ class RecFIDController(BaseTabController):
         self.se_max_result = {}
         self.extrapolation = None
         self.build_result = {}
+        self.time_analysis_result = {}
+        self._close_time_analysis_dialog()
         if clear_plots:
             self.initialize_plots()
+            self._clear_result_text_widgets()
 
     def connect_signals(self):
         self._connect("RecFID_Button_LoadFID", "clicked", self.load_fid_files)
@@ -65,7 +70,6 @@ class RecFIDController(BaseTabController):
 
     def initialize_plots(self):
         self._setup_graph("RecFID_PlotWidget_OriginalNMRSignal", "Time, μs", "Amplitude", "FID / data")
-        self._setup_graph("RecFID_PlotWidget_OriginalSpectra", "Frequency, MHz", "Amplitude, a.u", "FFT")
         self._setup_graph("RecFID_PlotWidget_SEMax", "Echo Time, μs", "Amplitude", "SE Max")
         self._setup_graph("RecFID_PlotWidget_BuildUpNMRSignal", "Time, μs", "Amplitude", "FID Build")
         self._setup_graph("RecFID_PlotWidget_BuildUpSpectra", "Frequency, MHz", "Amplitude, a.u", "FFT Build")
@@ -106,7 +110,8 @@ class RecFIDController(BaseTabController):
             if not self._validate_required_files() or not self._validate_empty_data_files():
                 return
             try:
-                self.run_basic_data_analysis()
+                if self.run_basic_data_analysis() is None:
+                    return
                 if self.extrapolate() is None:
                     return
                 self.build_up()
@@ -130,6 +135,9 @@ class RecFIDController(BaseTabController):
     def run_basic_data_analysis(self):
         data, data_empty, fid, fid_empty = self._choose_files_for_comparison(0)
         result = recfid.analyze_signal(data, fid, data_empty, fid_empty, self._analysis_options())
+        result = self._apply_mse_divider_to_analysis_result(result)
+        if result is None:
+            return None
         self.fid_result = {
             "Time_td_fid": result.time_fid,
             "Re_td": result.signal_fid,
@@ -185,14 +193,13 @@ class RecFIDController(BaseTabController):
             self._plot_se_maximum()
         elif self.recfid_mode == "mse":
             result = self.run_basic_data_analysis()
-            raw_maximum = float(np.max(result.signal_data))
-            divider = self._validated_mse_divider()
-            if divider is None:
+            if result is None:
                 self.extrapolation = None
                 self.se_max_result = {}
                 self.build_result = {}
                 return None
-            self.extrapolation = raw_maximum / divider
+            raw_maximum = float(np.max(result.signal_data))
+            self.extrapolation = raw_maximum
             self.se_max_result = {
                 "echo_time": np.array([0.0]),
                 "maximum": np.array([raw_maximum]),
@@ -251,6 +258,12 @@ class RecFIDController(BaseTabController):
         dialog.resize(800, 600)
         dialog.show()
         self._plot_window = dialog
+        self.time_analysis_result = {
+            "start_range": start_range,
+            "finish_range": finish_range,
+            "m2": m2_values,
+            "t2": t2_values,
+        }
 
     def save_statistics(self):
         if not self.fid_result or self.extrapolation is None:
@@ -469,6 +482,31 @@ class RecFIDController(BaseTabController):
         self.selected_data_empty_files = []
         return True
 
+
+    def _apply_mse_divider_to_analysis_result(self, result):
+        if self.recfid_mode != "mse":
+            return result
+        divider = self._validated_mse_divider()
+        if divider is None:
+            return None
+        # In MSE mode the divider represents phase averaging; apply it before
+        # plotting, extrapolation, and build-up so FID and MSE amplitudes share
+        # the same scaled reference frame.
+        return recfid.SignalAnalysisResult(
+            time_data=result.time_data,
+            signal_data=result.signal_data / divider,
+            time_fid=result.time_fid,
+            signal_fid=result.signal_fid / divider,
+            frequency_data=result.frequency_data,
+            spectrum_data=result.spectrum_data / divider,
+            frequency_fid=result.frequency_fid,
+            spectrum_fid=result.spectrum_fid / divider,
+            m2_data=result.m2_data,
+            t2_data=result.t2_data,
+            m2_fid=result.m2_fid,
+            t2_fid=result.t2_fid,
+        )
+
     def _data_result_from_analysis(self, result):
         return {
             "Time_td": result.time_data,
@@ -490,54 +528,29 @@ class RecFIDController(BaseTabController):
         if not self.fid_result:
             return
         graph_nmr = getattr(self.ui, "RecFID_PlotWidget_OriginalNMRSignal", None)
-        if graph_nmr is not None:
-            self._prepare_plot_with_legend(graph_nmr)
-            fid_label = f"FID: {Path(self.selected_fid_files[0]).name}" if self.selected_fid_files else "FID"
+        if graph_nmr is None:
+            return
+        self._prepare_plot(graph_nmr)
+        graph_nmr.plot(
+            self.fid_result["Time_td_fid"],
+            self.fid_result["Re_td"],
+            pen=mkPen(QColor(220, 20, 60), width=3),
+            symbol=None,
+        )
+        for index, result in enumerate(self.data_results.values()):
             graph_nmr.plot(
-                self.fid_result["Time_td_fid"],
-                self.fid_result["Re_td"],
-                pen=mkPen(QColor(220, 20, 60), width=3),
+                result["Time_td"],
+                result["Re_td"],
+                pen=mkPen(self._winter_color(index, max(len(self.data_results), 1)), width=2),
                 symbol=None,
-                name=fid_label,
             )
-            for index, (file_path, result) in enumerate(self.data_results.items()):
-                color = self._winter_color(index, max(len(self.data_results), 1))
-                graph_nmr.plot(
-                    result["Time_td"],
-                    result["Re_td"],
-                    pen=mkPen(color, width=2),
-                    symbol=None,
-                    name=f"Data {index + 1}: {Path(file_path).name}",
-                )
+        self._status("Original NMR plot: red = FID; data curves use a winter color scale by echo time/file order.")
 
-        graph_fft = getattr(self.ui, "RecFID_PlotWidget_OriginalSpectra", None)
-        if graph_fft is not None:
-            self._prepare_plot_with_legend(graph_fft)
-            fid_label = f"FID: {Path(self.selected_fid_files[0]).name}" if self.selected_fid_files else "FID"
-            graph_fft.plot(
-                self.fid_result["Freq"],
-                self.fid_result["Real_fft"],
-                pen=mkPen(QColor(220, 20, 60), width=3),
-                symbol=None,
-                name=fid_label,
-            )
-            for index, (file_path, result) in enumerate(self.data_results.items()):
-                color = self._winter_color(index, max(len(self.data_results), 1))
-                graph_fft.plot(
-                    result["Freq"],
-                    result["Real_fft"],
-                    pen=mkPen(color, width=2),
-                    symbol=None,
-                    name=f"Data {index + 1}: {Path(file_path).name}",
-                )
-
-    def _prepare_plot_with_legend(self, graph):
+    def _prepare_plot(self, graph):
         graph.clear()
         graph.show()
         legend = getattr(graph.plotItem, "legend", None)
-        if legend is None:
-            graph.addLegend()
-        else:
+        if legend is not None:
             legend.clear()
 
     def _winter_color(self, index, total):
@@ -583,9 +596,8 @@ class RecFIDController(BaseTabController):
                 widget.hide()
 
     def _select_files(self, multiple):
-        dialog = QFileDialog(self.parent)
-        dialog.setFileMode(QFileDialog.ExistingFiles if multiple else QFileDialog.ExistingFile)
-        dialog.setNameFilter("Data (*.dat *.txt *.csv)")
+        open_files_dialog_module.State_multiple_files = multiple
+        dialog = OpenFilesDialog(self.parent)
         if dialog.exec():
             return dialog.selectedFiles()
         return None
@@ -606,10 +618,29 @@ class RecFIDController(BaseTabController):
         if widget is None:
             return
         widget.clear()
+        legend = getattr(widget.plotItem, "legend", None)
+        if legend is not None:
+            legend.clear()
         widget.show()
         widget.getAxis("left").setLabel(ylabel)
         widget.getAxis("bottom").setLabel(xlabel)
         widget.setTitle(title)
+
+    def _clear_result_text_widgets(self):
+        for widget_name in (
+            "RecFID_TextEdit_OriginalResults",
+            "RecFID_TextEdit_SEMaxResult",
+            "RecFID_TextEdit_BuildUpResults",
+        ):
+            widget = getattr(self.ui, widget_name, None)
+            if widget is not None:
+                widget.clear()
+
+    def _close_time_analysis_dialog(self):
+        dialog = getattr(self, "_plot_window", None)
+        if dialog is not None:
+            dialog.close()
+            self._plot_window = None
 
     def _checked(self, widget_name, default=False):
         widget = getattr(self.ui, widget_name, None)
