@@ -567,7 +567,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>6</number>
+              <number>0</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -5667,7 +5667,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <item>
                      <widget class="QCheckBox" name="RecFID_CheckBox_AdjustZero">
                       <property name="text">
-                       <string>Shift NMR Signal</string>
+                       <string>Shift FID Signal</string>
                       </property>
                       <property name="checked">
                        <bool>false</bool>
@@ -5996,7 +5996,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        <item>
                         <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_MseDivider">
                          <property name="prefix">
-                          <string>derive by </string>
+                          <string>divide by </string>
                          </property>
                          <property name="suffix">
                           <string/>
