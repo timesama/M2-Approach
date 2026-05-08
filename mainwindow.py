@@ -18,7 +18,7 @@ from pyqtgraph import mkColor, mkPen
 from ui_Form import Ui_NMR
 from controllers import (
     SETabController, DQTabController, DQTempTabController,
-    T1T2TabController, DQMQTabController, GSTabController, GeneralSEDQController
+    T1T2TabController, DQMQTabController, GSTabController, GeneralSEDQController, RecFIDController
 )
 from dialogs.open_files_dialog import OpenFilesDialog
 import dialogs.open_files_dialog as open_files_dialog_module
@@ -87,6 +87,7 @@ class MainWindow(QMainWindow):
         self.t1t2_controller = T1T2TabController(ui=self.ui, state=self.app_state, parent=self)
         self.dqmq_controller = DQMQTabController(ui=self.ui, state=self.app_state, parent=self)
         self.gs_controller = GSTabController(ui=self.ui, state=self.app_state, parent=self)
+        self.recfid_controller = RecFIDController(ui=self.ui, state=self.app_state, parent=self)
         self.general_se_dq_controller = GeneralSEDQController(ui=self.ui, state=self.app_state, parent=self, se_controller=self.se_controller, dq_controller=self.dq_controller)
 
         self.state()
@@ -163,11 +164,13 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.GS_PlotWidget_RawSignal, "√Time, √us", "Signal", "")
         self.setup_graph(self.ui.GS_PlotWidget_SqrtTime, "X axis", "√Time, √us", "")
         self.setup_graph(self.ui.DQTemp_PlotWidget_PolyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
+        self.recfid_controller.initialize_plots()
         self.se_controller.connect_signals()
         self.dq_controller.connect_signals()
         self.dq_temp_controller.connect_signals()
         self.t1t2_controller.connect_signals()
         self.gs_controller.connect_signals()
+        self.recfid_controller.connect_signals()
 
         # Table Headers
         self.copy_enabler = TableCopyEnabler(self)
@@ -641,9 +644,13 @@ class MainWindow(QMainWindow):
 
     def state(self):
         """Update the cached tab name when the user changes tabs."""
-        current_tab_index =  self.ui.tabWidget.currentIndex()
+        current_tab_index = self.ui.tabWidget.currentIndex()
+        current_widget = self.ui.tabWidget.currentWidget()
+        current_name = current_widget.objectName() if current_widget is not None else ""
 
-        if current_tab_index == 0:
+        if current_name == "g_RecFID":
+            self.tab = 'RecFID'
+        elif current_tab_index == 0:
             self.tab = 'SE'
         elif current_tab_index == 1:
             self.tab = 'DQ'
@@ -873,6 +880,10 @@ class MainWindow(QMainWindow):
                     QMessageBox.Ok,
                 )
                 return
+
+        elif self.tab == 'RecFID':
+            self.recfid_controller.save_results()
+            return
 
         dialog = SaveFilesDialog(self)
         dialog.save_data_as_csv(self, table, files, default_name)
