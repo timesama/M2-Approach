@@ -5733,22 +5733,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="PlotWidget" name="RecFID_PlotWidget_OriginalSpectra" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>300</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <widget class="PlotWidget" name="RecFID_PlotWidget_SEMax" native="true">
                    <property name="minimumSize">
                     <size>
