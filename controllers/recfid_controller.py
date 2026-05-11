@@ -559,7 +559,6 @@ class RecFIDController(BaseTabController):
                 pen=mkPen(self._winter_color(index, max(len(self.data_results), 1)), width=3),
                 symbol=None,
             )
-        self._autoscale_after_plot(graph_nmr)
         # Gradient label is the compact visible color-scale indicator for data curves.
         self._add_original_signal_gradient_label(graph_nmr)
         self._status("Original NMR plot: black = FID; data curves use a winter color scale by echo time/file order.")
@@ -659,7 +658,6 @@ class RecFIDController(BaseTabController):
             symbol="o",
             symbolBrush="b",
         )
-        self._autoscale_after_plot(graph)
 
     def _plot_build_up(self, freq_build, spectrum_build, time_build, data_build):
         graph_build_fid = getattr(self.ui, "RecFID_PlotWidget_BuildUpNMRSignal", None)
@@ -667,13 +665,11 @@ class RecFIDController(BaseTabController):
             graph_build_fid.clear()
             graph_build_fid.plot(time_build, data_build, pen=mkPen("b", width=4), symbol=None)
             graph_build_fid.plot(self.fid_result["Time_td_fid"], self.fid_result["Re_td"], pen=mkPen("r", width=3), symbol=None)
-            self._autoscale_after_plot(graph_build_fid)
         graph_build_fft = getattr(self.ui, "RecFID_PlotWidget_BuildUpSpectra", None)
         if graph_build_fft is not None:
             graph_build_fft.clear()
             graph_build_fft.plot(freq_build, spectrum_build, pen=mkPen("b", width=4), symbol=None)
             graph_build_fft.plot(self.fid_result["Freq"], self.fid_result["Real_fft"], pen=mkPen("r", width=3), symbol=None)
-            self._autoscale_after_plot(graph_build_fft)
 
     def _clear_or_hide(self, widget_name, hide=False):
         widget = getattr(self.ui, widget_name, None)
@@ -714,14 +710,6 @@ class RecFIDController(BaseTabController):
         widget.getAxis("left").setLabel(ylabel)
         widget.getAxis("bottom").setLabel(xlabel)
         widget.setTitle(title)
-        # Keep autoscaling enabled for future data without forcing an autorange
-        # calculation while the plot is empty, which can disturb startup axes.
-        widget.enableAutoRange(x=True, y=True)
-
-    def _autoscale_after_plot(self, graph):
-        graph.enableAutoRange(x=True, y=True)
-        graph.autoRange()
-
     def _capture_initial_input_widget_state(self):
         self._initial_input_widget_state = {}
         for widget_name in self._resettable_input_widget_names():
