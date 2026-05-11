@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.exporters
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 from pyqtgraph import mkPen
@@ -27,9 +27,21 @@ class RecFIDController(BaseTabController):
 
     def __init__(self, ui, state, parent=None):
         super().__init__(ui, state, parent)
+        self._capture_initial_input_widget_state()
         self.reset_tab(clear_plots=False)
 
-    def reset_tab(self, clear_plots=True):
+    def clear_reconstruct_fid_tab(self, *_args):
+        """Reset RecFID as if the tab had just been opened.
+
+        QPushButton.clicked emits a checked-state boolean.  Keep the public
+        reset_tab(clear_plots=...) API separate from the button slot so that
+        the emitted ``False`` value cannot be interpreted as ``clear_plots``
+        and leave stale curves visible.
+        """
+        self.reset_tab(clear_plots=True, reset_inputs=True)
+        self._status("Cleared Reconstruct FID tab.")
+
+    def reset_tab(self, clear_plots=True, reset_inputs=False):
         self.recfid_mode = "none"
         self.selected_fid_files = []
         self.selected_data_files = []
@@ -45,6 +57,8 @@ class RecFIDController(BaseTabController):
         self.time_analysis_result = {}
         self._clear_original_signal_gradient_label()
         self._close_time_analysis_dialog()
+        if reset_inputs:
+            self._reset_input_widgets_to_initial_state()
         if clear_plots:
             self.initialize_plots()
             self._clear_result_text_widgets()
@@ -54,7 +68,7 @@ class RecFIDController(BaseTabController):
         self._connect("RecFID_Button_LoadData", "clicked", self.load_data_files)
         self._connect("RecFID_Button_LoadFIDEmpty", "clicked", self.load_empty_fid_files)
         self._connect("RecFID_Button_LoadDataEmpty", "clicked", self.load_empty_data_files)
-        self._connect("RecFID_Button_Clear", "clicked", self.reset_tab)
+        self._connect("RecFID_Button_Clear", "clicked", self.clear_reconstruct_fid_tab)
         self._connect("RecFID_Button_ManualEchoTimes", "clicked", self.open_manual_echo_time_dialog)
         self._connect("RecFID_Button_SaveStatistics", "clicked", self.save_statistics)
         self._connect("RecFID_Button_ExportSEMaxT2", "clicked", self.export_se_max_t2)
@@ -593,13 +607,26 @@ class RecFIDController(BaseTabController):
 
     def _clear_original_signal_gradient_label(self):
         label = getattr(self, "original_signal_gradient_label", None)
+        update_position = getattr(self, "original_signal_gradient_label_update", None)
+        if update_position is not None:
+            graph = getattr(self.ui, "RecFID_PlotWidget_OriginalNMRSignal", None)
+            if graph is not None:
+                try:
+                    graph.getViewBox().sigResized.disconnect(update_position)
+                except (RuntimeError, TypeError):
+                    logger.debug("RecFID gradient label resize callback was already disconnected", exc_info=True)
+            self.original_signal_gradient_label_update = None
         if label is not None:
             graph = getattr(self.ui, "RecFID_PlotWidget_OriginalNMRSignal", None)
             if graph is not None:
                 try:
                     graph.removeItem(label)
                 except (RuntimeError, ValueError):
-                    logger.debug("RecFID gradient label was already removed", exc_info=True)
+                    logger.debug("RecFID gradient label was already removed from the plot item", exc_info=True)
+            try:
+                label.setParentItem(None)
+            except RuntimeError:
+                logger.debug("RecFID gradient label was already deleted", exc_info=True)
             self.original_signal_gradient_label = None
 
     def _prepare_plot(self, graph):
@@ -680,9 +707,65 @@ class RecFIDController(BaseTabController):
         if legend is not None:
             legend.clear()
         widget.show()
+        widget.enableAutoRange()
+        widget.autoRange()
         widget.getAxis("left").setLabel(ylabel)
         widget.getAxis("bottom").setLabel(xlabel)
         widget.setTitle(title)
+
+    def _capture_initial_input_widget_state(self):
+        self._initial_input_widget_state = {}
+        for widget_name in self._resettable_input_widget_names():
+            widget = getattr(self.ui, widget_name, None)
+            if widget is None:
+                continue
+            if hasattr(widget, "isChecked"):
+                self._initial_input_widget_state[widget_name] = ("checked", widget.isChecked())
+            elif hasattr(widget, "value"):
+                self._initial_input_widget_state[widget_name] = ("value", widget.value())
+            elif hasattr(widget, "currentIndex"):
+                self._initial_input_widget_state[widget_name] = ("current_index", widget.currentIndex())
+
+    def _reset_input_widgets_to_initial_state(self):
+        for widget_name, (state_type, value) in getattr(self, "_initial_input_widget_state", {}).items():
+            widget = getattr(self.ui, widget_name, None)
+            if widget is None:
+                continue
+            blocker = QSignalBlocker(widget)
+            try:
+                if state_type == "checked":
+                    widget.setChecked(value)
+                elif state_type == "value":
+                    widget.setValue(value)
+                elif state_type == "current_index":
+                    widget.setCurrentIndex(value)
+            finally:
+                del blocker
+
+    def _resettable_input_widget_names(self):
+        return (
+            "RecFID_CheckBox_SubtractEmpty",
+            "RecFID_CheckBox_CutBeginning",
+            "RecFID_CheckBox_NormalizeToFID",
+            "RecFID_DoubleSpinBox_NormalizeFrom",
+            "RecFID_DoubleSpinBox_NormalizeTo",
+            "RecFID_CheckBox_LongComponent",
+            "RecFID_DoubleSpinBox_LongComponentEnd",
+            "RecFID_CheckBox_Smooth",
+            "RecFID_SpinBox_SmoothOrder",
+            "RecFID_SpinBox_SmoothWindow",
+            "RecFID_CheckBox_TimeDomainApodization",
+            "RecFID_DoubleSpinBox_ApodizationSigma",
+            "RecFID_CheckBox_AdjustZero",
+            "RecFID_DoubleSpinBox_ZeroShift",
+            "RecFID_ComboBox_BuildFunction",
+            "RecFID_DoubleSpinBox_BuildFrom",
+            "RecFID_DoubleSpinBox_BuildTo",
+            "RecFID_SpinBox_TimeAnalysisRange",
+            "RecFID_DoubleSpinBox_SEFitFrom",
+            "RecFID_DoubleSpinBox_SEFitTo",
+            "RecFID_DoubleSpinBox_MseDivider",
+        )
 
     def _clear_result_text_widgets(self):
         for widget_name in (
