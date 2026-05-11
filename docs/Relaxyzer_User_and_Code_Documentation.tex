@@ -1,0 +1,977 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[strings]{underscore}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black,
+  citecolor=blue!60!black
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!6},
+  columns=fullflexible
+}
+
+\newcommand{\Relaxyzer}{Relaxyzer}
+\newcommand{\TtwoStar}{T_2^{\ast}}
+\newcommand{\Mtwo}{M_2}
+\newcommand{\Dres}{D_{\mathrm{res}}}
+\newcommand{\nDQ}{n_{\mathrm{DQ}}}
+\newcommand{\todoverify}{\textbf{to be verified against code behavior}}
+
+\title{\Relaxyzer{} Software Documentation}
+\author{Generated from the Relaxyzer source code}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\Relaxyzer{} is software for processing and analyzing NMR data. It was initially created to speed up analysis of data obtained from Resonance Systems equipment and later expanded into a broader tool with multiple analysis workflows. The current codebase implements tab-based workflows for FID/Solid Echo/MSE processing, Double Quantum analysis with an \Mtwo{} approach, temperature comparison of DQ-derived distributions, \(T_1\)/\(T_2\) relaxation fitting, DQ/MQ build-up and \Dres{} fitting, and Goldman--Shen domain-size estimation. This document describes what each tab does, what files it accepts, what the user sees, how results are saved or loaded, and which functions/classes implement the calculations. It is intentionally an implementation-oriented manual, not a complete NMR physics textbook.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{What Relaxyzer is}
+\Relaxyzer{} is a desktop GUI application written in Python with PySide6 and pyqtgraph. The entry point creates a \texttt{QApplication}, constructs \texttt{MainWindow}, and shows the tabbed user interface. The code is organized around a central \texttt{MainWindow} object, tab-specific controllers in \texttt{controllers/}, and numerical helper modules in \texttt{Calculator.py} and \texttt{calculations/}.
+
+\subsection{Supported NMR data types}
+Based on the implemented loaders and controllers, the software supports the following practical workflows:
+\begin{itemize}[noitemsep]
+  \item FID, Free Induction Decay, Solid Echo, and MSE-style three-column time-domain files for the SE workflow.
+  \item DQ files that contain DQ filtering time data and three-column NMR signal data, processed with the same time/frequency-domain pipeline as SE.
+  \item Saved DQ distribution tables for temperature-dependent DQ comparison.
+  \item \(T_1\) and \(T_2\) relaxation curves in two-column CSV, tab-separated text, and generic numeric two-column files.
+  \item DQMQ raw files with time, DQ, and reference channels.
+  \item Goldman--Shen spin-diffusion text files with time-like and short/medium/long signal columns.
+\end{itemize}
+Legacy Stelar \texttt{.sef} files are explicitly rejected by the current \(T_1/T_2\) controller; the user is instructed to convert such data to the supported text/table/CSV formats.
+
+\subsection{Program philosophy}
+The application follows a repeated workflow: select files, parse numeric columns, compute tab-specific derived quantities, display raw and fitted curves, populate an editable results table, then save the table and the source-file list. The GUI does not hide the intermediate tables: many subsequent plots and fits read from table columns, which makes the workflow transparent but also means users should avoid editing numeric result columns unless they intend to influence later calculations.
+
+\subsection{Intended users}
+This document is intended for users and developers who understand basic NMR concepts such as FID, echo time, relaxation time, DQ build-up, and distributions. It explains the implemented calculations only to the depth needed to understand the software output.
+
+\subsection{Scope and exclusions}
+The document covers the visible workflows requested for the SE, DQ, DQ(Temp), T1T2, DQMQ, and Goldman--Shen tabs. It also notes shared save/load behavior and developer-facing implementation details. It does not attempt a full derivation of NMR relaxation theory, spin diffusion theory, or the physical origin of DQ kernels. When a behavior is not clear from the code, it is marked as \todoverify{}.
+
+\section{General Program Structure}
+
+\subsection{Main window and tab organization}
+\texttt{main.py} starts the application and opens \texttt{MainWindow}. \texttt{MainWindow} creates controller instances for each major tab:
+\begin{itemize}[noitemsep]
+  \item \texttt{SETabController} for the SE table, plots, grouping, and Arrhenius/activation-energy view.
+  \item \texttt{DQTabController} for DQ table linearization, DQ distribution fitting, and plots.
+  \item \texttt{DQTempTabController} for DQ temperature comparison.
+  \item \texttt{T1T2TabController} for relaxation-curve parsing and exponential fitting.
+  \item \texttt{DQMQTabController} for DQMQ build-up processing, \nDQ{} calculation, integral-sum overlay, and \Dres{} fitting.
+  \item \texttt{GSTabController} for Goldman--Shen/spin-diffusion fits and domain-size calculation.
+  \item \texttt{GeneralSEDQController} for the shared SE/DQ time-domain and frequency-domain analysis pipeline.
+\end{itemize}
+
+\subsection{Common workflow}
+A typical tab follows this sequence:
+\begin{enumerate}
+  \item Select one or more input files using \texttt{OpenFilesDialog}. The dialog accepts \texttt{.dat}, \texttt{.txt}, and \texttt{.csv} files at the UI filter level.
+  \item The active controller loads and validates the selected file(s).
+  \item Numeric arrays are stored in dictionaries or tables owned by \texttt{MainWindow}.
+  \item The controller computes tab-specific quantities and writes them into a \texttt{QTableWidget}.
+  \item pyqtgraph plot widgets are updated from either arrays or table columns.
+  \item The user may change fitting ranges, initial parameters, units, checkboxes, or selected table rows; many controls trigger recalculation through \texttt{editingFinished}, \texttt{clicked}, or selection-change signals.
+  \item The active tab can be saved as a CSV table. A companion \texttt{\_files.json} file stores source-file paths, and SE/DQ also store manual phasing data when present.
+\end{enumerate}
+
+\subsection{Common UI concepts}
+\begin{itemize}
+  \item \textbf{Tables.} Tables are the main result store. Some workflows read later calculations directly from the table.
+  \item \textbf{Plots.} Plot widgets show raw data, fitted curves, comparison trends, and highlighted selected points.
+  \item \textbf{Status messages.} Controllers call \texttt{show\_status} or \texttt{\_status}; messages are also logged.
+  \item \textbf{Grouping.} SE, T1T2, and Goldman--Shen support a grouping dialog for grouped plots or table grouping. Exact grouping semantics outside SE plotting are \todoverify{}.
+  \item \textbf{Manual phasing.} SE and DQ can store phased frequency-domain spectra keyed by filename and reuse them during recalculation/loading.
+\end{itemize}
+
+\subsection{Common data assumptions}
+\begin{itemize}
+  \item Most raw SE/DQ/DQMQ files are assumed to be numeric three-column files: time or experimental axis, real/DQ channel, imaginary/reference channel.
+  \item Several parsers skip a first header row for tab-separated files, but generic numeric loaders do not.
+  \item Filename patterns are frequently used to infer temperature, DQ filtering time, or comparison x-axis values. If the pattern is missing, controllers usually use zero or the row index.
+  \item Time units are taken as supplied, except where a tab provides an explicit seconds/milliseconds selector or fixed labels.
+\end{itemize}
+
+\subsection{Common save/load behavior}
+The active tab's \texttt{Save} action writes the visible table to CSV with no header row. A companion JSON file named from the same base path plus \texttt{\_files.json} stores source file paths. Loading a saved table repopulates the active tab's table and source-file list, then triggers the tab-specific refresh routine. DQMQ additionally exports integral-sum and \Dres{} results if those calculations exist.
+
+\subsection{Common error handling}
+Controllers generally catch parsing or fitting exceptions, show a \texttt{QMessageBox.warning}, log the error, skip the bad file, fill failed fit values with \texttt{NaN}, or reset plots. Long numerical fits use high \texttt{maxfev} values and run under a busy cursor, but they are not implemented as background worker threads.
+
+\section{SE Tab}
+
+\subsection{Purpose and Scope}
+The SE tab processes FID, Free Induction Decay, Solid Echo, and MSE-like time-domain data. It computes solid content (SC), the second spectral moment \Mtwo{}, and \TtwoStar{}. It can also make an Arrhenius-style activation-energy plot from \TtwoStar{} values over temperature.
+
+\subsection{Step-by-Step User Workflow}
+\begin{enumerate}
+  \item Open the SE tab.
+  \item Click the main file-selection button and select one or more \texttt{.dat}, \texttt{.txt}, or \texttt{.csv} numeric data files.
+  \item Optionally add more files with the add button.
+  \item In settings, optionally enable glycerol/reference correction, empty/baseline subtraction, long-component subtraction, and FFT smoothing.
+  \item Click Start/Analyze. The shared SE/DQ controller reads each file, performs time-domain correction, FFT processing, baseline correction, apodization, \Mtwo{} and \TtwoStar{} calculation, then writes a row to the SE table.
+  \item Choose the SE plot y-axis: SC, \Mtwo{}, or \TtwoStar{}.
+  \item Optionally use manual phasing, then accept the phased spectrum so \Mtwo{} and \TtwoStar{} are updated.
+  \item Optionally group rows for overlaid trend lines.
+  \item Optionally open the activation-energy panel, set start/end row trimming and Celsius-to-Kelvin conversion, and compute the Arrhenius fit.
+  \item Save the table and source-file list.
+\end{enumerate}
+
+\subsection{Accepted File Formats}
+Raw SE analysis uses \texttt{numpy.loadtxt} and expects at least three numeric columns:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Column & Meaning in code & Notes \\
+\midrule
+0 & Time & Used for FID/FFT axes. \\
+1 & Real signal & Used in time-domain correction. \\
+2 & Imaginary signal & Used for amplitude and phasing. \\
+\bottomrule
+\end{tabular}
+\end{center}
+The file picker allows \texttt{.dat}, \texttt{.txt}, and \texttt{.csv}. Because \texttt{numpy.loadtxt} is used without a delimiter override in the shared SE/DQ pipeline, comma-separated files with literal commas may fail unless NumPy can parse them in the local environment; this is \todoverify{} for user-provided CSV examples.
+
+\subsection{User Controls and Features}
+\begin{itemize}
+  \item \textbf{Select/Add files}: replaces or appends active SE source files.
+  \item \textbf{Start}: runs shared time/frequency-domain processing.
+  \item \textbf{Save/Load}: writes or restores the visible SE table and source list.
+  \item \textbf{Phasing}: opens the manual phasing window and stores phased spectra by filename.
+  \item \textbf{Y-axis selector}: plots SC, \Mtwo{}, or \TtwoStar{} versus the first table column.
+  \item \textbf{Group}: opens a grouping dialog and overlays grouped lines on the main SE plot.
+  \item \textbf{Activation energy controls}: start/end row trimming, optional Celsius-to-Kelvin conversion, units toggle, and close/done button.
+  \item \textbf{Settings}: short/long SC windows, absolute/relative SC, glycerol correction, empty/baseline subtraction, long-component subtraction, FFT smoothing window range, and optional figure export.
+\end{itemize}
+
+\subsection{Solid Content Calculation}
+The SE table temperature is inferred from the filename using a pattern equivalent to a final underscore followed by a number before \texttt{.dat}. If the filename does not match, temperature is stored as \texttt{0}.
+
+The SC windows are read from settings as short start/end and long start/end; the implementation multiplies these values by 2 and casts to integer indices. Let
+\begin{equation}
+S = \operatorname{mean}\left(A[i_s^{\min}:i_s^{\max}]\right), \qquad
+L = \operatorname{mean}\left(A[i_l^{\min}:i_l^{\max}]\right),
+\end{equation}
+where \(A=\sqrt{\mathrm{Re}^2+\mathrm{Im}^2}\) is the signal amplitude. The code computes
+\begin{equation}
+\mathrm{SC} =
+\begin{cases}
+S, & \text{absolute mode},\\
+\dfrac{S-L}{S}, & \text{relative mode}.
+\end{cases}
+\end{equation}
+If SC calculation raises an exception, the function logs a warning and returns \(0\).
+
+\subsection{Second Moment Calculation}
+After FFT processing, the real spectral part is baseline-corrected and apodized. The implementation computes
+\begin{equation}
+I = \int R(f)\,df, \qquad \hat{R}(f)=\frac{R(f)}{I},
+\end{equation}
+then
+\begin{equation}
+\Mtwo = 4\pi^2 \int f^2 \hat{R}(f)\,df.
+\end{equation}
+Integration is performed with SciPy's trapezoid routine. The code warns if the mean of the first ten values of \(f^2\hat{R}(f)\) is above \(10^{-6}\) in absolute value. If \Mtwo{} is negative, \Mtwo{} and \TtwoStar{} are set to zero.
+
+\subsection{\texorpdfstring{$T_2^{\ast}$}{T2*} Calculation}
+For non-negative \Mtwo{}, the code computes
+\begin{equation}
+\TtwoStar = \sqrt{\frac{2}{\Mtwo}}.
+\end{equation}
+The value is written to the SE table and plotted if the user chooses the \TtwoStar{} y-axis.
+
+\subsection{Activation Energy Calculation from \texorpdfstring{$T_2^{\ast}$}{T2*} over Temperature}
+The activation-energy view sorts rows by temperature, optionally converts Celsius to Kelvin by adding 273.15, trims rows from the beginning and end, removes non-finite values and non-positive \TtwoStar{} values, and requires at least two valid points. The axes are
+\begin{equation}
+X = \frac{1000}{T}, \qquad Y = \ln\left(\frac{1}{\TtwoStar}\right).
+\end{equation}
+A line \(Y=aX+b\) is fitted. Important implementation detail: the current code computes activation energy from the intercept \(b\), not the slope \(a\):
+\begin{equation}
+E_{\mathrm{act}} = -bR
+\end{equation}
+for the kJ-radio-button branch, or \(-bR\times 0.239005736\) for the kcal branch. Whether this is the intended physical expression is \todoverify{}.
+
+\subsection{Mathematical Background Used in the Code}
+\begin{align}
+A(t) &= \sqrt{\mathrm{Re}(t)^2+\mathrm{Im}(t)^2},\\
+\mathrm{FFT} &= \operatorname{fftshift}(\operatorname{fft}(\mathrm{FID})),\\
+W(f) &= \exp\left[-\left(\frac{f}{\sigma}\right)^6\right],\\
+R_{\mathrm{apod}}(f) &= R(f)W(f),\\
+R^2 &= 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}.
+\end{align}
+The FFT apodization scale \(\sigma\) is selected from the frequency where the real spectrum falls near 2\% of its maximum after the peak.
+
+\subsection{Save, Load, and Export}
+\begin{itemize}
+  \item Save writes the SE table to CSV and writes \texttt{\_files.json} with source paths and phased spectra.
+  \item Load restores the table, source list, phasing records, file combobox, and plot.
+  \item If the figure-export radio button is checked during analysis, the code writes \texttt{Result/FFT\_<variable>.png}, \texttt{Result/NMR\_<variable>.png}, and corresponding CSV files beside the source data.
+  \item Exported FFT/FID CSV files contain x values and two plotted y-series from the pyqtgraph items. Exact column labels are not written; \todoverify{} before using as an interchange format.
+\end{itemize}
+
+\subsection{Implementation Notes: Important Classes and Functions}
+\begin{longtable}{p{0.32\linewidth}p{0.60\linewidth}}
+\toprule
+Object & Role \\
+\midrule
+\texttt{GeneralSEDQController.analysis} & Main loop over selected SE/DQ files. \\
+\texttt{GeneralSEDQController.process\_file\_data} & Reads raw data, performs optional corrections, FFT, smoothing, baseline, phasing, \Mtwo{}, and \TtwoStar{}. \\
+\texttt{SETabController.process\_processed\_file} & Extracts temperature, computes SC, and fills the SE row. \\
+\texttt{SETabController.plot\_Arr} & Activation-energy plotting and fitting. \\
+\texttt{Calculator.analysis\_time\_domain} & Shared time-domain correction pipeline. \\
+\texttt{Calculator.final\_analysis\_time\_domain} & Apodization and zero-filling before FFT. \\
+\texttt{Calculator.\_calculate\_M2} & Implements \Mtwo{} and \TtwoStar{}. \\
+\texttt{Calculator.calculate\_SC} & Implements solid content. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Limitations and Validation Checks}
+\begin{itemize}
+  \item Raw files must be numeric and have at least three columns.
+  \item Filename-derived temperature can silently become zero if the filename pattern does not match.
+  \item SC settings are treated as indices after multiplication by 2; this assumes a fixed sampling relationship that should be checked for new instruments.
+  \item Invalid files are removed from the selected list during shared SE/DQ analysis.
+  \item Activation-energy fitting requires at least two positive finite \TtwoStar{} values.
+  \item Physical interpretation of the implemented activation-energy intercept formula is \todoverify{}.
+\end{itemize}
+
+\section{DQ Tab}
+
+\subsection{Purpose and Scope}
+The DQ tab analyzes Double Quantum NMR data using an \Mtwo{} approach. It calculates DQ intensity, \Mtwo{}, and \TtwoStar{} for each DQ filtering time, linearly maps DQ filtering time to \TtwoStar{}, normalizes the DQ intensity distribution, and fits a Gauss, Lorenz, or pseudo-Voigt distribution.
+
+\subsection{Step-by-Step User Workflow}
+\begin{enumerate}
+  \item Select DQ raw files with the primary file-selection button.
+  \item Optionally configure the same baseline, glycerol, long-component, and smoothing options used by SE.
+  \item Start analysis. Each file is processed through the shared time/frequency-domain pipeline.
+  \item DQ filtering time is inferred from the filename using an underscore-number-underscore pattern.
+  \item The table is populated with DQ time, DQ intensity, \Mtwo{}, and \TtwoStar{}.
+  \item Set the DQ filtering-time range used for linearization.
+  \item The controller fits a line \(\TtwoStar(\tau_{DQ})\), computes a linearized \TtwoStar{} column, and normalizes DQ intensity.
+  \item Choose linear or \(\log_{10}(\TtwoStar)\) x-axis.
+  \item Choose Gauss, Lorenz, or Pseudo Voigt fitting.
+  \item Save the table. The resulting CSV can later be used by the DQ(Temp) tab if it has at least six columns.
+\end{enumerate}
+
+\subsection{Accepted File Formats}
+The raw DQ parser uses the same three-column numeric file expectation as SE. The first column is also used directly to compute DQ intensity from the mean amplitude before the point nearest time \(4\).
+
+Filename convention for DQ time:
+\begin{lstlisting}
+anything_<DQ time with decimal>_anything.dat
+example_12.5_sample.dat
+\end{lstlisting}
+If the pattern is absent, DQ time is stored as \texttt{0}.
+
+\subsection{User Controls and Features}
+\begin{itemize}
+  \item Filtering range spin boxes: select the range of DQ filtering times used to fit \TtwoStar{} versus DQ time.
+  \item Log-scale radio button: plots the distribution against \(\log_{10}(\TtwoStar_{\mathrm{lin}})\).
+  \item Fit-function combobox: Gauss, Lorenz, or Pseudo Voigt.
+  \item Two plots: \TtwoStar{} versus DQ filtering time, and normalized DQ intensity versus linearized \TtwoStar{}.
+  \item Fit-result text box: \(R^2\), center \(X_0\), FWHM/width parameter, and Lorenz fraction.
+\end{itemize}
+
+\subsection{M2 Approach}
+The tab reuses the SE \Mtwo{} calculation for each DQ raw file. This produces one \TtwoStar{} value per DQ filtering time. A linear mapping
+\begin{equation}
+\TtwoStar_{\mathrm{lin}}(\tau_{DQ}) = a\tau_{DQ}+b
+\end{equation}
+is fitted over the selected DQ time window. If fewer than three points fall in the user range, the code falls back to a default range of 0 to 20. If the resulting selected range has fewer than two points, linearization fails.
+
+\subsection{\texorpdfstring{$T_2^{\ast}$}{T2*} Recalculation from the DQ Distribution}
+The DQ distribution x-axis is not directly the measured \TtwoStar{} column; it is the linearly recalculated value \(a\tau_{DQ}+b\). The normalized DQ distribution is
+\begin{equation}
+I_{DQ,\mathrm{norm}}(\tau_i)=\frac{I_{DQ}(\tau_i)}{\int I_{DQ}(\tau)\,d\tau},
+\end{equation}
+where the implementation calls \texttt{trapezoid(dq)} without explicitly passing the DQ-time axis. Thus integration is over array index spacing; whether this is intended for nonuniform DQ times is \todoverify{}.
+
+\subsection{Mathematical Background Used in the Code}
+DQ intensity is computed as
+\begin{equation}
+I_{DQ}=\operatorname{mean}\left(A(t)\;\middle|\;t < t_{\mathrm{nearest}\;4}\right).
+\end{equation}
+Distribution fitting uses:
+\begin{align}
+G(x;A,x_0,w,y_0) &= A\exp\left[-\frac{(x-x_0)^2}{2w^2}\right]+y_0,\\
+L(x;A,x_0,w,y_0) &= \frac{Aw^2}{(x-x_0)^2+w^2}+y_0,\\
+V(x;A,x_0,w,\eta,y_0) &= \eta L_{area}(x)+(1-\eta)G_{area}(x)+y_0.
+\end{align}
+The pseudo-Voigt implementation uses normalized area-style Gaussian and Lorentzian terms; the displayed ``FWHM'' is the fitted width parameter returned by the model, not necessarily a post-processed physical FWHM for every model.
+
+\subsection{Save, Load, and Export}
+\begin{itemize}
+  \item Save writes a CSV table. After linearization the table has six columns: DQ time, DQ intensity, \Mtwo{}, \TtwoStar{}, \TtwoStar{} lin, and DQ Norm.
+  \item The companion \texttt{\_files.json} stores source paths and manual phasing records.
+  \item If figure export is enabled during analysis, FFT and NMR images/CSVs are exported beside raw files under \texttt{Result/}.
+  \item DQ(Temp) expects saved DQ CSV files with at least six columns and uses columns 4 and 5.
+\end{itemize}
+
+\subsection{Implementation Notes}
+\begin{longtable}{p{0.34\linewidth}p{0.58\linewidth}}
+\toprule
+Object & Role \\
+\midrule
+\texttt{DQTabController.process\_processed\_file} & Extracts DQ time and DQ intensity, fills table row. \\
+\texttt{DQTabController.linearization} & Fits \TtwoStar{} versus DQ time and writes columns 4--5. \\
+\texttt{calculations.dq\_signal.calculate\_linearization} & Numerical implementation of linearization and DQ normalization. \\
+\texttt{calculations.dq\_signal.fit\_distribution} & Fits Gauss/Lorenz/pseudo-Voigt and returns plot/fitting metrics. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Limitations and Validation Checks}
+\begin{itemize}
+  \item Raw files must have at least three numeric columns.
+  \item Missing DQ time in the filename becomes zero.
+  \item Log scale uses \(\log_{10}\) of linearized \TtwoStar{} values; non-positive values can create invalid values.
+  \item The linearization routine does not sort DQ times before fitting.
+  \item Distribution fitting warnings are shown for missing columns, missing fit function, invalid range, or nonnumeric table values.
+\end{itemize}
+
+\section{DQ(Temp) Tab}
+
+\subsection{Purpose and Scope}
+The DQ(Temp) tab compares DQ-derived \TtwoStar{} distributions across temperatures or another user-defined x-axis. It loads saved DQ table CSV files, extracts linearized \TtwoStar{} and normalized DQ intensity, fits distribution summaries, overlays distributions, and plots fitted centers versus the comparison axis.
+
+\subsection{Step-by-Step User Workflow}
+\begin{enumerate}
+  \item Produce saved DQ tables from the DQ tab with columns \(\TtwoStar_{\mathrm{lin}}\) and DQ Norm.
+  \item Open DQ(Temp) and select one or more saved DQ CSV files.
+  \item The tab validates that each file has at least six columns and loads columns 4 and 5.
+  \item Review or edit the first table column, used as the comparison x-axis. The default comes from filenames like \texttt{Table\_DQ\_-20...csv}; otherwise the row number plus one is used.
+  \item The tab fits each distribution with Gauss, Lorenz, and Voigt summaries and finds a derivative-based peak.
+  \item View overlaid distributions, Voigt fits, derivative polynomial fits, and center-versus-x-axis trends.
+  \item Save the comparison table.
+\end{enumerate}
+
+\subsection{Accepted File Formats}
+Input files are comma-delimited saved DQ table files. They must contain at least six columns. The loader uses:
+\begin{equation}
+\text{column 4} = \TtwoStar_{\mathrm{lin}}, \qquad \text{column 5} = I_{DQ,\mathrm{norm}}.
+\end{equation}
+There is no header handling in the DQ(Temp) loader; header rows can make \texttt{numpy.loadtxt(..., delimiter=',')} fail.
+
+\subsection{User Controls and Features}
+\begin{itemize}
+  \item Select files, clear table, save, and load.
+  \item Editable comparison x-axis column.
+  \item Results table columns: x-axis/name, centers from Gauss/Lorenz/Voigt/derivative methods, FWHM values from Gauss/Lorenz/Voigt, and source filename.
+  \item Distribution plot: raw normalized DQ distribution points and Voigt fit curves.
+  \item Polynomial/derivative plot: raw points and derivative-related fitted curve.
+  \item Center trend plot: center values versus comparison axis for each method.
+\end{itemize}
+
+\subsection{Temperature-Dependent Distribution Comparison}
+The code itself treats the comparison axis as a float, not specifically as temperature. Temperature support is achieved by naming files with numeric values or editing table values. Files whose comparison cell is \texttt{hide} are skipped during plotting.
+
+\subsection{Mathematical Background Used in the Code}
+Each distribution is fitted with the same Gaussian, Lorentzian, and Voigt functions used elsewhere. The derivative center is computed by fitting a fifth-order polynomial around the maximum region and selecting the smallest real derivative root inside the fitted range:
+\begin{equation}
+p(x)=\sum_{k=0}^{5} c_k x^{5-k}, \qquad \frac{dp}{dx}=0.
+\end{equation}
+The current derivative search uses points from the start of the distribution through ten points after the maximum, not a symmetric peak window.
+
+\subsection{Save, Load, and Export}
+Saving writes the comparison results table and source-file JSON. Before saving, the code also writes a collective dictionary to a path ending in \texttt{Table\_DQ\_comparison\_parametrs}; the exact file extension and contents should be verified in the current UI flow because the helper writes dictionary rows without a standard extension in the visible call.
+
+\subsection{Implementation Notes}
+\begin{longtable}{p{0.34\linewidth}p{0.58\linewidth}}
+\toprule
+Object & Role \\
+\midrule
+\texttt{DQTempTabController.update\_DQ\_comparison} & Validates and lists selected files. \\
+\texttt{DQTempTabController.launch} & Loads arrays for all files and starts plotting/fitting. \\
+\texttt{calculations.dq\_temp\_signal.load\_distribution\_file} & Reads columns 4 and 5 from saved DQ CSV files. \\
+\texttt{calculations.dq\_temp\_signal.fit\_distribution} & Fits Gauss/Lorenz/Voigt summaries and derivative center. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Limitations and Validation Checks}
+\begin{itemize}
+  \item Files with fewer than six columns are skipped.
+  \item Header rows are not supported by the numeric loader.
+  \item Failed fits fill result cells with \texttt{NaN} and show a warning listing failed files.
+  \item The comparison axis is numeric; nonnumeric values become \texttt{NaN}, except the special text \texttt{hide} skips plotting.
+\end{itemize}
+
+\section{T1T2 Tab}
+
+\subsection{Purpose and Scope}
+The T1T2 tab loads and fits \(T_1\) and \(T_2\) relaxation curves. It supports regular two-column relaxation curves, text files containing T1 curves for different FID regions, and converted FFC/Stelar-style profile data in supported table/text/CSV formats. Current legacy \texttt{.sef} files are rejected.
+
+\subsection{Step-by-Step User Workflow}
+\begin{enumerate}
+  \item Select one or more T1/T2 files.
+  \item The loader chooses a parsing branch based on the extension of the first selected file: \texttt{.csv}, \texttt{.txt}, or default.
+  \item Review rows in the results table. The x-axis column is inferred from filenames or row index and can be edited.
+  \item Choose a curve in the file combobox.
+  \item Choose seconds or milliseconds for the time-axis denominator.
+  \item Set fit trimming values: number of points skipped at the beginning and number excluded from the end.
+  \item Select one-, two-, or three-exponential fitting and provide initial \(\tau\) guesses.
+  \item Run or update the fit. The raw curve and fitted curve appear in the raw-signal plot.
+  \item Plot \(\tau_1\), \(\tau_2\), or \(\tau_3\) versus the x-axis column in the relaxation-time plot.
+  \item Save the results table.
+\end{enumerate}
+
+\subsection{Accepted File Formats}
+\begin{longtable}{p{0.18\linewidth}p{0.34\linewidth}p{0.36\linewidth}}
+\toprule
+Branch & Expected structure & Filename parsing \\
+\midrule
+CSV & No header expected. Each line: \texttt{time,signal}. & Pattern \texttt{\_(number).csv} gives x-axis; otherwise row index. \\
+TXT multi-signal & Tab-separated text. First nonempty line is skipped. Columns 0--4: time, all, short, medium, long. & Pattern \texttt{T1\_.*\_(number).txt}; otherwise ``Variable''. Creates four rows per file: \texttt{\_all}, \texttt{\_short}, \texttt{\_medium}, \texttt{\_long}. \\
+Default & First tries tab-separated text with first nonempty line skipped and columns 0--1 as time/signal; falls back to \texttt{numpy.loadtxt} columns 0--1. & Pattern \texttt{(T1|T2)\_(number)...(dat|txt)}; otherwise row index. \\
+Legacy SEF & Not supported. & User is warned to convert to supported table/text/CSV. \\
+\bottomrule
+\end{longtable}
+
+\subsection{User Controls and Features}
+\begin{itemize}
+  \item File selector, clear table, save/load, and group button.
+  \item Combobox for choosing which loaded curve to fit.
+  \item Fit range controls: skip points at start and end.
+  \item Unit controls: seconds or milliseconds; milliseconds divides input time by 1000.
+  \item Initial \(\tau_1\), \(\tau_2\), \(\tau_3\) spin boxes.
+  \item Fit-order buttons: one, two, or three exponentials.
+  \item Plot selector for \(\tau_1\), \(\tau_2\), or \(\tau_3\).
+  \item Table columns: x-axis, tau/amplitude pairs for up to three components, filename, and source path.
+\end{itemize}
+
+\subsection{Regular T1/T2 Curve Analysis}
+Regular curves are parsed as two columns. Depending on branch, a header row may or may not be skipped. The selected curve is sliced by index and fitted with the selected exponential order.
+
+\subsection{T1 Analysis for Different FID Regions}
+The text multi-signal branch expects one file containing columns for all, short, medium, and long FID-region signals. The controller expands each file into four separate selectable curves. Each region is fitted independently with the same exponential machinery.
+
+\subsection{FFC / Stelar Profile Analysis}
+The code explicitly rejects \texttt{.sef} files with a message that legacy FFC \texttt{.sef} files are no longer supported and should be converted to the current supported table/text/CSV format. Therefore Stelar/FFC support in this version means converted data only; exact conversion requirements beyond the supported columns above are \todoverify{}.
+
+\subsection{Tau and Amplitude Calculation}
+For fit order \(n\), the code fits one of:
+\begin{align}
+S(t)&=A_1\exp(-t/\tau_1)+C,\\
+S(t)&=A_1\exp(-t/\tau_1)+A_2\exp(-t/\tau_2)+C,\\
+S(t)&=A_1\exp(-t/\tau_1)+A_2\exp(-t/\tau_2)+A_3\exp(-t/\tau_3)+C.
+\end{align}
+For multi-component fits, \((\tau,A)\) pairs are sorted by increasing \(\tau\) before writing table columns. \(R^2\) is displayed in the fit-result text box.
+
+\subsection{Deconvolution into up to Three Components}
+The deconvolution is nonlinear least-squares fitting via SciPy \texttt{curve\_fit}. Bounds allow amplitudes and offsets to be negative or positive, while \(\tau\) values are bounded from 0 to 500000. Initial amplitudes are set to the first signal value for each component and initial \(\tau\) values come from user controls.
+
+\subsection{Mathematical Background Used in the Code}
+The fitted model is a sum of decaying exponentials plus constant baseline. Goodness of fit is
+\begin{equation}
+R^2 = 1-\frac{\sum_i (S_i-\hat{S}_i)^2}{\sum_i (S_i-\bar{S})^2}.
+\end{equation}
+The fit curve is plotted on 60 evenly spaced points between the minimum and maximum fitted time.
+
+\subsection{Save, Load, and Export}
+Save writes the table and source file list. Load restores the table, selected files, and then reruns \texttt{update\_T12\_table}, which reparses the source files. If source files are missing, only the tabular result may be available after the warning; subsequent recalculation may require the original files.
+
+\subsection{Implementation Notes}
+\begin{longtable}{p{0.34\linewidth}p{0.58\linewidth}}
+\toprule
+Object & Role \\
+\midrule
+\texttt{T1T2TabController.update\_T12\_table} & Selects parser branch and populates rows. \\
+\texttt{T1T2TabController.\_read\_csv} & Reads two comma-separated columns. \\
+\texttt{T1T2TabController.\_read\_txt\_multi\_signal} & Reads all/short/medium/long region curves. \\
+\texttt{T1T2TabController.calculate\_relaxation\_time} & Fits selected curve and writes tau/amplitude columns. \\
+\texttt{calculations.t1t2\_signal.fit\_relaxation} & Delegates to shared calculator exponential fitting. \\
+\texttt{Calculator.fit\_exponent} & Implements one-, two-, and three-exponential curve fitting. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Limitations and Validation Checks}
+\begin{itemize}
+  \item The parser branch is chosen from the first selected file's extension; mixing formats in one selection is not recommended.
+  \item CSV parsing has no header handling.
+  \item Empty selected fit ranges are rejected.
+  \item Failed higher-order fits advise decreasing the component count and/or changing initial \(\tau\) values.
+  \item A helper detects some old saved table column orders and refuses to load them safely.
+\end{itemize}
+
+\section{DQMQ Tab}
+
+\subsection{Purpose and Scope}
+The DQMQ tab analyzes Double Quantum/Multiple Quantum data. It loads a raw time, DQ, reference table, builds normalized DQ/MQ curves, calculates \nDQ{}, optionally overlays a signal reconstructed from a DQ/T2 distribution, and fits \Dres{} distributions using selectable kernels and one- or two-component Gaussian distributions.
+
+\subsection{Step-by-Step User Workflow}
+\begin{enumerate}
+  \item Select one DQMQ raw file.
+  \item The tab loads time, DQ, and reference arrays and writes them to a table.
+  \item Review raw DQ and reference plots.
+  \item Set tail-fit range, tail exponent, noise/baseline level, integer time shift, and optional smoothing window.
+  \item Run Plot Norm / Plot nDQ / related analysis action. The controller normalizes signals, fits the tail, computes \nDQ{}, writes \nDQ{} to the table, and updates the plot.
+  \item Toggle visible curves: DQ, reference, MQ, reference--DQ, tail fit, MQ-tail, \nDQ{}, integral sum, and \Dres{} fit.
+  \item Optionally select a saved DQ/T2 distribution CSV and calculate the integral-sum overlay.
+  \item Select a \Dres{} kernel, one or two \Dres{} components, K value, centers, widths, fraction, and beta.
+  \item Click Calculate Dres. The tab fits \nDQ{} and plots \(P(\Dres)\).
+  \item Save. The table is saved, and integral-sum and \Dres{} outputs are exported when present.
+\end{enumerate}
+
+\subsection{Accepted File Formats}
+The raw DQMQ loader first tries to skip one header row, then retries without skipping if needed. It expects at least three numeric columns:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Column & Meaning & Use \\
+\midrule
+0 & Time & Fit and plot axis. \\
+1 & DQ raw signal & Normalized by reference maximum. \\
+2 & Reference raw signal & Normalization reference and MQ construction. \\
+\bottomrule
+\end{tabular}
+\end{center}
+The integral-sum feature accepts a comma-delimited CSV with exactly six columns. It uses column 0 as DQ time, column 1 as DQ amplitude, and column 4 as \(\TtwoStar_{\mathrm{lin}}\). This matches the saved DQ table after linearization.
+
+\subsection{User Controls and Features}
+\begin{itemize}
+  \item Raw file selector and table with Time, DQ, Ref, and nDQ columns.
+  \item Tail fit range controls, tail exponent/power, noise level, time shift, smoothing range/window.
+  \item Curve visibility checkboxes styled by plot color.
+  \item Integral-sum calculation and shift control.
+  \item \Dres{} controls: kernel combobox (Gauss, Abragam, Pake, Weibull, A-L), one/two component radio buttons, K value, component centers/widths, component fraction, and beta.
+  \item Signal plot and \Dres{} distribution plot.
+\end{itemize}
+
+\subsection{Build-Up Curve Construction}
+The DQMQ analysis constructs:
+\begin{align}
+DQ_{n}(t) &= \frac{DQ_{raw}(t)}{\max(Ref_{raw})},\\
+Ref_{n}(t) &= \frac{Ref_{raw}(t)}{\max(Ref_{raw})},\\
+MQ_{raw,n}(t) &= DQ_n(t)+Ref_n(t),\\
+MQ_n(t) &= \frac{MQ_{raw,n}(t)}{\max(MQ_{raw,n})},\\
+\Delta(t) &= Ref_n(t)-DQ_n(t).
+\end{align}
+A stretched exponential tail model is fitted to \(\Delta(t)\) over the selected range:
+\begin{equation}
+T_{tail}(t)=A\exp\left[-\left(\frac{t}{\tau}\right)^p\right]+C.
+\end{equation}
+If fewer than three valid tail-fit points are available, or if the fit fails, the tail fit becomes a zero array.
+
+\subsection{nDQ Calculation}
+The implementation constructs a smooth additive noise/baseline term:
+\begin{equation}
+w(t)=
+\begin{cases}
+\exp\left[\left((t-t_f)/(0.19t_f)\right)^3\right], & t<t_f,\\
+1-\exp\left[\left((t_f-t)/(0.19t_f)\right)^3\right], & t\ge t_f,
+\end{cases}
+\end{equation}
+where \(t_f\) is the fit-from value. The additive term is
+\begin{equation}
+B(t)=\frac{1}{2}Nw(t),
+\end{equation}
+with user noise level \(N\). Then
+\begin{align}
+D_{base}(t)&=MQ_{raw,n}(t)-T_{tail}(t),\\
+\mathrm{denominator}(t)&=D_{base}(t)+2B(t),\\
+\mathrm{numerator}(t)&=DQ_n(t)+B(t),\\
+\nDQ(t)&=\frac{\mathrm{numerator}(t)}{\mathrm{denominator}(t)}.
+\end{align}
+Invalid or non-positive denominators yield \texttt{NaN}. A zero point is inserted at the beginning of both time and \nDQ{} for fitting and plotting.
+
+\subsection{Dres Distribution Models}
+The \Dres{} fitting code uses an internal grid \(D\in[0,0.6]\) with 3000 points. Distribution normalization is
+\begin{equation}
+p_{norm}(D)=\frac{p(D)}{\int p(D)\,dD}.
+\end{equation}
+A one-component Gaussian distribution is
+\begin{equation}
+p(D;\mu,\sigma)\propto \exp\left[-\frac{(D-\mu)^2}{2\sigma^2}\right].
+\end{equation}
+The two-component Gaussian mixture is
+\begin{equation}
+p(D)=f p_1(D)+(1-f)p_2(D).
+\end{equation}
+The fitted distribution is plotted as \(D/(2\pi)\times1000\), labelled \(\Dres/2\pi\) in kHz.
+
+\subsection{Fitting Procedure}
+The code fits \nDQ{} with SciPy \texttt{curve\_fit}. For distributed one- and two-component models:
+\begin{equation}
+\nDQ(\tau)=\frac{1}{2}\int p(D)K(D\tau)\,dD.
+\end{equation}
+The implemented single-\Dres{} helper, available in the calculation module but not selected by the current controller path, is
+\begin{equation}
+\nDQ(\tau)=\frac{1}{2}\left[1-\exp(-K\Dres^2\tau^2)\right].
+\end{equation}
+The selectable kernels are:
+\begin{align}
+K_{gaussian}(x)&=1-\exp(-Kx^2),\\
+K_{abragam}(x)&=1-\exp(-Kx^2)\operatorname{sinc}(x/\pi),\\
+K_{pake}(x)&=1-\exp(-Kx^2)\cos x,\\
+K_{weibull}(x)&=1-\exp(-Kx^{\beta}),\\
+K_{A-L}(x)&=1-\exp(-Kx^{\beta})\cos x.
+\end{align}
+Initial parameters are validated against bounds before fitting. One-component bounds are \(0\le\mu\le0.5\), \(0\le\sigma\le1\), and \(0\le\beta\le6\). Two-component bounds use the same center/width/beta limits plus \(0\le f\le1\). The K value must be positive and finite.
+
+\subsection{Mathematical Background Used in the Code}
+The DQMQ tab combines signal normalization, tail subtraction, additive noise compensation, \nDQ{} calculation, optional moving-average smoothing, and nonlinear least-squares fitting. It is an implementation of practical curve construction rather than a complete physical model. The constants and kernel choices should be treated as model assumptions controlled by the user.
+
+\subsection{Save, Load, and Export}
+\begin{itemize}
+  \item Save writes the visible DQMQ table and source-file JSON.
+  \item If an integral-sum result exists, a \texttt{\_IntegralSum} CSV is written with \texttt{time,integral\_sum\_norm}.
+  \item If a \Dres{} result exists and pandas plus an Excel writer are available, the code writes \texttt{\_Dres.xlsx} with distribution, fit, and metadata sheets.
+  \item If Excel export is unavailable or fails, the code writes \texttt{\_Dres\_distribution.csv} and \texttt{\_Dres\_fit.csv} with metadata in comments.
+  \item Loading a saved DQMQ table reconstructs a plot from table arrays when possible; full raw-processing settings are not fully restored from the CSV table.
+\end{itemize}
+
+\subsection{Implementation Notes}
+\begin{longtable}{p{0.34\linewidth}p{0.58\linewidth}}
+\toprule
+Object & Role \\
+\midrule
+\texttt{DQMQTabController.dq\_mq\_analysis} & Loads raw data, fills table, and plots raw DQ/ref. \\
+\texttt{DQMQTabController.run\_full\_analysis} & Runs normalization, tail fitting, \nDQ{} calculation, and plot refresh. \\
+\texttt{calculations.dqmq\_signal.calculate\_dqmq\_analysis} & Main numerical DQMQ processing routine. \\
+\texttt{DQMQTabController.calculate\_integral\_sum} & Reads a DQ/T2 distribution CSV and creates overlay curve. \\
+\texttt{calculations.dqmq\_dres.fit\_selected\_model} & Validates kernel/bounds and performs \Dres{} fit. \\
+\texttt{DQMQTabController.save\_dres\_result} & Exports \Dres{} distribution, fit, and metadata. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Performance Considerations and Long-Running Fits}
+Tail fitting uses \texttt{maxfev=10000000}; \Dres{} fitting uses \texttt{maxfev=50000} and integrates over 3000 grid points for every model evaluation. These can be long-running fits. The application changes to a busy cursor but does not move the computation to a worker thread in the inspected code, so the GUI may appear blocked during difficult fits.
+
+\subsection{Limitations and Validation Checks}
+\begin{itemize}
+  \item Reference maximum must be finite and nonzero.
+  \item Integral-sum input must have exactly six columns and positive finite \TtwoStar{} values in column 4.
+  \item \Dres{} fitting needs at least three finite \nDQ{} values.
+  \item Nonnumeric or missing table values trigger detailed row-specific errors when \Dres{} reads from the table.
+  \item The controller path fits distributed one- or two-component Gaussian \Dres{} models; the single-\Dres{} response function exists in the calculation module but is not exposed by the inspected controller controls.
+\end{itemize}
+
+\section{Goldman-Shen Tab}
+
+\subsection{Purpose and Scope}
+The Goldman--Shen tab estimates domain size from spin-diffusion data. It loads short/medium/long signal columns, optionally square-root transforms the time axis, fits a line over a selected range, extrapolates to the zero crossing, and converts the result to a domain-size estimate.
+
+\subsection{Step-by-Step User Workflow}
+\begin{enumerate}
+  \item Select one or more spin-diffusion files.
+  \item The tab reads each file, extracts short, medium, and long signals, and infers an x-axis value from the filename or row index.
+  \item Choose a file in the combobox.
+  \item Select short, medium, or long signal.
+  \item Choose whether to use square-root-transformed time.
+  \item Set fit-from and fit-to bounds, plus beta, \(r^2\), and \Mtwo{} parameters.
+  \item Run/update the calculation. The raw selected signal and linear fit are plotted.
+  \item The table receives the extrapolated time-like value and domain size in nm.
+  \item Plot the extrapolated value versus the x-axis column across files.
+  \item Save the table.
+\end{enumerate}
+
+\subsection{Accepted File Formats}
+The Goldman--Shen loader reads tab-separated text. The first nonempty line is skipped. Expected columns are:
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Column & Used as & Notes \\
+\midrule
+0 & time or square-time axis & Optionally transformed by square root. \\
+4 & short signal & Selected by Short radio button. \\
+5 & medium signal & Selected by Medium radio button. \\
+6 & long signal & Selected by Long radio button. \\
+\bottomrule
+\end{tabular}
+\end{center}
+Filename pattern \texttt{\_(number).dat} sets the comparison x-axis; otherwise row index is used.
+
+\subsection{User Controls and Features}
+\begin{itemize}
+  \item File selector, clear table, save/load, and group button.
+  \item Combobox for selecting a loaded file.
+  \item Short/medium/long signal radio buttons.
+  \item Use square-root time checkbox.
+  \item Fit-from and fit-to spin boxes.
+  \item Physical/model parameter spin boxes: beta, \(r^2\), and \Mtwo{}.
+  \item Raw-signal plot and extrapolated-value trend plot.
+  \item Results table with x-axis, extrapolated time-like value, domain size in nm, filename, and source folder/path.
+\end{itemize}
+
+\subsection{Domain Size Estimation Workflow}
+The selected signal is linearly fitted over the nearest-index slice between fit bounds:
+\begin{equation}
+S(x)=ax+b.
+\end{equation}
+The zero crossing is
+\begin{equation}
+x_0=-\frac{b}{a}.
+\end{equation}
+The code stores this as \texttt{sqrtT} and passes it to the domain-size formula.
+
+\subsection{Mathematical Background Used in the Code}
+The spin-diffusion coefficient-like term is implemented as
+\begin{equation}
+D_{sd}=\sqrt{\pi \Mtwo}\frac{(r^2\times10^{-10})^2}{6}.
+\end{equation}
+The domain size estimate is
+\begin{equation}
+d=\left(\frac{2\beta x_0\sqrt{D_{sd}}}{\sqrt{\pi}}\right)10^9,
+\end{equation}
+rounded to three decimals. The meaning and units of the UI parameter labelled \(r^2\) should be checked against the experimental protocol; \todoverify{}.
+
+\subsection{Save, Load, and Export}
+Save writes the table and source-file JSON. Load restores the table and selected files, then reruns \texttt{update\_GS\_table}, which reparses source files if available. There is no separate plot-image export implemented specifically for Goldman--Shen in the inspected code.
+
+\subsection{Implementation Notes}
+\begin{longtable}{p{0.34\linewidth}p{0.58\linewidth}}
+\toprule
+Object & Role \\
+\midrule
+\texttt{GSTabController.update\_GS\_table} & Loads selected spin-diffusion files into table and dictionary. \\
+\texttt{calculations.gs\_signal.read\_spin\_diffusion\_file} & Parses tab-separated columns 0, 4, 5, 6. \\
+\texttt{GSTabController.calculate\_sqrt\_time} & Selects signal, slices fit range, fits, plots, and writes results. \\
+\texttt{Calculator.linear\_fit\_GS} & Fits a line and extrapolates zero crossing. \\
+\texttt{Calculator.calculate\_domain\_size} & Implements the domain-size equation. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Limitations and Validation Checks}
+\begin{itemize}
+  \item Files need at least seven tab-separated columns after the skipped header.
+  \item Fit range must contain at least two points.
+  \item If all plotted result values are nonnumeric, the trend plot warns and does not display a meaningful series.
+  \item The fit-to control minimum is dynamically set to the 16th point when available; for short files it uses the last point.
+\end{itemize}
+
+\section{File Formats}
+
+\begin{longtable}{p{0.12\linewidth}p{0.13\linewidth}p{0.30\linewidth}p{0.18\linewidth}p{0.19\linewidth}}
+\toprule
+Tab & Extensions & Required structure & Optional metadata & Notes \\
+\midrule
+SE & \texttt{.dat .txt .csv} & Numeric columns: time, real, imaginary. & Filename temperature near final underscore. & CSV delimiter support is \todoverify{} because raw loader uses default \texttt{loadtxt}. \\
+DQ & \texttt{.dat .txt .csv} & Numeric columns: time, real/DQ, imaginary. & Filename \texttt{\_<number>\_} for DQ time. & Produces saved six-column DQ tables after linearization. \\
+DQ(Temp) & \texttt{.csv} & Saved DQ table with at least six comma-delimited columns; uses columns 4--5. & Filename \texttt{Table\_DQ\_<number>...csv}. & Header rows unsupported. \\
+T1T2 CSV & \texttt{.csv} & Lines \texttt{time,signal}; no header. & Filename \texttt{\_<number>.csv}. & Parser branch based on first selected extension. \\
+T1T2 TXT regions & \texttt{.txt} & Header skipped; tab columns 0--4: time, all, short, medium, long. & Filename \texttt{T1\_...\_<number>.txt}. & Creates four curves per file. \\
+T1T2 default & \texttt{.dat .txt} & Header-skipped tab columns 0--1, or fallback numeric columns 0--1. & Filename \texttt{T1/T2\_<number>...}. & Legacy \texttt{.sef} rejected. \\
+DQMQ raw & \texttt{.dat .txt .csv} & Three numeric columns: time, DQ, Ref; loader tries one skipped row then no skip. & None implemented. & File picker is single-file for DQMQ. \\
+DQMQ integral sum & \texttt{.csv} & Exactly six comma-delimited columns; uses 0, 1, 4. & None. & Intended for saved DQ distribution tables. \\
+Goldman--Shen & typically \texttt{.dat/.txt} & Header skipped; tab columns 0, 4, 5, 6. & Filename \texttt{\_<number>.dat}. & Requires short/medium/long columns. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Example Minimal Layouts}
+\begin{lstlisting}[caption={SE/DQ/DQMQ-style three-column numeric file}]
+0.0    1.0000    0.0000
+0.5    0.9500    0.0100
+1.0    0.9000    0.0120
+\end{lstlisting}
+
+\begin{lstlisting}[caption={T1T2 CSV file}]
+0,1.000
+10,0.820
+20,0.690
+\end{lstlisting}
+
+\begin{lstlisting}[caption={T1T2 multi-region TXT file}]
+Time	All	Short	Medium	Long
+0	1.0	0.4	0.35	0.25
+10	0.8	0.3	0.28	0.22
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Goldman--Shen file structure; unused columns shown as c1--c3}]
+Time	c1	c2	c3	Short	Medium	Long
+0	0	0	0	1.0	0.8	0.5
+10	0	0	0	0.9	0.7	0.45
+\end{lstlisting}
+
+\section{Save, Load, and Export Behavior}
+
+\subsection{Project/session save}
+There is no single global project file in the inspected code. Each tab saves the active results table as CSV and stores source-file paths in a companion JSON file. SE and DQ extend the JSON payload with manual phased spectra.
+
+\subsection{Result export}
+\begin{itemize}
+  \item SE: table CSV, source/phasing JSON, optional FID/FFT images and CSVs.
+  \item DQ: table CSV, source/phasing JSON, optional FID/FFT images and CSVs.
+  \item DQ(Temp): table CSV and source JSON; additionally writes a comparison-parameter dictionary path before table save.
+  \item T1T2: table CSV and source JSON.
+  \item DQMQ: table CSV, source JSON, optional integral-sum CSV, optional \Dres{} Excel or CSV fallback exports.
+  \item Goldman--Shen: table CSV and source JSON.
+\end{itemize}
+
+\subsection{Plot export}
+Only the shared SE/DQ raw processing path explicitly exports plot PNGs when the relevant radio button is checked. Other tabs can be visually inspected but do not have dedicated plot-image export in the inspected controller code.
+
+\subsection{Naming conventions}
+Default save names are based on the source folder or tab type: e.g., \texttt{<folder>\_SE\_MSE\_FID}, \texttt{Table\_DQ\_<folder>}, \texttt{Table\_DQ\_comparison}, \texttt{<folder>\_T}, \texttt{<folder>\_SpinDiffusion}, and \texttt{<folder>\_DQMQ\_data}. The save dialog allows the user to choose the final path.
+
+\subsection{What is preserved and what must be recalculated}
+The visible table and source paths are preserved. Full UI state, fit ranges, checkboxes, and all intermediate arrays are not consistently saved. Loading T1T2 and Goldman--Shen tables reruns file parsing if source files are available. DQMQ can reconstruct an analysis-like plot from table arrays but not all processing parameters.
+
+\section{Error Handling and Validation}
+
+\begin{longtable}{p{0.26\linewidth}p{0.62\linewidth}}
+\toprule
+Condition & Implemented behavior \\
+\midrule
+Invalid raw SE/DQ file & Warning dialog, file removed from selection, plots cleared. \\
+Missing SE/DQ selected files & Status message and no analysis. \\
+DQ invalid range & Fallback to default 0--20 if fewer than three selected points; failure if still insufficient. \\
+DQ missing fit function & Warning dialog. \\
+DQ(Temp) invalid file & File skipped; failed file list shown. \\
+DQ(Temp) fit failure & Row values set to \texttt{NaN}; warning lists failures. \\
+T1T2 \texttt{.sef} & Rejected with conversion warning. \\
+T1T2 empty/invalid fit range & Warning dialog. \\
+T1T2 nonlinear fit failure & Warning suggests decreasing order or adjusting initial tau values. \\
+DQMQ missing file & Warning dialog. \\
+DQMQ bad reference normalization & Raises error if reference max is zero/nonfinite. \\
+DQMQ invalid integral-sum CSV & Requires exactly six columns and positive finite T2star values. \\
+DQMQ Dres invalid input & Requires at least three finite nDQ values and valid bounds. \\
+Goldman--Shen invalid range & Warning dialog if fewer than two fit points. \\
+Old saved table format & Some old column orders are detected and refused with migration instructions. \\
+\bottomrule
+\end{longtable}
+
+\section{Developer Notes}
+
+\subsection{Code organization}
+\begin{itemize}
+  \item \texttt{main.py}: application entry point.
+  \item \texttt{mainwindow.py}: central UI setup, tab state, file selection, save/load, shared plot helpers, and controller wiring.
+  \item \texttt{controllers/}: GUI orchestration per tab.
+  \item \texttt{calculations/}: testable numerical routines introduced for individual workflows.
+  \item \texttt{Calculator.py}: legacy/shared numerical functions used across multiple tabs.
+  \item \texttt{dialogs/}: custom dialogs for file opening, grouping, saving, phasing, and RecFID auxiliary tools.
+\end{itemize}
+
+\subsection{Data flow from file upload to result display}
+\begin{enumerate}
+  \item \texttt{MainWindow} opens \texttt{OpenFilesDialog} and stores selected paths in tab-specific lists.
+  \item The tab controller reads files into NumPy arrays or dictionaries.
+  \item Numerical functions compute derived values.
+  \item The controller writes table cells with \texttt{QTableWidgetItem}.
+  \item Plot functions read arrays or table columns and update pyqtgraph widgets.
+  \item Save/load routines serialize the table and file list.
+\end{enumerate}
+
+\subsection{Where calculations are implemented}
+\begin{itemize}
+  \item Shared SE/DQ FID/FFT processing and legacy formulas: \texttt{Calculator.py}.
+  \item DQ linearization and distribution fitting: \texttt{calculations/dq\_signal.py}.
+  \item DQ temperature comparison: \texttt{calculations/dq\_temp\_signal.py}.
+  \item T1/T2 parsing helpers and fit delegation: \texttt{calculations/t1t2\_signal.py} plus \texttt{Calculator.fit\_exponent}.
+  \item DQMQ signal construction: \texttt{calculations/dqmq\_signal.py}.
+  \item DQMQ \Dres{} kernels and distributions: \texttt{calculations/dqmq\_dres.py}.
+  \item Goldman--Shen parsing/fitting helpers: \texttt{calculations/gs\_signal.py} plus shared linear/domain-size functions in \texttt{Calculator.py}.
+\end{itemize}
+
+\subsection{How UI and numerical code interact}
+The newer modules in \texttt{calculations/} are mostly UI-independent and accept NumPy arrays, while controllers perform validation, error dialogs, and table/plot updates. Some legacy calculations remain in \texttt{Calculator.py}; they mix naming conventions and contain implementation assumptions such as filename-derived metadata, fixed default ranges, and index-based integration.
+
+\subsection{Suggestions for future maintenance}
+\begin{itemize}
+  \item Add explicit headers to saved CSV tables and robust header-aware loaders.
+  \item Separate physical formulas from UI choices and add unit tests for every formula.
+  \item Store tab settings with saved tables so load fully restores analysis state.
+  \item Move long fits to worker threads to prevent UI blocking.
+  \item Clarify and test activation-energy slope/intercept behavior.
+  \item Replace filename-only metadata extraction with optional user-editable metadata import.
+  \item Document and test CSV delimiter expectations for SE/DQ raw files.
+\end{itemize}
+
+\section{Appendix}
+
+\subsection{Glossary}
+\begin{description}
+  \item[FID] Free induction decay, the time-domain NMR signal after excitation.
+  \item[SE] Solid Echo workflow in this program, including FID/MSE-like analysis.
+  \item[\Mtwo] Second spectral moment computed from the normalized real FFT spectrum.
+  \item[\TtwoStar] Effective transverse decay time calculated as \(\sqrt{2/\Mtwo}\) in the SE/DQ implementation.
+  \item[DQ] Double Quantum signal or workflow.
+  \item[MQ] Multiple Quantum combined signal \(DQ+Ref\) in the DQMQ tab.
+  \item[\nDQ] Normalized DQ build-up curve calculated from DQ, reference/MQ, tail, and noise terms.
+  \item[\Dres] Residual dipolar coupling parameter fitted in the DQMQ tab.
+  \item[Goldman--Shen] Spin-diffusion/domain-size workflow implemented in the GS tab.
+\end{description}
+
+\subsection{Symbols Used in Equations}
+\begin{longtable}{p{0.18\linewidth}p{0.70\linewidth}}
+\toprule
+Symbol & Meaning \\
+\midrule
+\(A(t)\) & Magnitude/amplitude of real and imaginary time-domain signal. \\
+\(R(f)\) & Real frequency-domain spectrum. \\
+\(\Mtwo\) & Second spectral moment. \\
+\(\TtwoStar\) & Effective \(T_2^{\ast}\) value. \\
+\(I_{DQ}\) & DQ intensity. \\
+\(\tau_{DQ}\) & DQ filtering time. \\
+\(\tau_i\) & Relaxation time component in T1T2 fits. \\
+\(A_i\) & Amplitude of relaxation component \(i\). \\
+\(\Dres\) & Residual dipolar coupling variable. \\
+\(\beta\) & User parameter in GS domain-size formula or Weibull/A-L DQMQ kernels. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Example Workflows}
+\subsubsection*{SE: Temperature Trend}
+\begin{enumerate}
+  \item Name files so temperatures are encoded near the end of filenames.
+  \item Load all files and run analysis.
+  \item Plot \TtwoStar{} versus temperature.
+  \item Open activation energy, enable Kelvin conversion if source temperatures are Celsius, trim outliers, and fit.
+  \item Save the table and record the units used.
+\end{enumerate}
+
+\subsubsection*{DQ to DQ(Temp)}
+\begin{enumerate}
+  \item For each temperature, run DQ raw analysis and ensure linearized columns are present.
+  \item Save each DQ table.
+  \item Open DQ(Temp), select all saved DQ tables, edit comparison-axis values if needed, and inspect center trends.
+\end{enumerate}
+
+\subsubsection*{DQMQ Dres Fit}
+\begin{enumerate}
+  \item Load one raw DQMQ file and run normalization/nDQ analysis.
+  \item Check whether \nDQ{} is finite and physically plausible.
+  \item Select kernel and component count.
+  \item Start with bounded center/width guesses.
+  \item Calculate \Dres{} and save exports.
+\end{enumerate}
+
+\subsection{Known Limitations and TODOs}
+\begin{itemize}
+  \item Activation energy currently uses the fitted intercept in the energy formula; confirm intended behavior.
+  \item Several file formats rely on filenames for metadata.
+  \item Saved CSV tables have no headers.
+  \item Legacy FFC \texttt{.sef} files are not supported despite historical references to Stelar workflows.
+  \item Some exported auxiliary files lack explicit column headers.
+  \item Long fits can block the GUI.
+\end{itemize}
+
+\end{document}
