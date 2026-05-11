@@ -1,49 +1,52 @@
-# The overveiw of Relaxyzer Software
+# Relaxyzer Software
 
-Initially created as a tool to speed up the analysis of NMR data, obtained from Resonance Systems equipment, Relaxyzer has grown up in a bigger convenient tool with various functionality.
+Relaxyzer was initially created as a tool to speed up the analysis of NMR data obtained from Resonance Systems equipment. It has since grown into a broader and convenient software package for processing, visualizing, fitting, and comparing several types of NMR experiments.
 
+## Key Features
 
-## **Key Features**
-### SE: 
-*The analysis of FID (Free Induction Decay, Solid Echo, MSE)*
+### SE
+Analysis of FID, Free Induction Decay, Solid Echo, and MSE data.
 
-  -Solid Content calculation
-  
-  -For advanced researchers Second Moment and T2* as well
-  
-  -Calculation of the activation energies based on T2* for the measurements at various temperatures
+- Solid content calculation
+- Second moment calculation for advanced analysis
+- T2* calculation
+- Activation energy calculation from T2* values measured at different temperatures
 
-### DQ: 
-*The analysis of Double Quantum NMR with M2 approach*
+### DQ
+Analysis of Double Quantum NMR data using the M2 approach.
 
-  -T2* recalculation from the DQ distribution
+- DQ distribution analysis
+- T2* recalculation from the DQ distribution
 
-### DQ(Temp):
+### DQ(Temp)
+Temperature-dependent comparison of T2* distributions.
 
-  -Comparison of T2* distributions over temperature
+- Overlay and comparison of distributions measured at different temperatures
+- Support for thermal trend analysis
 
-### T1T2:
-  *Analysis of T1 and T2 curves*
-  
-  -Calculation of tau and corresponding amplitudes
-  
-  -Deconvolution onto up to 3 components
+### T1T2
+Analysis of T1 and T2 relaxation curves.
 
-#### The tab includes analysis of 
+- Calculation of relaxation times and corresponding amplitudes
+- Deconvolution into up to three components
+- Support for regular T1/T2 curves
+- Support for T1 curves recorded for different FID regions
+- Support for T1 data measured from FFC profiles obtained with Stelar equipment
 
-  - regular T1\T2 curves
-    
-  - T1s recorded for different FID regions
-    
-  - T1s measured from the FFC profile obtained with Stelar equipment
+### DQMQ
+Analysis of Double Quantum NMR data.
 
-### DQMQ:
-*The analysis of Double Quantum NMR*
+- Build-up curve construction
+- Normalized double quantum signal, nDQ, calculation
+- Dres distribution fitting
 
-  - the construction of the build-up curve
-    
-  - nDQ calculation
+### Goldman-Shen
+Domain size estimation using Goldman-Shen analysis.
 
-### Goldman - Shen:
+## Documentation
 
-  - The domain size estimation
+Detailed user and developer documentation is available in:
+
+`docs/Relaxyzer_User_and_Code_Documentation.tex`
+
+This document describes the workflows, file formats, mathematical formulas, save/load behavior, and implementation details for each program tab.

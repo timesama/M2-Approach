@@ -14,7 +14,6 @@
 \usepackage{graphicx}
 \usepackage{array}
 \usepackage{tabularx}
-\usepackage[strings]{underscore}
 
 \hypersetup{
   colorlinks=true,
@@ -22,6 +21,7 @@
   urlcolor=blue!60!black,
   citecolor=blue!60!black
 }
+\setlength{\emergencystretch}{3em}
 
 \lstset{
   basicstyle=\ttfamily\small,
@@ -32,10 +32,13 @@
 }
 
 \newcommand{\Relaxyzer}{Relaxyzer}
-\newcommand{\TtwoStar}{T_2^{\ast}}
-\newcommand{\Mtwo}{M_2}
-\newcommand{\Dres}{D_{\mathrm{res}}}
-\newcommand{\nDQ}{n_{\mathrm{DQ}}}
+\newcommand{\TtwoStar}{\ensuremath{T_2^{\ast}}}
+\newcommand{\Mtwo}{\ensuremath{M_2}}
+\newcommand{\Dres}{\ensuremath{D_{\mathrm{res}}}}
+\newcommand{\nDQ}{\ensuremath{n_{\mathrm{DQ}}}}
+\newcommand{\Tone}{\ensuremath{T_1}}
+\newcommand{\Ttwo}{\ensuremath{T_2}}
+\newcommand{\TtwoStarLin}{\ensuremath{T_{2,\mathrm{lin}}^{\ast}}}
 \newcommand{\todoverify}{\textbf{to be verified against code behavior}}
 
 \title{\Relaxyzer{} Software Documentation}
@@ -46,7 +49,7 @@
 \maketitle
 
 \begin{abstract}
-\Relaxyzer{} is software for processing and analyzing NMR data. It was initially created to speed up analysis of data obtained from Resonance Systems equipment and later expanded into a broader tool with multiple analysis workflows. The current codebase implements tab-based workflows for FID/Solid Echo/MSE processing, Double Quantum analysis with an \Mtwo{} approach, temperature comparison of DQ-derived distributions, \(T_1\)/\(T_2\) relaxation fitting, DQ/MQ build-up and \Dres{} fitting, and Goldman--Shen domain-size estimation. This document describes what each tab does, what files it accepts, what the user sees, how results are saved or loaded, and which functions/classes implement the calculations. It is intentionally an implementation-oriented manual, not a complete NMR physics textbook.
+\Relaxyzer{} is software for processing and analyzing NMR data. It was initially created to speed up analysis of data obtained from Resonance Systems equipment and later expanded into a broader tool with multiple analysis workflows. The current codebase implements tab-based workflows for FID/Solid Echo/MSE processing, Double Quantum analysis with an \Mtwo{} approach, temperature comparison of DQ-derived distributions, \Tone{}/\Ttwo{} relaxation fitting, DQ/MQ build-up and \Dres{} fitting, and Goldman--Shen domain-size estimation. This document describes what each tab does, what files it accepts, what the user sees, how results are saved or loaded, and which functions/classes implement the calculations. It is intentionally an implementation-oriented manual, not a complete NMR physics textbook.
 \end{abstract}
 
 \tableofcontents
@@ -63,11 +66,11 @@ Based on the implemented loaders and controllers, the software supports the foll
   \item FID, Free Induction Decay, Solid Echo, and MSE-style three-column time-domain files for the SE workflow.
   \item DQ files that contain DQ filtering time data and three-column NMR signal data, processed with the same time/frequency-domain pipeline as SE.
   \item Saved DQ distribution tables for temperature-dependent DQ comparison.
-  \item \(T_1\) and \(T_2\) relaxation curves in two-column CSV, tab-separated text, and generic numeric two-column files.
+  \item \Tone{} and \Ttwo{} relaxation curves in two-column CSV, tab-separated text, and generic numeric two-column files.
   \item DQMQ raw files with time, DQ, and reference channels.
   \item Goldman--Shen spin-diffusion text files with time-like and short/medium/long signal columns.
 \end{itemize}
-Legacy Stelar \texttt{.sef} files are explicitly rejected by the current \(T_1/T_2\) controller; the user is instructed to convert such data to the supported text/table/CSV formats.
+Legacy Stelar \texttt{.sef} files are explicitly rejected by the current \Tone{}/\Ttwo{} controller; the user is instructed to convert such data to the supported text/table/CSV formats.
 
 \subsection{Program philosophy}
 The application follows a repeated workflow: select files, parse numeric columns, compute tab-specific derived quantities, display raw and fitted curves, populate an editable results table, then save the table and the source-file list. The GUI does not hide the intermediate tables: many subsequent plots and fits read from table columns, which makes the workflow transparent but also means users should avoid editing numeric result columns unless they intend to influence later calculations.
@@ -296,7 +299,7 @@ If the pattern is absent, DQ time is stored as \texttt{0}.
 \subsection{User Controls and Features}
 \begin{itemize}
   \item Filtering range spin boxes: select the range of DQ filtering times used to fit \TtwoStar{} versus DQ time.
-  \item Log-scale radio button: plots the distribution against \(\log_{10}(\TtwoStar_{\mathrm{lin}})\).
+  \item Log-scale radio button: plots the distribution against \(\log_{10}(\TtwoStarLin)\).
   \item Fit-function combobox: Gauss, Lorenz, or Pseudo Voigt.
   \item Two plots: \TtwoStar{} versus DQ filtering time, and normalized DQ intensity versus linearized \TtwoStar{}.
   \item Fit-result text box: \(R^2\), center \(X_0\), FWHM/width parameter, and Lorenz fraction.
@@ -305,7 +308,7 @@ If the pattern is absent, DQ time is stored as \texttt{0}.
 \subsection{M2 Approach}
 The tab reuses the SE \Mtwo{} calculation for each DQ raw file. This produces one \TtwoStar{} value per DQ filtering time. A linear mapping
 \begin{equation}
-\TtwoStar_{\mathrm{lin}}(\tau_{DQ}) = a\tau_{DQ}+b
+\TtwoStarLin(\tau_{DQ}) = a\tau_{DQ}+b
 \end{equation}
 is fitted over the selected DQ time window. If fewer than three points fall in the user range, the code falls back to a default range of 0 to 20. If the resulting selected range has fewer than two points, linearization fails.
 
@@ -365,7 +368,7 @@ The DQ(Temp) tab compares DQ-derived \TtwoStar{} distributions across temperatur
 
 \subsection{Step-by-Step User Workflow}
 \begin{enumerate}
-  \item Produce saved DQ tables from the DQ tab with columns \(\TtwoStar_{\mathrm{lin}}\) and DQ Norm.
+  \item Produce saved DQ tables from the DQ tab with columns \(\TtwoStarLin\) and DQ Norm.
   \item Open DQ(Temp) and select one or more saved DQ CSV files.
   \item The tab validates that each file has at least six columns and loads columns 4 and 5.
   \item Review or edit the first table column, used as the comparison x-axis. The default comes from filenames like \texttt{Table\_DQ\_-20...csv}; otherwise the row number plus one is used.
@@ -377,7 +380,7 @@ The DQ(Temp) tab compares DQ-derived \TtwoStar{} distributions across temperatur
 \subsection{Accepted File Formats}
 Input files are comma-delimited saved DQ table files. They must contain at least six columns. The loader uses:
 \begin{equation}
-\text{column 4} = \TtwoStar_{\mathrm{lin}}, \qquad \text{column 5} = I_{DQ,\mathrm{norm}}.
+\text{column 4} = \TtwoStarLin, \qquad \text{column 5} = I_{DQ,\mathrm{norm}}.
 \end{equation}
 There is no header handling in the DQ(Temp) loader; header rows can make \texttt{numpy.loadtxt(..., delimiter=',')} fail.
 
@@ -427,7 +430,7 @@ Object & Role \\
 \section{T1T2 Tab}
 
 \subsection{Purpose and Scope}
-The T1T2 tab loads and fits \(T_1\) and \(T_2\) relaxation curves. It supports regular two-column relaxation curves, text files containing T1 curves for different FID regions, and converted FFC/Stelar-style profile data in supported table/text/CSV formats. Current legacy \texttt{.sef} files are rejected.
+The T1T2 tab loads and fits \Tone{} and \Ttwo{} relaxation curves. It supports regular two-column relaxation curves, text files containing T1 curves for different FID regions, and converted FFC/Stelar-style profile data in supported table/text/CSV formats. Current legacy \texttt{.sef} files are rejected.
 
 \subsection{Step-by-Step User Workflow}
 \begin{enumerate}
@@ -553,7 +556,7 @@ Column & Meaning & Use \\
 \bottomrule
 \end{tabular}
 \end{center}
-The integral-sum feature accepts a comma-delimited CSV with exactly six columns. It uses column 0 as DQ time, column 1 as DQ amplitude, and column 4 as \(\TtwoStar_{\mathrm{lin}}\). This matches the saved DQ table after linearization.
+The integral-sum feature accepts a comma-delimited CSV with exactly six columns. It uses column 0 as DQ time, column 1 as DQ amplitude, and column 4 as \(\TtwoStarLin\). This matches the saved DQ table after linearization.
 
 \subsection{User Controls and Features}
 \begin{itemize}
