@@ -145,11 +145,11 @@ def open_interactive_dres(parent=None):
     ax_s6 = fig.add_axes([0.28, 0.08, 0.55, 0.03])
 
     s1 = Slider(ax_s1, "center 1", 0.001, 0.5, valinit=0.15, valstep=0.001)
-    s2 = Slider(ax_s2, "width 1", 0.000000001, 0.1, valinit=0.001, valstep=0.000000001)
+    s2 = Slider(ax_s2, "width 1", 0.0000001, 1.0, valinit=0.001, valstep=0.0000001)
     s3 = Slider(ax_s3, "center 2", 0.1, 0.5, valinit=0.35, valstep=0.001)
-    s4 = Slider(ax_s4, "width 2", 0.000000001, 0.1, valinit=0.001, valstep=0.000000001)
+    s4 = Slider(ax_s4, "width 2", 0.0000001, 1.0, valinit=0.001, valstep=0.0000001)
     s5 = Slider(ax_s5, "fraction 1", 0.0, 1.0, valinit=0.5, valstep=0.001)
-    s6 = Slider(ax_s6, "Weibull beta", 0.1, 5.0, valinit=2.0, valstep=0.01)
+    s6 = Slider(ax_s6, "Weibull beta", 0.1, 6.0, valinit=2.0, valstep=0.01)
 
     # -----------------------------
     # Radio buttons
