@@ -713,9 +713,5 @@ class RecFIDController(BaseTabController):
         return widget.currentText() if widget is not None else default
 
     def _warn(self, title, message):
+        self._status(message)
         QMessageBox.warning(self.parent, title, message, QMessageBox.Ok)
-
-    def _status(self, message):
-        if self.parent is not None and hasattr(self.parent, "statusBar"):
-            self.parent.statusBar().showMessage(message, 8000)
-        logger.info(message)

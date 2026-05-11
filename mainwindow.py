@@ -186,6 +186,8 @@ class MainWindow(QMainWindow):
         self.disable_buttons()
         self.ui.SE_GroupBox_EAct.setHidden(True)
 
+        self.show_status("Ready.")
+
         self.tab10_colors = [
             mkColor('#1f77b4'),  # blue
             mkColor('#ff7f0e'),  # orange
@@ -198,6 +200,11 @@ class MainWindow(QMainWindow):
             mkColor('#bcbd22'),  # olive
             mkColor('#17becf')   # cyan
         ]
+
+    def show_status(self, message, timeout=8000):
+        """Show a concise user-facing footer/status-bar message and log it."""
+        self.statusBar().showMessage(message, timeout)
+        logger.info(message)
 
     def check_for_updates(self):
         """Check GitHub releases and prompt when a newer app version exists."""
@@ -222,10 +229,12 @@ class MainWindow(QMainWindow):
 
         except requests.RequestException as e:
             logger.warning("Failed to check for updates: %s", e)
+            self.show_status("Could not check for updates.")
 
     def open_url(self):
         """Open the GitHub releases page used by the Settings tab."""
         open_application('https://github.com/timesama/M2-Approach/releases')
+        self.show_status("Opened project releases page.")
 
     def open_interactive_dres_tool(self):
         """Open or raise the standalone interactive Dres matplotlib tool."""
@@ -237,6 +246,7 @@ class MainWindow(QMainWindow):
                 and plt.fignum_exists(self.interactive_dres_figure.number)
             ):
                 self._raise_interactive_dres_window(self.interactive_dres_figure)
+                self.show_status("Interactive Dres tool is already open.")
                 return
 
             from plotmat import plot_interactive_Dres as interactive_dres
@@ -246,9 +256,11 @@ class MainWindow(QMainWindow):
                 "close_event",
                 self._clear_interactive_dres_reference,
             )
+            self.show_status("Opened interactive Dres tool.")
         except Exception:
             logger.exception("Could not open the interactive Dres tool.")
             self.interactive_dres_figure = None
+            self.show_status("Could not open interactive Dres tool.")
             QMessageBox.warning(
                 self,
                 "Interactive Dres",
@@ -285,8 +297,9 @@ class MainWindow(QMainWindow):
 
         try:
             file_path = next((f for f in files if os.path.basename(f) == filename), None)
-            i = next((i for i, f in enumerate(files) if os.path.basename(f) == filename), None)+1
-        except:
+            i = next((i for i, f in enumerate(files) if os.path.basename(f) == filename), None) + 1
+        except Exception:
+            self.show_status("Could not find the selected file.")
             return
 
         if self.ui.Settings_CheckBox_Glycerol.isChecked() and self.ui.Settings_CheckBox_Baseline.isChecked():
@@ -312,7 +325,11 @@ class MainWindow(QMainWindow):
         try:
             self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
         except Exception:
+            logger.exception("Could not update file preview: %s", filename)
+            self.show_status(f"Could not process file: {filename}")
             return
+
+        self.show_status(f"Loaded preview for {filename}.")
 
         if self.tab == 'DQ':
             self.highlight_row(self.ui.DQ_Table_Data, i)
@@ -390,6 +407,7 @@ class MainWindow(QMainWindow):
                 combobox.removeItem(0)
 
         self.window_array = np.array([])
+        self.show_status(f"Cleared {self.tab} data.")
 
     def delete_row(self):
         """Delete the selected row and keep the active tab file list in sync."""
@@ -427,6 +445,7 @@ class MainWindow(QMainWindow):
                 )
             else:
                 QMessageBox.warning(self, "Cricket sounds", "Select the row.", QMessageBox.Ok)
+            self.show_status("No rows selected.")
             return
 
         table.removeRow(row)
@@ -441,6 +460,8 @@ class MainWindow(QMainWindow):
             if self.tab in ('SE', 'DQ') and self.selected_files_empty and len(self.selected_files_empty) > row:
                 self.selected_files_empty.pop(row)
         except Exception:
+            logger.exception("File list sync failed after deleting row")
+            self.show_status("Deleted row, but file list may be out of sync.")
             QMessageBox.warning(self, "Delete warning", "Row was removed from table, but file lists may be out of sync.", QMessageBox.Ok)
 
         if self.tab == 'SE':
@@ -454,6 +475,8 @@ class MainWindow(QMainWindow):
         elif self.tab in ('SE', 'DQ'):
             self.ui.FidWidget.clear()
             self.ui.FFTWidget.clear()
+
+        self.show_status("Deleted selected row.")
 
     def highlight_row(self, table, row_selected):
 
@@ -489,38 +512,45 @@ class MainWindow(QMainWindow):
             if self.tab == 'DQ_Temp':
                 DQfileNames = dlg.selectedFiles()
                 self.selected_DQfiles.extend(DQfileNames)
+                self.show_status(f"Loaded {len(DQfileNames)} DQ temperature file(s).")
                 self.dq_temp_controller.update_DQ_comparison()
             elif self.tab == 'T1T2':
                 while self.ui.T1T2_ComboBox_ChooseFile.count()>0:
                     self.ui.T1T2_ComboBox_ChooseFile.removeItem(0)
                 T1fileNames = dlg.selectedFiles()
                 self.selected_T1files.extend(T1fileNames)
+                self.show_status(f"Loaded {len(T1fileNames)} T1/T2 file(s).")
                 self.t1t2_controller.update_T12_table()
             elif self.tab == 'GS':
                 while self.ui.GS_ComboBox_ChooseFile.count() > 0:
                     self.ui.GS_ComboBox_ChooseFile.removeItem(0)
                 GSfileNames = dlg.selectedFiles()
                 self.selected_GSfiles.extend(GSfileNames)
+                self.show_status(f"Loaded {len(GSfileNames)} spin diffusion file(s).")
                 self.gs_controller.update_GS_table()
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
                 self.app_state.dqmq_files = self.selected_DQMQfile
                 self.dqmq_controller.state.dqmq_files = self.selected_DQMQfile
+                self.show_status("Loaded DQMQ file.")
                 self.dqmq_controller.dq_mq_analysis()
 
     def open_select_dialog(self):
         """Open the primary SE/DQ file picker."""
         open_files_dialog_module.State_multiple_files = True
         dlg = OpenFilesDialog(self)
+        files = []
 
         if dlg.exec():
             self.clear_list()
-            files = []
             fileNames = dlg.selectedFiles()
             files.extend(fileNames)
             # self.ui.btn_Start.setEnabled(True)
             self.ui.btn_Start.setStyleSheet("background-color: green")
+            self.show_status(f"Loaded {len(files)} file(s).")
             # self.ui.btn_Add.setEnabled(True)
+        else:
+            self.show_status("File loading cancelled.")
 
         if self.tab == 'SE':
             self.selected_files = files
@@ -543,7 +573,10 @@ class MainWindow(QMainWindow):
             files.extend(fileNames)
             # self.ui.btn_Start.setEnabled(True)
             self.ui.btn_Start.setStyleSheet("background-color: green")
+            self.show_status(f"Added {len(fileNames)} file(s).")
             # self.ui.btn_Add.setEnabled(True)
+        else:
+            self.show_status("File loading cancelled.")
 
         if self.tab == 'SE':
             self.selected_files = files
@@ -560,6 +593,7 @@ class MainWindow(QMainWindow):
             self.group_data_SE = {}
         elif self.tab == 'T1T2':
             if self.ui.T1T2_Table_Results.rowCount() == 0:
+                self.show_status("No T1/T2 data available.")
                 QMessageBox.warning(
                     self,
                     "No T1/T2 data",
@@ -571,6 +605,7 @@ class MainWindow(QMainWindow):
             self.group_data_T1T2 = {}
         elif self.tab == 'GS':
             if self.ui.GS_Table_Results.rowCount() == 0:
+                self.show_status("No spin diffusion data available.")
                 QMessageBox.warning(
                     self,
                     "No spin diffusion data",
@@ -585,19 +620,23 @@ class MainWindow(QMainWindow):
             data = self.group_window.group_dict
         else:
             logger.info("Group window was cancelled.")
+            self.show_status("Grouping cancelled.")
             return
 
         if self.tab == 'SE':
             self.group_data_SE = data
             self.update_se_graphs()
+            self.show_status("Updated SE groups.")
 
         elif self.tab == 'T1T2':
             self.group_data_T1T2 = data
             self.t1t2_controller.plot_relaxation_time()
+            self.show_status("Updated T1/T2 groups.")
 
         elif self.tab == 'GS':
             self.group_data_SD = data
             self.gs_controller.plot_sqrt_time()
+            self.show_status("Updated spin diffusion groups.")
 
 
     def _connect_dqmq_workflow_signals(self):
@@ -747,8 +786,10 @@ class MainWindow(QMainWindow):
                 winreg.SetValueEx(key, "SelectedFolder", 0, winreg.REG_SZ, folder_path)
                 winreg.CloseKey(key)
                 logger.info("Default folder saved to registry: %s", folder_path)
+                self.show_status("Saved default folder.")
             except Exception as e:
                 logger.warning("Failed to save the default folder to the registry: %s", e)
+                self.show_status("Could not save default folder.")
 
     def renameSection(self, table, index):
         """Rename a table header and mirror it to the linked x-axis label."""
@@ -758,6 +799,7 @@ class MainWindow(QMainWindow):
         if ok and new_header:
             table.horizontalHeaderItem(index).setText(new_header)
             self.update_xaxis(table, index)
+            self.show_status("Renamed table column.")
 
     def update_xaxis(self, table, index):
         """Update the active comparison plot x-axis label from a table header."""
@@ -774,6 +816,7 @@ class MainWindow(QMainWindow):
 
         name = table.horizontalHeaderItem(index).text()
         figure.getAxis('bottom').setLabel(name)
+        self.show_status("Updated plot axis.")
 
     def _apply_table_header_order(self):
         """Restore table headers that Qt Designer does not keep in controller order."""
@@ -849,8 +892,8 @@ class MainWindow(QMainWindow):
         if self.tab == 'SE':
             table = self.ui.SE_Table_Data
             files = self.selected_files
-            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_SE_MSE_FID'
             if table.rowCount() == 0 or not files:
+                self.show_status("Load data files first.")
                 QMessageBox.warning(
                     self,
                     "No data loaded",
@@ -858,12 +901,13 @@ class MainWindow(QMainWindow):
                     QMessageBox.Ok,
                 )
                 return
+            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_SE_MSE_FID'
 
         elif self.tab == 'DQ':
             table = self.ui.DQ_Table_Data
             files = self.selected_files_DQ_single
-            default_name = 'Table_DQ_' + os.path.split(os.path.dirname(files[0]))[1]
             if table.rowCount() == 0 or not files:
+                self.show_status("Load DQ data files first.")
                 QMessageBox.warning(
                     self,
                     "No DQ data loaded",
@@ -871,11 +915,13 @@ class MainWindow(QMainWindow):
                     QMessageBox.Ok,
                 )
                 return
+            default_name = 'Table_DQ_' + os.path.split(os.path.dirname(files[0]))[1]
 
         elif self.tab == 'DQ_Temp':
             table = self.ui.DQTemp_Table_Results
             files = self.selected_DQfiles
             if table.rowCount() == 0 or not files:
+                self.show_status("Load DQ comparison files first.")
                 QMessageBox.warning(
                     self,
                     "No DQ data",
@@ -892,6 +938,7 @@ class MainWindow(QMainWindow):
             table = self.ui.T1T2_Table_Results
             files = self.selected_T1files
             if table.rowCount() == 0 or not files:
+                self.show_status("Load T1/T2 files first.")
                 QMessageBox.warning(
                     self,
                     "No T1/T2 data",
@@ -905,6 +952,7 @@ class MainWindow(QMainWindow):
             table = self.ui.GS_Table_Results
             files = self.selected_GSfiles
             if table.rowCount() == 0 or not files:
+                self.show_status("Load spin diffusion files first.")
                 QMessageBox.warning(
                     self,
                     "No spin diffusion data",
@@ -918,9 +966,8 @@ class MainWindow(QMainWindow):
             table = self.ui.DQMQ_Table_Data
             files = self.selected_DQMQfile
 
-            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_DQMQ_data'
-
             if table.rowCount() == 0 or not files:
+                self.show_status("Load DQMQ file first.")
                 QMessageBox.warning(
                     self,
                     "No DQMQ data",
@@ -929,11 +976,14 @@ class MainWindow(QMainWindow):
                 )
                 return
 
+            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_DQMQ_data'
+
         elif self.tab == 'RecFID':
             self.recfid_controller.save_results()
             return
 
         dialog = SaveFilesDialog(self)
+        self.show_status("Saving analysis results...")
         dialog.save_data_as_csv(self, table, files, default_name)
 
         if self.tab == 'DQMQ' and dialog.last_saved_file_path:
@@ -947,6 +997,11 @@ class MainWindow(QMainWindow):
             with open(files_json, 'w') as f:
                 json.dump({"files": files, "phased": phased_data}, f)
 
+        if dialog.last_saved_file_path:
+            self.show_status("Saved analysis results.")
+        else:
+            self.show_status("Save cancelled.")
+
 
     def load_data(self):
         """Load a saved results table for the active tab."""
@@ -954,7 +1009,10 @@ class MainWindow(QMainWindow):
         # self.ui.btn_Save.setEnabled(False)
         if dlg.exec():
             tableName = dlg.selectedFiles()
+            self.show_status("Loading saved table...")
             self.load_table_from_csv(tableName)
+        else:
+            self.show_status("File loading cancelled.")
 
     def load_table_from_csv(self, tableName):
         with busy_cursor():
@@ -979,8 +1037,10 @@ class MainWindow(QMainWindow):
                     files = files_payload
                     phased = {}
         except Exception as e:
+            logger.warning("Saved table file list missing: %s", e)
+            self.show_status("Loaded table without file list.")
             QMessageBox.warning(self, "File missing", f"Didn't find file list, only the tabular result is available", QMessageBox.Ok)
-            files = None
+            files = []
             phased = {}
             # self.ui.comboBox_4.setEnabled(False)
             # self.ui.btn_Phasing.setEnabled(False)
@@ -1019,6 +1079,7 @@ class MainWindow(QMainWindow):
             lines = f.readlines()
             if self._is_probably_old_table_format(lines):
                 self._warn_old_table_format()
+                self.show_status("Old saved file format detected.")
                 return
             table.setRowCount(len(lines))
             for row, line in enumerate(lines):
@@ -1060,8 +1121,11 @@ class MainWindow(QMainWindow):
         elif self.tab == 'GS':
             self.gs_controller.update_GS_table()
 
+        self.show_status(f"Loaded saved {self.tab} table.")
+
     def _warn_old_table_format(self):
         """Warn when a saved table appears to use an obsolete column order."""
+        self.show_status("Old saved file format detected.")
         QMessageBox.warning(
             self,
             "Old saved file format",

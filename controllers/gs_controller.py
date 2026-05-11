@@ -30,6 +30,8 @@ class GSTabController(BaseTabController):
         self.ui.GS_ComboBox_ChooseFile.activated.connect(lambda *_args: self.calculate_sqrt_time())
 
     def update_GS_table(self):
+        if self.parent.selected_GSfiles:
+            self._status(f"Loading {len(self.parent.selected_GSfiles)} spin diffusion file(s)...")
         with busy_cursor():
             self._update_GS_table_impl()
 
@@ -75,6 +77,10 @@ class GSTabController(BaseTabController):
 
         combobox.setCurrentIndex(-1)
         table.resizeColumnsToContents()
+        if table.rowCount():
+            self._status(f"Loaded {table.rowCount()} spin diffusion row(s).")
+        else:
+            self._status("Could not load spin diffusion files.")
 
     def _add_table_row(self, table, combobox, row, folder, file_name, x_axis):
         table.insertRow(row)
@@ -100,6 +106,7 @@ class GSTabController(BaseTabController):
 
         if idx == -1:
             if show_warning:
+                self._status("No rows selected.")
                 QMessageBox.warning(
                     self.parent,
                     "No spin diffusion row selected",
@@ -111,6 +118,7 @@ class GSTabController(BaseTabController):
         item = table.item(idx, GSColumns.FOLDER)
         if item is None or item.text() not in dictionary:
             if show_warning:
+                self._status("Could not fit spin diffusion data: non-numeric values.")
                 QMessageBox.warning(
                     self.parent,
                     "No spin diffusion data",
@@ -154,6 +162,7 @@ class GSTabController(BaseTabController):
         except Exception:
             logger.exception("GS fit failed: index=%d", idx)
             figure.clear()
+            self._status("Could not fit spin diffusion data.")
             QMessageBox.warning(
                 self.parent,
                 "Fitting failed",
@@ -180,6 +189,8 @@ class GSTabController(BaseTabController):
         dictionary_entry["sqrtT"] = sqrt_time
         dictionary_entry["d"] = diffusion_distance
         logger.info("GS fit completed: sqrtT=%s d=%s", sqrt_time, diffusion_distance)
+        if show_warning:
+            self._status("Fit completed.")
 
     def _update_fit_limits(self, time_original):
         self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(time_original[0])
@@ -205,6 +216,7 @@ class GSTabController(BaseTabController):
 
         if table.rowCount() < 1:
             if show_warning:
+                self._status("Cannot update spin diffusion plot because the table is empty.")
                 QMessageBox.warning(
                     self.parent,
                     "No spin diffusion data",
@@ -236,6 +248,7 @@ class GSTabController(BaseTabController):
             fallback_x_axis += 1
 
         if invalid_result_count == table.rowCount() and show_warning:
+            self._status("Could not plot spin diffusion data: non-numeric values.")
             QMessageBox.warning(
                 self.parent,
                 "No spin diffusion data",
@@ -253,11 +266,15 @@ class GSTabController(BaseTabController):
             symbolBrush="r",
             symbolSize=10,
         )
+        if show_warning:
+            self._status("Plot updated.")
 
     def _warn_no_data(self, message):
+        self._status(message)
         QMessageBox.warning(self.parent, "No spin diffusion data", message, QMessageBox.Ok)
 
     def _warn_invalid_range(self):
+        self._status("Could not fit spin diffusion data: invalid range.")
         QMessageBox.warning(
             self.parent,
             "Invalid spin diffusion range",
@@ -269,4 +286,5 @@ class GSTabController(BaseTabController):
         preview = "\n".join(failed_files[:5])
         if len(failed_files) > 5:
             preview += f"\n...and {len(failed_files) - 5} more"
+        self._status(message)
         QMessageBox.warning(self.parent, "Spin diffusion load warning", f"{message}\n\n{preview}", QMessageBox.Ok)

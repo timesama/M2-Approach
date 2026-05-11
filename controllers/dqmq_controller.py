@@ -135,6 +135,7 @@ class DQMQTabController(BaseTabController):
     def _ensure_raw_data(self):
         file_path = self._get_current_file()
         if file_path is None:
+            self._status("Select a DQMQ file first.")
             QMessageBox.warning(
                 self.parent,
                 "DQMQ file missing",
@@ -184,9 +185,11 @@ class DQMQTabController(BaseTabController):
 
     def dq_mq_analysis(self):
         with busy_cursor():
+            self._status("Loading DQMQ data...")
             logger.info("DQMQ raw load started")
             file_path = self._get_current_file()
             if file_path is None:
+                self._status("Select a DQMQ file first.")
                 QMessageBox.warning(
                     self.parent,
                     "DQMQ file missing",
@@ -199,6 +202,7 @@ class DQMQTabController(BaseTabController):
                 raw_data = self._read_raw_data_from_file(file_path)
             except Exception as exc:
                 logger.exception("DQMQ raw load failed")
+                self._status(f"Could not process file: {exc}")
                 QMessageBox.warning(
                     self.parent,
                     "Corrupt File",
@@ -214,6 +218,7 @@ class DQMQTabController(BaseTabController):
             # self._enable_file_actions()
             self.render_raw_plot()
             logger.info("DQMQ raw load completed: %d points", len(raw_data["time"]))
+            self._status("Loaded DQMQ data.")
 
     def render_raw_plot(self):
         raw_data = self._ensure_raw_data()
@@ -244,7 +249,9 @@ class DQMQTabController(BaseTabController):
         return time, dq, ref
 
     def plot_original(self):
-        return self.render_raw_plot()
+        result = self.render_raw_plot()
+        self._status("Plot updated.")
+        return result
 
     def _analysis_parameters(self):
         fit_from = self.ui.DQMQ_DoubleSpinBox_FitFrom.value()
@@ -263,6 +270,7 @@ class DQMQTabController(BaseTabController):
         raw_data = self._ensure_raw_data()
         if raw_data is None:
             return None
+        self._status("Running DQMQ analysis...")
 
         if self.ui.DQMQ_Table_Data.rowCount() != len(raw_data["time"]):
             self._write_raw_table(raw_data)
@@ -295,6 +303,7 @@ class DQMQTabController(BaseTabController):
                 )
         except Exception as exc:
             logger.exception("DQMQ full analysis failed")
+            self._status(f"Could not run DQMQ analysis: {exc}")
             QMessageBox.warning(self.parent, "DQMQ analysis failed", str(exc))
             return None
 
@@ -304,6 +313,7 @@ class DQMQTabController(BaseTabController):
         )
         self.dres_is_stale = True
         self.render_analysis_plot()
+        self._status("Fit completed.")
         return self.analysis_result
 
     def plot_norm(self):
@@ -326,6 +336,7 @@ class DQMQTabController(BaseTabController):
             return
         if self.current_plot_mode == "analysis":
             self.render_analysis_plot()
+            self._status("Plot updated.")
 
     def _dqmq_pen(self, style_name, *, dashed=False):
         style = DQMQ_PLOT_STYLES[style_name]
@@ -486,10 +497,13 @@ class DQMQTabController(BaseTabController):
                 }
                 if self.current_plot_mode == "analysis":
                     self.render_analysis_plot()
+                self._status("Calculated integral sum.")
         except ValueError as exc:
+            self._status(f"Could not process file: {exc}")
             QMessageBox.warning(self.parent, "Invalid file", str(exc))
         except Exception as exc:
             logger.exception("Integral sum calculation failed")
+            self._status(f"Could not calculate integral sum: {exc}")
             QMessageBox.warning(
                 self.parent, "Integral sum calculation failed", str(exc)
             )
@@ -546,6 +560,7 @@ class DQMQTabController(BaseTabController):
         self.integral_sum_result["time"] = self.integral_sum_result["time_base"] + shift
         if self.current_plot_mode == "analysis":
             self.render_analysis_plot()
+            self._status("Integral sum shift updated.")
 
     def save_integral_sum_result(self, base_file_path):
         if not self.integral_sum_result:
@@ -599,14 +614,17 @@ class DQMQTabController(BaseTabController):
                 self._plot_dres_distribution()
                 if self.current_plot_mode == "analysis":
                     self.render_analysis_plot()
+                self._status("Dres calculation completed.")
         except ValueError as exc:
             if show_errors:
+                self._status(f"Could not calculate Dres: {exc}")
                 QMessageBox.warning(self.parent, "Dres calculation", str(exc))
             else:
                 logger.warning("Skipping automatic Dres calculation: %s", exc)
         except Exception as exc:
             logger.exception("Dres calculation failed")
             if show_errors:
+                self._status(f"Could not calculate Dres: {exc}")
                 QMessageBox.warning(self.parent, "Dres calculation failed", str(exc))
 
     def _dres_input_arrays(self):
@@ -780,6 +798,7 @@ class DQMQTabController(BaseTabController):
     def mark_dres_stale(self):
         self.dres_is_stale = True
         logger.info("DQMQ Dres parameters changed; Dres result is stale")
+        self._status("Dres settings changed.")
 
     def _plot_dres_distribution(self):
         if not self.dres_result:

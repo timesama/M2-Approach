@@ -37,8 +37,10 @@ class GeneralSEDQController(BaseTabController):
                 self.ui.DQ_ComboBox_FitFunction.setCurrentIndex(-1)
 
             if len(files) == 0:
+                self._status("Load data files first.")
                 return
 
+            self._status(f"Analyzing {len(files)} {mw.tab} file(s)...")
             logger.info("%s analysis started: %d files", mw.tab, len(files))
             logger.info(
                 "Options - glycerol:%s baseline:%s long_component:%s smoothing:%s",
@@ -90,11 +92,13 @@ class GeneralSEDQController(BaseTabController):
             self.update_legends_and_dq_graphs()
             self.ui.btn_Start.setStyleSheet("background-color: none")
             logger.info("%s analysis completed: %d files", mw.tab, len(files))
+            self._status("Analysis completed.")
 
     def analysis_error(self, file_path, files):
         logger.exception("Failed to process file %s", file_path)
 
         mw = self.parent
+        self._status(f"Could not process file: {os.path.basename(file_path)}")
         QMessageBox.warning(
             mw,
             "Invalid Data",
@@ -238,6 +242,7 @@ class GeneralSEDQController(BaseTabController):
             or self.state.spectrum.re_spectra is None
             or self.state.spectrum.im_spectra is None
         ):
+            self._status("Load data before opening manual phasing.")
             QMessageBox.warning(
             self.parent,
             "No spectrum data",
@@ -250,12 +255,15 @@ class GeneralSEDQController(BaseTabController):
         mw.phasing_manual_window.read_data()
         mw.phasing_manual_window.show()
         mw.phasing_manual_window.closed.connect(self.after_phasing)
+        self._status("Opened manual phasing.")
 
     def open_select_dialog_glycerol(self):
         dlg = OpenFilesDialog(self.parent)
         dlg.setWindowTitle("Select Glycerol Files")
         if dlg.exec():
-            self.parent.selected_files_gly.extend(dlg.selectedFiles())
+            files = dlg.selectedFiles()
+            self.parent.selected_files_gly.extend(files)
+            self._status(f"Loaded {len(files)} glycerol file(s).")
         # self.ui.btn_Start.setEnabled(True)
         # self.ui.btn_Add.setEnabled(True)
 
@@ -263,6 +271,8 @@ class GeneralSEDQController(BaseTabController):
         dlg = OpenFilesDialog(self.parent)
         dlg.setWindowTitle("Select Baseline Files")
         if dlg.exec():
-            self.parent.selected_files_empty.extend(dlg.selectedFiles())
+            files = dlg.selectedFiles()
+            self.parent.selected_files_empty.extend(files)
+            self._status(f"Loaded {len(files)} baseline file(s).")
         # self.ui.btn_Start.setEnabled(True)
         # self.ui.btn_Add.setEnabled(True)

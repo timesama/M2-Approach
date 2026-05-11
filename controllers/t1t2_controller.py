@@ -35,6 +35,8 @@ class T1T2TabController(BaseTabController):
         )
 
     def update_T12_table(self):
+        if self.parent.selected_T1files:
+            self._status(f"Loading {len(self.parent.selected_T1files)} T1/T2 file(s)...")
         with busy_cursor():
             self._update_T12_table_impl()
 
@@ -46,6 +48,7 @@ class T1T2TabController(BaseTabController):
 
         legacy_files = [path for path in selected_files if path.lower().endswith(".sef")]
         if legacy_files:
+            self._status("Unsupported T1/T2 file skipped.")
             QMessageBox.warning(
                 self.parent,
                 "Unsupported T1/T2 file",
@@ -79,6 +82,11 @@ class T1T2TabController(BaseTabController):
 
         combobox.setCurrentIndex(-1)
         table.resizeColumnsToContents()
+        loaded_count = table.rowCount()
+        if loaded_count:
+            self._status(f"Loaded {loaded_count} T1/T2 row(s).")
+        else:
+            self._status("Could not load T1/T2 files.")
 
     def _load_csv_files(self, table, combobox, dictionary, preserved_x_axis, selected_files):
         logger.info("T1T2 branch: CSV")
@@ -256,12 +264,14 @@ class T1T2TabController(BaseTabController):
 
         if idx == -1:
             if show_warning:
+                self._status("No rows selected.")
                 QMessageBox.warning(self.parent, "No T1/T2 row selected", "No T1/T2 row selected.", QMessageBox.Ok)
             return
 
         item = table.item(idx, T1Columns.FOLDER)
         if item is None or item.text() not in dictionary:
             if show_warning:
+                self._status("Could not fit T1/T2 data: non-numeric values.")
                 QMessageBox.warning(
                     self.parent,
                     "No T1/T2 data",
@@ -296,6 +306,7 @@ class T1T2TabController(BaseTabController):
             initial_params = t1t2_signal.initial_parameters(order, fit_signal, tau1, tau2, tau3)
         except ValueError:
             if show_warning:
+                self._status("Could not fit T1/T2 data: invalid range.")
                 QMessageBox.warning(
                     self.parent,
                     "Invalid T1/T2 range",
@@ -314,6 +325,7 @@ class T1T2TabController(BaseTabController):
             )
         except Exception:
             logger.exception("T1T2 fit failed for index=%d order=%d", idx, order)
+            self._status("Could not fit T1/T2 data.")
             QMessageBox.warning(
                 self.parent,
                 "Fitting failed",
@@ -323,6 +335,8 @@ class T1T2TabController(BaseTabController):
             return
 
         logger.info("T1T2 fit completed: tau1=%s tau2=%s tau3=%s r2=%s", tau_1, tau_2, tau_3, r2)
+        if show_warning:
+            self._status("Fit completed.")
         self.ui.T1T2_TextEdit_FitResult.setText(f"R² {r2}")
         table.setItem(idx, T1Columns.TAU_1, QTableWidgetItem(str(tau_1)))
         table.setItem(idx, T1Columns.TAU_2, QTableWidgetItem(str(tau_2)))
@@ -369,6 +383,8 @@ class T1T2TabController(BaseTabController):
 
         graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol="o", symbolBrush="r", symbolSize=10)
         self.highlight_selected_relaxation_point()
+        if show_warning:
+            self._status("Plot updated.")
 
     def highlight_selected_relaxation_point(self):
         row = self.ui.T1T2_Table_Results.currentRow()
@@ -405,10 +421,12 @@ class T1T2TabController(BaseTabController):
         return T1Columns.TAU_3
 
     def _warn_no_data(self, message):
+        self._status(message)
         QMessageBox.warning(self.parent, "No T1/T2 data", message, QMessageBox.Ok)
 
     def _warn_failed_files(self, message, failed_files):
         preview = "\n".join(failed_files[:5])
         if len(failed_files) > 5:
             preview += f"\n...and {len(failed_files) - 5} more"
+        self._status(message)
         QMessageBox.warning(self.parent, "T1/T2 load warning", f"{message}\n\n{preview}", QMessageBox.Ok)

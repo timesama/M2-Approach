@@ -51,6 +51,7 @@ class SETabController(BaseTabController):
 
     def update_graphs_from_user(self):
         if self.ui.SE_Table_Data.rowCount() == 0:
+            self._status("No SE data available.")
             QMessageBox.warning(
                 self.parent,
                 "No SE data",
@@ -85,6 +86,7 @@ class SETabController(BaseTabController):
             self.ui.SE_PlotWidget_Main.getAxis("left").setLabel("T₂*")
         else:
             self.ui.SE_PlotWidget_Main.getAxis("left").setLabel("Not Set")
+            self._status("Cannot update SE plot: selected Y column is missing.")
             QMessageBox.warning(
                 self.parent,
                 "SE plot unavailable",
@@ -144,6 +146,7 @@ class SETabController(BaseTabController):
         graph = self.ui.SE_PlotWidget_Main
 
         if table.rowCount() == 0:
+            self._status("No SE data available.")
             QMessageBox.warning(
                 self.parent,
                 "No SE data",
@@ -198,7 +201,9 @@ class SETabController(BaseTabController):
             graph.plot(temp_fit, fitted_curve, pen="b")
             self.parent.setup_graph(graph, "1000/T, 𝐾⁻¹", "ln(τ)", "")
             self.ui.SE_TextEdit_EActResult.setText(f"Eact = {eact}\nR² {r2}")
+            self._status("Fit completed.")
         except Exception as exc:
+            self._status(f"Could not fit Arrhenius plot: {exc}")
             QMessageBox.warning(self.parent, "Arrhenius fit error", str(exc), QMessageBox.Ok)
 
     def hide_Eact(self):
@@ -206,10 +211,12 @@ class SETabController(BaseTabController):
         self.ui.SE_PlotWidget_Main.clear()
         self.parent.setup_graph(self.ui.SE_PlotWidget_Main, "", "", "")
         self.parent.update_xaxis(self.ui.SE_Table_Data, 0)
+        self._status("Activation energy view closed.")
 
     def open_group_window(self):
         table = self.ui.SE_Table_Data
         if table.rowCount() == 0:
+            self._status("No SE data available.")
             QMessageBox.warning(
                 self.parent,
                 "No SE data",
@@ -227,6 +234,7 @@ class SETabController(BaseTabController):
 
         self.parent.group_data_SE = group_window.group_dict
         self.update_graphs()
+        self._status("Updated SE groups.")
 
     def highlight_selected_point(self):
         row = self.ui.SE_Table_Data.currentRow()
