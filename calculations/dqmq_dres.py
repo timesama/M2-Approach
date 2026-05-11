@@ -9,7 +9,7 @@ from scipy.integrate import trapezoid
 from scipy.optimize import curve_fit
 
 K = 0.4
-D_GRID = np.linspace(0, 0.94, 60000)
+D_GRID = np.linspace(0, 0.6, 3000)
 VALID_KERNELS = ["gaussian", "abragam", "pake", "weibull", "a-l"]
 
 
@@ -119,12 +119,12 @@ def fit_selected_model(
     if n_components == 1:
         default_p0 = [0.25, 1e-3, 2.0]
         bounds_min = [0, 0, 0]
-        bounds_max = [1.000, 0.8, 6.0]
+        bounds_max = [0.500, 1.0, 6.0]
         param_names = ["mu", "sigma", "beta"]
     elif n_components == 2:
         default_p0 = [0.25, 0.001, 0.05, 0.001, 0.5, 2.0]
         bounds_min = [0, 0, 0, 0, 0.0, 0]
-        bounds_max = [1.0000, 10, 2.0000, 10, 1.0, 6.0]
+        bounds_max = [0.5000, 1.0, 0.5000, 1.0, 1.0, 6.0]
         param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1", "beta"]
     else:
         raise ValueError("n_components must be 1 or 2")
