@@ -26,6 +26,7 @@ class DQTempTabController(BaseTabController):
             self._warn_no_data("No DQ temperature data available. Select DQ comparison files first.")
             return
 
+        self._status(f"Loading {len(self.parent.selected_DQfiles)} DQ temperature file(s)...")
         with busy_cursor():
             table = self.ui.DQTemp_Table_Results
             valid_files = []
@@ -66,8 +67,10 @@ class DQTempTabController(BaseTabController):
 
             if not valid_files:
                 self._clear_plots()
+                self._status("Could not load DQ temperature files.")
                 return
 
+            self._status(f"Loaded {len(valid_files)} DQ temperature file(s).")
             self.launch()
 
     def launch(self):
@@ -75,6 +78,7 @@ class DQTempTabController(BaseTabController):
             self._warn_no_data("No DQ temperature data available. Select DQ comparison files first.")
             return
 
+        self._status("Fitting DQ temperature data...")
         logger.info("DQ Temp launching comparison fit")
         self.parent.dq_t2 = {}
         failed_files = []
@@ -94,6 +98,8 @@ class DQTempTabController(BaseTabController):
                 "Some DQ temperature files could not be fitted. They were filled with NaN.",
                 all_failed_files,
             )
+        else:
+            self._status("Fit completed.")
 
     def update_DQ_comparison_plot(self, show_warning=True):
         table = self.ui.DQTemp_Table_Results
@@ -175,6 +181,8 @@ class DQTempTabController(BaseTabController):
 
         table.resizeColumnsToContents()
         self._plot_centers(comparison_axis, center_gauss, center_lorenz, center_voigt, center_derivative)
+        if show_warning:
+            self._status("Plot updated.")
 
         if failed_files and show_warning:
             self._warn_failed_files(
@@ -293,6 +301,7 @@ class DQTempTabController(BaseTabController):
         self.ui.DQTemp_PlotWidget_PolyFit.clear()
 
     def _warn_no_data(self, message):
+        self._status(message)
         QMessageBox.warning(self.parent, "No DQ temperature data", message, QMessageBox.Ok)
 
     def _warn_failed_files(self, message, failed_files):
@@ -300,6 +309,7 @@ class DQTempTabController(BaseTabController):
         if len(failed_files) > 5:
             preview += f"\n...and {len(failed_files) - 5} more"
 
+        self._status(message)
         QMessageBox.warning(
             self.parent,
             "DQ temperature processing warning",

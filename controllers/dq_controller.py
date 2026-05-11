@@ -34,6 +34,7 @@ class DQTabController(BaseTabController):
         if not self._has_table_data("Cannot update DQ plot because the table is empty."):
             return
 
+        self._status("Updating DQ plot...")
         self.update_graphs(show_warning=True)
 
     def update_graphs(self, show_warning=False):
@@ -75,6 +76,8 @@ class DQTabController(BaseTabController):
             symbolSize=10,
         )
         self.highlight_selected_point_widget_1()
+        if show_warning:
+            self._status("Plot updated.")
 
     def linearization(self, show_warning=False):
         if not self._has_table_data("No DQ data available. Load or analyze DQ files first.", show_warning):
@@ -97,6 +100,7 @@ class DQTabController(BaseTabController):
         )
         if result is None:
             if show_warning:
+                self._status("Could not fit DQ data: invalid range.")
                 QMessageBox.warning(
                     self.parent,
                     "Invalid DQ range",
@@ -127,6 +131,8 @@ class DQTabController(BaseTabController):
         self.dq_t2_graph(show_warning=False)
         self.ui.DQ_PlotWidget_T2.plot(result["x_line"], result["y_line"], pen="r")
         self.t2_dq_graph(show_warning=False)
+        if show_warning:
+            self._status("DQ linearization completed.")
         return True
 
     def t2_dq_graph(self, show_warning=False):
@@ -154,6 +160,8 @@ class DQTabController(BaseTabController):
             symbolSize=10,
         )
         self.highlight_selected_point_widget_2()
+        if show_warning:
+            self._status("Plot updated.")
 
     def plot_fit_from_user(self):
         self.plot_fit(show_warning=True)
@@ -176,6 +184,7 @@ class DQTabController(BaseTabController):
         fit_function = self.ui.DQ_ComboBox_FitFunction.currentText()
         if not fit_function:
             if show_warning:
+                self._status("Select a DQ fit function first.")
                 QMessageBox.warning(
                     self.parent,
                     "No DQ fit function",
@@ -193,6 +202,7 @@ class DQTabController(BaseTabController):
             )
         except (RuntimeError, ValueError, TypeError):
             if show_warning:
+                self._status("Could not fit DQ data: non-numeric values.")
                 QMessageBox.warning(
                     self.parent,
                     "DQ fit error",
@@ -213,6 +223,8 @@ class DQTabController(BaseTabController):
             f"FWHM: {round(result['fwhm'], 4)} \n"
             f"Fraction (Lorenz): {round(result['lorenz_fraction'], 2)}"
         )
+        if show_warning:
+            self._status("Fit completed.")
 
     def highlight_selected_point_widget_1(self):
         row = self.ui.DQ_Table_Data.currentRow()
@@ -288,6 +300,7 @@ class DQTabController(BaseTabController):
             return True
 
         if show_warning:
+            self._status("Could not fit DQ data: missing columns.")
             QMessageBox.warning(
                 self.parent,
                 "No DQ fit data",
@@ -301,6 +314,7 @@ class DQTabController(BaseTabController):
             return self.read_column_values(self.ui.DQ_Table_Data, column_index)
         except (ValueError, TypeError, IndexError):
             if show_warning:
+                self._status("Could not fit DQ data: non-numeric values.")
                 QMessageBox.warning(
                     self.parent,
                     "Invalid DQ data",
@@ -310,4 +324,5 @@ class DQTabController(BaseTabController):
             return None
 
     def _warn_no_data(self, message):
+        self._status(message)
         QMessageBox.warning(self.parent, "No DQ data", message, QMessageBox.Ok)
