@@ -42,11 +42,3 @@ Analysis of Double Quantum NMR data.
 
 ### Goldman-Shen
 Domain size estimation using Goldman-Shen analysis.
-
-## Documentation
-
-Detailed user and developer documentation is available in:
-
-`docs/Relaxyzer_User_and_Code_Documentation.tex`
-
-This document describes the workflows, file formats, mathematical formulas, save/load behavior, and implementation details for each program tab.
