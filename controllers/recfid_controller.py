@@ -561,7 +561,7 @@ class RecFIDController(BaseTabController):
             )
         # Gradient label is the compact visible color-scale indicator for data curves.
         self._add_original_signal_gradient_label(graph_nmr)
-        self._status("Original NMR plot: black = FID; data curves use a winter color scale by echo time/file order.")
+        self._status("Original NMR plot: red = FID; data curves use a winter color scale by echo time/file order.")
 
     def _add_original_signal_gradient_label(self, graph):
         if not self.data_results:
@@ -572,7 +572,7 @@ class RecFIDController(BaseTabController):
         scale_text = self._original_signal_color_scale_text()
         html = (
             '<div style="background-color:rgba(255,255,255,210); padding:4px; border:1px solid #444;">'
-            '<span style="color:#000000; font-weight:bold;">FID: black</span><br>'
+            '<span style="color:#ff0000; font-weight:bold;">FID: red</span><br>'
             '<span style="color:#0033ff; font-weight:bold;">■</span>'
             '<span style="color:#007fbf; font-weight:bold;">■</span>'
             '<span style="color:#00bf80; font-weight:bold;">■</span>'
