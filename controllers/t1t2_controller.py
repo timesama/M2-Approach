@@ -63,7 +63,7 @@ class T1T2TabController(BaseTabController):
         table = self.ui.T1T2_Table_Results
         combobox = self.ui.T1T2_ComboBox_ChooseFile
         dictionary = self.parent.tau_dictionary
-        preserved_x_axis = self._preserved_x_axis(table)
+        preserved_rows = self._preserved_rows(table)
         dictionary.clear()
         combobox.clear()
 
@@ -71,11 +71,11 @@ class T1T2TabController(BaseTabController):
         failed_files = []
 
         if extension == ".csv":
-            failed_files = self._load_csv_files(table, combobox, dictionary, preserved_x_axis, selected_files)
+            failed_files = self._load_csv_files(table, combobox, dictionary, preserved_rows, selected_files)
         elif extension == ".txt":
-            failed_files = self._load_txt_files(table, combobox, dictionary, preserved_x_axis, selected_files)
+            failed_files = self._load_txt_files(table, combobox, dictionary, preserved_rows, selected_files)
         else:
-            failed_files = self._load_default_files(table, combobox, dictionary, preserved_x_axis, selected_files)
+            failed_files = self._load_default_files(table, combobox, dictionary, preserved_rows, selected_files)
 
         if failed_files:
             self._warn_failed_files("Some T1/T2 files could not be read. They were skipped.", failed_files)
@@ -88,7 +88,7 @@ class T1T2TabController(BaseTabController):
         else:
             self._status("Could not load T1/T2 files.")
 
-    def _load_csv_files(self, table, combobox, dictionary, preserved_x_axis, selected_files):
+    def _load_csv_files(self, table, combobox, dictionary, preserved_rows, selected_files):
         logger.info("T1T2 branch: CSV")
         table.setRowCount(0)
         csv_pattern = r"_(\-?\d+)(?=\.csv$)"
@@ -108,13 +108,18 @@ class T1T2TabController(BaseTabController):
                 failed_files.append(current_file)
                 continue
 
-            effective_x = preserved_x_axis.get(file_path, str(x_axis))
-            dictionary[file_path] = {"X Axis": [effective_x], "Time": time_values, "Signal": signal_values}
-            self._add_table_row(table, combobox, row, file_path, current_file, effective_x)
+            preserved_row = preserved_rows.get(file_path)
+            effective_x = (
+                preserved_row.get(T1Columns.X_AXIS, str(x_axis))
+                if preserved_row is not None
+                else str(x_axis)
+            )
+            dictionary[file_path] = {"X Axis": [effective_x], "Time": list(time_values), "Signal": list(signal_values)}
+            self._add_table_row(table, combobox, row, file_path, current_file, effective_x, preserved_row)
 
         return failed_files
 
-    def _load_txt_files(self, table, combobox, dictionary, preserved_x_axis, selected_files):
+    def _load_txt_files(self, table, combobox, dictionary, preserved_rows, selected_files):
         logger.info("T1T2 branch: TXT")
         table.setRowCount(0)
         pattern_all = r"T1_.*_(\s?-?\d+).txt"
@@ -144,12 +149,18 @@ class T1T2TabController(BaseTabController):
                 t1t2_signal.add_curve(dictionary, file_path, suffix, x_axis, time_values, signal_values)
                 row = table.rowCount()
                 current_entry = os.path.basename(key)
-                effective_x = preserved_x_axis.get(key, dictionary[key]["X Axis"][0])
-                self._add_table_row(table, combobox, row, key, current_entry, effective_x)
+                preserved_row = preserved_rows.get(key)
+                effective_x = (
+                    preserved_row.get(T1Columns.X_AXIS, dictionary[key]["X Axis"][0])
+                    if preserved_row is not None
+                    else dictionary[key]["X Axis"][0]
+                )
+                dictionary[key]["X Axis"] = [effective_x]
+                self._add_table_row(table, combobox, row, key, current_entry, effective_x, preserved_row)
 
         return failed_files
 
-    def _load_default_files(self, table, combobox, dictionary, preserved_x_axis, selected_files):
+    def _load_default_files(self, table, combobox, dictionary, preserved_rows, selected_files):
         logger.info("T1T2 branch: default")
         table.setRowCount(0)
         pattern = r"(T1|T2)_(\s?-?\d+(\.\d+)?)((_.*)?\.(dat|txt))"
@@ -169,9 +180,14 @@ class T1T2TabController(BaseTabController):
                 failed_files.append(current_file)
                 continue
 
-            effective_x = preserved_x_axis.get(file_path, str(x_axis))
+            preserved_row = preserved_rows.get(file_path)
+            effective_x = (
+                preserved_row.get(T1Columns.X_AXIS, str(x_axis))
+                if preserved_row is not None
+                else str(x_axis)
+            )
             dictionary[file_path] = {"X Axis": [effective_x], "Time": list(time_values), "Signal": list(signal_values)}
-            self._add_table_row(table, combobox, row, file_path, current_file, effective_x)
+            self._add_table_row(table, combobox, row, file_path, current_file, effective_x, preserved_row)
 
         return failed_files
 
@@ -222,22 +238,42 @@ class T1T2TabController(BaseTabController):
             data = np.loadtxt(file_path)
             return data[:, 0], data[:, 1]
 
-    def _add_table_row(self, table, combobox, row, folder, file_name, x_axis):
+    def _add_table_row(self, table, combobox, row, folder, file_name, default_x_axis, preserved_row=None):
         table.insertRow(row)
+
+        if preserved_row is not None:
+            for col in range(table.columnCount()):
+                value = preserved_row.get(col, "")
+                table.setItem(row, col, QTableWidgetItem(str(value)))
+
         table.setItem(row, T1Columns.FOLDER, QTableWidgetItem(folder))
         table.setItem(row, T1Columns.FILE_NAME, QTableWidgetItem(file_name))
-        table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(x_axis)))
+
+        if preserved_row is None:
+            table.setItem(row, T1Columns.X_AXIS, QTableWidgetItem(str(default_x_axis)))
+
         combobox.addItem(file_name)
 
-    def _preserved_x_axis(self, table):
-        preserved_x_axis = {}
+    def _preserved_rows(self, table):
+        preserved_rows = {}
+
         for row in range(table.rowCount()):
             file_item = table.item(row, T1Columns.FOLDER)
-            x_item = table.item(row, T1Columns.X_AXIS)
-            if file_item is not None and x_item is not None:
-                preserved_x_axis[file_item.text()] = x_item.text()
+            if file_item is None:
+                continue
 
-        return preserved_x_axis
+            file_key = file_item.text().strip()
+            if not file_key:
+                continue
+
+            row_data = {}
+            for col in range(table.columnCount()):
+                item = table.item(row, col)
+                row_data[col] = item.text() if item is not None else ""
+
+            preserved_rows[file_key] = row_data
+
+        return preserved_rows
 
     def change_exponential_order(self):
         # self.ui.T1T2_DoubleSpinBox_InitialTau1.setEnabled(True)
