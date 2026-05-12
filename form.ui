@@ -1242,7 +1242,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       <double>0.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>2.000000000000000</double>
+                      <double>5.000000000000000</double>
                      </property>
                      <property name="value">
                       <double>0.000000000000000</double>
@@ -1314,7 +1314,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       <double>0.000000000000000</double>
                      </property>
                      <property name="singleStep">
-                      <double>2.000000000000000</double>
+                      <double>5.000000000000000</double>
                      </property>
                      <property name="value">
                       <double>20.000000000000000</double>
@@ -3041,10 +3041,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>0.000000000000000</double>
                         </property>
                         <property name="maximum">
-                         <double>700.000000000000000</double>
+                         <double>1000.000000000000000</double>
                         </property>
                         <property name="singleStep">
-                         <double>2.000000000000000</double>
+                         <double>5.000000000000000</double>
                         </property>
                         <property name="value">
                          <double>60.000000000000000</double>
@@ -3278,7 +3278,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>100.000000000000000</double>
                         </property>
                         <property name="singleStep">
-                         <double>0.100000000000000</double>
+                         <double>1.000000000000000</double>
                         </property>
                         <property name="value">
                          <double>0.000000000000000</double>
@@ -3534,7 +3534,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>1000.000000000000000</double>
                         </property>
                         <property name="singleStep">
-                         <double>0.100000000000000</double>
+                         <double>10.000000000000000</double>
                         </property>
                         <property name="value">
                          <double>0.000000000000000</double>
@@ -3609,10 +3609,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>-100.000000000000000</double>
                         </property>
                         <property name="maximum">
-                         <double>1000.000000000000000</double>
+                         <double>10000.000000000000000</double>
                         </property>
                         <property name="singleStep">
-                         <double>0.100000000000000</double>
+                         <double>10.000000000000000</double>
                         </property>
                         <property name="value">
                          <double>0.000000000000000</double>
@@ -4075,7 +4075,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                            <double>0.500000000000000</double>
                           </property>
                           <property name="singleStep">
-                           <double>0.010000000000000</double>
+                           <double>0.100000000000000</double>
                           </property>
                           <property name="value">
                            <double>0.250000000000000</double>
@@ -4357,7 +4357,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                            <double>0.500000000000000</double>
                           </property>
                           <property name="singleStep">
-                           <double>0.010000000000000</double>
+                           <double>0.100000000000000</double>
                           </property>
                           <property name="value">
                            <double>0.050000000000000</double>
@@ -4389,7 +4389,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                            <double>1.000000000000000</double>
                           </property>
                           <property name="singleStep">
-                           <double>0.500000000000000</double>
+                           <double>0.200000000000000</double>
                           </property>
                           <property name="value">
                            <double>0.500000000000000</double>
@@ -4405,7 +4405,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                            <double>6.000000000000000</double>
                           </property>
                           <property name="singleStep">
-                           <double>0.100000000000000</double>
+                           <double>0.500000000000000</double>
                           </property>
                           <property name="value">
                            <double>2.000000000000000</double>
@@ -4811,7 +4811,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>10000.000000000000000</double>
                         </property>
                         <property name="singleStep">
-                         <double>0.010000000000000</double>
+                         <double>10.000000000000000</double>
                         </property>
                         <property name="value">
                          <double>0.000000000000000</double>
@@ -4895,7 +4895,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>1000000.000000000000000</double>
                         </property>
                         <property name="singleStep">
-                         <double>0.010000000000000</double>
+                         <double>10.000000000000000</double>
                         </property>
                         <property name="value">
                          <double>0.000000000000000</double>
@@ -5114,7 +5114,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>1.000000000000000</double>
                         </property>
                         <property name="singleStep">
-                         <double>0.100000000000000</double>
+                         <double>0.200000000000000</double>
                         </property>
                         <property name="value">
                          <double>1.000000000000000</double>
@@ -5198,7 +5198,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>0.000000000000000</double>
                         </property>
                         <property name="maximum">
-                         <double>20.000000000000000</double>
+                         <double>100.000000000000000</double>
                         </property>
                         <property name="singleStep">
                          <double>0.100000000000000</double>
@@ -5291,7 +5291,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>1.000000000000000</double>
                         </property>
                         <property name="singleStep">
-                         <double>0.000001000000000</double>
+                         <double>0.200000000000000</double>
                         </property>
                         <property name="value">
                          <double>0.010000000000000</double>
@@ -5658,6 +5658,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </property>
                       <property name="maximum">
                        <double>10000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>10.000000000000000</double>
                       </property>
                       <property name="value">
                        <double>100.000000000000000</double>
