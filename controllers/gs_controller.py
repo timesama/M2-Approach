@@ -45,6 +45,7 @@ class GSTabController(BaseTabController):
         table = self.ui.GS_Table_Results
         combobox = self.ui.GS_ComboBox_ChooseFile
         dictionary = self.parent.GS_dictionary
+        preserved_rows = self._preserved_rows(table)
         dictionary.clear()
         table.setRowCount(0)
         combobox.clear()
@@ -63,14 +64,20 @@ class GSTabController(BaseTabController):
                 failed_files.append(current_file)
                 continue
 
+            preserved_row = preserved_rows.get(file_path)
+            effective_x = (
+                preserved_row.get(GSColumns.X_AXIS, str(x_axis))
+                if preserved_row is not None
+                else str(x_axis)
+            )
             dictionary[file_path] = {
-                "X Axis": [x_axis],
+                "X Axis": [effective_x],
                 "sqrtTime": list(sqrt_time),
                 "short": list(short_signal),
                 "medium": list(medium_signal),
                 "long": list(long_signal),
             }
-            self._add_table_row(table, combobox, row, file_path, current_file, x_axis)
+            self._add_table_row(table, combobox, row, file_path, current_file, effective_x, preserved_row)
 
         if failed_files:
             self._warn_failed_files("Some spin diffusion files could not be read. They were skipped.", failed_files)
@@ -82,12 +89,43 @@ class GSTabController(BaseTabController):
         else:
             self._status("Could not load spin diffusion files.")
 
-    def _add_table_row(self, table, combobox, row, folder, file_name, x_axis):
+    def _add_table_row(self, table, combobox, row, folder, file_name, default_x_axis, preserved_row=None):
         table.insertRow(row)
+
+        if preserved_row is not None:
+            for col in range(table.columnCount()):
+                value = preserved_row.get(col, "")
+                table.setItem(row, col, QTableWidgetItem(str(value)))
+
         table.setItem(row, GSColumns.FOLDER, QTableWidgetItem(folder))
         table.setItem(row, GSColumns.FILE_NAME, QTableWidgetItem(file_name))
-        table.setItem(row, GSColumns.X_AXIS, QTableWidgetItem(str(x_axis)))
-        combobox.addItem(file_name)
+
+        if preserved_row is None:
+            table.setItem(row, GSColumns.X_AXIS, QTableWidgetItem(str(default_x_axis)))
+
+        if combobox is not None:
+            combobox.addItem(file_name)
+
+    def _preserved_rows(self, table):
+        preserved_rows = {}
+
+        for row in range(table.rowCount()):
+            file_item = table.item(row, GSColumns.FOLDER)
+            if file_item is None:
+                continue
+
+            file_key = file_item.text().strip()
+            if not file_key:
+                continue
+
+            row_data = {}
+            for col in range(table.columnCount()):
+                item = table.item(row, col)
+                row_data[col] = item.text() if item is not None else ""
+
+            preserved_rows[file_key] = row_data
+
+        return preserved_rows
 
     def calculate_sqrt_time(self, *_args, show_warning=True):
         with busy_cursor():
@@ -266,8 +304,72 @@ class GSTabController(BaseTabController):
             symbolBrush="r",
             symbolSize=10,
         )
+        self._plot_group_overlays()
+        self.highlight_selected_sqrt_time_point()
         if show_warning:
             self._status("Plot updated.")
+
+    def _plot_group_overlays(self):
+        group_data = getattr(self.parent, "group_data_SD", {})
+        colors = getattr(self.parent, "tab10_colors", [])
+        if not group_data:
+            return
+
+        column = self._selected_gs_plot_column()
+
+        for i, (_group_number, group_rows) in enumerate(group_data.items()):
+            group_x = []
+            group_y = []
+            for row_data in group_rows:
+                try:
+                    group_x.append(float(row_data[GSColumns.X_AXIS]))
+                    group_y.append(float(row_data[column]))
+                except (ValueError, IndexError):
+                    continue
+
+            sorted_points = sorted(zip(group_x, group_y), key=lambda point: point[0])
+            if len(sorted_points) > 1:
+                xs, ys = zip(*sorted_points)
+                color = colors[i % len(colors)] if colors else "r"
+                self.ui.GS_PlotWidget_SqrtTime.plot(
+                    xs,
+                    ys,
+                    pen={"color": color, "width": 2},
+                    symbol="o",
+                    symbolBrush=color,
+                    symbolPen=None,
+                    symbolSize=8,
+                )
+
+    def highlight_selected_sqrt_time_point(self):
+        row = self.ui.GS_Table_Results.currentRow()
+        if row < 0:
+            return
+
+        column = self._selected_gs_plot_column()
+        x_item = self.ui.GS_Table_Results.item(row, GSColumns.X_AXIS)
+        y_item = self.ui.GS_Table_Results.item(row, column)
+        if x_item is None or y_item is None:
+            return
+
+        try:
+            x = float(x_item.text())
+            y = float(y_item.text())
+        except ValueError:
+            return
+
+        self.ui.GS_PlotWidget_SqrtTime.plot(
+            [x],
+            [y],
+            pen=None,
+            symbol="o",
+            symbolBrush=(255, 255, 0, 255),
+            symbolPen="k",
+            symbolSize=13,
+        )
+
+    def _selected_gs_plot_column(self):
+        return GSColumns.SQRT_TIME
 
     def _warn_no_data(self, message):
         self._status(message)
