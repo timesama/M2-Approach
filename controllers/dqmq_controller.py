@@ -105,18 +105,7 @@ class DQMQTabController(BaseTabController):
         figure = self.ui.DQMQ_PlotWidget_Signal
         figure.clear()
         self.integral_sum_curve_item = None
-        # legend = figure.addLegend()
-        # legend.clear()
-        # figure.addLegend()
         return figure
-
-    def _enable_file_actions(self):
-        pass
-        # self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
-        # self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
-        # self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
-        # self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
-        # self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
 
     def _read_raw_data_from_file(self, file_path):
         try:
@@ -215,7 +204,6 @@ class DQMQTabController(BaseTabController):
 
             self.reset_cached_results(clear_raw=False)
             self._write_raw_table(raw_data)
-            # self._enable_file_actions()
             self.render_raw_plot()
             logger.info("DQMQ raw load completed: %d points", len(raw_data["time"]))
             self._status("Loaded DQMQ data.")

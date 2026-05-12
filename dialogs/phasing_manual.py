@@ -82,7 +82,9 @@ class PhasingManual(QDialog):
 
     def update_plot(self):
 
-        self.ui.PhasingGraph.clear(); self.ui.PhasingGraph.plot(Frequency, Re_spectra, pen='r', name='Original'); self.ui.PhasingGraph.plot(Frequency, self.Real_freq_phased, pen='b', name='Phased')
+        self.ui.PhasingGraph.clear()
+        self.ui.PhasingGraph.plot(Frequency, Re_spectra, pen='r', name='Original')
+        self.ui.PhasingGraph.plot(Frequency, self.Real_freq_phased, pen='b', name='Phased')
 
     def update_text(self):
 

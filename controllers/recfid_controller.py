@@ -543,21 +543,23 @@ class RecFIDController(BaseTabController):
         if not self.fid_result:
             return
         graph_nmr = getattr(self.ui, "RecFID_PlotWidget_OriginalNMRSignal", None)
+
         if graph_nmr is None:
             return
+
         self._prepare_plot(graph_nmr)
         graph_nmr.plot(
             self.fid_result["Time_td_fid"],
             self.fid_result["Re_td"],
             pen=mkPen(QColor(255, 0, 0), width=4),
-            symbol=None,
+            symbol=None
         )
         for index, result in enumerate(self.data_results.values()):
             graph_nmr.plot(
                 result["Time_td"],
                 result["Re_td"],
                 pen=mkPen(self._winter_color(index, max(len(self.data_results), 1)), width=3),
-                symbol=None,
+                symbol=None
             )
         # Gradient label is the compact visible color-scale indicator for data curves.
         self._add_original_signal_gradient_label(graph_nmr)
@@ -663,13 +665,23 @@ class RecFIDController(BaseTabController):
         graph_build_fid = getattr(self.ui, "RecFID_PlotWidget_BuildUpNMRSignal", None)
         if graph_build_fid is not None:
             graph_build_fid.clear()
-            graph_build_fid.plot(time_build, data_build, pen=mkPen("b", width=4), symbol=None)
-            graph_build_fid.plot(self.fid_result["Time_td_fid"], self.fid_result["Re_td"], pen=mkPen("r", width=3), symbol=None)
+
+            plot_item = graph_build_fid.getPlotItem()
+            if plot_item.legend is None:
+                plot_item.addLegend(offset=(40, 10))
+            else:
+                plot_item.legend.clear()
+
+            graph_build_fid.plot(time_build, data_build, pen=mkPen("b", width=4), symbol=None, name="Reconstruction")
+            graph_build_fid.plot(self.fid_result["Time_td_fid"], self.fid_result["Re_td"], pen=mkPen("r", width=3), symbol=None,
+            name="Original")
+
         graph_build_fft = getattr(self.ui, "RecFID_PlotWidget_BuildUpSpectra", None)
         if graph_build_fft is not None:
             graph_build_fft.clear()
-            graph_build_fft.plot(freq_build, spectrum_build, pen=mkPen("b", width=4), symbol=None)
-            graph_build_fft.plot(self.fid_result["Freq"], self.fid_result["Real_fft"], pen=mkPen("r", width=3), symbol=None)
+            graph_build_fft.plot(freq_build, spectrum_build, pen=mkPen("b", width=4), symbol=None, name="Reconstruction")
+            graph_build_fft.plot(self.fid_result["Freq"], self.fid_result["Real_fft"], pen=mkPen("r", width=3), symbol=None,
+            name="Original")
 
     def _clear_or_hide(self, widget_name, hide=False):
         widget = getattr(self.ui, widget_name, None)
@@ -710,6 +722,7 @@ class RecFIDController(BaseTabController):
         widget.getAxis("left").setLabel(ylabel)
         widget.getAxis("bottom").setLabel(xlabel)
         widget.setTitle(title)
+
     def _capture_initial_input_widget_state(self):
         self._initial_input_widget_state = {}
         for widget_name in self._resettable_input_widget_names():
