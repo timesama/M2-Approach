@@ -382,9 +382,44 @@ class T1T2TabController(BaseTabController):
             number += 1
 
         graph.plot(x_axis, relaxation_time, pen=None, symbolPen=None, symbol="o", symbolBrush="r", symbolSize=10)
+
+        self._plot_group_overlays()
         self.highlight_selected_relaxation_point()
         if show_warning:
             self._status("Plot updated.")
+
+    def _plot_group_overlays(self):
+
+        group_data = getattr(self.parent, "group_data_T1T2", {})
+        colors = getattr(self.parent, "tab10_colors", [])
+        if not group_data:
+            return
+
+        column = self._selected_relaxation_column()
+
+        for i, (_group_number, group_rows) in enumerate(group_data.items()):
+            group_x = []
+            group_y = []
+            for row_data in group_rows:
+                try:
+                    group_x.append(float(row_data[0]))
+                    group_y.append(float(row_data[column]))
+                except (ValueError, IndexError):
+                    continue
+
+            sorted_points = sorted(zip(group_x, group_y), key=lambda point: point[0])
+            if len(sorted_points) > 1:
+                xs, ys = zip(*sorted_points)
+                color = colors[i % len(colors)] if colors else "r"
+                self.ui.T1T2_PlotWidget_RelaxationTime.plot(
+                    xs,
+                    ys,
+                    pen={"color": color, "width": 2},
+                    symbol="o",
+                    symbolBrush=color,
+                    symbolPen=None,
+                    symbolSize=8,
+                )
 
     def highlight_selected_relaxation_point(self):
         row = self.ui.T1T2_Table_Results.currentRow()
