@@ -550,16 +550,18 @@ class DQMQTabController(BaseTabController):
             self.render_analysis_plot()
             self._status("Integral sum shift updated.")
 
-    def save_integral_sum_result(self, base_file_path):
+    def save_integral_sum_result1(self, base_file_path):
         if not self.integral_sum_result:
             return
         root, ext = os.path.splitext(base_file_path)
         save_path = f"{root}_IntegralSum{ext or '.csv'}"
         out = np.column_stack(
-            (self.integral_sum_result["time"], self.integral_sum_result["signal_norm"])
+            (self.integral_sum_result["time"], self.integral_sum_result["signal_norm"],
+             self.analysis_result["time"], self.analysis_result["mq_norm"],
+             self.analysis_result["time"], self.analysis_result["denominator_base_norm"])
         )
         np.savetxt(
-            save_path, out, delimiter=",", header="time,integral_sum_norm", comments=""
+            save_path, out, delimiter=",", header="time,integral_sum_norm,tau_dq,MQ,tau_dq,MQTail", comments=""
         )
 
     def calculate_dres(self):
@@ -814,6 +816,46 @@ class DQMQTabController(BaseTabController):
                 pen=mkPen((80, 80, 80), width=2, style=Qt.DashLine),
             )
             dres_figure.addItem(center_line)
+
+    def save_integral_sum_result(self, base_file_path):
+        if not self.integral_sum_result:
+            return
+
+        root, ext = os.path.splitext(base_file_path)
+        save_path = f"{root}_IntegralSum{ext or '.csv'}"
+        integral = np.column_stack(
+            (self.integral_sum_result["time"], self.integral_sum_result["signal_norm"])
+            )
+
+        mq = np.column_stack(
+            (self.analysis_result["time"], self.analysis_result["mq_norm"], self.analysis_result["denominator_base_norm"])
+            )
+
+        can_write_excel = importlib.util.find_spec("pandas") is not None and (
+            importlib.util.find_spec("openpyxl") is not None
+            or importlib.util.find_spec("xlsxwriter") is not None
+        )
+        if can_write_excel:
+            import pandas as pd
+
+            try:
+                with pd.ExcelWriter(f"{root}_InegralSum.xlsx") as writer:
+                    pd.DataFrame(
+                        integral, columns=["time", "integral_sum"]
+                    ).to_excel(
+                        writer,
+                        sheet_name="Integral Sum",
+                        index=False,
+                    )
+                    pd.DataFrame(mq, columns=["tauDQ", "MQ", "MQ_tail"]).to_excel(
+                        writer,
+                        sheet_name="MQ",
+                        index=False,
+                    )
+                return
+            except Exception:
+                logger.exception("Excel IntegralSum export failed; writing CSV fallback files")
+
 
     def save_dres_result(self, base_file_path):
         if not self.dres_result:
