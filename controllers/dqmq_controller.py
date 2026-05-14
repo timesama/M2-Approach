@@ -574,6 +574,7 @@ class DQMQTabController(BaseTabController):
                 kernel = self._selected_dres_kernel()
                 n_components = self._selected_dres_component_count()
                 k_value = self._dres_k_value()
+                beta = self._weibul_beta_value()
                 p0 = self._dres_initial_parameters(n_components)
 
                 fitto_value = self._dres_fitto_value()
@@ -589,6 +590,7 @@ class DQMQTabController(BaseTabController):
                     n_components=n_components,
                     p0=p0,
                     k_value=k_value,
+                    beta = beta
                 )
                 d_plot, p_dist = dqmq_dres.build_distribution(fit_result)
 
@@ -603,6 +605,7 @@ class DQMQTabController(BaseTabController):
                     "param_names": fit_result["param_names"],
                     "p0": p0,
                     "k_value": k_value,
+                    "beta_value" : beta
                 }
                 self._write_fitted_dres_parameters_to_ui(
                     fit_result["popt"],
@@ -755,31 +758,32 @@ class DQMQTabController(BaseTabController):
     def _dres_fitto_value(self):
         return self.ui.DQMQ_DoubleSpinBox_DresFitTo.value()
 
+    def _weibul_beta_value(self):
+        return self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta.value()
+
     def _dres_k_value(self):
         return self.ui.DQMQ_DoubleSpinBox_DresK.value()
 
     def _dres_initial_parameters(self, n_components):
         center1 = self.ui.DQMQ_DoubleSpinBox_DresCenter1.value()
         width1 = self.ui.DQMQ_DoubleSpinBox_DresWidth1.value()
-        beta = self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta.value()
+
         if n_components == 1:
-            return [center1, width1, beta]
+            return [center1, width1]
 
         center2 = self.ui.DQMQ_DoubleSpinBox_DresCenter2.value()
         width2 = self.ui.DQMQ_DoubleSpinBox_DresWidth2.value()
         fraction1 = self.ui.DQMQ_DoubleSpinBox_DresFraction1.value()
-        return [center1, width1, center2, width2, fraction1, beta]
+        return [center1, width1, center2, width2, fraction1]
 
     def _write_fitted_dres_parameters_to_ui(self, fitted_parameters, n_components):
         parameter_widgets = [
             self.ui.DQMQ_DoubleSpinBox_DresCenter1,
             self.ui.DQMQ_DoubleSpinBox_DresWidth1,
-            self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta,
         ]
         parameter_values = [
             fitted_parameters[0],
             fitted_parameters[1],
-            fitted_parameters[-1],
         ]
         if n_components == 2:
             parameter_widgets = [
@@ -788,7 +792,6 @@ class DQMQTabController(BaseTabController):
                 self.ui.DQMQ_DoubleSpinBox_DresCenter2,
                 self.ui.DQMQ_DoubleSpinBox_DresWidth2,
                 self.ui.DQMQ_DoubleSpinBox_DresFraction1,
-                self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta,
             ]
             parameter_values = fitted_parameters
 
@@ -881,6 +884,7 @@ class DQMQTabController(BaseTabController):
             "kernel": self.dres_result["kernel"],
             "n_components": self.dres_result["n_components"],
             "k_value": self.dres_result.get("k_value"),
+            "beta": self.dres_result.get("beta"),
             **dict(zip(self.dres_result["param_names"], self.dres_result["params"])),
         }
 

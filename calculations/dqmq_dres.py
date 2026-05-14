@@ -9,7 +9,8 @@ from scipy.integrate import trapezoid
 from scipy.optimize import curve_fit
 
 K = 0.4
-D_GRID = np.linspace(0, 0.6, 20000)
+BETA = 2
+D_GRID = np.linspace(0, 1.3, 20000)
 VALID_KERNELS = ["gaussian", "abragam", "pake", "weibull", "a-l", "p-l"]
 
 
@@ -82,21 +83,21 @@ def ndq_single(time_values, dres, k_value=K):
     return 0.5 * (1.0 - np.exp(exponent))
 
 
-def make_fit_model(kernel, n_components, k_value=K):
+def make_fit_model(kernel, n_components, k_value=K, beta=BETA):
     kernel = kernel.lower()
     if kernel not in VALID_KERNELS:
         raise ValueError(f"kernel must be one of {VALID_KERNELS}")
 
     if n_components == 1:
 
-        def model(time_values, mu, sigma, beta):
+        def model(time_values, mu, sigma):
             return ndq_1d(time_values, mu, sigma, beta, kernel, k_value)
 
         return model
 
     if n_components == 2:
 
-        def model(time_values, mu1, sigma1, mu2, sigma2, frac1, beta):
+        def model(time_values, mu1, sigma1, mu2, sigma2, frac1):
             return ndq_2d(
                 time_values, mu1, sigma1, mu2, sigma2, frac1, beta, kernel, k_value
             )
@@ -106,9 +107,7 @@ def make_fit_model(kernel, n_components, k_value=K):
     raise ValueError("n_components must be 1 or 2")
 
 
-def fit_selected_model(
-    fullTimearray, time0, ndq0, kernel="gaussian", n_components=1, p0=None, k_value=K
-):
+def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_components=1, p0=None, k_value=K, beta=BETA):
     kernel = kernel.lower()
     if kernel not in VALID_KERNELS:
         raise ValueError(f"kernel must be one of {VALID_KERNELS}")
@@ -117,17 +116,21 @@ def fit_selected_model(
     if not np.isfinite(k_value) or k_value <= 0:
         raise ValueError("Dres K value must be a positive finite number.")
 
-    model = make_fit_model(kernel, n_components, k_value)
+    beta = float(beta)
+    if not np.isfinite(beta) or beta <= 0:
+        raise ValueError("Weibull beta value must be a positive finite number.")
+
+    model = make_fit_model(kernel, n_components, k_value, beta)
     if n_components == 1:
-        default_p0 = [0.25, 1e-3, 2.0]
-        bounds_min = [0, 0, 0]
-        bounds_max = [0.500, 1.0, 6.0]
-        param_names = ["mu", "sigma", "beta"]
+        default_p0 = [0.25, 1e-3]
+        bounds_min = [0, 0]
+        bounds_max = [1.300, 1.0]
+        param_names = ["mu", "sigma"]
     elif n_components == 2:
-        default_p0 = [0.25, 0.001, 0.05, 0.001, 0.5, 2.0]
-        bounds_min = [0, 0, 0, 0, 0.0, 0]
-        bounds_max = [0.5000, 1.0, 0.5000, 1.0, 1.0, 6.0]
-        param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1", "beta"]
+        default_p0 = [0.25, 0.001, 0.05, 0.001, 0.5]
+        bounds_min = [0, 0, 0, 0, 0.0]
+        bounds_max = [1.3000, 1.0, 1.3000, 1.0, 1.0]
+        param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1"]
     else:
         raise ValueError("n_components must be 1 or 2")
 
@@ -172,6 +175,7 @@ def fit_selected_model(
         "fit_y": fit_y,
         "param_names": param_names,
         "k_value": k_value,
+        "beta":beta,
     }
 
 
