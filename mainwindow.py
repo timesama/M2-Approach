@@ -340,8 +340,8 @@ class MainWindow(QMainWindow):
     def clear_list(self):
         """Clear data, plots, and file lists for the active tab."""
         if self.tab == 'SE':
-            self.app_state.dq_files = []
-            self.app_state.dqmq_files = []
+            # self.app_state.dq_files = []
+            # self.app_state.dqmq_files = []
             self.selected_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
@@ -355,8 +355,8 @@ class MainWindow(QMainWindow):
         elif self.tab == 'DQ':
             self.selected_files_DQ_single = []
             self.app_state.dq_files = []
-            self.selected_files_gly = []
-            self.selected_files_empty = []
+            # self.selected_files_gly = []
+            # self.selected_files_empty = []
             self.ui.DQ_Table_Data.setRowCount(0)
             self.ui.DQ_PlotWidget_T2.clear()
             self.ui.DQ_PlotWidget_NormIntensity.clear()
@@ -543,10 +543,8 @@ class MainWindow(QMainWindow):
             self.clear_list()
             fileNames = dlg.selectedFiles()
             files.extend(fileNames)
-            # self.ui.btn_Start.setEnabled(True)
             self.ui.btn_Start.setStyleSheet("background-color: green")
             self.show_status(f"Loaded {len(files)} file(s).")
-            # self.ui.btn_Add.setEnabled(True)
         else:
             self.show_status("File loading cancelled.")
 
@@ -569,10 +567,8 @@ class MainWindow(QMainWindow):
         if dlg.exec():
             fileNames = dlg.selectedFiles()
             files.extend(fileNames)
-            # self.ui.btn_Start.setEnabled(True)
             self.ui.btn_Start.setStyleSheet("background-color: green")
             self.show_status(f"Added {len(fileNames)} file(s).")
-            # self.ui.btn_Add.setEnabled(True)
         else:
             self.show_status("File loading cancelled.")
 

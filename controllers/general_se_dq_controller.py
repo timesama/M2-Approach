@@ -42,18 +42,25 @@ class GeneralSEDQController(BaseTabController):
 
             self._status(f"Analyzing {len(files)} {mw.tab} file(s)...")
             logger.info("%s analysis started: %d files", mw.tab, len(files))
-            logger.info(
-                "Options - glycerol:%s baseline:%s long_component:%s smoothing:%s",
-                self.ui.Settings_CheckBox_Glycerol.isChecked(),
-                self.ui.Settings_CheckBox_Baseline.isChecked(),
-                self.ui.Settings_CheckBox_LongComponent.isChecked(),
-                self.ui.Settings_CheckBox_SmoothFft.isChecked(),
-            )
 
-            if self.ui.Settings_CheckBox_Glycerol.isChecked() and mw.selected_files_gly == []:
+            if mw.tab == "SE":
+                logger.info(
+                    "Options - glycerol:%s baseline:%s long_component:%s smoothing:%s",
+                    self.ui.Settings_CheckBox_Glycerol.isChecked(),
+                    self.ui.Settings_CheckBox_Baseline.isChecked(),
+                    self.ui.Settings_CheckBox_LongComponent.isChecked(),
+                    self.ui.Settings_CheckBox_SmoothFft.isChecked(),
+                )
+            elif mw.tab == "DQ":
+                logger.info(
+                    "Options - smoothing:%s",
+                    self.ui.Settings_CheckBox_SmoothFft.isChecked(),
+                )
+
+            if self.ui.Settings_CheckBox_Glycerol.isChecked() and mw.selected_files_gly == [] and mw.tab == "SE":
                 self.open_select_dialog_glycerol()
 
-            if self.ui.Settings_CheckBox_Baseline.isChecked() and mw.selected_files_empty == []:
+            if self.ui.Settings_CheckBox_Baseline.isChecked() and mw.selected_files_empty == [] and mw.tab == "SE":
                 self.open_select_dialog_baseline()
 
             self.ui.comboBox_4.setCurrentIndex(-1)
@@ -115,11 +122,13 @@ class GeneralSEDQController(BaseTabController):
         mw = self.parent
         filename = os.path.basename(file_path)
         subtract = self.ui.Settings_CheckBox_Baseline.isChecked()
+        if mw.tab == "DQ":
+            subtract = False
         data = np.loadtxt(file_path)
         x, y, z = data[:, 0], data[:, 1], data[:, 2]
         time, re_signal, im_signal = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
 
-        if self.ui.Settings_CheckBox_Glycerol.isChecked():
+        if self.ui.Settings_CheckBox_Glycerol.isChecked() and mw.tab == "SE":
             time_reference, re_reference, im_reference = Cal.analysis_time_domain(file_path_gly, [], False)
             time, re_signal, im_signal = Cal.magnet_inhomogenity_correction(
                 time,
@@ -130,7 +139,7 @@ class GeneralSEDQController(BaseTabController):
                 im_reference,
             )
 
-        if self.ui.Settings_CheckBox_LongComponent.isChecked():
+        if self.ui.Settings_CheckBox_LongComponent.isChecked() and mw.tab == "SE":
             time, re_signal, im_signal = Cal.subtract_long_component(time, re_signal, im_signal)
 
         amplitude = Cal._calculate_amplitude(re_signal, im_signal)
