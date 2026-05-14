@@ -575,20 +575,28 @@ class DQMQTabController(BaseTabController):
                 n_components = self._selected_dres_component_count()
                 k_value = self._dres_k_value()
                 p0 = self._dres_initial_parameters(n_components)
+
+                fitto_value = self._dres_fitto_value()
+                fitto_idx = dqmq_signal._nearest_index(arrays['Time0'], fitto_value)
+                array_x  = arrays['Time0'][:fitto_idx]
+                array_y  = arrays['nDQ0'][:fitto_idx]
+
                 fit_result = dqmq_dres.fit_selected_model(
-                    arrays["Time0"],
-                    arrays["nDQ0"],
+                    arrays['Time0'],
+                    array_x,
+                    array_y,
                     kernel=kernel,
                     n_components=n_components,
                     p0=p0,
                     k_value=k_value,
                 )
                 d_plot, p_dist = dqmq_dres.build_distribution(fit_result)
+
                 self.dres_result = {
                     "D_plot": d_plot,
                     "P": p_dist,
-                    "fit_x": arrays["Time0"],
-                    "fit_y": fit_result["fit"],
+                    "fit_x": fit_result["fit_x"],
+                    "fit_y": fit_result["fit_y"],
                     "kernel": kernel,
                     "n_components": n_components,
                     "params": fit_result["popt"],
@@ -742,6 +750,9 @@ class DQMQTabController(BaseTabController):
         if self.ui.DQMQ_RadioButton_TwoDres.isChecked():
             return 2
         raise ValueError("Select either 1 Dres or 2 Dres components.")
+
+    def _dres_fitto_value(self):
+        return self.ui.DQMQ_DoubleSpinBox_DresFitTo.value()
 
     def _dres_k_value(self):
         return self.ui.DQMQ_DoubleSpinBox_DresK.value()

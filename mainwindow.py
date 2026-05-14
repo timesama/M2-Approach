@@ -707,7 +707,7 @@ class MainWindow(QMainWindow):
         )
         self._connect_dqmq_signal(
             "DQMQ_DoubleSpinBox_DresFitTo",
-            "currentFitRangeChanged",
+            "editingFinished",
             self.dqmq_controller.mark_dres_stale,
         )
 
@@ -1094,11 +1094,6 @@ class MainWindow(QMainWindow):
         elif self.tab == 'T1T2':
             self.t1t2_controller.update_T12_table()
         elif self.tab == 'DQMQ':
-            # self.ui.DQMQ_Button_PlotOriginal.setEnabled(True)
-            # self.ui.DQMQ_Button_PlotNorm.setEnabled(True)
-            # self.ui.DQMQ_DoubleSpinBox_FitFrom.setEnabled(True)
-            # self.ui.DQMQ_DoubleSpinBox_FitTo.setEnabled(True)
-            # self.ui.DQMQ_DoubleSpinBox_Power.setEnabled(True)
             self.dqmq_controller.plot_nDQ_on_Load()
 
         elif self.tab == 'GS':

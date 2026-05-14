@@ -9,7 +9,7 @@ from scipy.integrate import trapezoid
 from scipy.optimize import curve_fit
 
 K = 0.4
-D_GRID = np.linspace(0, 0.6, 6000)
+D_GRID = np.linspace(0, 0.6, 20000)
 VALID_KERNELS = ["gaussian", "abragam", "pake", "weibull", "a-l"]
 
 
@@ -48,7 +48,7 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K):
     if kernel == "weibull":
         return 1.0 - np.exp(-k_value * x_values**beta)
     if kernel == "a-l":
-        return 1.0 - np.exp(-k_value * x_values**beta) * np.cos(x_values)
+        return 1.0 - np.exp(-k_value * x_values**beta) * np.cos(-k_value * x_values)
 
     raise ValueError(f"Unknown kernel: {kernel}. Use one of {VALID_KERNELS}")
 
@@ -105,7 +105,7 @@ def make_fit_model(kernel, n_components, k_value=K):
 
 
 def fit_selected_model(
-    time0, ndq0, kernel="gaussian", n_components=1, p0=None, k_value=K
+    fullTimearray, time0, ndq0, kernel="gaussian", n_components=1, p0=None, k_value=K
 ):
     kernel = kernel.lower()
     if kernel not in VALID_KERNELS:
@@ -157,14 +157,17 @@ def fit_selected_model(
         bounds=(bounds_min, bounds_max),
         maxfev=50000,
     )
-    fit = model(time0, *popt)
+
+    fit_x = np.arange(0, fullTimearray[-1], 0.1)
+    fit_y = model(fit_x, *popt)
 
     return {
         "kernel": kernel,
         "n_components": n_components,
         "popt": popt,
         "pcov": pcov,
-        "fit": fit,
+        "fit_x": fit_x,
+        "fit_y": fit_y,
         "param_names": param_names,
         "k_value": k_value,
     }
