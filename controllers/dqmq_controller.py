@@ -738,6 +738,7 @@ class DQMQTabController(BaseTabController):
             "Pake": "pake",
             "Weibull": "weibull",
             "A-L": "a-l",
+            "P-L": "p-l",
         }
         selected = self.ui.DQMQ_ComboBox_Kernel.currentText()
         if selected not in kernel_map:

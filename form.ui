@@ -567,7 +567,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>4</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -3456,14 +3456,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="0" colspan="2">
-                       <widget class="Line" name="DQMQ_Line_NoiseSeparator">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="0">
+                      <item row="2" column="0">
                        <widget class="QTextEdit" name="DQMQ_TextEdit_SmoothFromLabel">
                         <property name="minimumSize">
                          <size>
@@ -3513,7 +3506,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="3" column="1">
+                      <item row="2" column="1">
                        <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_SmoothFrom">
                         <property name="enabled">
                          <bool>true</bool>
@@ -3541,7 +3534,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="4" column="0">
+                      <item row="3" column="0">
                        <widget class="QTextEdit" name="DQMQ_TextEdit_SmoothToLabel">
                         <property name="minimumSize">
                          <size>
@@ -3591,7 +3584,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="4" column="1">
+                      <item row="3" column="1">
                        <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_SmoothTo">
                         <property name="enabled">
                          <bool>true</bool>
@@ -3619,7 +3612,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="5" column="0">
+                      <item row="4" column="0">
                        <widget class="QTextEdit" name="DQMQ_TextEdit_SmoothWindowLabel">
                         <property name="minimumSize">
                          <size>
@@ -3669,7 +3662,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="5" column="1">
+                      <item row="4" column="1">
                        <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_SmoothWindow">
                         <property name="enabled">
                          <bool>true</bool>
@@ -3763,6 +3756,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <item>
                          <property name="text">
                           <string>A-L</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>P-L</string>
                          </property>
                         </item>
                        </widget>
@@ -4025,75 +4023,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <string>Dres Initial Fitting Parameters</string>
                        </property>
                        <layout class="QFormLayout" name="formLayout_4">
-                        <item row="0" column="0">
-                         <widget class="QTextEdit" name="DQMQ_TextEdit_KLabel">
-                          <property name="minimumSize">
-                           <size>
-                            <width>0</width>
-                            <height>30</height>
-                           </size>
-                          </property>
-                          <property name="maximumSize">
-                           <size>
-                            <width>16777215</width>
-                            <height>30</height>
-                           </size>
-                          </property>
-                          <property name="mouseTracking">
-                           <bool>false</bool>
-                          </property>
-                          <property name="focusPolicy">
-                           <enum>Qt::NoFocus</enum>
-                          </property>
-                          <property name="styleSheet">
-                           <string notr="true">background: transparent</string>
-                          </property>
-                          <property name="frameShape">
-                           <enum>QFrame::NoFrame</enum>
-                          </property>
-                          <property name="verticalScrollBarPolicy">
-                           <enum>Qt::ScrollBarAlwaysOff</enum>
-                          </property>
-                          <property name="horizontalScrollBarPolicy">
-                           <enum>Qt::ScrollBarAlwaysOff</enum>
-                          </property>
-                          <property name="sizeAdjustPolicy">
-                           <enum>QAbstractScrollArea::AdjustToContents</enum>
-                          </property>
-                          <property name="html">
-                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;k&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                          </property>
-                          <property name="textInteractionFlags">
-                           <set>Qt::NoTextInteraction</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="1">
-                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresK">
-                          <property name="decimals">
-                           <number>1</number>
-                          </property>
-                          <property name="minimum">
-                           <double>0.000000000000000</double>
-                          </property>
-                          <property name="maximum">
-                           <double>10.000000000000000</double>
-                          </property>
-                          <property name="singleStep">
-                           <double>0.100000000000000</double>
-                          </property>
-                          <property name="value">
-                           <double>0.400000000000000</double>
-                          </property>
-                         </widget>
-                        </item>
                         <item row="1" column="0">
                          <widget class="QTextEdit" name="DQMQ_TextEdit_Center1Label">
                           <property name="minimumSize">
@@ -4210,6 +4139,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
                           </property>
                          </widget>
                         </item>
+                        <item row="2" column="1">
+                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresWidth1">
+                          <property name="decimals">
+                           <number>5</number>
+                          </property>
+                          <property name="maximum">
+                           <double>1.000000000000000</double>
+                          </property>
+                          <property name="singleStep">
+                           <double>0.001000000000000</double>
+                          </property>
+                          <property name="value">
+                           <double>0.001000000000000</double>
+                          </property>
+                         </widget>
+                        </item>
                         <item row="3" column="0">
                          <widget class="QTextEdit" name="DQMQ_TextEdit_Center2Label">
                           <property name="minimumSize">
@@ -4257,6 +4202,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
                           </property>
                           <property name="textInteractionFlags">
                            <set>Qt::NoTextInteraction</set>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="1">
+                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresCenter2">
+                          <property name="decimals">
+                           <number>3</number>
+                          </property>
+                          <property name="maximum">
+                           <double>0.500000000000000</double>
+                          </property>
+                          <property name="singleStep">
+                           <double>0.100000000000000</double>
+                          </property>
+                          <property name="value">
+                           <double>0.050000000000000</double>
                           </property>
                          </widget>
                         </item>
@@ -4310,6 +4271,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
                           </property>
                          </widget>
                         </item>
+                        <item row="4" column="1">
+                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresWidth2">
+                          <property name="decimals">
+                           <number>5</number>
+                          </property>
+                          <property name="maximum">
+                           <double>1.000000000000000</double>
+                          </property>
+                          <property name="singleStep">
+                           <double>0.001000000000000</double>
+                          </property>
+                          <property name="value">
+                           <double>0.001000000000000</double>
+                          </property>
+                         </widget>
+                        </item>
                         <item row="5" column="0">
                          <widget class="QTextEdit" name="DQMQ_TextEdit_FractionLabel">
                           <property name="minimumSize">
@@ -4360,7 +4337,23 @@ li.checked::marker { content: &quot;\2612&quot;; }
                           </property>
                          </widget>
                         </item>
-                        <item row="6" column="0">
+                        <item row="5" column="1">
+                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresFraction1">
+                          <property name="decimals">
+                           <number>1</number>
+                          </property>
+                          <property name="maximum">
+                           <double>1.000000000000000</double>
+                          </property>
+                          <property name="singleStep">
+                           <double>0.200000000000000</double>
+                          </property>
+                          <property name="value">
+                           <double>0.500000000000000</double>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="7" column="0">
                          <widget class="QTextEdit" name="DQMQ_TextEdit_WeibullBetaLabel">
                           <property name="minimumSize">
                            <size>
@@ -4410,71 +4403,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                           </property>
                          </widget>
                         </item>
-                        <item row="2" column="1">
-                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresWidth1">
-                          <property name="decimals">
-                           <number>5</number>
-                          </property>
-                          <property name="maximum">
-                           <double>1.000000000000000</double>
-                          </property>
-                          <property name="singleStep">
-                           <double>0.001000000000000</double>
-                          </property>
-                          <property name="value">
-                           <double>0.001000000000000</double>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="3" column="1">
-                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresCenter2">
-                          <property name="decimals">
-                           <number>3</number>
-                          </property>
-                          <property name="maximum">
-                           <double>0.500000000000000</double>
-                          </property>
-                          <property name="singleStep">
-                           <double>0.100000000000000</double>
-                          </property>
-                          <property name="value">
-                           <double>0.050000000000000</double>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="4" column="1">
-                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresWidth2">
-                          <property name="decimals">
-                           <number>5</number>
-                          </property>
-                          <property name="maximum">
-                           <double>1.000000000000000</double>
-                          </property>
-                          <property name="singleStep">
-                           <double>0.001000000000000</double>
-                          </property>
-                          <property name="value">
-                           <double>0.001000000000000</double>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="5" column="1">
-                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresFraction1">
-                          <property name="decimals">
-                           <number>1</number>
-                          </property>
-                          <property name="maximum">
-                           <double>1.000000000000000</double>
-                          </property>
-                          <property name="singleStep">
-                           <double>0.200000000000000</double>
-                          </property>
-                          <property name="value">
-                           <double>0.500000000000000</double>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="6" column="1">
+                        <item row="7" column="1">
                          <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresWeibullBeta">
                           <property name="decimals">
                            <number>1</number>
@@ -4487,6 +4416,82 @@ li.checked::marker { content: &quot;\2612&quot;; }
                           </property>
                           <property name="value">
                            <double>2.000000000000000</double>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="9" column="0">
+                         <widget class="QTextEdit" name="DQMQ_TextEdit_KLabel">
+                          <property name="minimumSize">
+                           <size>
+                            <width>0</width>
+                            <height>30</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>16777215</width>
+                            <height>30</height>
+                           </size>
+                          </property>
+                          <property name="mouseTracking">
+                           <bool>false</bool>
+                          </property>
+                          <property name="focusPolicy">
+                           <enum>Qt::NoFocus</enum>
+                          </property>
+                          <property name="styleSheet">
+                           <string notr="true">background: transparent</string>
+                          </property>
+                          <property name="frameShape">
+                           <enum>QFrame::NoFrame</enum>
+                          </property>
+                          <property name="verticalScrollBarPolicy">
+                           <enum>Qt::ScrollBarAlwaysOff</enum>
+                          </property>
+                          <property name="horizontalScrollBarPolicy">
+                           <enum>Qt::ScrollBarAlwaysOff</enum>
+                          </property>
+                          <property name="sizeAdjustPolicy">
+                           <enum>QAbstractScrollArea::AdjustToContents</enum>
+                          </property>
+                          <property name="html">
+                           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;k&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="textInteractionFlags">
+                           <set>Qt::NoTextInteraction</set>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="9" column="1">
+                         <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresK">
+                          <property name="decimals">
+                           <number>1</number>
+                          </property>
+                          <property name="minimum">
+                           <double>0.000000000000000</double>
+                          </property>
+                          <property name="maximum">
+                           <double>10.000000000000000</double>
+                          </property>
+                          <property name="singleStep">
+                           <double>0.100000000000000</double>
+                          </property>
+                          <property name="value">
+                           <double>0.400000000000000</double>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="6" column="0" colspan="2">
+                         <widget class="Line" name="line">
+                          <property name="orientation">
+                           <enum>Qt::Horizontal</enum>
                           </property>
                          </widget>
                         </item>
