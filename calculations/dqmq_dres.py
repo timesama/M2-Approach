@@ -9,7 +9,7 @@ from scipy.integrate import trapezoid
 from scipy.optimize import curve_fit
 
 K = 0.4
-D_GRID = np.linspace(0, 0.6, 3000)
+D_GRID = np.linspace(0, 0.6, 6000)
 VALID_KERNELS = ["gaussian", "abragam", "pake", "weibull", "a-l"]
 
 

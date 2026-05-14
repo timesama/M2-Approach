@@ -182,8 +182,6 @@ class MainWindow(QMainWindow):
         # Connect change events
         self.ui.comboBox_4.activated.connect(self.update_file)
 
-        # Disable buttons initially
-        self.disable_buttons()
         self.ui.SE_GroupBox_EAct.setHidden(True)
 
         self.show_status("Ready.")
@@ -707,6 +705,11 @@ class MainWindow(QMainWindow):
             "toggled",
             self.dqmq_controller.mark_dres_stale,
         )
+        self._connect_dqmq_signal(
+            "DQMQ_DoubleSpinBox_DresFitTo",
+            "currentFitRangeChanged",
+            self.dqmq_controller.mark_dres_stale,
+        )
 
     def _connect_dqmq_signal(self, widget_name, signal_name, slot):
         """Connect a DQMQ widget signal when the generated UI exposes it."""
@@ -756,25 +759,6 @@ class MainWindow(QMainWindow):
             self.ui.BOX_up.setHidden(True)
         else:
             self.ui.BOX_up.setHidden(False)
-
-    def disable_buttons(self):
-        pass
-        # self.ui.btn_Start.setEnabled(False)
-        # self.ui.btn_Save.setEnabled(False)
-        # self.ui.btn_Phasing.setEnabled(False)
-        # self.ui.btn_Add.setEnabled(False)
-        # self.ui.DQMQ_Button_PlotOriginal.setEnabled(False)
-        # self.ui.DQMQ_Button_PlotNorm.setEnabled(False)
-
-    def enable_buttons(self):
-        pass
-        # self.ui.btn_SelectFiles.setEnabled(True)
-        # self.ui.btn_Start.setEnabled(True)
-        # self.ui.btn_Save.setEnabled(True)
-        # self.ui.radioButton.setEnabled(True)
-        # self.ui.btn_Load.setEnabled(True)
-        # self.ui.comboBox_4.setEnabled(True)
-        # self.ui.btn_Add.setEnabled(True)
 
     def default_folder(self):
         """Store the Settings tab default folder in the user registry."""
@@ -1021,7 +1005,6 @@ class MainWindow(QMainWindow):
     def _load_table_from_csv_impl(self, tableName):
 
         self.clear_list()
-        self.enable_buttons()
         self.ui.comboBox_4.clear()
 
         file_path = tableName[0]
