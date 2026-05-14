@@ -285,8 +285,6 @@ class MainWindow(QMainWindow):
 
     def update_file(self):
         """Load the selected SE/DQ file into the shared FID/FFT preview widgets."""
-        # self.ui.btn_Phasing.setEnabled(True)
-
         filename = self.ui.comboBox_4.currentText()
         if self.tab == 'SE':
             files = self.selected_files
@@ -340,8 +338,6 @@ class MainWindow(QMainWindow):
     def clear_list(self):
         """Clear data, plots, and file lists for the active tab."""
         if self.tab == 'SE':
-            # self.app_state.dq_files = []
-            # self.app_state.dqmq_files = []
             self.selected_files = []
             self.selected_files_gly = []
             self.selected_files_empty = []
@@ -738,8 +734,10 @@ class MainWindow(QMainWindow):
             self.tab = 'RecFID'
         elif current_tab_index == 0:
             self.tab = 'SE'
+            self.general_se_dq_controller.populate_combobox()
         elif current_tab_index == 1:
             self.tab = 'DQ'
+            self.general_se_dq_controller.populate_combobox()
         elif current_tab_index == 2:
             self.tab = 'DQ_Temp'
         elif current_tab_index == 3:
@@ -1021,9 +1019,6 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "File missing", f"Didn't find file list, only the tabular result is available", QMessageBox.Ok)
             files = []
             phased = {}
-            # self.ui.comboBox_4.setEnabled(False)
-            # self.ui.btn_Phasing.setEnabled(False)
-
         try:
             phased_path = os.path.splitext(file_path)[0] + '_phased.json'
             with open(phased_path, 'r') as file:

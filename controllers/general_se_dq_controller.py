@@ -112,7 +112,6 @@ class GeneralSEDQController(BaseTabController):
         self.ui.FidWidget.clear()
         self.ui.FFTWidget.clear()
 
-
     def update_legends_and_dq_graphs(self):
 
         if self.parent.tab == "DQ":
@@ -264,8 +263,6 @@ class GeneralSEDQController(BaseTabController):
             files = dlg.selectedFiles()
             self.parent.selected_files_gly.extend(files)
             self._status(f"Loaded {len(files)} glycerol file(s).")
-        # self.ui.btn_Start.setEnabled(True)
-        # self.ui.btn_Add.setEnabled(True)
 
     def open_select_dialog_baseline(self):
         dlg = OpenFilesDialog(self.parent)
@@ -274,5 +271,19 @@ class GeneralSEDQController(BaseTabController):
             files = dlg.selectedFiles()
             self.parent.selected_files_empty.extend(files)
             self._status(f"Loaded {len(files)} baseline file(s).")
-        # self.ui.btn_Start.setEnabled(True)
-        # self.ui.btn_Add.setEnabled(True)
+
+    def populate_combobox(self):
+        mw = self.parent
+        while self.ui.comboBox_4.count() > 0:
+            self.ui.comboBox_4.removeItem(0)
+
+        if mw.tab == 'SE':
+            files = mw.selected_files
+        elif mw.tab == 'DQ':
+            files = mw.selected_files_DQ_single
+
+        for file_path in files:
+            filename = os.path.basename(file_path)
+            self.ui.comboBox_4.addItem(filename)
+
+            logger.info("Update files list: %s file", filename)
