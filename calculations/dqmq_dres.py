@@ -49,7 +49,7 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K):
     if kernel == "weibull":
         return 1.0 - np.exp(-k_value * x_values**beta)
     if kernel == "a-l":
-        return 1.0 - np.exp(-(k_value * x_values)**beta) * np.sinc(x_values/ np.pi)
+        return 1.0 - np.exp(-(0.378 * x_values)**beta) * np.cos(0.583 * x_values)
     if kernel == "p-l":
         return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(k_value * x_values)
 
@@ -123,12 +123,12 @@ def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_componen
     model = make_fit_model(kernel, n_components, k_value, beta)
     if n_components == 1:
         default_p0 = [0.25, 1e-3]
-        bounds_min = [0, 0]
+        bounds_min = [0, 0.001]
         bounds_max = [1.300, 1.0]
         param_names = ["mu", "sigma"]
     elif n_components == 2:
         default_p0 = [0.25, 0.001, 0.05, 0.001, 0.5]
-        bounds_min = [0, 0, 0, 0, 0.0]
+        bounds_min = [0, 0.001, 0, 0.001, 0.0]
         bounds_max = [1.3000, 1.0, 1.3000, 1.0, 1.0]
         param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1"]
     else:

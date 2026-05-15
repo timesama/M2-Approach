@@ -937,3 +937,14 @@ class DQMQTabController(BaseTabController):
             header=f"{metadata_header}\ntime,fitted_nDQ",
             comments="# ",
         )
+
+    def reset_Dres_values(self):
+        logger.info("Dres fitting parameters restored to defaults")
+        self._status("Dres fitting parameters restored to defaults.")
+        self.ui.DQMQ_DoubleSpinBox_DresCenter1.setValue(0.250)
+        self.ui.DQMQ_DoubleSpinBox_DresWidth1.setValue(0.001)
+        self.ui.DQMQ_DoubleSpinBox_DresCenter2.setValue(0.05)
+        self.ui.DQMQ_DoubleSpinBox_DresWidth2.setValue(0.001)
+        self.ui.DQMQ_DoubleSpinBox_DresFraction1.setValue(0.5)
+        self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta.setValue(2)
+        self.ui.DQMQ_DoubleSpinBox_DresK.setValue(0.4)

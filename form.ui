@@ -4148,7 +4148,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                            <double>1.000000000000000</double>
                           </property>
                           <property name="singleStep">
-                           <double>0.001000000000000</double>
+                           <double>0.010000000000000</double>
                           </property>
                           <property name="value">
                            <double>0.001000000000000</double>
@@ -4280,7 +4280,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                            <double>1.000000000000000</double>
                           </property>
                           <property name="singleStep">
-                           <double>0.001000000000000</double>
+                           <double>0.010000000000000</double>
                           </property>
                           <property name="value">
                            <double>0.001000000000000</double>
@@ -4406,7 +4406,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         <item row="7" column="1">
                          <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_DresWeibullBeta">
                           <property name="decimals">
-                           <number>1</number>
+                           <number>2</number>
                           </property>
                           <property name="maximum">
                            <double>6.000000000000000</double>
@@ -4492,6 +4492,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <widget class="Line" name="line">
                           <property name="orientation">
                            <enum>Qt::Horizontal</enum>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="10" column="0" colspan="2">
+                         <widget class="QPushButton" name="DQMQ_Button_ResetValues">
+                          <property name="text">
+                           <string>Reset Values</string>
                           </property>
                          </widget>
                         </item>

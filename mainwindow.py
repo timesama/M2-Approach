@@ -146,6 +146,10 @@ class MainWindow(QMainWindow):
         self.ui.DQMQ_DoubleSpinBox_IntegralShift.editingFinished.connect(
             self.dqmq_controller.update_integral_sum_shift
         )
+
+        self.ui.DQMQ_Button_ResetValues.clicked.connect(
+            self.dqmq_controller.reset_Dres_values
+        )
         self._connect_dqmq_workflow_signals()
 
         self.ui.T1T2_Button_Group.clicked.connect(self.open_group_window)
