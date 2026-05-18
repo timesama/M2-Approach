@@ -672,6 +672,7 @@ class MainWindow(QMainWindow):
 
         dres_parameter_widgets = [
             "DQMQ_DoubleSpinBox_DresK",
+            "DQMQ_DoubleSpinBox_DresL",
             "DQMQ_DoubleSpinBox_DresCenter1",
             "DQMQ_DoubleSpinBox_DresWidth1",
             "DQMQ_DoubleSpinBox_DresCenter2",

@@ -575,6 +575,7 @@ class DQMQTabController(BaseTabController):
                 n_components = self._selected_dres_component_count()
                 k_value = self._dres_k_value()
                 beta = self._weibul_beta_value()
+                l_value = self._dres_l_value()
                 p0 = self._dres_initial_parameters(n_components)
 
                 fitto_value = self._dres_fitto_value()
@@ -590,7 +591,8 @@ class DQMQTabController(BaseTabController):
                     n_components=n_components,
                     p0=p0,
                     k_value=k_value,
-                    beta = beta
+                    beta = beta,
+                    l_value = l_value
                 )
                 d_plot, p_dist = dqmq_dres.build_distribution(fit_result)
 
@@ -605,7 +607,8 @@ class DQMQTabController(BaseTabController):
                     "param_names": fit_result["param_names"],
                     "p0": p0,
                     "k_value": k_value,
-                    "beta_value" : beta
+                    "beta_value" : beta,
+                    "l_value":l_value,
                 }
                 self._write_fitted_dres_parameters_to_ui(
                     fit_result["popt"],
@@ -763,6 +766,9 @@ class DQMQTabController(BaseTabController):
 
     def _dres_k_value(self):
         return self.ui.DQMQ_DoubleSpinBox_DresK.value()
+
+    def _dres_l_value(self):
+        return self.ui.DQMQ_DoubleSpinBox_DresL.value()
 
     def _dres_initial_parameters(self, n_components):
         center1 = self.ui.DQMQ_DoubleSpinBox_DresCenter1.value()
@@ -948,3 +954,4 @@ class DQMQTabController(BaseTabController):
         self.ui.DQMQ_DoubleSpinBox_DresFraction1.setValue(0.5)
         self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta.setValue(2)
         self.ui.DQMQ_DoubleSpinBox_DresK.setValue(0.4)
+        self.ui.DQMQ_DoubleSpinBox_DresL.setValue(0.4)

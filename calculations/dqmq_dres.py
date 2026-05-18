@@ -8,7 +8,8 @@ import numpy as np
 from scipy.integrate import trapezoid
 from scipy.optimize import curve_fit
 
-K = 0.4
+K   = 0.4
+L   = 0.4
 BETA = 2
 D_GRID = np.linspace(0, 1.3, 20000)
 VALID_KERNELS = ["gaussian", "abragam", "pake", "weibull", "a-l", "p-l"]
@@ -36,7 +37,7 @@ def p_gaussian_2d(d_values, mu1, sigma1, mu2, sigma2, frac1):
     return frac1 * p1 + (1.0 - frac1) * p2
 
 
-def dq_kernel(x_values, kernel, beta=2.0, k_value=K):
+def dq_kernel(x_values, kernel, beta=2.0, k_value=K, l_value=L):
     kernel = kernel.lower()
     beta = max(float(beta), 1e-12)
 
@@ -49,32 +50,32 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K):
     if kernel == "weibull":
         return 1.0 - np.exp(-k_value * x_values**beta)
     if kernel == "a-l":
-        return 1.0 - np.exp(-(0.378 * x_values)**beta) * np.cos(0.583 * x_values)
+        return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.cos(k_value * 1.4575 * x_values)
     if kernel == "p-l":
-        return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(k_value * x_values)
+        return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(l_value * x_values)
 
     raise ValueError(f"Unknown kernel: {kernel}. Use one of {VALID_KERNELS}")
 
 
-def _integrated_ndq_response(time_values, p_values, kernel, beta, k_value=K):
+def _integrated_ndq_response(time_values, p_values, kernel, beta, k_value=K, l_value=L):
     integrated_values = []
     for tau_i in np.asarray(time_values, dtype=float):
         scaled_dres = D_GRID * tau_i
-        kernel_response = dq_kernel(scaled_dres, kernel, beta, k_value)
+        kernel_response = dq_kernel(scaled_dres, kernel, beta, k_value, l_value)
         integrated_response = trapezoid(p_values * kernel_response, D_GRID)
         integrated_values.append(0.5 * integrated_response)
 
     return np.array(integrated_values)
 
 
-def ndq_1d(time_values, mu, sigma, beta, kernel, k_value=K):
+def ndq_1d(time_values, mu, sigma, beta, kernel, k_value=K, l_value=L):
     p_values = p_gaussian(D_GRID, mu, sigma)
-    return _integrated_ndq_response(time_values, p_values, kernel, beta, k_value)
+    return _integrated_ndq_response(time_values, p_values, kernel, beta, k_value, l_value)
 
 
-def ndq_2d(time_values, mu1, sigma1, mu2, sigma2, frac1, beta, kernel, k_value=K):
+def ndq_2d(time_values, mu1, sigma1, mu2, sigma2, frac1, beta, kernel, k_value=K, l_value=L):
     p_values = p_gaussian_2d(D_GRID, mu1, sigma1, mu2, sigma2, frac1)
-    return _integrated_ndq_response(time_values, p_values, kernel, beta, k_value)
+    return _integrated_ndq_response(time_values, p_values, kernel, beta, k_value, l_value)
 
 
 def ndq_single(time_values, dres, k_value=K):
@@ -83,7 +84,7 @@ def ndq_single(time_values, dres, k_value=K):
     return 0.5 * (1.0 - np.exp(exponent))
 
 
-def make_fit_model(kernel, n_components, k_value=K, beta=BETA):
+def make_fit_model(kernel, n_components, k_value=K, beta=BETA, l_value=L):
     kernel = kernel.lower()
     if kernel not in VALID_KERNELS:
         raise ValueError(f"kernel must be one of {VALID_KERNELS}")
@@ -91,7 +92,7 @@ def make_fit_model(kernel, n_components, k_value=K, beta=BETA):
     if n_components == 1:
 
         def model(time_values, mu, sigma):
-            return ndq_1d(time_values, mu, sigma, beta, kernel, k_value)
+            return ndq_1d(time_values, mu, sigma, beta, kernel, k_value, l_value)
 
         return model
 
@@ -99,7 +100,7 @@ def make_fit_model(kernel, n_components, k_value=K, beta=BETA):
 
         def model(time_values, mu1, sigma1, mu2, sigma2, frac1):
             return ndq_2d(
-                time_values, mu1, sigma1, mu2, sigma2, frac1, beta, kernel, k_value
+                time_values, mu1, sigma1, mu2, sigma2, frac1, beta, kernel, k_value, l_value
             )
 
         return model
@@ -107,7 +108,7 @@ def make_fit_model(kernel, n_components, k_value=K, beta=BETA):
     raise ValueError("n_components must be 1 or 2")
 
 
-def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_components=1, p0=None, k_value=K, beta=BETA):
+def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_components=1, p0=None, k_value=K, beta=BETA, l_value=L):
     kernel = kernel.lower()
     if kernel not in VALID_KERNELS:
         raise ValueError(f"kernel must be one of {VALID_KERNELS}")
@@ -119,6 +120,11 @@ def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_componen
     beta = float(beta)
     if not np.isfinite(beta) or beta <= 0:
         raise ValueError("Weibull beta value must be a positive finite number.")
+
+    l_value = float(l_value)
+    if not np.isfinite(l_value) or l_value <= 0:
+        raise ValueError("Dres L value must be a positive finite number.")
+
 
     model = make_fit_model(kernel, n_components, k_value, beta)
     if n_components == 1:
@@ -176,6 +182,7 @@ def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_componen
         "param_names": param_names,
         "k_value": k_value,
         "beta":beta,
+        "l_value":l_value,
     }
 
 
