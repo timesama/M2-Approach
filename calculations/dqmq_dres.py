@@ -44,7 +44,7 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K, l_value=L):
     if kernel == "gaussian":
         return 1.0 - np.exp(-k_value * x_values**2)
     if kernel == "abragam":
-        return 1.0 - np.exp(-k_value * x_values**2) * np.sinc(x_values / np.pi)
+        return 1.0 - np.exp(-k_value * x_values**2) * np.sinc(x_values)
     if kernel == "pake":
         return 1.0 - np.exp(-k_value * x_values**2) * np.cos(x_values)
     if kernel == "weibull":
