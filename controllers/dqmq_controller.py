@@ -510,21 +510,32 @@ class DQMQTabController(BaseTabController):
         t_dq = data[:, 0]
         amp_dq = data[:, 1]
         t2 = data[:, 4]
+
         finite_values = np.isfinite(amp_dq) & np.isfinite(t2) & np.isfinite(t_dq)
         positive_t2 = t2 > 0
         valid_rows = finite_values & positive_t2
         amp_dq = amp_dq[valid_rows]
         t2 = t2[valid_rows]
         t_dq = t_dq[valid_rows]
+
         if len(t2) == 0:
             raise ValueError(
                 "Selected file does not contain valid positive T2star_lin values."
             )
+
         order = np.argsort(t2)
         amp_dq = amp_dq[order]
         t2 = t2[order]
-        t = np.linspace(0, np.max(t_dq), n_points)
+
+        # t = np.linspace(0, np.max(t_dq), n_points)
+
+        t_extra = np.linspace(0, np.max(t_dq), n_points)
+
+        t = np.unique(np.concatenate([t_dq, t_extra]))
+        t.sort()
         d_t2 = np.gradient(t2) if len(t2) > 1 else np.ones_like(t2)
+
+
         signal = np.zeros_like(t)
         for amp, t2i, delta_t2 in zip(amp_dq, t2, d_t2):
             scaled_time = t / t2i
@@ -550,19 +561,6 @@ class DQMQTabController(BaseTabController):
             self.render_analysis_plot()
             self._status("Integral sum shift updated.")
 
-    def save_integral_sum_result1(self, base_file_path):
-        if not self.integral_sum_result:
-            return
-        root, ext = os.path.splitext(base_file_path)
-        save_path = f"{root}_IntegralSum{ext or '.csv'}"
-        out = np.column_stack(
-            (self.integral_sum_result["time"], self.integral_sum_result["signal_norm"],
-             self.analysis_result["time"], self.analysis_result["mq_norm"],
-             self.analysis_result["time"], self.analysis_result["denominator_base_norm"])
-        )
-        np.savetxt(
-            save_path, out, delimiter=",", header="time,integral_sum_norm,tau_dq,MQ,tau_dq,MQTail", comments=""
-        )
 
     def calculate_dres(self):
         self.calculate_dres_distribution(show_errors=True)
