@@ -390,7 +390,7 @@ class DQMQTabController(BaseTabController):
 
             figure.plot(
                 time,
-                result["denominator_base_norm"],
+                result["mq_baseline"],
                 pen=self._dqmq_pen("mq_minus_tail"),
                 name="MQ - Tail",
             )
@@ -454,6 +454,7 @@ class DQMQTabController(BaseTabController):
             "denominator_base": arrays["DQ"] + arrays["Ref"],
             "denominator_base_norm": np.zeros_like(arrays["tau"]),
             "denominator": arrays["DQ"] + arrays["Ref"],
+            "mq_baseline" : np.zeros_like(arrays["tau"]),
             "time0": arrays["Time0"],
             "nDQ": arrays["nDQ0"],
             "fit_from": None,
@@ -508,8 +509,9 @@ class DQMQTabController(BaseTabController):
 
     def _calculate_t2_summed_signal(self, data, n_points=500):
         t_dq = data[:, 0]
-        amp_dq = data[:, 1]
+        # amp_dq = data[:, 1]
         t2 = data[:, 4]
+        amp_dq = data[:, 5] # USE NORMALIZED!!!!
 
         finite_values = np.isfinite(amp_dq) & np.isfinite(t2) & np.isfinite(t_dq)
         positive_t2 = t2 > 0
@@ -528,11 +530,15 @@ class DQMQTabController(BaseTabController):
         t2 = t2[order]
 
         # t = np.linspace(0, np.max(t_dq), n_points)
+        t = t_dq
 
-        t_extra = np.linspace(0, np.max(t_dq), n_points)
+        # t_extra = np.linspace(0, np.max(t_dq), n_points)
 
-        t = np.unique(np.concatenate([t_dq, t_extra]))
-        t.sort()
+        # t = np.unique(np.concatenate([t_dq, t_extra]))
+        # t.sort()
+
+        # t = np.linspace(0, 300, 1000) ### try a different time scale for relaxation
+
         d_t2 = np.gradient(t2) if len(t2) > 1 else np.ones_like(t2)
 
 
@@ -540,6 +546,7 @@ class DQMQTabController(BaseTabController):
         for amp, t2i, delta_t2 in zip(amp_dq, t2, d_t2):
             scaled_time = t / t2i
             gaussian_decay = np.exp(-(scaled_time**2))
+
             signal += amp * gaussian_decay * delta_t2
 
         s_min = np.min(signal)
@@ -563,9 +570,6 @@ class DQMQTabController(BaseTabController):
 
 
     def calculate_dres(self):
-        self.calculate_dres_distribution(show_errors=True)
-
-    def calculate_dres_distribution(self, show_errors=True):
         try:
             with busy_cursor():
                 arrays = self._dres_input_arrays()

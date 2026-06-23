@@ -25,9 +25,14 @@ def calculate_linearization(dq_time, t2, dq, time_min, time_max):
         return None
 
     coefficients = np.polyfit(selected_time, selected_t2, 1)
-    integral = trapezoid(dq)
-    dq_norm = dq / integral
+    # integral = trapezoid(dq)
+    
     t2_linearized = coefficients[0] * dq_time + coefficients[1]
+
+    integral = trapezoid(dq, t2_linearized) ### to normalize against the correct integral value, dx != 1
+    dq_norm = dq / integral
+
+
     x_line = np.arange(0, 105.1, 0.1)
     y_line = np.polyval(coefficients, x_line)
 

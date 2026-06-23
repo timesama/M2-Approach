@@ -124,6 +124,9 @@ def calculate_dqmq_analysis(
     time0 = np.insert(time, 0, 0.0)
     n_dq0 = np.insert(n_dq, 0, 0.0)
 
+    mq_minus_baseline = denominator_base - min(denominator_base)
+    mq_minus_baseline_nomalized, _ = normalize_to_own_max(mq_minus_baseline)
+
     return {
         "time": time,
         "dq_norm": dq_norm,
@@ -137,6 +140,7 @@ def calculate_dqmq_analysis(
         "denominator_base": denominator_base,
         "denominator_base_norm": denominator_base_norm,
         "denominator": denominator,
+        "mq_baseline" : mq_minus_baseline_nomalized,
         "time0": time0,
         "nDQ": n_dq0,
         "fit_from": fit_from,
