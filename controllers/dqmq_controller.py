@@ -622,16 +622,13 @@ class DQMQTabController(BaseTabController):
                     self.render_analysis_plot()
                 self._status("Dres calculation completed.")
         except ValueError as exc:
-            if show_errors:
-                self._status(f"Could not calculate Dres: {exc}")
-                QMessageBox.warning(self.parent, "Dres calculation", str(exc))
-            else:
-                logger.warning("Skipping automatic Dres calculation: %s", exc)
+            self._status(f"Could not calculate Dres: {exc}")
+            QMessageBox.warning(self.parent, "Dres calculation", str(exc))
+            logger.warning("Skipping automatic Dres calculation: %s", exc)
         except Exception as exc:
             logger.exception("Dres calculation failed")
-            if show_errors:
-                self._status(f"Could not calculate Dres: {exc}")
-                QMessageBox.warning(self.parent, "Dres calculation failed", str(exc))
+            self._status(f"Could not calculate Dres: {exc}")
+            QMessageBox.warning(self.parent, "Dres calculation failed", str(exc))
 
     def _dres_input_arrays(self):
         if self.analysis_result is not None:
@@ -851,7 +848,7 @@ class DQMQTabController(BaseTabController):
             )
 
         mq = np.column_stack(
-            (self.analysis_result["time"], self.analysis_result["mq_norm"], self.analysis_result["denominator_base_norm"])
+            (self.analysis_result["time"], self.analysis_result["mq_norm"], self.analysis_result["mq_baseline"])
             )
 
         can_write_excel = importlib.util.find_spec("pandas") is not None and (
