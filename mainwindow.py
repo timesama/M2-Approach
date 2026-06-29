@@ -218,6 +218,8 @@ class MainWindow(QMainWindow):
             latest_release = response.json()
             latest_version = latest_release['tag_name']
 
+            ### TODO: add here the strip function, so the update pop up will appear only on major update 0.X.X -> 1.X.X etc
+
             if latest_version != current_version:
                 msg = QMessageBox(self)
                 msg.setIcon(QMessageBox.Information)
@@ -735,6 +737,7 @@ class MainWindow(QMainWindow):
         current_widget = self.ui.tabWidget.currentWidget()
         current_name = current_widget.objectName() if current_widget is not None else ""
 
+        # TODO: here change the idx to the name
         if current_name == "g_RecFID":
             self.tab = 'RecFID'
         elif current_tab_index == 0:
