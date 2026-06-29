@@ -89,11 +89,15 @@ def fit_tail(time, dq_norm, ref_norm, fit_from, fit_to, exponent):
             p0=initial_params,
             maxfev=10000000,
         )
-        return exponent_model(time, *fitted_params)
+        return exponent_model(time, *fitted_params), fitted_params[0]
     except Exception:
         logger.exception("DQMQ tail fitting failed; using zero tail fit.")
         return np.zeros_like(time, dtype=float)
 
+def calculate_tail_fraction(amplitude_tail, amplitude_MQ):
+
+    fraction_tail = 100 * amplitude_tail / amplitude_MQ
+    return fraction_tail
 
 def calculate_dqmq_analysis(
     raw_time,
@@ -112,7 +116,7 @@ def calculate_dqmq_analysis(
     mq_raw_norm = dq_norm + ref_norm
     mq_norm, mq_max = normalize_to_own_max(mq_raw_norm)
     diff = ref_norm - dq_norm
-    tail_fit = fit_tail(time, dq_norm, ref_norm, fit_from, fit_to, fitting_exponent)
+    tail_fit, tail_amplitude = fit_tail(time, dq_norm, ref_norm, fit_from, fit_to, fitting_exponent)
     noise_weight = calculate_noise_weight(time, fit_from)
     additive = 0.5 * noise_level * noise_weight
     denominator_base = mq_raw_norm - tail_fit
@@ -126,6 +130,8 @@ def calculate_dqmq_analysis(
 
     mq_minus_baseline = denominator_base - min(denominator_base)
     mq_minus_baseline_nomalized, _ = normalize_to_own_max(mq_minus_baseline)
+
+    tail_fraction = calculate_tail_fraction(tail_amplitude, (dq_norm[0] + ref_norm[0]))
 
     return {
         "time": time,
@@ -151,6 +157,7 @@ def calculate_dqmq_analysis(
         "smoothing": smoothing,
         "ref_max": ref_max,
         "mq_max": mq_max,
+        "tail_fraction": tail_fraction
     }
 
 

@@ -302,6 +302,9 @@ class DQMQTabController(BaseTabController):
         self.dres_is_stale = True
         self.render_analysis_plot()
         self._status("Fit completed.")
+
+        print('Tail Fraction: ', self.analysis_result["tail_fraction"])
+
         return self.analysis_result
 
     def plot_norm(self):
@@ -448,6 +451,7 @@ class DQMQTabController(BaseTabController):
             "mq_raw_norm": arrays["DQ"] + arrays["Ref"],
             "mq_norm": arrays["DQ"] + arrays["Ref"],
             "tail_fit": np.zeros_like(arrays["tau"]),
+            "tail_fraction": 0,
             "mq_tail": np.zeros_like(arrays["tau"]),
             "noise_weight": np.zeros_like(arrays["tau"]),
             "additive": np.zeros_like(arrays["tau"]),
@@ -567,7 +571,6 @@ class DQMQTabController(BaseTabController):
         if self.current_plot_mode == "analysis":
             self.render_analysis_plot()
             self._status("Integral sum shift updated.")
-
 
     def calculate_dres(self):
         try:
