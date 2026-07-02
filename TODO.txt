@@ -5,12 +5,16 @@ The order of tabs:
 3. DQ
 4. DQMQ
 5. Spin Diffusion
+--
+done
 
 - no need for DQ(Temp)
+--
+done (commented out, remove later)
 
-- hide the up window in settings
-- whats up with the imported pachages?
++ hide the up window in settings
++ whats up with the imported pachages?
 - I really like how the folder in DQMQ remembers what was the last folder opened
-- increase the "letncy" for the version update pop up window
+- increase the "latency" for the version update pop up window
 - include the tail fraction in gui
 

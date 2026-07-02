@@ -567,7 +567,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>4</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -583,7 +583,7 @@
              </property>
              <widget class="QWidget" name="a_SE">
               <attribute name="title">
-               <string>SE</string>
+               <string>FID</string>
               </attribute>
               <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,2,0">
                <property name="spacing">
@@ -1053,11 +1053,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="b_DQ">
+             <widget class="QWidget" name="g_RecFID">
               <attribute name="title">
-               <string>DQ</string>
+               <string>Reconstruct FID</string>
               </attribute>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,2,0,2">
                <property name="spacing">
                 <number>5</number>
                </property>
@@ -1065,7 +1065,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <property name="topMargin">
-                <number>0</number>
+                <number>5</number>
                </property>
                <property name="rightMargin">
                 <number>5</number>
@@ -1074,418 +1074,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <number>5</number>
                </property>
                <item>
-                <layout class="QGridLayout" name="gridLayout_3" rowstretch="2,0,0,0,0" columnstretch="0,0,0">
-                 <property name="horizontalSpacing">
-                  <number>5</number>
-                 </property>
-                 <property name="verticalSpacing">
-                  <number>10</number>
-                 </property>
-                 <item row="0" column="2" rowspan="2">
-                  <widget class="PlotWidget" name="DQ_PlotWidget_NormIntensity" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>100</width>
-                     <height>100</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QPushButton" name="DQ_Button_ClearTable">
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Clear Table</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0" rowspan="3">
-                  <widget class="QTableWidget" name="DQ_Table_Data">
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::AllEditTriggers</set>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="columnCount">
-                    <number>4</number>
-                   </property>
-                   <column>
-                    <property name="text">
-                     <string>DQ time</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>DQ amp</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>M₂</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>T₂*</string>
-                    </property>
-                   </column>
-                  </widget>
-                 </item>
-                 <item row="0" column="1" rowspan="2">
-                  <widget class="PlotWidget" name="DQ_PlotWidget_T2" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>100</width>
-                     <height>100</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QPushButton" name="DQ_Button_DeleteRow">
-                   <property name="text">
-                    <string>Delete row</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1" rowspan="3">
-                  <layout class="QFormLayout" name="DQ_FormLayout_Filter">
-                   <property name="horizontalSpacing">
-                    <number>0</number>
-                   </property>
-                   <property name="verticalSpacing">
-                    <number>0</number>
-                   </property>
-                   <property name="leftMargin">
-                    <number>50</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QTextEdit" name="DQ_TextEdit_FilterTitle">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>10</width>
-                       <height>10</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>100</width>
-                       <height>30</height>
-                      </size>
-                     </property>
-                     <property name="mouseTracking">
-                      <bool>false</bool>
-                     </property>
-                     <property name="focusPolicy">
-                      <enum>Qt::NoFocus</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background: transparent</string>
-                     </property>
-                     <property name="frameShape">
-                      <enum>QFrame::NoFrame</enum>
-                     </property>
-                     <property name="verticalScrollBarPolicy">
-                      <enum>Qt::ScrollBarAlwaysOff</enum>
-                     </property>
-                     <property name="horizontalScrollBarPolicy">
-                      <enum>Qt::ScrollBarAlwaysOff</enum>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QAbstractScrollArea::AdjustToContents</enum>
-                     </property>
-                     <property name="html">
-                      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Filter DQ times&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="textInteractionFlags">
-                      <set>Qt::NoTextInteraction</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QDoubleSpinBox" name="DQ_DoubleSpinBox_FilterFrom">
-                     <property name="maximumSize">
-                      <size>
-                       <width>100</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="prefix">
-                      <string/>
-                     </property>
-                     <property name="suffix">
-                      <string> musec</string>
-                     </property>
-                     <property name="decimals">
-                      <number>1</number>
-                     </property>
-                     <property name="minimum">
-                      <double>0.000000000000000</double>
-                     </property>
-                     <property name="singleStep">
-                      <double>5.000000000000000</double>
-                     </property>
-                     <property name="value">
-                      <double>0.000000000000000</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QTextEdit" name="DQ_TextEdit_FilterToLabel">
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                     <property name="mouseTracking">
-                      <bool>false</bool>
-                     </property>
-                     <property name="focusPolicy">
-                      <enum>Qt::NoFocus</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background: transparent</string>
-                     </property>
-                     <property name="frameShape">
-                      <enum>QFrame::NoFrame</enum>
-                     </property>
-                     <property name="verticalScrollBarPolicy">
-                      <enum>Qt::ScrollBarAlwaysOff</enum>
-                     </property>
-                     <property name="horizontalScrollBarPolicy">
-                      <enum>Qt::ScrollBarAlwaysOff</enum>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QAbstractScrollArea::AdjustToContents</enum>
-                     </property>
-                     <property name="html">
-                      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;to&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="textInteractionFlags">
-                      <set>Qt::NoTextInteraction</set>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QDoubleSpinBox" name="DQ_DoubleSpinBox_FilterTo">
-                     <property name="maximumSize">
-                      <size>
-                       <width>100</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="prefix">
-                      <string/>
-                     </property>
-                     <property name="suffix">
-                      <string> musec</string>
-                     </property>
-                     <property name="decimals">
-                      <number>1</number>
-                     </property>
-                     <property name="minimum">
-                      <double>0.000000000000000</double>
-                     </property>
-                     <property name="singleStep">
-                      <double>5.000000000000000</double>
-                     </property>
-                     <property name="value">
-                      <double>20.000000000000000</double>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0" colspan="2">
-                    <widget class="QTextEdit" name="DQ_TextEdit_FitResult">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>20</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>30</height>
-                      </size>
-                     </property>
-                     <property name="font">
-                      <font>
-                       <pointsize>7</pointsize>
-                      </font>
-                     </property>
-                     <property name="mouseTracking">
-                      <bool>false</bool>
-                     </property>
-                     <property name="focusPolicy">
-                      <enum>Qt::NoFocus</enum>
-                     </property>
-                     <property name="acceptDrops">
-                      <bool>false</bool>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background: transparent</string>
-                     </property>
-                     <property name="frameShape">
-                      <enum>QFrame::NoFrame</enum>
-                     </property>
-                     <property name="verticalScrollBarPolicy">
-                      <enum>Qt::ScrollBarAlwaysOff</enum>
-                     </property>
-                     <property name="horizontalScrollBarPolicy">
-                      <enum>Qt::ScrollBarAlwaysOff</enum>
-                     </property>
-                     <property name="sizeAdjustPolicy">
-                      <enum>QAbstractScrollArea::AdjustToContents</enum>
-                     </property>
-                     <property name="undoRedoEnabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="html">
-                      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:7pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                     <property name="textInteractionFlags">
-                      <set>Qt::NoTextInteraction</set>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="2" column="2" rowspan="3">
-                  <layout class="QVBoxLayout" name="DQ_VBoxLayout_Fit">
-                   <property name="leftMargin">
-                    <number>30</number>
-                   </property>
-                   <item>
-                    <widget class="QRadioButton" name="DQ_RadioButton_LogScale">
-                     <property name="maximumSize">
-                      <size>
-                       <width>100</width>
-                       <height>30</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Logarithm</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QComboBox" name="DQ_ComboBox_FitFunction">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>100</width>
-                       <height>16777215</height>
-                      </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background: none</string>
-                     </property>
-                     <property name="currentText">
-                      <string/>
-                     </property>
-                     <property name="currentIndex">
-                      <number>-1</number>
-                     </property>
-                     <property name="maxVisibleItems">
-                      <number>10</number>
-                     </property>
-                     <property name="placeholderText">
-                      <string>Function:</string>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>Gauss</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>Lorenz</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>Pseudo Voigt</string>
-                      </property>
-                     </item>
-                    </widget>
-                   </item>
-                   <item>
-                    <spacer name="verticalSpacer">
-                     <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>20</width>
-                       <height>15</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-             <widget class="QWidget" name="c_DQ_Temp">
-              <attribute name="title">
-               <string>DQ (Temp)</string>
-              </attribute>
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
-               <property name="leftMargin">
-                <number>5</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>5</number>
-               </property>
-               <property name="bottomMargin">
-                <number>5</number>
-               </property>
-               <item>
-                <layout class="QGridLayout" name="gridLayout_6" rowstretch="2,3,1" rowminimumheight="2,3,1">
+                <layout class="QVBoxLayout" name="verticalLayout_3">
                  <property name="leftMargin">
                   <number>5</number>
                  </property>
@@ -1498,191 +1087,705 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  <property name="bottomMargin">
                   <number>5</number>
                  </property>
-                 <item row="0" column="2">
-                  <widget class="PlotWidget" name="DQTemp_PlotWidget_PolyFit" native="true">
+                 <item>
+                  <widget class="QGroupBox" name="RecFID_GroupBox_LoadExport">
                    <property name="minimumSize">
                     <size>
-                     <width>200</width>
-                     <height>0</height>
+                     <width>150</width>
+                     <height>270</height>
                     </size>
                    </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>150</width>
+                     <height>270</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string>Load | Export</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_16">
+                    <property name="leftMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>5</number>
+                    </property>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_LoadFID">
+                      <property name="text">
+                       <string>Load FID</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_LoadData">
+                      <property name="text">
+                       <string>Load (M)SE</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_LoadFIDEmpty">
+                      <property name="text">
+                       <string>Load FID Empty</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_LoadDataEmpty">
+                      <property name="text">
+                       <string>Load (M)SE Empty</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_ManualEchoTimes">
+                      <property name="text">
+                       <string>Manual Echo Time</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_Clear">
+                      <property name="text">
+                       <string>Clear</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_SaveStatistics">
+                      <property name="text">
+                       <string>Export T2 Map</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_ExportSEMaxT2">
+                      <property name="text">
+                       <string>Export SE max and T2</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_Run">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="text">
+                       <string>Go!</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="PlotWidget" name="DQTemp_PlotWidget_T2Distribution" native="true">
+                 <item>
+                  <widget class="QGroupBox" name="RecFID_GroupBox_DataAdjustment">
                    <property name="minimumSize">
                     <size>
-                     <width>200</width>
-                     <height>0</height>
+                     <width>100</width>
+                     <height>270</height>
                     </size>
                    </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>150</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string>Data Adjustment</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_18">
+                    <property name="leftMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>5</number>
+                    </property>
+                    <item>
+                     <widget class="QCheckBox" name="RecFID_CheckBox_SubtractEmpty">
+                      <property name="text">
+                       <string>Subtract Empty</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="RecFID_CheckBox_CutBeginning">
+                      <property name="text">
+                       <string>Cut the beginning</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="RecFID_CheckBox_NormalizeToFID">
+                      <property name="text">
+                       <string>Normalize to FID</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_NormalizeFrom">
+                      <property name="prefix">
+                       <string>from </string>
+                      </property>
+                      <property name="suffix">
+                       <string>μs</string>
+                      </property>
+                      <property name="decimals">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>70.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_NormalizeTo">
+                      <property name="prefix">
+                       <string>to </string>
+                      </property>
+                      <property name="suffix">
+                       <string>μs</string>
+                      </property>
+                      <property name="decimals">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>90.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="RecFID_CheckBox_LongComponent">
+                      <property name="text">
+                       <string>Long Component</string>
+                      </property>
+                      <property name="checked">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_LongComponentEnd">
+                      <property name="prefix">
+                       <string>from </string>
+                      </property>
+                      <property name="suffix">
+                       <string>μs</string>
+                      </property>
+                      <property name="decimals">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <double>2000.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>55.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="RecFID_CheckBox_Smooth">
+                      <property name="text">
+                       <string>Smooth</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="RecFID_SpinBox_SmoothOrder">
+                      <property name="suffix">
+                       <string/>
+                      </property>
+                      <property name="prefix">
+                       <string>order </string>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>3</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="RecFID_SpinBox_SmoothWindow">
+                      <property name="prefix">
+                       <string>window </string>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>100</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="RecFID_CheckBox_TimeDomainApodization">
+                      <property name="text">
+                       <string>TD Apodization</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_ApodizationSigma">
+                      <property name="prefix">
+                       <string>at </string>
+                      </property>
+                      <property name="decimals">
+                       <number>0</number>
+                      </property>
+                      <property name="maximum">
+                       <double>10000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>10.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>100.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="RecFID_CheckBox_AdjustZero">
+                      <property name="text">
+                       <string>Shift FID Signal</string>
+                      </property>
+                      <property name="checked">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_ZeroShift">
+                      <property name="minimum">
+                       <double>-10.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>10.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>0.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <layout class="QGridLayout" name="gridLayout_4">
-                   <property name="leftMargin">
-                    <number>0</number>
+                </layout>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_11">
+                 <property name="leftMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>5</number>
+                 </property>
+                 <item>
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_OriginalNMRSignal" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>300</width>
+                     <height>300</height>
+                    </size>
                    </property>
-                   <property name="topMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>0</number>
-                   </property>
-                   <property name="horizontalSpacing">
-                    <number>5</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QPushButton" name="DQTemp_Button_SelectFiles">
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>25</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Select Files</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QPushButton" name="DQTemp_Button_ClearTable">
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>25</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Clear Table</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QPushButton" name="DQTemp_Button_Load">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>25</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Load</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QPushButton" name="DQTemp_Button_Save">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>16777215</width>
-                       <height>25</height>
-                      </size>
-                     </property>
-                     <property name="text">
-                      <string>Save</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="0" column="0" rowspan="2">
-                  <widget class="QTableWidget" name="DQTemp_Table_Results">
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
                      <height>16777215</height>
                     </size>
                    </property>
-                   <property name="styleSheet">
-                    <string notr="true"/>
-                   </property>
-                   <property name="editTriggers">
-                    <set>QAbstractItemView::NoEditTriggers</set>
-                   </property>
-                   <property name="alternatingRowColors">
-                    <bool>true</bool>
-                   </property>
-                   <property name="selectionMode">
-                    <enum>QAbstractItemView::ExtendedSelection</enum>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
-                   </property>
-                   <property name="sortingEnabled">
-                    <bool>true</bool>
-                   </property>
-                   <property name="columnCount">
-                    <number>9</number>
-                   </property>
-                   <column>
-                    <property name="text">
-                     <string>Name</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Center Gauss</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Center Lorenz</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Center Voigt</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Center y`</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>FWHM Gaus</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>FWHM Lorenz</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>FWHM Voigt</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Folder</string>
-                    </property>
-                   </column>
                   </widget>
                  </item>
-                 <item row="1" column="1" rowspan="2" colspan="2">
-                  <widget class="PlotWidget" name="DQTemp_PlotWidget_CenterVsXAxis" native="true">
+                 <item>
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_SEMax" native="true">
                    <property name="minimumSize">
                     <size>
-                     <width>200</width>
-                     <height>400</height>
+                     <width>300</width>
+                     <height>300</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_15">
+                 <property name="leftMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>5</number>
+                 </property>
+                 <item>
+                  <spacer name="verticalSpacer_8">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QGroupBox" name="RecFID_GroupBox_Reconstruction">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>270</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>150</width>
+                     <height>270</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string>Reconstruction</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_20">
+                    <property name="spacing">
+                     <number>5</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>5</number>
+                    </property>
+                    <item>
+                     <widget class="QComboBox" name="RecFID_ComboBox_BuildFunction">
+                      <property name="styleSheet">
+                       <string notr="true">background: white</string>
+                      </property>
+                      <property name="placeholderText">
+                       <string>Choose Function</string>
+                      </property>
+                      <item>
+                       <property name="text">
+                        <string>Gaussian</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Polynom 4</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Polynom 6</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>Polynom 8</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_BuildFrom">
+                      <property name="suffix">
+                       <string>μs</string>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="minimum">
+                       <double>5.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>9.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_BuildTo">
+                      <property name="suffix">
+                       <string>μs</string>
+                      </property>
+                      <property name="decimals">
+                       <number>1</number>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="value">
+                       <double>20.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="RecFID_Button_TimeAnalysis">
+                      <property name="text">
+                       <string>Analyse Times</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="RecFID_SpinBox_TimeAnalysisRange">
+                      <property name="singleStep">
+                       <number>1</number>
+                      </property>
+                      <property name="value">
+                       <number>24</number>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer_14">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QGroupBox" name="RecFID_GroupBox_Maximum">
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>270</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>150</width>
+                     <height>270</height>
+                    </size>
+                   </property>
+                   <property name="title">
+                    <string>Maximum</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_19">
+                    <property name="leftMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>5</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>5</number>
+                    </property>
+                    <item>
+                     <widget class="QGroupBox" name="RecFID_GroupBox_SE">
+                      <property name="title">
+                       <string>SE</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_22">
+                       <property name="leftMargin">
+                        <number>5</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>5</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>5</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>5</number>
+                       </property>
+                       <item>
+                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_SEFitFrom">
+                         <property name="prefix">
+                          <string>cut from </string>
+                         </property>
+                         <property name="suffix">
+                          <string> point</string>
+                         </property>
+                         <property name="decimals">
+                          <number>0</number>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_SEFitTo">
+                         <property name="prefix">
+                          <string>cut to </string>
+                         </property>
+                         <property name="suffix">
+                          <string> point</string>
+                         </property>
+                         <property name="decimals">
+                          <number>0</number>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="RecFID_GroupBox_MSE">
+                      <property name="title">
+                       <string>MSE</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_23" stretch="0">
+                       <property name="leftMargin">
+                        <number>5</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>5</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>5</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>5</number>
+                       </property>
+                       <item>
+                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_MseDivider">
+                         <property name="prefix">
+                          <string>divide by </string>
+                         </property>
+                         <property name="suffix">
+                          <string/>
+                         </property>
+                         <property name="decimals">
+                          <number>0</number>
+                         </property>
+                         <property name="minimum">
+                          <double>1.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer_9">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_17">
+                 <property name="leftMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>5</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>5</number>
+                 </property>
+                 <item>
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_BuildUpNMRSignal" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>300</width>
+                     <height>300</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="PlotWidget" name="RecFID_PlotWidget_BuildUpSpectra" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>300</width>
+                     <height>300</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
                     </size>
                    </property>
                   </widget>
@@ -2770,7 +2873,421 @@ li.checked::marker { content: &quot;\2612&quot;; }
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="DQMQ_Tab">
+             <widget class="QWidget" name="b_DQ">
+              <attribute name="title">
+               <string>DQ</string>
+              </attribute>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <property name="spacing">
+                <number>5</number>
+               </property>
+               <property name="leftMargin">
+                <number>5</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>5</number>
+               </property>
+               <property name="bottomMargin">
+                <number>5</number>
+               </property>
+               <item>
+                <layout class="QGridLayout" name="gridLayout_3" rowstretch="2,0,0,0,0" columnstretch="0,0,0">
+                 <property name="horizontalSpacing">
+                  <number>5</number>
+                 </property>
+                 <property name="verticalSpacing">
+                  <number>10</number>
+                 </property>
+                 <item row="0" column="2" rowspan="2">
+                  <widget class="PlotWidget" name="DQ_PlotWidget_NormIntensity" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>100</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QPushButton" name="DQ_Button_ClearTable">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Clear Table</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0" rowspan="3">
+                  <widget class="QTableWidget" name="DQ_Table_Data">
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::AllEditTriggers</set>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                   </property>
+                   <property name="columnCount">
+                    <number>4</number>
+                   </property>
+                   <column>
+                    <property name="text">
+                     <string>DQ time</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>DQ amp</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>M₂</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>T₂*</string>
+                    </property>
+                   </column>
+                  </widget>
+                 </item>
+                 <item row="0" column="1" rowspan="2">
+                  <widget class="PlotWidget" name="DQ_PlotWidget_T2" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>100</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QPushButton" name="DQ_Button_DeleteRow">
+                   <property name="text">
+                    <string>Delete row</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1" rowspan="3">
+                  <layout class="QFormLayout" name="DQ_FormLayout_Filter">
+                   <property name="horizontalSpacing">
+                    <number>0</number>
+                   </property>
+                   <property name="verticalSpacing">
+                    <number>0</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>50</number>
+                   </property>
+                   <item row="0" column="0">
+                    <widget class="QTextEdit" name="DQ_TextEdit_FilterTitle">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>10</width>
+                       <height>10</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="mouseTracking">
+                      <bool>false</bool>
+                     </property>
+                     <property name="focusPolicy">
+                      <enum>Qt::NoFocus</enum>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background: transparent</string>
+                     </property>
+                     <property name="frameShape">
+                      <enum>QFrame::NoFrame</enum>
+                     </property>
+                     <property name="verticalScrollBarPolicy">
+                      <enum>Qt::ScrollBarAlwaysOff</enum>
+                     </property>
+                     <property name="horizontalScrollBarPolicy">
+                      <enum>Qt::ScrollBarAlwaysOff</enum>
+                     </property>
+                     <property name="sizeAdjustPolicy">
+                      <enum>QAbstractScrollArea::AdjustToContents</enum>
+                     </property>
+                     <property name="html">
+                      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Filter DQ times&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="textInteractionFlags">
+                      <set>Qt::NoTextInteraction</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QDoubleSpinBox" name="DQ_DoubleSpinBox_FilterFrom">
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                     <property name="prefix">
+                      <string/>
+                     </property>
+                     <property name="suffix">
+                      <string> musec</string>
+                     </property>
+                     <property name="decimals">
+                      <number>1</number>
+                     </property>
+                     <property name="minimum">
+                      <double>0.000000000000000</double>
+                     </property>
+                     <property name="singleStep">
+                      <double>5.000000000000000</double>
+                     </property>
+                     <property name="value">
+                      <double>0.000000000000000</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QTextEdit" name="DQ_TextEdit_FilterToLabel">
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                     <property name="mouseTracking">
+                      <bool>false</bool>
+                     </property>
+                     <property name="focusPolicy">
+                      <enum>Qt::NoFocus</enum>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background: transparent</string>
+                     </property>
+                     <property name="frameShape">
+                      <enum>QFrame::NoFrame</enum>
+                     </property>
+                     <property name="verticalScrollBarPolicy">
+                      <enum>Qt::ScrollBarAlwaysOff</enum>
+                     </property>
+                     <property name="horizontalScrollBarPolicy">
+                      <enum>Qt::ScrollBarAlwaysOff</enum>
+                     </property>
+                     <property name="sizeAdjustPolicy">
+                      <enum>QAbstractScrollArea::AdjustToContents</enum>
+                     </property>
+                     <property name="html">
+                      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;to&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="textInteractionFlags">
+                      <set>Qt::NoTextInteraction</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QDoubleSpinBox" name="DQ_DoubleSpinBox_FilterTo">
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                     <property name="prefix">
+                      <string/>
+                     </property>
+                     <property name="suffix">
+                      <string> musec</string>
+                     </property>
+                     <property name="decimals">
+                      <number>1</number>
+                     </property>
+                     <property name="minimum">
+                      <double>0.000000000000000</double>
+                     </property>
+                     <property name="singleStep">
+                      <double>5.000000000000000</double>
+                     </property>
+                     <property name="value">
+                      <double>20.000000000000000</double>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0" colspan="2">
+                    <widget class="QTextEdit" name="DQ_TextEdit_FitResult">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="font">
+                      <font>
+                       <pointsize>7</pointsize>
+                      </font>
+                     </property>
+                     <property name="mouseTracking">
+                      <bool>false</bool>
+                     </property>
+                     <property name="focusPolicy">
+                      <enum>Qt::NoFocus</enum>
+                     </property>
+                     <property name="acceptDrops">
+                      <bool>false</bool>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background: transparent</string>
+                     </property>
+                     <property name="frameShape">
+                      <enum>QFrame::NoFrame</enum>
+                     </property>
+                     <property name="verticalScrollBarPolicy">
+                      <enum>Qt::ScrollBarAlwaysOff</enum>
+                     </property>
+                     <property name="horizontalScrollBarPolicy">
+                      <enum>Qt::ScrollBarAlwaysOff</enum>
+                     </property>
+                     <property name="sizeAdjustPolicy">
+                      <enum>QAbstractScrollArea::AdjustToContents</enum>
+                     </property>
+                     <property name="undoRedoEnabled">
+                      <bool>false</bool>
+                     </property>
+                     <property name="html">
+                      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:7pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="textInteractionFlags">
+                      <set>Qt::NoTextInteraction</set>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="2" column="2" rowspan="3">
+                  <layout class="QVBoxLayout" name="DQ_VBoxLayout_Fit">
+                   <property name="leftMargin">
+                    <number>30</number>
+                   </property>
+                   <item>
+                    <widget class="QRadioButton" name="DQ_RadioButton_LogScale">
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>30</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Logarithm</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QComboBox" name="DQ_ComboBox_FitFunction">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background: none</string>
+                     </property>
+                     <property name="currentText">
+                      <string/>
+                     </property>
+                     <property name="currentIndex">
+                      <number>-1</number>
+                     </property>
+                     <property name="maxVisibleItems">
+                      <number>10</number>
+                     </property>
+                     <property name="placeholderText">
+                      <string>Function:</string>
+                     </property>
+                     <item>
+                      <property name="text">
+                       <string>Gauss</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Lorenz</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>Pseudo Voigt</string>
+                      </property>
+                     </item>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="verticalSpacer">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>15</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="c_DQMQ_Tab">
               <attribute name="title">
                <string>DQMQ</string>
               </attribute>
@@ -3079,7 +3596,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="1">
+                      <item row="3" column="1">
                        <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_Power">
                         <property name="enabled">
                          <bool>true</bool>
@@ -3157,7 +3674,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="0">
+                      <item row="3" column="0">
                        <widget class="QTextEdit" name="DQMQ_TextEdit_PowerLabel">
                         <property name="minimumSize">
                          <size>
@@ -3207,7 +3724,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="4" column="0">
+                      <item row="6" column="0">
                        <widget class="QTextEdit" name="DQMQ_TextEdit_TimeShiftLabel">
                         <property name="minimumSize">
                          <size>
@@ -3257,7 +3774,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="4" column="1">
+                      <item row="6" column="1">
                        <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_TimeShift">
                         <property name="enabled">
                          <bool>true</bool>
@@ -3285,7 +3802,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="5" column="0">
+                      <item row="7" column="0">
                        <widget class="QTextEdit" name="DQMQ_TextEdit_IntegralShiftLabel">
                         <property name="minimumSize">
                          <size>
@@ -3335,7 +3852,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                        </widget>
                       </item>
-                      <item row="5" column="1">
+                      <item row="7" column="1">
                        <widget class="QDoubleSpinBox" name="DQMQ_DoubleSpinBox_IntegralShift">
                         <property name="enabled">
                          <bool>true</bool>
@@ -3366,6 +3883,56 @@ li.checked::marker { content: &quot;\2612&quot;; }
                         </property>
                         <property name="value">
                          <double>0.000000000000000</double>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="0" colspan="2">
+                       <widget class="QTextEdit" name="DQMQ_TextEdit_FitTailResult">
+                        <property name="maximumSize">
+                         <size>
+                          <width>200</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                        <property name="mouseTracking">
+                         <bool>false</bool>
+                        </property>
+                        <property name="focusPolicy">
+                         <enum>Qt::NoFocus</enum>
+                        </property>
+                        <property name="acceptDrops">
+                         <bool>false</bool>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true">background: transparent</string>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::NoFrame</enum>
+                        </property>
+                        <property name="verticalScrollBarPolicy">
+                         <enum>Qt::ScrollBarAlwaysOff</enum>
+                        </property>
+                        <property name="horizontalScrollBarPolicy">
+                         <enum>Qt::ScrollBarAlwaysOff</enum>
+                        </property>
+                        <property name="sizeAdjustPolicy">
+                         <enum>QAbstractScrollArea::AdjustToContents</enum>
+                        </property>
+                        <property name="undoRedoEnabled">
+                         <bool>false</bool>
+                        </property>
+                        <property name="html">
+                         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        </property>
+                        <property name="textInteractionFlags">
+                         <set>Qt::NoTextInteraction</set>
                         </property>
                        </widget>
                       </item>
@@ -5502,747 +6069,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     </widget>
                    </item>
                   </layout>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-             <widget class="QWidget" name="g_RecFID">
-              <attribute name="title">
-               <string>Reconstruct FID</string>
-              </attribute>
-              <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,2,0,2">
-               <property name="spacing">
-                <number>5</number>
-               </property>
-               <property name="leftMargin">
-                <number>5</number>
-               </property>
-               <property name="topMargin">
-                <number>5</number>
-               </property>
-               <property name="rightMargin">
-                <number>5</number>
-               </property>
-               <property name="bottomMargin">
-                <number>5</number>
-               </property>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_3">
-                 <property name="leftMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>5</number>
-                 </property>
-                 <item>
-                  <widget class="QGroupBox" name="RecFID_GroupBox_LoadExport">
-                   <property name="minimumSize">
-                    <size>
-                     <width>150</width>
-                     <height>270</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>150</width>
-                     <height>270</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string>Load | Export</string>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_16">
-                    <property name="leftMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>5</number>
-                    </property>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_LoadFID">
-                      <property name="text">
-                       <string>Load FID</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_LoadData">
-                      <property name="text">
-                       <string>Load (M)SE</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_LoadFIDEmpty">
-                      <property name="text">
-                       <string>Load FID Empty</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_LoadDataEmpty">
-                      <property name="text">
-                       <string>Load (M)SE Empty</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_ManualEchoTimes">
-                      <property name="text">
-                       <string>Manual Echo Time</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_Clear">
-                      <property name="text">
-                       <string>Clear</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_SaveStatistics">
-                      <property name="text">
-                       <string>Export T2 Map</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_ExportSEMaxT2">
-                      <property name="text">
-                       <string>Export SE max and T2</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_Run">
-                      <property name="enabled">
-                       <bool>true</bool>
-                      </property>
-                      <property name="text">
-                       <string>Go!</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QGroupBox" name="RecFID_GroupBox_DataAdjustment">
-                   <property name="minimumSize">
-                    <size>
-                     <width>100</width>
-                     <height>270</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>150</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string>Data Adjustment</string>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_18">
-                    <property name="leftMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>5</number>
-                    </property>
-                    <item>
-                     <widget class="QCheckBox" name="RecFID_CheckBox_SubtractEmpty">
-                      <property name="text">
-                       <string>Subtract Empty</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="RecFID_CheckBox_CutBeginning">
-                      <property name="text">
-                       <string>Cut the beginning</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="RecFID_CheckBox_NormalizeToFID">
-                      <property name="text">
-                       <string>Normalize to FID</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_NormalizeFrom">
-                      <property name="prefix">
-                       <string>from </string>
-                      </property>
-                      <property name="suffix">
-                       <string>μs</string>
-                      </property>
-                      <property name="decimals">
-                       <number>0</number>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>70.000000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_NormalizeTo">
-                      <property name="prefix">
-                       <string>to </string>
-                      </property>
-                      <property name="suffix">
-                       <string>μs</string>
-                      </property>
-                      <property name="decimals">
-                       <number>0</number>
-                      </property>
-                      <property name="maximum">
-                       <double>1000.000000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>90.000000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="RecFID_CheckBox_LongComponent">
-                      <property name="text">
-                       <string>Long Component</string>
-                      </property>
-                      <property name="checked">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_LongComponentEnd">
-                      <property name="prefix">
-                       <string>from </string>
-                      </property>
-                      <property name="suffix">
-                       <string>μs</string>
-                      </property>
-                      <property name="decimals">
-                       <number>0</number>
-                      </property>
-                      <property name="maximum">
-                       <double>2000.000000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>55.000000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="RecFID_CheckBox_Smooth">
-                      <property name="text">
-                       <string>Smooth</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="RecFID_SpinBox_SmoothOrder">
-                      <property name="suffix">
-                       <string/>
-                      </property>
-                      <property name="prefix">
-                       <string>order </string>
-                      </property>
-                      <property name="minimum">
-                       <number>1</number>
-                      </property>
-                      <property name="maximum">
-                       <number>3</number>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="RecFID_SpinBox_SmoothWindow">
-                      <property name="prefix">
-                       <string>window </string>
-                      </property>
-                      <property name="minimum">
-                       <number>1</number>
-                      </property>
-                      <property name="maximum">
-                       <number>100</number>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="RecFID_CheckBox_TimeDomainApodization">
-                      <property name="text">
-                       <string>TD Apodization</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_ApodizationSigma">
-                      <property name="prefix">
-                       <string>at </string>
-                      </property>
-                      <property name="decimals">
-                       <number>0</number>
-                      </property>
-                      <property name="maximum">
-                       <double>10000.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>10.000000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>100.000000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="RecFID_CheckBox_AdjustZero">
-                      <property name="text">
-                       <string>Shift FID Signal</string>
-                      </property>
-                      <property name="checked">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_ZeroShift">
-                      <property name="minimum">
-                       <double>-10.000000000000000</double>
-                      </property>
-                      <property name="maximum">
-                       <double>10.000000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>0.000000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_11">
-                 <property name="leftMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>5</number>
-                 </property>
-                 <item>
-                  <widget class="PlotWidget" name="RecFID_PlotWidget_OriginalNMRSignal" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>300</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="PlotWidget" name="RecFID_PlotWidget_SEMax" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>300</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_15">
-                 <property name="leftMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>5</number>
-                 </property>
-                 <item>
-                  <spacer name="verticalSpacer_8">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item>
-                  <widget class="QGroupBox" name="RecFID_GroupBox_Reconstruction">
-                   <property name="minimumSize">
-                    <size>
-                     <width>150</width>
-                     <height>270</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>150</width>
-                     <height>270</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string>Reconstruction</string>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_20">
-                    <property name="spacing">
-                     <number>5</number>
-                    </property>
-                    <property name="leftMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>5</number>
-                    </property>
-                    <item>
-                     <widget class="QComboBox" name="RecFID_ComboBox_BuildFunction">
-                      <property name="styleSheet">
-                       <string notr="true">background: white</string>
-                      </property>
-                      <property name="placeholderText">
-                       <string>Choose Function</string>
-                      </property>
-                      <item>
-                       <property name="text">
-                        <string>Gaussian</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>Polynom 4</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>Polynom 6</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>Polynom 8</string>
-                       </property>
-                      </item>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_BuildFrom">
-                      <property name="suffix">
-                       <string>μs</string>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="minimum">
-                       <double>5.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>1.000000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>9.000000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_BuildTo">
-                      <property name="suffix">
-                       <string>μs</string>
-                      </property>
-                      <property name="decimals">
-                       <number>1</number>
-                      </property>
-                      <property name="singleStep">
-                       <double>1.000000000000000</double>
-                      </property>
-                      <property name="value">
-                       <double>20.000000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="RecFID_Button_TimeAnalysis">
-                      <property name="text">
-                       <string>Analyse Times</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="RecFID_SpinBox_TimeAnalysisRange">
-                      <property name="singleStep">
-                       <number>1</number>
-                      </property>
-                      <property name="value">
-                       <number>24</number>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <spacer name="verticalSpacer_14">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item>
-                  <widget class="QGroupBox" name="RecFID_GroupBox_Maximum">
-                   <property name="minimumSize">
-                    <size>
-                     <width>150</width>
-                     <height>270</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>150</width>
-                     <height>270</height>
-                    </size>
-                   </property>
-                   <property name="title">
-                    <string>Maximum</string>
-                   </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_19">
-                    <property name="leftMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>5</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>5</number>
-                    </property>
-                    <item>
-                     <widget class="QGroupBox" name="RecFID_GroupBox_SE">
-                      <property name="title">
-                       <string>SE</string>
-                      </property>
-                      <layout class="QVBoxLayout" name="verticalLayout_22">
-                       <property name="leftMargin">
-                        <number>5</number>
-                       </property>
-                       <property name="topMargin">
-                        <number>5</number>
-                       </property>
-                       <property name="rightMargin">
-                        <number>5</number>
-                       </property>
-                       <property name="bottomMargin">
-                        <number>5</number>
-                       </property>
-                       <item>
-                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_SEFitFrom">
-                         <property name="prefix">
-                          <string>cut from </string>
-                         </property>
-                         <property name="suffix">
-                          <string> point</string>
-                         </property>
-                         <property name="decimals">
-                          <number>0</number>
-                         </property>
-                        </widget>
-                       </item>
-                       <item>
-                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_SEFitTo">
-                         <property name="prefix">
-                          <string>cut to </string>
-                         </property>
-                         <property name="suffix">
-                          <string> point</string>
-                         </property>
-                         <property name="decimals">
-                          <number>0</number>
-                         </property>
-                        </widget>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="RecFID_GroupBox_MSE">
-                      <property name="title">
-                       <string>MSE</string>
-                      </property>
-                      <layout class="QVBoxLayout" name="verticalLayout_23" stretch="0">
-                       <property name="leftMargin">
-                        <number>5</number>
-                       </property>
-                       <property name="topMargin">
-                        <number>5</number>
-                       </property>
-                       <property name="rightMargin">
-                        <number>5</number>
-                       </property>
-                       <property name="bottomMargin">
-                        <number>5</number>
-                       </property>
-                       <item>
-                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_MseDivider">
-                         <property name="prefix">
-                          <string>divide by </string>
-                         </property>
-                         <property name="suffix">
-                          <string/>
-                         </property>
-                         <property name="decimals">
-                          <number>0</number>
-                         </property>
-                         <property name="minimum">
-                          <double>1.000000000000000</double>
-                         </property>
-                        </widget>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <spacer name="verticalSpacer_9">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_17">
-                 <property name="leftMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>5</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>5</number>
-                 </property>
-                 <item>
-                  <widget class="PlotWidget" name="RecFID_PlotWidget_BuildUpNMRSignal" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>300</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="PlotWidget" name="RecFID_PlotWidget_BuildUpSpectra" native="true">
-                   <property name="minimumSize">
-                    <size>
-                     <width>300</width>
-                     <height>300</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>16777215</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                  </widget>
                  </item>
                 </layout>
                </item>

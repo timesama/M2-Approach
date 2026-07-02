@@ -9,15 +9,16 @@ from webbrowser import open as open_application
 
 import numpy as np
 import pyqtgraph as pg
-import pyqtgraph.exporters
+# import pyqtgraph.exporters
 import requests
-from PySide6.QtCore import QCoreApplication, Qt
+# from PySide6.QtCore import QCoreApplication, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import QApplication, QFileDialog, QDialog, QInputDialog, QMainWindow, QMessageBox, QScrollArea, QTableWidgetItem
 from pyqtgraph import mkColor, mkPen
 from ui_Form import Ui_NMR
 from controllers import (
-    SETabController, DQTabController, DQTempTabController,
+    SETabController, DQTabController,
     T1T2TabController, DQMQTabController, GSTabController, GeneralSEDQController, RecFIDController
 )
 from dialogs.open_files_dialog import OpenFilesDialog
@@ -26,7 +27,7 @@ from dialogs.group_window import GroupWindow
 from dialogs.save_files_dialog import SaveFilesDialog
 from widgets.table_copy_enabler import TableCopyEnabler
 from app_state import AppState
-from controllers.table_columns import T1Columns, GSColumns, DQTempColumns
+from controllers.table_columns import T1Columns, GSColumns
 from utils.ui_busy import busy_cursor
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,7 @@ class MainWindow(QMainWindow):
             state=self.app_state,
             parent=self,
         )
-        self.dq_temp_controller = DQTempTabController(ui=self.ui, state=self.app_state, parent=self)
+        # self.dq_temp_controller = DQTempTabController(ui=self.ui, state=self.app_state, parent=self)
         self.t1t2_controller = T1T2TabController(ui=self.ui, state=self.app_state, parent=self)
         self.dqmq_controller = DQMQTabController(ui=self.ui, state=self.app_state, parent=self)
         self.gs_controller = GSTabController(ui=self.ui, state=self.app_state, parent=self)
@@ -102,12 +103,12 @@ class MainWindow(QMainWindow):
 
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.DQMQ_Button_Save.clicked.connect(self.save_data)
-        self.ui.DQTemp_Button_Save.clicked.connect(self.save_data)
+        # self.ui.DQTemp_Button_Save.clicked.connect(self.save_data)
         self.ui.T1T2_Button_Save.clicked.connect(self.save_data)
         self.ui.GS_Button_Save.clicked.connect(self.save_data)
 
         self.ui.btn_Load.clicked.connect(self.load_data)
-        self.ui.DQTemp_Button_Load.clicked.connect(self.load_data)
+        # self.ui.DQTemp_Button_Load.clicked.connect(self.load_data)
         self.ui.T1T2_Button_Load.clicked.connect(self.load_data)
         self.ui.DQMQ_Button_Load.clicked.connect(self.load_data)
         self.ui.GS_Button_Load.clicked.connect(self.load_data)
@@ -117,10 +118,10 @@ class MainWindow(QMainWindow):
         self.ui.btn_Add.clicked.connect(self.add_select_dialog)
         self.ui.T1T2_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.DQMQ_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
-        self.ui.DQTemp_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
+        # self.ui.DQTemp_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.GS_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
 
-        self.ui.DQTemp_Button_ClearTable.clicked.connect(self.clear_list)
+        # self.ui.DQTemp_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.T1T2_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.GS_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.SE_Button_ClearTable.clicked.connect(self.clear_list)
@@ -161,19 +162,19 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.SE_PlotWidget_Main, "Temperature, °C", "Choose", "")
         self.setup_graph(self.ui.DQ_PlotWidget_T2, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_PlotWidget_NormIntensity, "X axis", "Norm. DQ Intensity", "")
-        self.setup_graph(self.ui.DQTemp_PlotWidget_T2Distribution, "T₂*", "Norm. DQ Intensity", "FunctionFit")
-        self.setup_graph(self.ui.DQTemp_PlotWidget_CenterVsXAxis, "X axis", "Center", "")
+        # self.setup_graph(self.ui.DQTemp_PlotWidget_T2Distribution, "T₂*", "Norm. DQ Intensity", "FunctionFit")
+        # self.setup_graph(self.ui.DQTemp_PlotWidget_CenterVsXAxis, "X axis", "Center", "")
         self.setup_graph(self.ui.T1T2_PlotWidget_RawSignal, "Time, ms", "Signal", "")
         self.setup_graph(self.ui.T1T2_PlotWidget_RelaxationTime, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_PlotWidget_Signal, "Time", "NMR signal", "")
         self.setup_graph(self.ui.DQMQ_PlotWidget_Dres, "Dres/2π, KHz", "P(Dres)", "")
         self.setup_graph(self.ui.GS_PlotWidget_RawSignal, "√Time, √us", "Signal", "")
         self.setup_graph(self.ui.GS_PlotWidget_SqrtTime, "X axis", "√Time, √us", "")
-        self.setup_graph(self.ui.DQTemp_PlotWidget_PolyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
+        # self.setup_graph(self.ui.DQTemp_PlotWidget_PolyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
         self.recfid_controller.initialize_plots()
         self.se_controller.connect_signals()
         self.dq_controller.connect_signals()
-        self.dq_temp_controller.connect_signals()
+        # self.dq_temp_controller.connect_signals()
         self.t1t2_controller.connect_signals()
         self.gs_controller.connect_signals()
         self.recfid_controller.connect_signals()
@@ -367,13 +368,13 @@ class MainWindow(QMainWindow):
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
             self.phased_spectra_DQ = {}
-        elif self.tab == 'DQ_Temp':
-            self.selected_DQfiles = []
-            self.dq_t2 = {}
-            self.ui.DQTemp_Table_Results.setRowCount(0)
-            self.ui.DQTemp_PlotWidget_T2Distribution.clear()
-            self.ui.DQTemp_PlotWidget_CenterVsXAxis.clear()
-            self.ui.DQTemp_PlotWidget_PolyFit.clear()
+        # elif self.tab == 'DQ_Temp':
+        #     self.selected_DQfiles = []
+        #     self.dq_t2 = {}
+        #     self.ui.DQTemp_Table_Results.setRowCount(0)
+        #     self.ui.DQTemp_PlotWidget_T2Distribution.clear()
+        #     self.ui.DQTemp_PlotWidget_CenterVsXAxis.clear()
+        #     self.ui.DQTemp_PlotWidget_PolyFit.clear()
         elif self.tab == 'T1T2':
             self.selected_T1files = []
             self.tau_dictionary = {}
@@ -402,7 +403,8 @@ class MainWindow(QMainWindow):
         elif self.tab == 'GS':
             combobox = self.ui.GS_ComboBox_ChooseFile
 
-        if self.tab != 'DQMQ' and  self.tab != 'DQ_Temp':
+        # if self.tab != 'DQMQ' and  self.tab != 'DQ_Temp':
+        if self.tab != 'DQMQ':
             while combobox.count()>0:
                 combobox.removeItem(0)
 
@@ -509,12 +511,12 @@ class MainWindow(QMainWindow):
 
         dlg = OpenFilesDialog(self)
         if dlg.exec():
-            if self.tab == 'DQ_Temp':
-                DQfileNames = dlg.selectedFiles()
-                self.selected_DQfiles.extend(DQfileNames)
-                self.show_status(f"Loaded {len(DQfileNames)} DQ temperature file(s).")
-                self.dq_temp_controller.update_DQ_comparison()
-            elif self.tab == 'T1T2':
+            # if self.tab == 'DQ_Temp':
+            #     DQfileNames = dlg.selectedFiles()
+            #     self.selected_DQfiles.extend(DQfileNames)
+            #     self.show_status(f"Loaded {len(DQfileNames)} DQ temperature file(s).")
+            #     self.dq_temp_controller.update_DQ_comparison()
+            if self.tab == 'T1T2':
                 while self.ui.T1T2_ComboBox_ChooseFile.count()>0:
                     self.ui.T1T2_ComboBox_ChooseFile.removeItem(0)
                 T1fileNames = dlg.selectedFiles()
@@ -740,21 +742,26 @@ class MainWindow(QMainWindow):
         # TODO: here change the idx to the name
         if current_name == "g_RecFID":
             self.tab = 'RecFID'
-        elif current_tab_index == 0:
+        elif current_name == "a_SE":
             self.tab = 'SE'
             self.general_se_dq_controller.populate_combobox()
-        elif current_tab_index == 1:
+        # elif current_tab_index == 1:
+        elif current_name == "b_DQ":
             self.tab = 'DQ'
             self.general_se_dq_controller.populate_combobox()
-        elif current_tab_index == 2:
-            self.tab = 'DQ_Temp'
-        elif current_tab_index == 3:
+        # elif current_tab_index == 2:
+            # self.tab = 'DQ_Temp'
+        # elif current_tab_index == 3:
+        elif current_name == "d_T1T2":
             self.tab = 'T1T2'
-        elif current_tab_index == 4:
+        # elif current_tab_index == 4:
+        elif current_name == "c_DQMQ_Tab":
             self.tab = 'DQMQ'
-        elif current_tab_index == 5:
+        # elif current_tab_index == 5:
+        elif current_name == "f_GS":
             self.tab = 'GS'
-        elif current_tab_index == 6:
+        # elif current_tab_index == 6:
+        elif current_name == "Settings_Tab":
             self.tab = 'Extra'
 
         if not (self.tab == 'SE' or self.tab == 'DQ'):
@@ -795,8 +802,8 @@ class MainWindow(QMainWindow):
             figure = self.ui.T1T2_PlotWidget_RelaxationTime
         elif self.tab == 'GS':
             figure = self.ui.GS_PlotWidget_SqrtTime
-        elif self.tab == 'DQ_Temp':
-            figure = self.ui.DQTemp_PlotWidget_CenterVsXAxis
+        # elif self.tab == 'DQ_Temp':
+        #     figure = self.ui.DQTemp_PlotWidget_CenterVsXAxis
         else:
             return
 
@@ -812,13 +819,13 @@ class MainWindow(QMainWindow):
         self.ui.GS_Table_Results.setHorizontalHeaderLabels([
             "X axis", "sqrt time", "d, nm", "File name", "Folder"
         ])
-        self.ui.DQTemp_Table_Results.setHorizontalHeaderLabels([
-            "Name", "Center Gauss", "Center Lorenz", "Center Voigt", "Center y",
-            "FWHM Gauss", "FWHM Lorenz", "FWHM Voigt", "Folder"
-        ])
+        # self.ui.DQTemp_Table_Results.setHorizontalHeaderLabels([
+        #     "Name", "Center Gauss", "Center Lorenz", "Center Voigt", "Center y",
+        #     "FWHM Gauss", "FWHM Lorenz", "FWHM Voigt", "Folder"
+        # ])
         self.ui.T1T2_Table_Results.resizeColumnsToContents()
         self.ui.GS_Table_Results.resizeColumnsToContents()
-        self.ui.DQTemp_Table_Results.resizeColumnsToContents()
+        # self.ui.DQTemp_Table_Results.resizeColumnsToContents()
 
     def update_graphs(self, x, y1, y2, y3, graph):
         """Draw the shared raw time/frequency preview curves."""
@@ -903,22 +910,22 @@ class MainWindow(QMainWindow):
                 return
             default_name = 'Table_DQ_' + os.path.split(os.path.dirname(files[0]))[1]
 
-        elif self.tab == 'DQ_Temp':
-            table = self.ui.DQTemp_Table_Results
-            files = self.selected_DQfiles
-            if table.rowCount() == 0 or not files:
-                self.show_status("Load DQ comparison files first.")
-                QMessageBox.warning(
-                    self,
-                    "No DQ data",
-                    "Load DQ comparison files first.",
-                    QMessageBox.Ok,
-                )
-                return
+        # elif self.tab == 'DQ_Temp':
+        #     table = self.ui.DQTemp_Table_Results
+        #     files = self.selected_DQfiles
+        #     if table.rowCount() == 0 or not files:
+        #         self.show_status("Load DQ comparison files first.")
+        #         QMessageBox.warning(
+        #             self,
+        #             "No DQ data",
+        #             "Load DQ comparison files first.",
+        #             QMessageBox.Ok,
+        #         )
+        #         return
 
-            path = os.path.dirname(files[0]) + '/Table_DQ_comparison_parametrs'
-            self.write_collective_dictionary(self.dq_comparison_distribution, path)
-            default_name = 'Table_DQ_comparison'
+        #     path = os.path.dirname(files[0]) + '/Table_DQ_comparison_parametrs'
+        #     self.write_collective_dictionary(self.dq_comparison_distribution, path)
+        #     default_name = 'Table_DQ_comparison'
 
         elif self.tab == 'T1T2':
             table = self.ui.T1T2_Table_Results
@@ -1043,9 +1050,9 @@ class MainWindow(QMainWindow):
             self.selected_files_DQ_single = files
             self.app_state.dq_files = files
             self.phased_spectra_DQ = phased
-        elif self.tab == 'DQ_Temp':
-            table = self.ui.DQTemp_Table_Results
-            self.selected_DQfiles = files
+        # elif self.tab == 'DQ_Temp':
+        #     table = self.ui.DQTemp_Table_Results
+        #     self.selected_DQfiles = files
         elif self.tab == 'T1T2':
             table = self.ui.T1T2_Table_Results
             self.selected_T1files = files
@@ -1088,8 +1095,8 @@ class MainWindow(QMainWindow):
             if self.ui.comboBox_4.count() > 0:
                 self.ui.comboBox_4.setCurrentIndex(0)
                 self.update_file()
-        elif self.tab == 'DQ_Temp':
-            self.dq_temp_controller.update_DQ_comparison()
+        # elif self.tab == 'DQ_Temp':
+        #     self.dq_temp_controller.update_DQ_comparison()
         elif self.tab == 'T1T2':
             self.t1t2_controller.update_T12_table()
         elif self.tab == 'DQMQ':
@@ -1123,9 +1130,9 @@ class MainWindow(QMainWindow):
         if self.tab == 'GS':
             if len(first_values) > GSColumns.FOLDER:
                 return self._looks_like_path(first_values[GSColumns.X_AXIS]) or self._looks_numeric(first_values[GSColumns.FOLDER])
-        if self.tab == 'DQ_Temp':
-            if len(first_values) > DQTempColumns.FOLDER:
-                return self._looks_like_path(first_values[DQTempColumns.NAME]) and not self._looks_like_path(first_values[DQTempColumns.FOLDER])
+        # if self.tab == 'DQ_Temp':
+        #     if len(first_values) > DQTempColumns.FOLDER:
+        #         return self._looks_like_path(first_values[DQTempColumns.NAME]) and not self._looks_like_path(first_values[DQTempColumns.FOLDER])
         return False
 
     @staticmethod
