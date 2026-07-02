@@ -76,6 +76,7 @@ class DQMQTabController(BaseTabController):
         self.dres_is_stale = False
         self.dres_auto_calculated = False
         self.current_plot_mode = "raw"
+        self.print_tail_fraction(True)
         if clear_raw:
             self.ui.DQMQ_PlotWidget_Signal.clear()
         self.ui.DQMQ_PlotWidget_Dres.clear()
@@ -304,8 +305,19 @@ class DQMQTabController(BaseTabController):
         self._status("Fit completed.")
 
         print('Tail Fraction: ', self.analysis_result["tail_fraction"])
+        self.print_tail_fraction()
 
         return self.analysis_result
+
+    def print_tail_fraction(self, clear = False):
+        text_line = self.ui.DQMQ_TextEdit_FitTailResult
+
+        if clear:
+            tail_fraction = 0
+        else:
+            tail_fraction = np.round(self.analysis_result["tail_fraction"],2)
+        text_line.setText(f"Tail fraction: {tail_fraction}")
+
 
     def plot_norm(self):
         return self.run_full_analysis()

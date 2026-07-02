@@ -16,5 +16,5 @@ done (commented out, remove later)
 + whats up with the imported pachages?
 - I really like how the folder in DQMQ remembers what was the last folder opened
 - increase the "latency" for the version update pop up window
-- include the tail fraction in gui
++ include the tail fraction in gui
 
