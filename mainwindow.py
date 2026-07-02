@@ -211,7 +211,7 @@ class MainWindow(QMainWindow):
 
     def check_for_updates(self):
         """Check GitHub releases and prompt when a newer app version exists."""
-        current_version = '0.2.2'
+        current_version = '1.0.1'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             response = requests.get(url)
@@ -219,9 +219,11 @@ class MainWindow(QMainWindow):
             latest_release = response.json()
             latest_version = latest_release['tag_name']
 
-            ### TODO: add here the strip function, so the update pop up will appear only on major update 0.X.X -> 1.X.X etc
+            major_version = latest_version.split('.')[0]
+            current_major_version = current_version.split('.')[0]
 
-            if latest_version != current_version:
+            # if latest_version != current_version:
+            if major_version != current_major_version:
                 msg = QMessageBox(self)
                 msg.setIcon(QMessageBox.Information)
                 msg.setWindowTitle("New Relaxyzer Available")

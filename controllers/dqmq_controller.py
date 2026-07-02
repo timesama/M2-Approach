@@ -3,6 +3,7 @@ import logging
 import os
 
 import numpy as np
+import pandas as pd
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFileDialog, QMessageBox, QTableWidgetItem
 from pyqtgraph import InfiniteLine, mkPen
@@ -913,8 +914,6 @@ class DQMQTabController(BaseTabController):
             or importlib.util.find_spec("xlsxwriter") is not None
         )
         if can_write_excel:
-            import pandas as pd
-
             try:
                 with pd.ExcelWriter(f"{root}_Dres.xlsx") as writer:
                     pd.DataFrame(
