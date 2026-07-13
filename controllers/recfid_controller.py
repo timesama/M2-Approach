@@ -150,10 +150,15 @@ class RecFIDController(BaseTabController):
 
     def run_basic_data_analysis(self):
         data, data_empty, fid, fid_empty = self._choose_files_for_comparison(0)
+
+        # result = self._apply_mse_divider_to_analysis_result(data)
+
         result = recfid.analyze_signal(data, fid, data_empty, fid_empty, self._analysis_options())
-        result = self._apply_mse_divider_to_analysis_result(result)
+
+
         if result is None:
             return None
+
         self.fid_result = {
             "Time_td_fid": result.time_fid,
             "Re_td": result.signal_fid,
@@ -449,6 +454,8 @@ class RecFIDController(BaseTabController):
             smooth=self._checked("RecFID_CheckBox_Smooth", False),
             smooth_order=int(self._value("RecFID_SpinBox_SmoothOrder", 1)),
             smooth_window=int(self._value("RecFID_SpinBox_SmoothWindow", 5)),
+            divider = self._validated_mse_divider(),
+            mse_analysis = self.recfid_mode,
         )
 
     def _choose_files_for_comparison(self, number):
@@ -505,27 +512,27 @@ class RecFIDController(BaseTabController):
         return True
 
 
-    def _apply_mse_divider_to_analysis_result(self, result):
-        if self.recfid_mode != "mse":
-            return result
-        divider = self._validated_mse_divider()
-        if divider is None:
-            return None
-        # MSE divider applies only to the MSE data amplitude, not the FID reference.
-        return recfid.SignalAnalysisResult(
-            time_data=result.time_data,
-            signal_data=result.signal_data / divider,
-            time_fid=result.time_fid,
-            signal_fid=result.signal_fid,
-            frequency_data=result.frequency_data,
-            spectrum_data=result.spectrum_data / divider,
-            frequency_fid=result.frequency_fid,
-            spectrum_fid=result.spectrum_fid,
-            m2_data=result.m2_data,
-            t2_data=result.t2_data,
-            m2_fid=result.m2_fid,
-            t2_fid=result.t2_fid,
-        )
+    # def _apply_mse_divider_to_analysis_result(self, result):
+    #     if self.recfid_mode != "mse":
+    #         return result
+    #     divider = self._validated_mse_divider()
+    #     if divider is None:
+    #         return None
+    #     # MSE divider applies only to the MSE data amplitude, not the FID reference.
+    #     return recfid.SignalAnalysisResult(
+    #         time_data=result.time_data,
+    #         signal_data=result.signal_data / divider,
+    #         time_fid=result.time_fid,
+    #         signal_fid=result.signal_fid,
+    #         frequency_data=result.frequency_data,
+    #         spectrum_data=result.spectrum_data / divider,
+    #         frequency_fid=result.frequency_fid,
+    #         spectrum_fid=result.spectrum_fid,
+    #         m2_data=result.m2_data,
+    #         t2_data=result.t2_data,
+    #         m2_fid=result.m2_fid,
+    #         t2_fid=result.t2_fid,
+    #     )
 
     def _data_result_from_analysis(self, result):
         return {

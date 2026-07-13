@@ -1,22 +1,4 @@
-The order of tabs:
-1. SE (rename to FID, ok?)
-2. Reconstruction FID
-2. T2T2
-3. DQ
-4. DQMQ
-5. Spin Diffusion
---
-done
-
-- no need for DQ(Temp)
---
-done (commented out, remove later)
-
-+ hide the up window in settings
-+ whats up with the imported pachages?
-+ I really like how the folder in DQMQ remembers what was the last folder opened
-+ increase the "latency" for the version update pop up window
-+ include the tail fraction in gui
-+ check M2 calculation in FID and FID build up
-+ Check apodization in FID and FID build up
-
+- Something is wrong with manual phasing
+ - on exit without saving - should not save data
+ - on reload should reload data (start button)
+ - include button - restore original

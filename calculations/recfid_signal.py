@@ -39,6 +39,8 @@ class AnalysisOptions:
     smooth: bool = False
     smooth_order: int = 1
     smooth_window: int = 5
+    divider: int = 1
+    mse_analysis: str = 'None'
 
 
 @dataclass(frozen=True)
@@ -216,6 +218,11 @@ def nmr_signal_correction(
     time_td, re_td = time_domain_correction(file_path)
     time_td_fid, re_td_fid = time_domain_correction(file_path_fid)
 
+    if options.mse_analysis == "mse":
+        division = options.divider
+        if division is not None:
+            re_td = re_td/division
+
     if options.smooth:
         re_td = smooth_noisy_signal(re_td, options.smooth_order, options.smooth_window)
         re_td_fid = smooth_noisy_signal(re_td_fid, options.smooth_order, options.smooth_window)
@@ -289,7 +296,6 @@ def analyze_signal(data_file, fid_file, data_empty=None, fid_empty=None, options
         round(m2_fid, 5),
         round(t2_fid, 5),
     )
-
 
 def extract_echo_time(file_path: str | Path) -> float:
     match = re.search(r".*_\s*(\d+(?:\.\d+)?)_c\.dat$", str(file_path))
