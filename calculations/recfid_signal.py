@@ -57,13 +57,6 @@ class SignalAnalysisResult:
     t2_fid: float
 
 
-# def find_nearest(array: Sequence[float], value: float) -> int:
-#     values = np.asarray(array, dtype=float)
-#     if values.size == 0:
-#         raise ValueError("Cannot find a nearest value in an empty array.")
-#     return int(np.abs(values - value).argmin())
-
-
 def gauss(x, amplitude, sigma, y0):
     return amplitude * np.exp(-(np.asarray(x) ** 2) / (2 * sigma**2)) + y0
 
@@ -99,34 +92,11 @@ def polynom8_const_ampl(amplitude):
     return lambda x, c, g, h, j: polynom8(x, amplitude, c, g, h, j)
 
 
-# def decaying_exponential(x, a, b, c):
-#     return a * np.exp(-np.asarray(x) / b) + c
-
-
 def read_data(file_path: str | Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     data = np.loadtxt(file_path)
     if data.ndim != 2 or data.shape[1] < 3:
         raise ValueError(f"{file_path} must contain at least three numeric columns.")
     return data[:, 0], data[:, 1], data[:, 2]
-
-
-# def calculate_frequency_scale(time: Sequence[float]) -> np.ndarray:
-#     time = np.asarray(time, dtype=float)
-#     if time.size < 2:
-#         raise ValueError("At least two time points are required to calculate frequency scale.")
-#     numberp = len(time)
-#     dt = time[1] - time[0]
-#     if dt == 0:
-#         raise ValueError("Time step cannot be zero.")
-#     f_range = 1 / dt
-#     f_nyquist = f_range / 2
-#     df = 2 * (f_nyquist / numberp)
-#     return np.arange(-f_nyquist, f_nyquist + df, df)[:-1]
-
-
-# def calculate_amplitude(real, imaginary):
-#     return np.sqrt(np.asarray(real) ** 2 + np.asarray(imaginary) ** 2)
-
 
 def smooth_noisy_signal(signal: Sequence[float], smooth_order: int, smooth_window: int) -> np.ndarray:
     signal = np.asarray(signal, dtype=float)
