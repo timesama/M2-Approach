@@ -29,77 +29,6 @@ def read_data(file_path, header):
     x, y, z = data[:, 0], data[:, 1], data[:, 2]
     return x, y, z
 
-def normalize_mq(Signal, Ref, state):
-    maximum = np.max(Ref)
-    Signal_norm = Signal/maximum
-    Ref_norm = Ref/maximum
-
-    if state == 'minus':
-        End = Ref_norm - Signal_norm
-    else:
-        End = Ref_norm + Signal_norm
-        End = End/np.max(End)
-
-    return Signal_norm, Ref_norm, End
-
-def dqmq(file_path, fit_from, fit_to, p, noise_level, time_shift, smoothing=None):
-
-    def exponent(x, a, b, c):
-        return a * np.exp(- ((x / (b + 1e-12)) ** power) ) + c
-
-    # read files
-    Time, DQ, Ref = read_data(file_path, 1)
-    Time = Time + time_shift
-
-    power = p
-
-    # Normalize data: data norm = data/max data
-    # Diff here is Ref norm - DQ norm
-    DQ_norm, Ref_norm, Diff = normalize_mq(DQ, Ref, 'minus')
-
-    # Fit the difference Ref-DQ with exponent
-    idx_min = _find_nearest(Time, fit_from)
-    idx_max = _find_nearest(Time, fit_to)
-    Time_cut = Time[idx_min:idx_max+1]
-    Diff_cut = Diff[idx_min:idx_max+1]
-
-    try:
-        a0 = max(Diff_cut) - min(Diff_cut)
-        b0 = max(1e-6, (Time_cut[-1] - Time_cut[0]) / 4.0)
-        c0 = np.median(Diff_cut[-5:])
-        initial_params = [a0, b0, c0]
-    except:
-        initial_params = [(0, 10, 0)]
-
-    popt, _ = curve_fit(exponent, Time_cut, Diff_cut, p0 = initial_params, maxfev=10000000)
-    fitted_curve = exponent(Time, *popt)
-
-    # Subtract difference function from Ref
-    Ref = Ref_norm - fitted_curve
-
-    # DQ normal = DQ_norm, but the Ref normal is the new normalization of the Ref, whith subtraction of fitted difference betwen initial Ref and DQ.
-    DQ_normal, Ref_normal, MQ_normal = normalize_mq(DQ_norm, Ref, 'plus')
-
-    # Calculate nDQ
-    additive_function = _exp_apodization(Time, fit_from, noise_level)
-    nDQ = (DQ_normal+noise_level*additive_function)/(DQ_normal+Ref_normal+2*noise_level*additive_function)
-
-    nDQ = np.insert(nDQ, 0, 0)
-    Time0 = np.insert(Time, 0, 0)
-
-    if (np.all(smoothing) and smoothing!=None and smoothing[2]!=1 and smoothing[1]>smoothing[0]):
-        try:
-            smooth_from_idx = _find_nearest(Time, smoothing[0])
-            smooth_to_idx =  _find_nearest(Time, smoothing[1])
-            new_nDQ = nDQ[smooth_from_idx:smooth_to_idx]
-            smooth_nDQ = moving_average(new_nDQ, smoothing[2])
-            nDQ[smooth_from_idx:smooth_to_idx] = smooth_nDQ
-        except Exception as e:
-            logger.warning("Could not smooth nDQ segment: %s", e)
-
-
-    return Time, DQ_norm, Ref_norm, Diff, DQ_normal, Ref_normal, Time0, nDQ, fitted_curve, MQ_normal
-
 def _cut_beginning(Time, Data, Data2):
     # private api
     Data_amp = _calculate_amplitude(Data, Data2)
@@ -252,18 +181,6 @@ def final_analysis_time_domain(Time, Real, Imaginary, number_of_points):
 
     return Tim, Fid
 
-def frequency_domain_analysis(FFT, Frequency):
-    # 8. Simple baseline
-    _, Re, _ = _simple_baseline_correction(FFT)
-
-    # 9. Apodization
-    Real_apod = _calculate_apodization(Re, Frequency)
-
-    # 10. M2 & T2
-    M2, T2 = _calculate_M2(Real_apod, Frequency)
-
-    return M2, T2
-
 def read_data(file_path, header):
     data = np.loadtxt(file_path, skiprows=header)
     x, y, z = data[:, 0], data[:, 1], data[:, 2]
@@ -395,26 +312,15 @@ def _normalize(Real, Imaginary):
     return Re, Im
 
 def _apodization(Time, Real, Imaginary):
-    # private api
-    Amplitude = _calculate_amplitude(Real, Imaginary)
-    coeffs = np.polyfit(Time, Amplitude, 1)  # Fit an exponential decay function
-    c = np.polyval(coeffs, Time)
-    d = np.argmin(np.abs(c - 1e-5))
-    sigma = Time[d]
-    if sigma == 0:
-        sigma = 1000
+    try:
+        sigma = Time[-100] # 50 microseconds before the end of the decay
+    except:
+        sigma = 500
+
     apodization_function = np.exp(-(Time / sigma) ** 4)
     Re_ap = Real * apodization_function
     Im_ap = Imaginary * apodization_function
     return Re_ap, Im_ap
-
-def _exp_apodization(Time, Time_fitFrom, noise_level):
-    noise_tau = Time_fitFrom * 0.19 if Time_fitFrom != 0 else 1e-9
-    exp_function = np.empty_like(Time)
-    before = Time < Time_fitFrom
-    exp_function[before] = np.exp( ((Time[before] - Time_fitFrom) / noise_tau) ** 3 )
-    exp_function[~before] = 1.0 - np.exp( ((Time_fitFrom - Time[~before]) / noise_tau) ** 3 )
-    return 0.5 * noise_level * exp_function
 
 def _add_zeros(Time, Real, Imaginary, number_of_points):
     # private api
@@ -447,14 +353,7 @@ def _simple_baseline_correction(FFT):
     return Amp, Re, Im
 
 def _calculate_apodization(Real, Freq):
-    # private api
-    # Find sigma at 2% from the max amplitude of the spectra
-    Maximum = np.max(np.abs(Real))
-    idx_max = np.argmax(np.abs(Real))
-    ten_percent = Maximum * 0.02
-
-    b = np.argmin(np.abs(Real[idx_max:] - ten_percent))
-    sigma_ap = Freq[idx_max + b]
+    sigma_ap = 0.4
 
     apodization_function_s = np.exp(-(Freq / sigma_ap) ** 6)
 
@@ -487,11 +386,13 @@ def _find_nearest(array, value):
 
 def _calculate_M2(FFT_real, Frequency):
 
-
     RealPart = np.real(FFT_real)
 
     # Take the integral of the REAL PART OF FFT by counts
     Integral = trapezoid(RealPart)
+
+    if Integral == 0:
+        raise ValueError("Cannot calculate M2 because FFT integral is zero.")
 
     # Normalize FFT to the Integral value
     Fur_normalized = RealPart / Integral
@@ -540,7 +441,8 @@ def calculate_DQ_intensity(Time, Amplitude):
     return DQ
 
 def decaying_exponential(x, a, b, c):
-    return a * np.exp(-x/b) + c
+    # return a * np.exp(-x/b) + c
+    return a * np.exp(-np.asarray(x) / b) + c
 
 def decaying_2exponential(x, a1, b1, a2, b2, c):
     return a1 * np.exp(-x/b1) + a2 * np.exp(-x/b2) + c

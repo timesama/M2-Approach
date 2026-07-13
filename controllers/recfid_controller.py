@@ -231,10 +231,13 @@ class RecFIDController(BaseTabController):
     def build_up(self):
         if self.extrapolation is None:
             raise ValueError("Run extrapolation before build-up.")
+
         if not self.fid_result:
             raise ValueError("Run FID/data analysis before build-up.")
+
         begin = self._value("RecFID_DoubleSpinBox_BuildFrom", 9.0)
         finish = self._value("RecFID_DoubleSpinBox_BuildTo", 20.0)
+
         time_build, data_build, data_fit, freq_build, spectrum_build, m2_build, t2_build = recfid.analyze_build_up(
             self.fid_result["Time_td_fid"],
             self.fid_result["Re_td"],
@@ -244,6 +247,7 @@ class RecFIDController(BaseTabController):
             finish,
             self._value("RecFID_DoubleSpinBox_ApodizationSigma", 100.0),
         )
+
         self.build_result = {
             "Time": time_build,
             "Re": data_build,
@@ -253,6 +257,7 @@ class RecFIDController(BaseTabController):
             "M2": float(m2_build),
             "T2": float(t2_build),
         }
+
         self._plot_build_up(freq_build, spectrum_build, time_build, data_build)
         self._status(
             f"Build-up T₂*={round(t2_build, 5)}, M₂={round(m2_build, 5)}; "
@@ -476,7 +481,7 @@ class RecFIDController(BaseTabController):
 
     def _validate_required_files(self):
         if not self.selected_fid_files:
-            self._warn("No FID file", "Load a FID file first.")
+            self._warn("No FID file", "Load FID file first.")
             return False
         if not self.selected_data_files:
             self._warn("No (M)SE file", "Load (M)SE data first.")
@@ -548,12 +553,7 @@ class RecFIDController(BaseTabController):
             return
 
         self._prepare_plot(graph_nmr)
-        graph_nmr.plot(
-            self.fid_result["Time_td_fid"],
-            self.fid_result["Re_td"],
-            pen=mkPen(QColor(255, 0, 0), width=4),
-            symbol=None
-        )
+
         for index, result in enumerate(self.data_results.values()):
             graph_nmr.plot(
                 result["Time_td"],
@@ -561,6 +561,15 @@ class RecFIDController(BaseTabController):
                 pen=mkPen(self._winter_color(index, max(len(self.data_results), 1)), width=3),
                 symbol=None
             )
+
+
+        graph_nmr.plot(
+            self.fid_result["Time_td_fid"],
+            self.fid_result["Re_td"],
+            pen=mkPen(QColor(255, 0, 0), width=4),
+            symbol=None
+        )
+
         # Gradient label is the compact visible color-scale indicator for data curves.
         self._add_original_signal_gradient_label(graph_nmr)
         self._status("Original NMR plot: red = FID; data curves use a winter color scale by echo time/file order.")
@@ -610,6 +619,7 @@ class RecFIDController(BaseTabController):
     def _clear_original_signal_gradient_label(self):
         label = getattr(self, "original_signal_gradient_label", None)
         update_position = getattr(self, "original_signal_gradient_label_update", None)
+
         if update_position is not None:
             graph = getattr(self.ui, "RecFID_PlotWidget_OriginalNMRSignal", None)
             if graph is not None:
@@ -618,6 +628,7 @@ class RecFIDController(BaseTabController):
                 except (RuntimeError, TypeError):
                     logger.debug("RecFID gradient label resize callback was already disconnected", exc_info=True)
             self.original_signal_gradient_label_update = None
+
         if label is not None:
             graph = getattr(self.ui, "RecFID_PlotWidget_OriginalNMRSignal", None)
             if graph is not None:

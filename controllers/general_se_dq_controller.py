@@ -121,8 +121,10 @@ class GeneralSEDQController(BaseTabController):
         mw = self.parent
         filename = os.path.basename(file_path)
         subtract = self.ui.Settings_CheckBox_Baseline.isChecked()
+
         if mw.tab == "DQ":
             subtract = False
+
         data = np.loadtxt(file_path)
         x, y, z = data[:, 0], data[:, 1], data[:, 2]
         time, re_signal, im_signal = Cal.analysis_time_domain(file_path, file_path_empty, subtract)
@@ -146,7 +148,18 @@ class GeneralSEDQController(BaseTabController):
 
         time_fid, fid = Cal.final_analysis_time_domain(time, re_signal, im_signal, 2**16)
         frequency = Cal._calculate_frequency_scale(time_fid)
-        fft = np.fft.fftshift(np.fft.fft(fid))
+
+        # fft_before = np.fft.fftshift(np.fft.fft(fid))
+
+        # correct frequency AGAIN
+        real_fft = np.real(fid)
+        imag_fft = np.imag(fid)
+        real_adjusted, imaginary_adjusted = Cal._adjust_frequency(frequency, real_fft, imag_fft)
+
+        new_fid = np.array(real_adjusted + 1j * imaginary_adjusted)
+
+        fft = np.fft.fftshift(np.fft.fft(new_fid))
+
 
         if mw.window_array.size != 0:
             window = mw.window_array[i - 1]
@@ -169,6 +182,7 @@ class GeneralSEDQController(BaseTabController):
             amp_spectra = Cal._calculate_amplitude(re_spectra, im_spectra)
 
         real_apod = Cal._calculate_apodization(re_spectra, frequency)
+
         m2, t2 = Cal._calculate_M2(real_apod, frequency)
 
         self.state.spectrum.frequency = frequency
