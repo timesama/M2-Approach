@@ -14,9 +14,9 @@ done (commented out, remove later)
 
 + hide the up window in settings
 + whats up with the imported pachages?
-- I really like how the folder in DQMQ remembers what was the last folder opened
++ I really like how the folder in DQMQ remembers what was the last folder opened
 + increase the "latency" for the version update pop up window
 + include the tail fraction in gui
-- check M2 calculation in FID and FID build up
-- Check apodization in FID and FID build up
++ check M2 calculation in FID and FID build up
++ Check apodization in FID and FID build up
 

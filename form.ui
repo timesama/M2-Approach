@@ -1559,7 +1559,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        <double>1.000000000000000</double>
                       </property>
                       <property name="value">
-                       <double>9.000000000000000</double>
+                       <double>10.000000000000000</double>
                       </property>
                      </widget>
                     </item>
