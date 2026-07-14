@@ -23,6 +23,7 @@ class DQTabController(BaseTabController):
         amplitude = Cal._calculate_amplitude(y, z)
         dq = Cal.calculate_DQ_intensity(x, amplitude)
         self.ui.DQ_Table_Data.setRowCount(i)
+        t2 = round(t2, 3)
         self.parent.fill_table(self.ui.DQ_Table_Data, dq_time, dq, m2, t2, i)
 
         if self.ui.radioButton.isChecked():

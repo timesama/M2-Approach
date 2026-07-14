@@ -84,7 +84,6 @@ class MainWindow(QMainWindow):
             state=self.app_state,
             parent=self,
         )
-        # self.dq_temp_controller = DQTempTabController(ui=self.ui, state=self.app_state, parent=self)
         self.t1t2_controller = T1T2TabController(ui=self.ui, state=self.app_state, parent=self)
         self.dqmq_controller = DQMQTabController(ui=self.ui, state=self.app_state, parent=self)
         self.gs_controller = GSTabController(ui=self.ui, state=self.app_state, parent=self)
@@ -103,12 +102,10 @@ class MainWindow(QMainWindow):
 
         self.ui.btn_Save.clicked.connect(self.save_data)
         self.ui.DQMQ_Button_Save.clicked.connect(self.save_data)
-        # self.ui.DQTemp_Button_Save.clicked.connect(self.save_data)
         self.ui.T1T2_Button_Save.clicked.connect(self.save_data)
         self.ui.GS_Button_Save.clicked.connect(self.save_data)
 
         self.ui.btn_Load.clicked.connect(self.load_data)
-        # self.ui.DQTemp_Button_Load.clicked.connect(self.load_data)
         self.ui.T1T2_Button_Load.clicked.connect(self.load_data)
         self.ui.DQMQ_Button_Load.clicked.connect(self.load_data)
         self.ui.GS_Button_Load.clicked.connect(self.load_data)
@@ -118,10 +115,8 @@ class MainWindow(QMainWindow):
         self.ui.btn_Add.clicked.connect(self.add_select_dialog)
         self.ui.T1T2_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.DQMQ_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
-        # self.ui.DQTemp_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.GS_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
 
-        # self.ui.DQTemp_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.T1T2_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.GS_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.SE_Button_ClearTable.clicked.connect(self.clear_list)
@@ -162,19 +157,18 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.SE_PlotWidget_Main, "Temperature, °C", "Choose", "")
         self.setup_graph(self.ui.DQ_PlotWidget_T2, "DQ Filtering Time", "T₂*", "")
         self.setup_graph(self.ui.DQ_PlotWidget_NormIntensity, "X axis", "Norm. DQ Intensity", "")
-        # self.setup_graph(self.ui.DQTemp_PlotWidget_T2Distribution, "T₂*", "Norm. DQ Intensity", "FunctionFit")
-        # self.setup_graph(self.ui.DQTemp_PlotWidget_CenterVsXAxis, "X axis", "Center", "")
+
         self.setup_graph(self.ui.T1T2_PlotWidget_RawSignal, "Time, ms", "Signal", "")
         self.setup_graph(self.ui.T1T2_PlotWidget_RelaxationTime, "X axis", "τ, ms", "")
         self.setup_graph(self.ui.DQMQ_PlotWidget_Signal, "Time", "NMR signal", "")
         self.setup_graph(self.ui.DQMQ_PlotWidget_Dres, "Dres/2π, KHz", "P(Dres)", "")
         self.setup_graph(self.ui.GS_PlotWidget_RawSignal, "√Time, √us", "Signal", "")
         self.setup_graph(self.ui.GS_PlotWidget_SqrtTime, "X axis", "√Time, √us", "")
-        # self.setup_graph(self.ui.DQTemp_PlotWidget_PolyFit, "T₂*", "Norm. DQ Intensity", "PolyFit")
+
         self.recfid_controller.initialize_plots()
         self.se_controller.connect_signals()
         self.dq_controller.connect_signals()
-        # self.dq_temp_controller.connect_signals()
+
         self.t1t2_controller.connect_signals()
         self.gs_controller.connect_signals()
         self.recfid_controller.connect_signals()
@@ -185,7 +179,13 @@ class MainWindow(QMainWindow):
         self._apply_table_header_order()
 
         # Connect change events
-        self.ui.comboBox_4.activated.connect(self.update_file)
+        self.ui.comboBox_4.activated.connect(
+            lambda: self.update_file(keep_phasing=True)
+        )
+
+        self.ui.btn_Restore.clicked.connect(
+            lambda: self.update_file(keep_phasing=False)
+        )
 
         self.ui.SE_GroupBox_EAct.setHidden(True)
 
@@ -292,8 +292,17 @@ class MainWindow(QMainWindow):
         if event.canvas.figure is self.interactive_dres_figure:
             self.interactive_dres_figure = None
 
-    def update_file(self):
+    def update_file(self, keep_phasing):
         """Load the selected SE/DQ file into the shared FID/FFT preview widgets."""
+        if self.ui.comboBox_4.currentIndex() == -1:
+            QMessageBox.warning(
+            self,
+            "No data chosen",
+            "Choose data file.",
+            QMessageBox.Ok,
+            )
+            return
+
         filename = self.ui.comboBox_4.currentText()
         if self.tab == 'SE':
             files = self.selected_files
@@ -328,7 +337,7 @@ class MainWindow(QMainWindow):
             self.window_array = np.array([])
 
         try:
-            self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i)
+            self.general_se_dq_controller.process_file_data(file_path, file_path_gly, file_path_empty, i, keep_phasing)
         except Exception:
             logger.exception("Could not update file preview: %s", filename)
             self.show_status(f"Could not process file: {filename}")
@@ -342,7 +351,6 @@ class MainWindow(QMainWindow):
         elif self.tab == 'SE':
             self.highlight_row(self.ui.SE_Table_Data, i)
             self.update_se_graphs()
-
 
     def clear_list(self):
         """Clear data, plots, and file lists for the active tab."""
@@ -484,20 +492,17 @@ class MainWindow(QMainWindow):
 
     def highlight_row(self, table, row_selected):
 
-        #for row in range(table.rowCount()):
-        #table.selectRow(row_selected-1)
 
         for col in range(table.columnCount()):
             for row in range(table.rowCount()):
                 item = table.item(row, col)
                 if item is not None:
                     item.setBackground(QColor(255, 255, 255))
+
             item_selected = table.item(row_selected-1, col)
             if item_selected is not None:
                 item_selected.setBackground(QColor(255, 255, 0))
 
-        # self.ui.SE_Table_Data.selectRow(5)
-        # self.ui.SE_Table_Data.currentRow()
 
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
@@ -638,7 +643,6 @@ class MainWindow(QMainWindow):
             self.gs_controller.plot_sqrt_time()
             self.show_status("Updated spin diffusion groups.")
 
-
     def _connect_dqmq_workflow_signals(self):
         """Connect DQMQ edit signals without recalculating while users type."""
         analysis_parameter_widgets = [
@@ -737,7 +741,7 @@ class MainWindow(QMainWindow):
 
     def state(self):
         """Update the cached tab name when the user changes tabs."""
-        current_tab_index = self.ui.tabWidget.currentIndex()
+
         current_widget = self.ui.tabWidget.currentWidget()
         current_name = current_widget.objectName() if current_widget is not None else ""
 
@@ -747,22 +751,22 @@ class MainWindow(QMainWindow):
         elif current_name == "a_SE":
             self.tab = 'SE'
             self.general_se_dq_controller.populate_combobox()
-        # elif current_tab_index == 1:
+            self.general_se_dq_controller.clear_on_open()
+
         elif current_name == "b_DQ":
             self.tab = 'DQ'
             self.general_se_dq_controller.populate_combobox()
-        # elif current_tab_index == 2:
-            # self.tab = 'DQ_Temp'
-        # elif current_tab_index == 3:
+            self.general_se_dq_controller.clear_on_open()
+
         elif current_name == "d_T1T2":
             self.tab = 'T1T2'
-        # elif current_tab_index == 4:
+
         elif current_name == "c_DQMQ_Tab":
             self.tab = 'DQMQ'
-        # elif current_tab_index == 5:
+
         elif current_name == "f_GS":
             self.tab = 'GS'
-        # elif current_tab_index == 6:
+
         elif current_name == "Settings_Tab":
             self.tab = 'Extra'
 
@@ -996,7 +1000,6 @@ class MainWindow(QMainWindow):
             self.show_status("Saved analysis results.")
         else:
             self.show_status("Save cancelled.")
-
 
     def load_data(self):
         """Load a saved results table for the active tab."""

@@ -26,6 +26,8 @@ class PhasingManual(QDialog):
         g.setTitle("Phasing")
         g.addLegend()
 
+        self.saved = False
+
         self.ui.pushButton_2.clicked.connect(self.zero)
         self.ui.verticalSlider_a.valueChanged.connect(self.value_changed)
         self.ui.verticalSlider_b.valueChanged.connect(self.value_changed)
@@ -44,12 +46,13 @@ class PhasingManual(QDialog):
         self.zero()
 
     def save_data(self):
-
+        self.saved = True
         self.close()
 
     def closeEvent(self, event):
+        if self.saved:
+            self.closed.emit()
 
-        self.closed.emit()
         super().closeEvent(event)
 
     def zero(self):
@@ -83,8 +86,8 @@ class PhasingManual(QDialog):
     def update_plot(self):
 
         self.ui.PhasingGraph.clear()
-        self.ui.PhasingGraph.plot(Frequency, Re_spectra, pen='r', name='Original')
-        self.ui.PhasingGraph.plot(Frequency, self.Real_freq_phased, pen='b', name='Phased')
+        self.ui.PhasingGraph.plot(Frequency, Re_spectra, pen='r', name='Original', width=3)
+        self.ui.PhasingGraph.plot(Frequency, self.Real_freq_phased, pen='b', name='Phased', width=2)
 
     def update_text(self):
 

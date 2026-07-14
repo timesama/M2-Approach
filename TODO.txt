@@ -1,4 +1,10 @@
 - Something is wrong with manual phasing
- - on exit without saving - should not save data
- - on reload should reload data (start button)
- - include button - restore original
+ + on exit without saving - should not save data
+ + on reload should reload data (start button)
+ + include button - restore original
+ + do not open, when no daata is chosen
+
+- on tab change SE and DQ
+    - clar graph
+    - clear combobox 4
+    - clear highlight

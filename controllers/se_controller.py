@@ -42,6 +42,7 @@ class SETabController(BaseTabController):
         sfc = Cal.calculate_SC(amp, times, absolute)
 
         self.ui.SE_Table_Data.setRowCount(i)
+        t2 = round(t2, 3)
         self.parent.fill_table(self.ui.SE_Table_Data, temperature, sfc, m2, t2, i)
         self.ui.SE_Table_Data.setItem(i - 1, 4, QTableWidgetItem(filename))
 

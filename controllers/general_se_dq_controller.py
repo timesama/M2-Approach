@@ -29,12 +29,14 @@ class GeneralSEDQController(BaseTabController):
                 files = mw.selected_files
                 self.ui.SE_PlotWidget_Main.clear()
                 self.ui.SE_ComboBox_YAxis.setCurrentIndex(-1)
+                self.parent.phased_spectra_SE.clear()
             else:
                 files = mw.selected_files_DQ_single
                 self.ui.DQ_PlotWidget_T2.clear()
                 self.ui.DQ_PlotWidget_NormIntensity.clear()
                 self.ui.DQ_TextEdit_FitResult.setText("")
                 self.ui.DQ_ComboBox_FitFunction.setCurrentIndex(-1)
+                self.parent.phased_spectra_DQ.clear()
 
             if len(files) == 0:
                 self._status("Load data files first.")
@@ -86,11 +88,12 @@ class GeneralSEDQController(BaseTabController):
                 try:
                     file_path_gly = mw.selected_files_gly[i - 1] if self.ui.Settings_CheckBox_Glycerol.isChecked() else []
                     file_path_empty = mw.selected_files_empty[i - 1] if self.ui.Settings_CheckBox_Baseline.isChecked() else []
-                    self.process_file_data(file_path, file_path_gly, file_path_empty, i)
+                    self.process_file_data(file_path, file_path_gly, file_path_empty, i, keep_phasing = False)
                 except Exception:
                     self.analysis_error(file_path, files)
 
             self.update_legends_and_dq_graphs()
+            self.ui.comboBox_4.setCurrentIndex(-1)
             self.ui.btn_Start.setStyleSheet("background-color: none")
             logger.info("%s analysis completed: %d files", mw.tab, len(files))
             self._status("Analysis completed.")
@@ -117,10 +120,17 @@ class GeneralSEDQController(BaseTabController):
         if self.parent.tab == "DQ":
             self.dq_controller.update_graphs()
 
-    def process_file_data(self, file_path, file_path_gly, file_path_empty, i):
+    def process_file_data(self, file_path, file_path_gly, file_path_empty, i, keep_phasing):
+
         mw = self.parent
         filename = os.path.basename(file_path)
         subtract = self.ui.Settings_CheckBox_Baseline.isChecked()
+
+        if not keep_phasing:
+            if mw.tab == "SE":
+                mw.phased_spectra_SE.pop(filename, None)
+            else:
+                mw.phased_spectra_DQ.pop(filename, None)
 
         if mw.tab == "DQ":
             subtract = False
@@ -160,7 +170,6 @@ class GeneralSEDQController(BaseTabController):
 
         fft = np.fft.fftshift(np.fft.fft(new_fid))
 
-
         if mw.window_array.size != 0:
             window = mw.window_array[i - 1]
             real_part = savgol_filter(np.real(fft), window, 1)
@@ -176,7 +185,7 @@ class GeneralSEDQController(BaseTabController):
             phased_store = mw.phased_spectra_DQ
 
         phased_record = phased_store.get(filename)
-        if phased_record:
+        if (phased_record and keep_phasing):
             re_spectra = np.array(phased_record.get("re", re_spectra))
             im_spectra = np.array(phased_record.get("im", im_spectra))
             amp_spectra = Cal._calculate_amplitude(re_spectra, im_spectra)
@@ -198,6 +207,15 @@ class GeneralSEDQController(BaseTabController):
                 self.se_controller.process_processed_file(i, filename, amplitude, m2, t2, file_path)
             elif mw.tab == "DQ":
                 self.dq_controller.process_processed_file(i, filename, x, y, z, m2, t2, file_path)
+
+        else:
+            if mw.tab == "SE":
+                table = self.ui.SE_Table_Data
+            else:
+                table = self.ui.DQ_Table_Data
+
+            table.setItem(i-1, 2, QTableWidgetItem(str(round(m2, 6))))
+            table.setItem(i-1, 3, QTableWidgetItem(str(round(t2, 3))))
 
     def after_phasing(self):
         mw = self.parent
@@ -238,6 +256,7 @@ class GeneralSEDQController(BaseTabController):
 
         table.setItem(i, 2, QTableWidgetItem(str(round(m2, 6))))
         table.setItem(i, 3, QTableWidgetItem(str(round(t2, 3))))
+        mw.highlight_row(table, i+1)
 
         if mw.tab == "SE":
             self.se_controller.update_graphs()
@@ -245,6 +264,16 @@ class GeneralSEDQController(BaseTabController):
             self.dq_controller.update_graphs()
 
     def open_phasing_manual(self):
+        if self.ui.comboBox_4.currentIndex() == -1:
+            self._status("Choose data for phasing.")
+            QMessageBox.warning(
+            self.parent,
+            "No spectrum data",
+            "Choose data for phasing.",
+            QMessageBox.Ok,
+            )
+            return
+
         mw = self.parent
         phasing_manual_module.Frequency = self.state.spectrum.frequency
         phasing_manual_module.Re_spectra = self.state.spectrum.re_spectra
@@ -301,3 +330,13 @@ class GeneralSEDQController(BaseTabController):
             self.ui.comboBox_4.addItem(filename)
 
             logger.info("Update files list: %s file", filename)
+
+    def clear_on_open(self):
+        mw = self.parent
+        self.ui.comboBox_4.setCurrentIndex(-1)
+        self.ui.FidWidget.clear()
+        self.ui.FFTWidget.clear()
+
+        mw.highlight_row(self.ui.SE_Table_Data, -1)
+        mw.highlight_row(self.ui.DQ_Table_Data, -1)
+
