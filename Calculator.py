@@ -605,29 +605,6 @@ def derivative_peak_find(x, y):
 def linear_model(x, a, b):
     return a * x + b
 
-def linear_fit_GS(Time, Signal):
-    # Fit using curve_fit
-    Time = np.array(Time).flatten()
-    Signal = np.array(Signal).flatten()
-    popt, _ = curve_fit(linear_model, Time, Signal)
-    a, b = popt
-
-    # Extrapolate to find Time (sqrtT) where Signal = 0: a * sqrtT + b = 0 -> sqrtT = -b / a
-    sqrtT = -b / a if a != 0 else np.nan
-
-    # Generate Time_fit and fitted_curve
-
-    Time_fit = np.linspace(min(Time), sqrtT, 300)
-    fitted_curve = linear_model(Time_fit, a, b)
-
-    # Compute R^2 manually
-    residuals = Signal - linear_model(Time, a, b)
-    ss_res = np.sum(residuals**2)
-    ss_tot = np.sum((Signal - np.mean(Signal))**2)
-    R2 = 1 - (ss_res / ss_tot)
-
-    return Time_fit, fitted_curve, sqrtT, R2
-
 # Eact
 def calculate_Arrhenius_ax(Temperature, T2):
     reciprocal_temperature = 1000/Temperature
@@ -659,9 +636,3 @@ def calculate_Eact(reciprocal_temperature, lnT2, units):
 
     return Temp_fit, fitted_curve, Eact, R2
 
-def calculate_domain_size(t05, beta, r2, M2):
-    pi = np.pi
-    Dsd = np.sqrt(pi * M2) * ((r2*10**(-10))**2)/6
-    d = (2 * beta * t05 * np.sqrt(Dsd) / np.sqrt(pi))*10**(9)
-    d = np.round(d, 3)
-    return d

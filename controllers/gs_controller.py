@@ -2,6 +2,7 @@ import logging
 import os
 
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
+from PySide6.QtCore import QSignalBlocker
 
 from calculations import gs_signal
 from controllers.base_tab_controller import BaseTabController
@@ -22,8 +23,12 @@ class GSTabController(BaseTabController):
         self.ui.GS_RadioButton_Short.clicked.connect(self.calculate_sqrt_time)
         self.ui.GS_RadioButton_Medium.clicked.connect(self.calculate_sqrt_time)
         self.ui.GS_RadioButton_Long.clicked.connect(self.calculate_sqrt_time)
+
         self.ui.GS_DoubleSpinBox_FitFrom.editingFinished.connect(self.calculate_sqrt_time)
         self.ui.GS_DoubleSpinBox_FitTo.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_FitFrom_2.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_FitTo_2.editingFinished.connect(self.calculate_sqrt_time)
+
         self.ui.GS_DoubleSpinBox_Beta.editingFinished.connect(self.calculate_sqrt_time)
         self.ui.GS_DoubleSpinBox_R2.editingFinished.connect(self.calculate_sqrt_time)
         self.ui.GS_DoubleSpinBox_M2.editingFinished.connect(self.calculate_sqrt_time)
@@ -180,19 +185,32 @@ class GSTabController(BaseTabController):
         signals = gs_signal.signal_arrays(dictionary_entry)
         source = self._selected_signal_source()
         signal_original = gs_signal.selected_signal(signals, source)
+
         fit_from = self.ui.GS_DoubleSpinBox_FitFrom.value()
         fit_to = self.ui.GS_DoubleSpinBox_FitTo.value()
         fit_time, fit_signal = gs_signal.fit_range(time_original, signal_original, fit_from, fit_to)
+
+        fit_from_plateau = self.ui.GS_DoubleSpinBox_FitFrom_2.value()
+        fit_to_plateau  = self.ui.GS_DoubleSpinBox_FitTo_2.value()
+
+        fit_time_plateau, fit_signal_plateau = gs_signal.fit_range(time_original, signal_original, fit_from_plateau, fit_to_plateau)
 
         if not gs_signal.is_valid_fit_range(time_original, fit_time, fit_signal):
             if show_warning:
                 self._warn_invalid_range()
             return
 
+        if not gs_signal.is_valid_fit_range(time_original, fit_time_plateau, fit_signal_plateau):
+            if show_warning:
+                self._warn_invalid_range()
+            return
+
         try:
-            fit_time_curve, fit_signal_curve, sqrt_time, r2_value, diffusion_distance = gs_signal.fit_spin_diffusion(
+            fit_time_curve, fit_signal_curve, fit_time_plateau, fit_signal_plateau,sqrt_time, r2_value, diffusion_distance = gs_signal.fit_spin_diffusion(
                 fit_time,
                 fit_signal,
+                fit_time_plateau,
+                fit_signal_plateau,
                 self.ui.GS_DoubleSpinBox_Beta.value(),
                 self.ui.GS_DoubleSpinBox_R2.value(),
                 self.ui.GS_DoubleSpinBox_M2.value(),
@@ -213,6 +231,7 @@ class GSTabController(BaseTabController):
         table.setItem(idx, GSColumns.SQRT_TIME, QTableWidgetItem(str(sqrt_time)))
         table.setItem(idx, GSColumns.D_NM, QTableWidgetItem(str(diffusion_distance)))
         table.resizeColumnsToContents()
+
         figure.clear()
         figure.plot(
             time_original,
@@ -224,17 +243,179 @@ class GSTabController(BaseTabController):
             symbolSize=10,
         )
         figure.plot(fit_time_curve, fit_signal_curve, pen="b")
+        figure.plot(fit_time_plateau, fit_signal_plateau, pen="b")
+
         dictionary_entry["sqrtT"] = sqrt_time
         dictionary_entry["d"] = diffusion_distance
+
         logger.info("GS fit completed: sqrtT=%s d=%s", sqrt_time, diffusion_distance)
         if show_warning:
             self._status("Fit completed.")
 
-    def _update_fit_limits(self, time_original):
-        self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(time_original[0])
-        self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(time_original[-1])
-        self.ui.GS_DoubleSpinBox_FitTo.setMinimum(time_original[min(15, len(time_original) - 1)])
-        self.ui.GS_DoubleSpinBox_FitTo.setMaximum(time_original[-1])
+    def _update_fit_limits1(self, time_original):
+        # self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(time_original[0])
+        # self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(time_original[-1])
+        # self.ui.GS_DoubleSpinBox_FitTo.setMinimum(time_original[min(15, len(time_original) - 1)])
+        # self.ui.GS_DoubleSpinBox_FitTo.setMaximum(time_original[-1])
+
+        # self.ui.GS_DoubleSpinBox_FitFrom_2.setMinimum(time_original[min(1500, len(time_original) - 10)])
+        # self.ui.GS_DoubleSpinBox_FitFrom_2.setMaximum(time_original[-1])
+        # self.ui.GS_DoubleSpinBox_FitTo_2.setMinimum(time_original[min(1500, len(time_original) - 5)])
+        # self.ui.GS_DoubleSpinBox_FitTo_2.setMaximum(time_original[-1])
+
+        if (
+            self.ui.GS_DoubleSpinBox_FitFrom.value() == 0 or
+            self.ui.GS_DoubleSpinBox_FitTo.value() == 0 or
+            self.ui.GS_DoubleSpinBox_FitFrom_2.value() == 0  or
+            self.ui.GS_DoubleSpinBox_FitTo_2.value() == 0
+        ):
+
+            min = time_original[0]
+            max = time_original[-1]
+
+            length = len(time_original)
+
+            self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(min)
+            self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(max)
+
+            self.ui.GS_DoubleSpinBox_FitTo.setMinimum(min)
+            self.ui.GS_DoubleSpinBox_FitTo.setMaximum(max)
+
+            self.ui.GS_DoubleSpinBox_FitFrom_2.setMinimum(min)
+            self.ui.GS_DoubleSpinBox_FitFrom_2.setMaximum(max)
+
+            self.ui.GS_DoubleSpinBox_FitTo_2.setMinimum(min)
+            self.ui.GS_DoubleSpinBox_FitTo_2.setMaximum(max)
+
+            if length > 20:
+
+                self.ui.GS_DoubleSpinBox_FitFrom.setValue(time_original[0])
+                self.ui.GS_DoubleSpinBox_FitTo.setValue(time_original[10])
+
+                self.ui.GS_DoubleSpinBox_FitFrom_2.setValue(time_original[-5])
+                self.ui.GS_DoubleSpinBox_FitTo_2.setValue(time_original[-1])
+            else:
+                self.ui.GS_DoubleSpinBox_FitFrom.setValue(time_original[0])
+                self.ui.GS_DoubleSpinBox_FitTo.setValue(time_original[10])
+
+                self.ui.GS_DoubleSpinBox_FitFrom_2.setValue(time_original[-5])
+                self.ui.GS_DoubleSpinBox_FitTo_2.setValue(time_original[-1])
+
+        else:
+            return
+
+
+    def _update_fit_limits(self, time_values):
+
+        point_count = len(time_values)
+
+        if point_count < 2:
+            return
+
+        data_min = float(time_values[0])
+        data_max = float(time_values[-1])
+
+        slope_from_box = self.ui.GS_DoubleSpinBox_FitFrom
+        slope_to_box = self.ui.GS_DoubleSpinBox_FitTo
+
+        plateau_from_box = self.ui.GS_DoubleSpinBox_FitFrom_2
+        plateau_to_box = self.ui.GS_DoubleSpinBox_FitTo_2
+
+        old_slope_range = (
+            slope_from_box.value(),
+            slope_to_box.value(),
+        )
+        old_plateau_range = (
+            plateau_from_box.value(),
+            plateau_to_box.value(),
+        )
+
+
+        plateau_min_index = min(point_count // 2, point_count - 2)
+        plateau_min = float(time_values[plateau_min_index])
+
+        default_slope_to_index = min(10, point_count - 1)
+
+        default_plateau_from_index = int(0.8 * (point_count - 1))
+        default_plateau_from_index = max(
+            plateau_min_index,
+            default_plateau_from_index,
+        )
+        default_plateau_from_index = min(
+            default_plateau_from_index,
+            point_count - 2,
+        )
+
+        default_slope_range = (
+            float(time_values[0]),
+            float(time_values[default_slope_to_index]),
+        )
+        default_plateau_range = (
+            float(time_values[default_plateau_from_index]),
+            float(time_values[-1]),
+        )
+
+        # def nearest_index(value):
+        #     return int(np.abs(time_values - value).argmin())
+
+        # def range_is_valid(selected_range, allowed_minimum):
+        #     selected_from, selected_to = selected_range
+
+        #     if not (
+        #         allowed_minimum <= selected_from <= data_max
+        #         and allowed_minimum <= selected_to <= data_max
+        #     ):
+        #         return False
+
+        #     # The nearest indices must be ordered and distinct.
+        #     return nearest_index(selected_from) < nearest_index(selected_to)
+
+
+        slope_range_is_valid = gs_signal.range_is_valid(
+            old_slope_range,
+            data_min,
+            data_max,
+            time_values
+        )
+        plateau_range_is_valid = gs_signal.range_is_valid(
+            old_plateau_range,
+            plateau_min,
+            data_max,
+            time_values
+        )
+
+        boxes = (
+            slope_from_box,
+            slope_to_box,
+            plateau_from_box,
+            plateau_to_box,
+        )
+
+        # Retaining these objects until the end of the function blocks all signals
+        # while ranges and values are changed programmatically.
+        signal_blockers = [QSignalBlocker(box) for box in boxes]
+
+        # The slope can be selected anywhere in the complete data range.
+        slope_from_box.setRange(data_min, data_max)
+        slope_to_box.setRange(data_min, data_max)
+
+        # The plateau can be selected from the middle through the end.
+        plateau_from_box.setRange(plateau_min, data_max)
+        plateau_to_box.setRange(plateau_min, data_max)
+
+        if slope_range_is_valid:
+            slope_from_box.setValue(old_slope_range[0])
+            slope_to_box.setValue(old_slope_range[1])
+        else:
+            slope_from_box.setValue(default_slope_range[0])
+            slope_to_box.setValue(default_slope_range[1])
+
+        if plateau_range_is_valid:
+            plateau_from_box.setValue(old_plateau_range[0])
+            plateau_to_box.setValue(old_plateau_range[1])
+        else:
+            plateau_from_box.setValue(default_plateau_range[0])
+            plateau_to_box.setValue(default_plateau_range[1])
 
     def _selected_signal_source(self):
         if self.ui.GS_RadioButton_Short.isChecked():
