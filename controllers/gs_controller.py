@@ -252,7 +252,7 @@ class GSTabController(BaseTabController):
         if show_warning:
             self._status("Fit completed.")
 
-    def _update_fit_limits1(self, time_original):
+    def _update_fit_limits(self, time_original):
         # self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(time_original[0])
         # self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(time_original[-1])
         # self.ui.GS_DoubleSpinBox_FitTo.setMinimum(time_original[min(15, len(time_original) - 1)])
@@ -263,49 +263,55 @@ class GSTabController(BaseTabController):
         # self.ui.GS_DoubleSpinBox_FitTo_2.setMinimum(time_original[min(1500, len(time_original) - 5)])
         # self.ui.GS_DoubleSpinBox_FitTo_2.setMaximum(time_original[-1])
 
-        if (
-            self.ui.GS_DoubleSpinBox_FitFrom.value() == 0 or
-            self.ui.GS_DoubleSpinBox_FitTo.value() == 0 or
-            self.ui.GS_DoubleSpinBox_FitFrom_2.value() == 0  or
-            self.ui.GS_DoubleSpinBox_FitTo_2.value() == 0
-        ):
+        fit_from = self.ui.GS_DoubleSpinBox_FitFrom
+        fit_to = self.ui.GS_DoubleSpinBox_FitTo
+        plateau_from = self.ui.GS_DoubleSpinBox_FitFrom_2
+        plateau_to = self.ui.GS_DoubleSpinBox_FitTo_2
 
-            min = time_original[0]
-            max = time_original[-1]
+        blockers = [
+            QSignalBlocker(fit_from),
+            QSignalBlocker(fit_to),
+            QSignalBlocker(plateau_from),
+            QSignalBlocker(plateau_to),
+        ]
 
-            length = len(time_original)
 
-            self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(min)
-            self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(max)
+        # if (
+        #     fit_from.value() == 0 or
+        #     fit_to.value() == 0 or
+        #     plateau_from.value() == 0  or
+        #     plateau_to.value() == 0
+        # ):
 
-            self.ui.GS_DoubleSpinBox_FitTo.setMinimum(min)
-            self.ui.GS_DoubleSpinBox_FitTo.setMaximum(max)
+        min = time_original[0]
+        max = time_original[-1]
 
-            self.ui.GS_DoubleSpinBox_FitFrom_2.setMinimum(min)
-            self.ui.GS_DoubleSpinBox_FitFrom_2.setMaximum(max)
+        fit_from.setRange(min, max)
+        fit_to.setRange(min, max)
+        plateau_from.setRange(min, max)
+        plateau_to.setRange(min, max)
 
-            self.ui.GS_DoubleSpinBox_FitTo_2.setMinimum(min)
-            self.ui.GS_DoubleSpinBox_FitTo_2.setMaximum(max)
+        try:
+            fit_from.setValue(time_original[0])
+            fit_to.setValue(time_original[10])
 
-            if length > 20:
+            plateau_from.setValue(time_original[-5])
+            plateau_to.setValue(time_original[-1])
+        except:
+            logger.exception("Could not update ranges")
 
-                self.ui.GS_DoubleSpinBox_FitFrom.setValue(time_original[0])
-                self.ui.GS_DoubleSpinBox_FitTo.setValue(time_original[10])
-
-                self.ui.GS_DoubleSpinBox_FitFrom_2.setValue(time_original[-5])
-                self.ui.GS_DoubleSpinBox_FitTo_2.setValue(time_original[-1])
-            else:
-                self.ui.GS_DoubleSpinBox_FitFrom.setValue(time_original[0])
-                self.ui.GS_DoubleSpinBox_FitTo.setValue(time_original[10])
-
-                self.ui.GS_DoubleSpinBox_FitFrom_2.setValue(time_original[-5])
-                self.ui.GS_DoubleSpinBox_FitTo_2.setValue(time_original[-1])
-
-        else:
+            self._status("Could not update ranges.")
+            QMessageBox.warning(
+                self.parent,
+                "Range strange",
+                "The range update failed, check the data.",
+                QMessageBox.Ok,
+            )
             return
 
 
-    def _update_fit_limits(self, time_values):
+
+    def _update_fit_limits1(self, time_values):
 
         point_count = len(time_values)
 

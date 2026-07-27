@@ -408,6 +408,8 @@ def _calculate_M2(FFT_real, Frequency):
     # ppbly it should be (2pi)^n for generalized moment calculation
     M2 = (trapezoid(Multiplication)) * 4 * np.pi ** 2
 
+    ##### The untis of M2: 10^12 Hz^2
+
     # Check the validity
     if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
         logger.warning("Apodization check failed; multiplication baseline is non-zero.")

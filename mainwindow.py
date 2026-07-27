@@ -916,23 +916,6 @@ class MainWindow(QMainWindow):
                 return
             default_name = 'Table_DQ_' + os.path.split(os.path.dirname(files[0]))[1]
 
-        # elif self.tab == 'DQ_Temp':
-        #     table = self.ui.DQTemp_Table_Results
-        #     files = self.selected_DQfiles
-        #     if table.rowCount() == 0 or not files:
-        #         self.show_status("Load DQ comparison files first.")
-        #         QMessageBox.warning(
-        #             self,
-        #             "No DQ data",
-        #             "Load DQ comparison files first.",
-        #             QMessageBox.Ok,
-        #         )
-        #         return
-
-        #     path = os.path.dirname(files[0]) + '/Table_DQ_comparison_parametrs'
-        #     self.write_collective_dictionary(self.dq_comparison_distribution, path)
-        #     default_name = 'Table_DQ_comparison'
-
         elif self.tab == 'T1T2':
             table = self.ui.T1T2_Table_Results
             files = self.selected_T1files
@@ -975,7 +958,61 @@ class MainWindow(QMainWindow):
                 )
                 return
 
-            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_DQMQ_data'
+            default_name = os.path.split(os.path.dirname(files[0]))[1] + '_DQMQ_data.xlsx'
+
+            default_path = os.path.join(
+                os.path.dirname(files[0]),
+                default_name,
+            )
+
+            save_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Save DQMQ results",
+                default_path,
+                "Excel Workbook (*.xlsx)",
+            )
+
+            if not save_path:
+                self.show_status("Save cancelled.")
+                return
+
+            if not save_path.lower().endswith(".xlsx"):
+                save_path += ".xlsx"
+
+            self.show_status("Saving DQMQ analysis results...")
+
+            try:
+
+                excel_path = self.dqmq_controller.save_results_excel(save_path)
+
+                files_json = (
+                    os.path.splitext(excel_path)[0]
+                    + "_files.json"
+                )
+
+                with open(files_json, "w", encoding="utf-8") as file:
+                    json.dump(
+                        {
+                            "files": files,
+                            "filepath": excel_path,
+                        },
+                        file,
+                        indent=2,
+                    )
+
+            except Exception as exc:
+                logger.exception("Could not save DQMQ results")
+                self.show_status(f"Could not save DQMQ results: {exc}")
+                QMessageBox.warning(
+                    self,
+                    "DQMQ save failed",
+                    str(exc),
+                    QMessageBox.Ok,
+                )
+                return
+
+            self.show_status("Saved DQMQ analysis results.")
+            return
 
         elif self.tab == 'RecFID':
             self.recfid_controller.save_results()
@@ -1150,7 +1187,7 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _looks_like_path(value):
-        return ('/' in value) or ('\\' in value) or value.endswith(('.txt', '.dat', '.csv'))
+        return ('/' in value) or ('\\' in value) or value.endswith(('.txt', '.dat', '.csv', '.xlsx'))
 
     def save_figures(self, file_path, variable):
         """Export FID/FFT preview images and CSV data beside source files."""

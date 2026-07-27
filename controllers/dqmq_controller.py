@@ -853,7 +853,163 @@ class DQMQTabController(BaseTabController):
             )
             dres_figure.addItem(center_line)
 
-    def save_integral_sum_result(self, base_file_path):
+#### NEW SAVE
+    def _general_dataframe(self):
+        """Return the visible DQMQ table exactly as it should appear in Excel."""
+        table = self.ui.DQMQ_Table_Data
+        rows = []
+
+        column_labels = ["tauDQ", "DQ", "Ref", "nDQ"]
+
+        for row in range(table.rowCount()):
+            row_values = []
+            row_has_data = False
+
+            for column in range(4):
+                item = table.item(row, column)
+                text = item.text().strip() if item is not None else ""
+
+                if text:
+                    row_has_data = True
+                    try:
+                        row_values.append(float(text))
+                    except ValueError as exc:
+                        raise ValueError(
+                            f"Row {row + 1}, column {column_labels[column]} "
+                            "contains a non-numeric value."
+                        ) from exc
+                else:
+                    row_values.append(np.nan)
+
+            if row_has_data:
+                rows.append(row_values)
+
+        return pd.DataFrame(rows, columns=column_labels)
+
+
+    def save_results_excel(self, base_file_path):
+        """
+        Save all DQMQ, integral-sum and Dres results into one Excel workbook.
+
+        Sheet order:
+            1. General
+            2. MQ
+            3. Integral Sum
+            4. Dres fit
+            5. Dres distribution
+            6. Dres metadata
+        """
+        root, _ = os.path.splitext(base_file_path)
+        save_path = f"{root}.xlsx"
+
+        # 1. General
+        general_df = self._general_dataframe()
+
+        # 2. MQ
+        if self.analysis_result is not None:
+            mq_df = pd.DataFrame(
+                {
+                    "tauDQ": self.analysis_result["time"],
+                    "MQ": self.analysis_result["mq_norm"],
+                    "MQ_tail": self.analysis_result["mq_baseline"],
+                }
+            )
+        else:
+            mq_df = pd.DataFrame(columns=["tauDQ", "MQ", "MQ_tail"])
+
+        # 3. Integral Sum
+        # Always create the sheet, even when no integral data exists.
+        if self.integral_sum_result is not None:
+            integral_df = pd.DataFrame(
+                {
+                    "time": self.integral_sum_result["time"],
+                    "integral_sum": self.integral_sum_result["signal_norm"],
+                }
+            )
+        else:
+            integral_df = pd.DataFrame(columns=["time", "integral_sum"])
+
+        # 4–6. Dres
+        if self.dres_result is not None:
+            dres_fit_df = pd.DataFrame(
+                {
+                    "tauDQ": self.dres_result["fit_x"],
+                    "fitted_nDQ": self.dres_result["fit_y"],
+                }
+            )
+
+            dres_distribution_df = pd.DataFrame(
+                {
+                    "Dres_over_2pi_kHz": self.dres_result["D_plot"],
+                    "P_dres": self.dres_result["P"],
+                }
+            )
+
+            metadata = {
+                "kernel": self.dres_result["kernel"],
+                "n_components": self.dres_result["n_components"],
+                "k_value": self.dres_result.get("k_value"),
+                "beta_value": self.dres_result.get("beta_value"),
+                "l_value": self.dres_result.get("l_value"),
+                **dict(
+                    zip(
+                        self.dres_result["param_names"],
+                        self.dres_result["params"],
+                    )
+                ),
+            }
+
+            dres_metadata_df = pd.DataFrame(
+                metadata.items(),
+                columns=["variable", "value"],
+            )
+        else:
+            dres_fit_df = pd.DataFrame(columns=["tauDQ", "fitted_nDQ"])
+            dres_distribution_df = pd.DataFrame(
+                columns=["Dres_over_2pi_kHz", "P_dres"]
+            )
+            dres_metadata_df = pd.DataFrame(columns=["variable", "value"])
+
+        try:
+            with pd.ExcelWriter(save_path, engine="openpyxl") as writer:
+                general_df.to_excel(
+                    writer,
+                    sheet_name="General",
+                    index=False,
+                )
+                mq_df.to_excel(
+                    writer,
+                    sheet_name="MQ",
+                    index=False,
+                )
+                integral_df.to_excel(
+                    writer,
+                    sheet_name="Integral Sum",
+                    index=False,
+                )
+                dres_fit_df.to_excel(
+                    writer,
+                    sheet_name="Dres fit",
+                    index=False,
+                )
+                dres_distribution_df.to_excel(
+                    writer,
+                    sheet_name="Dres distribution",
+                    index=False,
+                )
+                dres_metadata_df.to_excel(
+                    writer,
+                    sheet_name="Dres metadata",
+                    index=False,
+                )
+        except Exception:
+            logger.exception("Combined DQMQ Excel export failed")
+            raise
+
+        return save_path
+
+#### OLD SAVE
+    def save_integral_sum_result1(self, base_file_path):
         if not self.integral_sum_result:
             return
 
@@ -892,8 +1048,7 @@ class DQMQTabController(BaseTabController):
             except Exception:
                 logger.exception("Excel IntegralSum export failed; writing CSV fallback files")
 
-
-    def save_dres_result(self, base_file_path):
+    def save_dres_result1(self, base_file_path):
         if not self.dres_result:
             return
         root, _ = os.path.splitext(base_file_path)

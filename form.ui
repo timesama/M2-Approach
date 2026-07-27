@@ -3430,6 +3430,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                       </item>
                       <item>
                        <widget class="QPushButton" name="DQMQ_Button_Load">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
                         <property name="minimumSize">
                          <size>
                           <width>0</width>
