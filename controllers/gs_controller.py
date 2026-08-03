@@ -253,53 +253,53 @@ class GSTabController(BaseTabController):
             self._status("Fit completed.")
 
     def _update_fit_limits(self, time_original):
-        # self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(time_original[0])
-        # self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(time_original[-1])
-        # self.ui.GS_DoubleSpinBox_FitTo.setMinimum(time_original[min(15, len(time_original) - 1)])
-        # self.ui.GS_DoubleSpinBox_FitTo.setMaximum(time_original[-1])
+        self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(time_original[0])
+        self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(time_original[-1])
+        self.ui.GS_DoubleSpinBox_FitTo.setMinimum(time_original[min(15, len(time_original) - 1)])
+        self.ui.GS_DoubleSpinBox_FitTo.setMaximum(time_original[-1])
 
-        # self.ui.GS_DoubleSpinBox_FitFrom_2.setMinimum(time_original[min(1500, len(time_original) - 10)])
-        # self.ui.GS_DoubleSpinBox_FitFrom_2.setMaximum(time_original[-1])
-        # self.ui.GS_DoubleSpinBox_FitTo_2.setMinimum(time_original[min(1500, len(time_original) - 5)])
-        # self.ui.GS_DoubleSpinBox_FitTo_2.setMaximum(time_original[-1])
+        self.ui.GS_DoubleSpinBox_FitFrom_2.setMinimum(time_original[min(1500, len(time_original) - 10)])
+        self.ui.GS_DoubleSpinBox_FitFrom_2.setMaximum(time_original[-1])
+        self.ui.GS_DoubleSpinBox_FitTo_2.setMinimum(time_original[min(1500, len(time_original) - 5)])
+        self.ui.GS_DoubleSpinBox_FitTo_2.setMaximum(time_original[-1])
 
-        fit_from = self.ui.GS_DoubleSpinBox_FitFrom
-        fit_to = self.ui.GS_DoubleSpinBox_FitTo
-        plateau_from = self.ui.GS_DoubleSpinBox_FitFrom_2
-        plateau_to = self.ui.GS_DoubleSpinBox_FitTo_2
+        # fit_from = self.ui.GS_DoubleSpinBox_FitFrom
+        # fit_to = self.ui.GS_DoubleSpinBox_FitTo
+        # plateau_from = self.ui.GS_DoubleSpinBox_FitFrom_2
+        # plateau_to = self.ui.GS_DoubleSpinBox_FitTo_2
 
-        blockers = [
-            QSignalBlocker(fit_from),
-            QSignalBlocker(fit_to),
-            QSignalBlocker(plateau_from),
-            QSignalBlocker(plateau_to),
-        ]
+        # blockers = [
+        #     QSignalBlocker(fit_from),
+        #     QSignalBlocker(fit_to),
+        #     QSignalBlocker(plateau_from),
+        #     QSignalBlocker(plateau_to),
+        # ]
 
-        min = time_original[0]
-        max = time_original[-1]
+        # min = time_original[0]
+        # max = time_original[-1]
 
-        fit_from.setRange(min, max)
-        fit_to.setRange(min, max)
-        plateau_from.setRange(min, max)
-        plateau_to.setRange(min, max)
+        # fit_from.setRange(min, max)
+        # fit_to.setRange(min, max)
+        # plateau_from.setRange(min, max)
+        # plateau_to.setRange(min, max)
 
-        try:
-            fit_from.setValue(time_original[0])
-            fit_to.setValue(time_original[10])
+        # try:
+        #     fit_from.setValue(time_original[0])
+        #     fit_to.setValue(time_original[10])
 
-            plateau_from.setValue(time_original[-5])
-            plateau_to.setValue(time_original[-1])
-        except:
-            logger.exception("Could not update ranges")
+        #     plateau_from.setValue(time_original[-5])
+        #     plateau_to.setValue(time_original[-1])
+        # except:
+        #     logger.exception("Could not update ranges")
 
-            self._status("Could not update ranges.")
-            QMessageBox.warning(
-                self.parent,
-                "Range strange",
-                "The range update failed, check the data.",
-                QMessageBox.Ok,
-            )
-            return
+        #     self._status("Could not update ranges.")
+        #     QMessageBox.warning(
+        #         self.parent,
+        #         "Range strange",
+        #         "The range update failed, check the data.",
+        #         QMessageBox.Ok,
+        #     )
+        #     return
 
 
     def _selected_signal_source(self):
