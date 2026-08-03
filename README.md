@@ -4,25 +4,22 @@ Relaxyzer was initially created as a tool to speed up the analysis of NMR data o
 
 ## Key Features
 
-### SE
-Analysis of FID, Free Induction Decay, Solid Echo, and MSE data.
+### FID
+Analysis of FID, Solid Echo, and MSE data.
 
 - Solid content calculation
 - Second moment calculation for advanced analysis
 - T2* calculation
 - Activation energy calculation from T2* values measured at different temperatures
 
+### FID build-up
+Reconstruct FID with SE or MSE data.
+
 ### DQ
 Analysis of Double Quantum NMR data using the M2 approach.
 
 - DQ distribution analysis
 - T2* recalculation from the DQ distribution
-
-### DQ(Temp)
-Temperature-dependent comparison of T2* distributions.
-
-- Overlay and comparison of distributions measured at different temperatures
-- Support for thermal trend analysis
 
 ### T1T2
 Analysis of T1 and T2 relaxation curves.
@@ -41,4 +38,4 @@ Analysis of Double Quantum NMR data.
 - Dres distribution fitting
 
 ### Goldman-Shen
-Domain size estimation using Goldman-Shen analysis.
+Domain size estimation using Goldman-Shen and DQ-SD analysis.
