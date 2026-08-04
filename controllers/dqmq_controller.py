@@ -886,7 +886,6 @@ class DQMQTabController(BaseTabController):
 
         return pd.DataFrame(rows, columns=column_labels)
 
-
     def save_results_excel(self, base_file_path):
         """
         Save all DQMQ, integral-sum and Dres results into one Excel workbook.
@@ -1008,109 +1007,6 @@ class DQMQTabController(BaseTabController):
 
         return save_path
 
-#### OLD SAVE
-    def save_integral_sum_result1(self, base_file_path):
-        if not self.integral_sum_result:
-            return
-
-        root, ext = os.path.splitext(base_file_path)
-        save_path = f"{root}_IntegralSum{ext or '.csv'}"
-        integral = np.column_stack(
-            (self.integral_sum_result["time"], self.integral_sum_result["signal_norm"])
-            )
-
-        mq = np.column_stack(
-            (self.analysis_result["time"], self.analysis_result["mq_norm"], self.analysis_result["mq_baseline"])
-            )
-
-        can_write_excel = importlib.util.find_spec("pandas") is not None and (
-            importlib.util.find_spec("openpyxl") is not None
-            or importlib.util.find_spec("xlsxwriter") is not None
-        )
-        if can_write_excel:
-            import pandas as pd
-
-            try:
-                with pd.ExcelWriter(f"{root}_InegralSum.xlsx") as writer:
-                    pd.DataFrame(
-                        integral, columns=["time", "integral_sum"]
-                    ).to_excel(
-                        writer,
-                        sheet_name="Integral Sum",
-                        index=False,
-                    )
-                    pd.DataFrame(mq, columns=["tauDQ", "MQ", "MQ_tail"]).to_excel(
-                        writer,
-                        sheet_name="MQ",
-                        index=False,
-                    )
-                return
-            except Exception:
-                logger.exception("Excel IntegralSum export failed; writing CSV fallback files")
-
-    def save_dres_result1(self, base_file_path):
-        if not self.dres_result:
-            return
-        root, _ = os.path.splitext(base_file_path)
-        distribution = np.column_stack(
-            (self.dres_result["D_plot"], self.dres_result["P"])
-        )
-        fit = np.column_stack((self.dres_result["fit_x"], self.dres_result["fit_y"]))
-        metadata = {
-            "kernel": self.dres_result["kernel"],
-            "n_components": self.dres_result["n_components"],
-            "k_value": self.dres_result.get("k_value"),
-            "beta": self.dres_result.get("beta"),
-            **dict(zip(self.dres_result["param_names"], self.dres_result["params"])),
-        }
-
-        can_write_excel = importlib.util.find_spec("pandas") is not None and (
-            importlib.util.find_spec("openpyxl") is not None
-            or importlib.util.find_spec("xlsxwriter") is not None
-        )
-        if can_write_excel:
-            try:
-                with pd.ExcelWriter(f"{root}_Dres.xlsx") as writer:
-                    pd.DataFrame(
-                        distribution, columns=["Dres_over_2pi_kHz", "P_Dres"]
-                    ).to_excel(
-                        writer,
-                        sheet_name="Dres distribution",
-                        index=False,
-                    )
-                    pd.DataFrame(fit, columns=["time", "fitted_nDQ"]).to_excel(
-                        writer,
-                        sheet_name="Fit",
-                        index=False,
-                    )
-                    pd.DataFrame(
-                        metadata.items(), columns=["parameter", "value"]
-                    ).to_excel(
-                        writer,
-                        sheet_name="Metadata",
-                        index=False,
-                    )
-                return
-            except Exception:
-                logger.exception("Excel Dres export failed; writing CSV fallback files")
-
-        np.savetxt(
-            f"{root}_Dres_distribution.csv",
-            distribution,
-            delimiter=",",
-            header="Dres_over_2pi_kHz,P_Dres",
-            comments="",
-        )
-        metadata_header = "\n".join(
-            [f"{key}: {value}" for key, value in metadata.items()]
-        )
-        np.savetxt(
-            f"{root}_Dres_fit.csv",
-            fit,
-            delimiter=",",
-            header=f"{metadata_header}\ntime,fitted_nDQ",
-            comments="# ",
-        )
 
     def reset_Dres_values(self):
         logger.info("Dres fitting parameters restored to defaults")

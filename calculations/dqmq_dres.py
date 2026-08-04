@@ -11,7 +11,17 @@ from scipy.optimize import curve_fit
 K   = 0.4
 L   = 0.4
 BETA = 2
-D_GRID = np.linspace(0, 1.3, 20000)
+"""
+Use Dres dtep 5Hz. Use Dres range 0 - 100 KHz.
+"""
+DELTA_GRID = 5 # Hz
+MAX_HZ_DRES = 100000 #Hz
+N_POINTS = MAX_HZ_DRES/DELTA_GRID
+
+### Use frequency MHz
+RAD_MAX_GRID = 2  *np.pi * MAX_HZ_DRES/(1000)**2
+
+D_GRID = np.linspace(0, RAD_MAX_GRID, N_POINTS)
 VALID_KERNELS = ["gaussian", "abragam", "pake", "weibull", "a-l", "p-l"]
 
 
@@ -44,7 +54,7 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K, l_value=L):
     if kernel == "gaussian":
         return 1.0 - np.exp(-k_value * x_values**2)
     if kernel == "abragam":
-        return 1.0 - np.exp(-k_value * x_values**2) * np.sinc(x_values)
+        return 1.0 - np.exp(-k_value * x_values**2) * np.sin(x_values)
     if kernel == "pake":
         return 1.0 - np.exp(-k_value * x_values**2) * np.cos(x_values)
     if kernel == "weibull":
@@ -52,7 +62,8 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K, l_value=L):
     if kernel == "a-l":
         return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.cos(k_value * 1.4575 * x_values)
     if kernel == "p-l":
-        return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(l_value * x_values)
+        # return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(l_value * x_values)
+        return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.sin(k_value * 1.4575 * x_values)
 
     raise ValueError(f"Unknown kernel: {kernel}. Use one of {VALID_KERNELS}")
 
@@ -130,12 +141,12 @@ def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_componen
     if n_components == 1:
         default_p0 = [0.25, 1e-3]
         bounds_min = [0, 0.001]
-        bounds_max = [1.300, 1.0]
+        bounds_max = [RAD_MAX_GRID, 1.0]
         param_names = ["mu", "sigma"]
     elif n_components == 2:
         default_p0 = [0.25, 0.001, 0.05, 0.001, 0.5]
         bounds_min = [0, 0.001, 0, 0.001, 0.0]
-        bounds_max = [1.3000, 1.0, 1.3000, 1.0, 1.0]
+        bounds_max = [RAD_MAX_GRID, 1.0, RAD_MAX_GRID, 1.0, 1.0]
         param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1"]
     else:
         raise ValueError("n_components must be 1 or 2")
@@ -199,7 +210,6 @@ def build_distribution(fit_result):
 
     d_plot = D_GRID / (2 * np.pi) * 1000.0
     return d_plot, p_values
-
 
 def build_singular_distribution(center, sigma):
     p_values = p_gaussian(D_GRID, center, sigma)
