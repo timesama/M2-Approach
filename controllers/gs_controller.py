@@ -176,12 +176,15 @@ class GSTabController(BaseTabController):
             dictionary_entry["sqrtTime"],
             self.ui.GS_CheckBox_UseSqrtTime.isChecked(),
         )
+
+        self._update_fit_limits(time_original)
+
         if len(time_original) == 0:
             if show_warning:
                 self._warn_invalid_range()
             return
 
-        self._update_fit_limits(time_original)
+        # self._update_fit_limits(time_original)
         signals = gs_signal.signal_arrays(dictionary_entry)
         source = self._selected_signal_source()
         signal_original = gs_signal.selected_signal(signals, source)
@@ -253,53 +256,45 @@ class GSTabController(BaseTabController):
             self._status("Fit completed.")
 
     def _update_fit_limits(self, time_original):
-        self.ui.GS_DoubleSpinBox_FitFrom.setMinimum(time_original[0])
-        self.ui.GS_DoubleSpinBox_FitFrom.setMaximum(time_original[-1])
-        self.ui.GS_DoubleSpinBox_FitTo.setMinimum(time_original[min(15, len(time_original) - 1)])
-        self.ui.GS_DoubleSpinBox_FitTo.setMaximum(time_original[-1])
 
-        self.ui.GS_DoubleSpinBox_FitFrom_2.setMinimum(time_original[min(1500, len(time_original) - 10)])
-        self.ui.GS_DoubleSpinBox_FitFrom_2.setMaximum(time_original[-1])
-        self.ui.GS_DoubleSpinBox_FitTo_2.setMinimum(time_original[min(1500, len(time_original) - 5)])
-        self.ui.GS_DoubleSpinBox_FitTo_2.setMaximum(time_original[-1])
 
-        # fit_from = self.ui.GS_DoubleSpinBox_FitFrom
-        # fit_to = self.ui.GS_DoubleSpinBox_FitTo
-        # plateau_from = self.ui.GS_DoubleSpinBox_FitFrom_2
-        # plateau_to = self.ui.GS_DoubleSpinBox_FitTo_2
+        min = time_original[0]
+        max = time_original[-1]
+        half = time_original[int(len(time_original)/2)]
+        shlish = time_original[int(len(time_original)/3)]
+        two_thirds = time_original[int(2*len(time_original)/3)]
 
-        # blockers = [
-        #     QSignalBlocker(fit_from),
-        #     QSignalBlocker(fit_to),
-        #     QSignalBlocker(plateau_from),
-        #     QSignalBlocker(plateau_to),
-        # ]
+        slope_from = self.ui.GS_DoubleSpinBox_FitFrom
+        slope_to = self.ui.GS_DoubleSpinBox_FitTo
 
-        # min = time_original[0]
-        # max = time_original[-1]
+        plateau_from = self.ui.GS_DoubleSpinBox_FitFrom_2
+        plateau_to = self.ui.GS_DoubleSpinBox_FitTo_2
 
-        # fit_from.setRange(min, max)
-        # fit_to.setRange(min, max)
-        # plateau_from.setRange(min, max)
-        # plateau_to.setRange(min, max)
+        with QSignalBlocker(slope_from):
+            slope_from.setRange(min, max)
 
-        # try:
-        #     fit_from.setValue(time_original[0])
-        #     fit_to.setValue(time_original[10])
+        with QSignalBlocker(slope_to):
+            slope_to.setRange(min, max)
 
-        #     plateau_from.setValue(time_original[-5])
-        #     plateau_to.setValue(time_original[-1])
-        # except:
-        #     logger.exception("Could not update ranges")
+        with QSignalBlocker(plateau_from):
+            plateau_from.setRange(min, max)
 
-        #     self._status("Could not update ranges.")
-        #     QMessageBox.warning(
-        #         self.parent,
-        #         "Range strange",
-        #         "The range update failed, check the data.",
-        #         QMessageBox.Ok,
-        #     )
-        #     return
+        with QSignalBlocker(plateau_to):
+            plateau_to.setRange(min, max)
+
+        # print(f"Sooooo\ncondition slope from is min: {slope_from.value() == min}\n condition slope to is min: {slope_to.value() == min}\ncondition plateau from is min: {plateau_from.value() == min}\n condition plateau to is min: {plateau_to.value() == min}\n")
+
+        # print(f"values: slope_from {slope_from.value()}, slope_to {slope_to.value()}, plateau_from {plateau_from.value()}, plateau_to {plateau_to.value()}\n")
+
+
+        if (slope_from.value() == min and
+            slope_to.value() == min and
+            plateau_from.value() == min and
+            plateau_to.value() == min
+        ):
+            slope_to.setValue(half)
+            plateau_from.setValue(two_thirds)
+            plateau_to.setValue(max)
 
 
     def _selected_signal_source(self):
