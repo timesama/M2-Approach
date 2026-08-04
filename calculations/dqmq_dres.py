@@ -66,8 +66,8 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K, l_value=L):
     if kernel == "a-l":
         return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.cos(k_value * 1.4575 * x_values)
     if kernel == "p-l":
-        # return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(l_value * x_values)
-        return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.sinc(k_value * 1.4575 * x_values)
+        return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(l_value * x_values)
+        # return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.sinc(k_value * 1.4575 * x_values)
 
     raise ValueError(f"Unknown kernel: {kernel}. Use one of {VALID_KERNELS}")
 
