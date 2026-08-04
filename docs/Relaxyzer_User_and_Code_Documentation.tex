@@ -64,12 +64,11 @@ Goldman--Shen & Estimate spin-diffusion/domain-size quantities from short, mediu
 
 \subsection{What Relaxyzer Can Do}
 \begin{itemize}
-  \item Load numeric text, CSV, DAT, and TXT files in the formats described in this manual.
-  \item Process several SE or DQ files in one run and place the extracted values in a table.
+  \item Load numeric text, CSV, DAT, TXT, XLSX files in the formats described in this manual.
+  \item Process several SE or DQ files in one run.
   \item Display raw curves, spectra, fitted curves, and summary plots.
   \item Let the user adjust fit ranges, trimming, units, grouping, and selected model functions.
   \item Save visible result tables for later use in \Relaxyzer{} or in external tools such as spreadsheet software, Python, R, or MATLAB.
-  \item Reuse saved DQ tables in later workflows, especially DQ(Temp) and the DQMQ integral-sum comparison.
 \end{itemize}
 
 \subsection{What Relaxyzer Cannot Do Reliably}
@@ -77,7 +76,7 @@ Goldman--Shen & Estimate spin-diffusion/domain-size quantities from short, mediu
   \item It is not an automatic quality-control system. Users must inspect plots and reject bad files, noise-dominated fits, or unphysical parameters.
   \item It does not infer all metadata from instrument headers. Several workflows rely on simple filename conventions or editable table columns.
   \item It does not support every vendor file format directly. In particular, legacy Stelar/FFC \texttt{.sef} files should be converted to a supported two-column or multi-column text/CSV format before loading.
-  \item It does not replace NMR interpretation. Reported parameters are model-dependent and should be compared with sample knowledge and experimental conditions.
+  \item It does not replace NMR interpretation. Some reported parameters are model-dependent and should be judged accordingly.
   \item It does not guarantee meaningful multi-component fits when the data do not contain enough information to separate components. Initial guesses and fit ranges matter.
 \end{itemize}
 
@@ -93,7 +92,7 @@ Goldman--Shen & Estimate spin-diffusion/domain-size quantities from short, mediu
 \end{itemize}
 
 \subsection{Common Three-Column Time-Domain Format}
-SE and raw DQ workflows use a three-column numeric time-domain format:
+FID and raw DQ workflows use a three-column numeric time-domain format:
 \begin{center}
 \begin{tabular}{lll}
 \toprule
@@ -114,10 +113,12 @@ and also uses the real and imaginary parts for frequency-domain processing and p
 \subsection{Saved Tables}
 When a workflow is saved, the visible result table is written as a CSV-style table. Depending on the tab, \Relaxyzer{} may also save supporting information such as the source-file list or additional exported curves. Treat the saved table as the main result for reporting, and keep the raw files if you may need to recalculate fits with different settings.
 
-\section{SE / FID / Solid Echo / MSE Workflow}
+\section{FID / Solid Echo / MSE Workflow}
+
+FID here refers to the Free Induction Decay. It may be recorded using single pulse excitation or any other methods.
 
 \subsection{Purpose}
-Use the SE workflow when you have time-domain files containing time, real signal, and imaginary signal and you want to estimate solid content, \Mtwo{}, \TtwoStar{}, or temperature trends.
+Use the FID workflow when you have time-domain files containing time, real signal, and imaginary signal, and you want to estimate solid content, \Mtwo{}, \TtwoStar{}, or see the temperature trends.
 
 \subsection{Data to Load}
 \begin{longtable}{p{0.23\linewidth}p{0.63\linewidth}}
@@ -127,19 +128,19 @@ Item & Requirement \\
 File extensions & Typically \texttt{.dat}, \texttt{.txt}, or \texttt{.csv}. \\
 Columns & At least three numeric columns: time, real, imaginary. \\
 Temperature metadata & If you want temperature plots, encode temperature near the end of the filename, for example \texttt{sample\_40.dat}. Files without a recognizable temperature can be loaded, but their temperature value may need manual correction. \\
-Optional reference/empty files & If using reference or empty-signal correction, select matching files in the same order as the raw files. \\
+Optional reference/empty files & If using reference (i.e. glycerol signal for magnet inhomogeneity correction) or empty-signal (for baseline correction), select matching files in the same order as the raw files. \\
 \bottomrule
 \end{longtable}
 
 \subsection{Typical Use}
 \begin{enumerate}
-  \item Select the raw files for the SE tab.
-  \item Adjust settings such as solid-content windows, baseline/empty correction, reference correction, smoothing, and figure export if needed.
+  \item Select the raw files for the FID tab.
+  \item Adjust settings such as solid-content windows, baseline/empty correction, reference correction, smoothing, and figure export if needed in Settings tab.
   \item Run the analysis.
   \item Inspect the time-domain and frequency-domain plots.
   \item If necessary, use manual phasing and accept the phased spectrum.
   \item Plot solid content, \Mtwo{}, or \TtwoStar{} versus the table x-axis.
-  \item Optionally group rows or calculate an activation-energy trend.
+  \item Optionally group data or calculate an activation-energy trend.
   \item Save the table.
 \end{enumerate}
 
@@ -173,7 +174,7 @@ X=\frac{1000}{T},\qquad Y=\ln\left(\frac{1}{\TtwoStar}\right),
 where \(T\) should be in Kelvin. If your filenames contain Celsius values, enable Celsius-to-Kelvin conversion before interpreting the fit.
 
 \subsection{Data to Extract}
-The SE table is the primary result. It contains the experimental variable, filename information, solid-content value, \Mtwo{}, and \TtwoStar{}. Optional figure export can also write plotted FID/FFT curves and images beside the source data.
+The FID table is the primary result. It contains the experimental variable, filename information, solid-content value, \Mtwo{}, and \TtwoStar{}. Optional figure export can also write plotted FID/FFT curves and images beside the source data.
 
 \subsection{Important Limits}
 \begin{itemize}
@@ -207,7 +208,7 @@ Optional correction files & Reference/empty files can be used as in the SE workf
   \item Choose the DQ-time range used for the \TtwoStar{} linearization.
   \item Inspect the \TtwoStar{} versus DQ-time plot.
   \item Choose the distribution x-axis mode: linear \TtwoStarLin{} or \(\log_{10}(\TtwoStarLin)\).
-  \item Fit the normalized distribution with Gaussian, Lorentzian, or pseudo-Voigt model.
+  \item Fit the normalized distribution with Gaussian, Lorentzian, or pseudo-Voigt (weighted sum of Gaussian and Lorentzian functions) model.
   \item Save the DQ table if you want to compare temperatures later or use the distribution in DQMQ.
 \end{enumerate}
 
@@ -233,6 +234,11 @@ L(x)&=\frac{Aw^2}{(x-x_0)^2+w^2}+y_0,\\
 V(x)&=\eta L(x)+(1-\eta)G(x)+y_0.
 \end{align}
 Here \(x_0\) is the fitted center, \(w\) is the fitted width parameter, and \(\eta\) is the Lorentzian fraction in the pseudo-Voigt model.
+
+% todo: i am too laze, and this is too boring.
+% add FID build up
+% add new functional for Spin Diffusion - BRAND NEW DQSD
+% check carefully description for DQMQ, there are many new things
 
 \subsection{Data to Extract}
 A saved DQ table should contain, at minimum, DQ filtering time, DQ intensity, \Mtwo{}, \TtwoStar{}, \TtwoStarLin{}, and normalized DQ intensity. The DQ(Temp) workflow expects saved DQ distribution files with at least six numeric columns and uses the linearized \TtwoStar{} and normalized DQ columns.
