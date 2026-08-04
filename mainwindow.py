@@ -146,6 +146,11 @@ class MainWindow(QMainWindow):
         self.ui.DQMQ_Button_ResetValues.clicked.connect(
             self.dqmq_controller.reset_Dres_values
         )
+
+        self.ui.DQMQ_Button_CalculateUsingValues.clicked.connect(
+            self.dqmq_controller.plot_from_values
+        )
+
         self._connect_dqmq_workflow_signals()
 
         self.ui.T1T2_Button_Group.clicked.connect(self.open_group_window)

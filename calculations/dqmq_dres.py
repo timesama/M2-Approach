@@ -8,6 +8,7 @@ import numpy as np
 from scipy.integrate import trapezoid
 from scipy.optimize import curve_fit
 
+##### CONSTANTS
 K   = 0.4
 L   = 0.4
 BETA = 2
@@ -16,15 +17,18 @@ Use Dres dtep 5Hz. Use Dres range 0 - 100 KHz.
 """
 DELTA_GRID = 5 # Hz
 MAX_HZ_DRES = 100000 #Hz
-N_POINTS = MAX_HZ_DRES/DELTA_GRID
+# N_POINTS = int(np.round(MAX_HZ_DRES/DELTA_GRID), 0) # no need
 
 ### Use frequency MHz
 RAD_MAX_GRID = 2  *np.pi * MAX_HZ_DRES/(1000)**2
+RAD_DELTA_GRID = 2 * np.pi * DELTA_GRID/(1000)**2
 
-D_GRID = np.linspace(0, RAD_MAX_GRID, N_POINTS)
+# D_GRID = np.linspace(0, RAD_MAX_GRID, N_POINTS)
+D_GRID = np.arange(0, RAD_MAX_GRID, RAD_DELTA_GRID)
 VALID_KERNELS = ["gaussian", "abragam", "pake", "weibull", "a-l", "p-l"]
 
 
+##### FUNCTIONS
 def normalize_distribution(p_values, d_values):
     area = trapezoid(p_values, d_values)
     if area <= 0 or not np.isfinite(area):
@@ -54,7 +58,7 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K, l_value=L):
     if kernel == "gaussian":
         return 1.0 - np.exp(-k_value * x_values**2)
     if kernel == "abragam":
-        return 1.0 - np.exp(-k_value * x_values**2) * np.sin(x_values)
+        return 1.0 - np.exp(-k_value * x_values**2) * np.sinc(x_values) # /2pi to allow the increase
     if kernel == "pake":
         return 1.0 - np.exp(-k_value * x_values**2) * np.cos(x_values)
     if kernel == "weibull":
@@ -63,7 +67,7 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K, l_value=L):
         return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.cos(k_value * 1.4575 * x_values)
     if kernel == "p-l":
         # return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(l_value * x_values)
-        return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.sin(k_value * 1.4575 * x_values)
+        return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.sinc(k_value * 1.4575 * x_values)
 
     raise ValueError(f"Unknown kernel: {kernel}. Use one of {VALID_KERNELS}")
 
@@ -180,8 +184,10 @@ def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_componen
         maxfev=50000,
     )
 
-    fit_x = np.arange(0, fullTimearray[-1], 0.1)
-    fit_y = model(fit_x, *popt)
+    # fit_x = np.arange(0, fullTimearray[-1], 0.1)
+    # fit_y = model(fit_x, *popt)
+
+    fit_x, fit_y = get_fitted_arrays(fullTimearray, popt, model)
 
     return {
         "kernel": kernel,
@@ -196,6 +202,10 @@ def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_componen
         "l_value":l_value,
     }
 
+def get_fitted_arrays(TimeArray, popt, model):
+    fit_x = np.arange(0, TimeArray[-1], 0.1)
+    fit_y = model(fit_x, *popt)
+    return fit_x, fit_y
 
 def build_distribution(fit_result):
     n_components = fit_result["n_components"]
@@ -209,6 +219,7 @@ def build_distribution(fit_result):
         raise ValueError("n_components must be 1 or 2")
 
     d_plot = D_GRID / (2 * np.pi) * 1000.0
+    # p_values = p_values * (2 * np.pi / 1000.0) # blahblahblah, ai says the probability should be converted with Jacobian, I see no point, it is a reference value anyway.
     return d_plot, p_values
 
 def build_singular_distribution(center, sigma):

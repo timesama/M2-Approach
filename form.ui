@@ -586,7 +586,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>5</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -5653,7 +5653,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>0.000000000000000</double>
                         </property>
                         <property name="maximum">
-                         <double>1000000.000000000000000</double>
+                         <double>10000.000000000000000</double>
                         </property>
                         <property name="singleStep">
                          <double>10.000000000000000</double>
@@ -5889,7 +5889,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <double>0.000000000000000</double>
                         </property>
                         <property name="maximum">
-                         <double>1000000.000000000000000</double>
+                         <double>10000.000000000000000</double>
                         </property>
                         <property name="singleStep">
                          <double>10.000000000000000</double>

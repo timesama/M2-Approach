@@ -1019,3 +1019,65 @@ class DQMQTabController(BaseTabController):
         self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta.setValue(2)
         self.ui.DQMQ_DoubleSpinBox_DresK.setValue(0.4)
         self.ui.DQMQ_DoubleSpinBox_DresL.setValue(0.4)
+
+
+    def plot_from_values(self):
+        try:
+            # 1. take values from double boxes
+            arrays = self._dres_input_arrays()
+            kernel = self._selected_dres_kernel()
+            n_components = self._selected_dres_component_count()
+            k_value = self._dres_k_value()
+            beta = self._weibul_beta_value()
+            l_value = self._dres_l_value()
+            p0 = self._dres_initial_parameters(n_components)
+
+
+            model = dqmq_dres.make_fit_model(kernel, n_components, k_value, beta)
+            fit_x, fit_y = dqmq_dres.get_fitted_arrays(arrays['Time0'], p0, model)
+
+            if n_components == 1:
+                param_names = ["mu", "sigma"]
+            elif n_components == 2:
+                param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1"]
+
+            manual_values = {
+                "kernel": kernel,
+                "n_components": n_components,
+                "popt": p0,
+                "pcov": np.zeros(len(p0)),
+                "fit_x": fit_x,
+                "fit_y": fit_y,
+                "param_names": param_names,
+                "k_value": k_value,
+                "beta":beta,
+                "l_value":l_value,
+            }
+
+            # 2. calculate pDres for plot
+            d_plot, p_dist = dqmq_dres.build_distribution(manual_values)
+
+
+            self.dres_result = {
+                "D_plot": d_plot,
+                "P": p_dist,
+                "fit_x": manual_values["fit_x"],
+                "fit_y": manual_values["fit_y"],
+                "kernel": kernel,
+                "n_components": n_components,
+                "params": manual_values["popt"],
+                "param_names": manual_values["param_names"],
+                "p0": p0,
+                "k_value": k_value,
+                "beta_value" : beta,
+                "l_value":l_value,
+            }
+
+            # 3. plot
+            self._plot_dres_distribution()
+            self._status("Dres plotted from given values.")
+
+        except Exception as e:
+            logger.exception("Could not plot P(Dres) from given values.")
+            self._status(f"Could not plot P(Dres) from given values. {e}")
+            QMessageBox.warning(self.parent, "Dres calculation failed", str(e))
