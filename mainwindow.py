@@ -6,6 +6,7 @@ import os
 import re
 import winreg
 from webbrowser import open as open_application
+from packaging import version
 
 import numpy as np
 import pyqtgraph as pg
@@ -224,11 +225,7 @@ class MainWindow(QMainWindow):
             latest_release = response.json()
             latest_version = latest_release['tag_name']
 
-            major_version = latest_version.split('.')[0]
-            current_major_version = current_version.split('.')[0]
-
-            # if latest_version != current_version:
-            if major_version != current_major_version:
+            if version.parse(latest_version) > version.parse(current_version):
                 msg = QMessageBox(self)
                 msg.setIcon(QMessageBox.Information)
                 msg.setWindowTitle("New Relaxyzer Available")
@@ -242,6 +239,7 @@ class MainWindow(QMainWindow):
         except requests.RequestException as e:
             logger.warning("Failed to check for updates: %s", e)
             self.show_status("Could not check for updates.")
+
 
     def open_url(self):
         """Open the GitHub releases page used by the Settings tab."""
