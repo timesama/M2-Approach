@@ -1,10 +1,12 @@
-- Something is wrong with manual phasing
- + on exit without saving - should not save data
- + on reload should reload data (start button)
- + include button - restore original
- + do not open, when no daata is chosen
+...- on tab change SE and DQ - debug
+    + clar graph
+    + clear combobox 4
+    + clear highlight - but it remembers the highlight from prev click on the corresponding tab
 
-- on tab change SE and DQ
-    - clar graph
-    - clear combobox 4
-    - clear highlight
+- consider adding header to saved csv
+- blocked Loaded button in DQMQ - add standard csv saving mechanism?
+- indicate filename or something in DQMQ/Reconstruct FID
+- check the tail fraction
+?- allow D_GRID user control
+- check upd FID after phasing
+?- add manual freq tune
