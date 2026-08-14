@@ -5,7 +5,7 @@ a = Analysis(
     ['mainwindow.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('BrandIcon.ico', '.'),],
     hiddenimports=['numpy', 'numpy.core._multiarray_umath', 'numpy.core.multiarray', 'numpy.core._dtype'],
     hookspath=[],
     hooksconfig={},

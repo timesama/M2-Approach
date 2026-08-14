@@ -1075,6 +1075,8 @@ class DQMQTabController(BaseTabController):
 
             # 3. plot
             self._plot_dres_distribution()
+            if self.current_plot_mode == "analysis":
+                    self.render_analysis_plot()
             self._status("Dres plotted from given values.")
 
         except Exception as e:
