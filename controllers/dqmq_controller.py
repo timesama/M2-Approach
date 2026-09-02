@@ -562,7 +562,7 @@ class DQMQTabController(BaseTabController):
         signal = np.zeros_like(t)
         for amp, t2i, delta_t2 in zip(amp_dq, t2, d_t2):
             scaled_time = t / t2i
-            gaussian_decay = np.exp(-(scaled_time**2))
+            gaussian_decay = np.exp(-2*(scaled_time**2))
 
             signal += amp * gaussian_decay * delta_t2
 
