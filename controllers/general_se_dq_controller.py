@@ -77,6 +77,7 @@ class GeneralSEDQController(BaseTabController):
                 mw.window_array = np.array([])
 
             for i, file_path in enumerate(files, start=1):
+                line = f"{mw.tab} processing file {i}/{len(files)}: {os.path.basename(file_path)}"
                 logger.info(
                     "%s processing file %d/%d: %s",
                     mw.tab,
@@ -84,6 +85,7 @@ class GeneralSEDQController(BaseTabController):
                     len(files),
                     os.path.basename(file_path),
                 )
+                # self._status(line)
 
                 try:
                     file_path_gly = mw.selected_files_gly[i - 1] if self.ui.Settings_CheckBox_Glycerol.isChecked() else []
@@ -190,7 +192,11 @@ class GeneralSEDQController(BaseTabController):
             im_spectra = np.array(phased_record.get("im", im_spectra))
             amp_spectra = Cal._calculate_amplitude(re_spectra, im_spectra)
 
+        ### calculate savitzki golay dynamic filter before apodization
+        # re_smoothed = Cal.adaptive_savgol(re_spectra, min_window=5, max_window=1001, polyorder=2, noise_fraction=0.10, snr_low=2, snr_high=20)
+
         real_apod = Cal._calculate_apodization(re_spectra, frequency)
+        # real_apod = Cal._calculate_apodization(re_smoothed, frequency)
 
         m2, t2 = Cal._calculate_M2(real_apod, frequency)
 

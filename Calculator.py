@@ -317,7 +317,7 @@ def _apodization(Time, Real, Imaginary):
     except:
         sigma = 500
 
-    apodization_function = np.exp(-(Time / sigma) ** 4)
+    apodization_function = np.exp(-(Time / sigma) ** 6)
     Re_ap = Real * apodization_function
     Im_ap = Imaginary * apodization_function
     return Re_ap, Im_ap
@@ -352,12 +352,80 @@ def _simple_baseline_correction(FFT):
     Amp = _calculate_amplitude(Re, Im)
     return Amp, Re, Im
 
-def _calculate_apodization(Real, Freq):
-    sigma_ap = 0.4
+def _calculate_apodization1(Real, Freq):
+    sigma_ap = 0.25
 
     apodization_function_s = np.exp(-(Freq / sigma_ap) ** 6)
 
     Real_apod = Real * apodization_function_s
+
+    return Real_apod
+
+
+def _calculate_apodization(Real, Freq):
+
+    # 1. Smooth
+    df = np.abs(Freq[1] - Freq[0])
+
+    window = int(round(0.0005/df))
+
+    if window % 2 == 0:
+        window += 1
+
+    if window < 5:
+        window = 5
+
+    Real_smooth = savgol_filter(Real, window, 2)
+
+    Real_smooth = (Real_smooth + Real_smooth[::-1])/2
+
+    # 2. Find maximum
+    maximum_idx = np.argmax(Real_smooth)
+    maximum = Real_smooth[maximum_idx]
+
+    threshold = maximum*0.05
+
+    right_idx = maximum_idx
+
+    while right_idx < len(Real_smooth)-1:
+
+        if Real_smooth[right_idx] < threshold:
+            break
+
+        right_idx += 1
+
+    sigma_ap = np.abs(Freq[right_idx] - Freq[maximum_idx])
+
+    apodization_function_s = np.exp(-(Freq/sigma_ap)**6)
+
+    Real_apod = Real_smooth*apodization_function_s
+
+
+    # while left_idx > 0:
+    #     if Real_smooth[left_idx] < threshold:
+    #         break
+
+    #     left_idx -= 1
+
+    # # 5. Find right edge
+    # right_idx = maximum_idx
+
+    # while right_idx < len(Real_smooth)-1:
+    #     if Real_smooth[right_idx] < threshold:
+    #         break
+
+    #     right_idx += 1
+
+    # 6. Calculate sigma
+    # left_width = np.abs(Freq[left_idx] - Freq[maximum_idx])
+
+    # right_width = np.abs(Freq[right_idx] - Freq[maximum_idx])
+
+    # sigma_ap = max(left_width, right_width   )
+
+    # # 7. Apodization
+    # apodization_function_s = np.exp(-(Freq/sigma_ap)**6)
+    # Real_apod = (Real_smooth * apodization_function_s)
 
     return Real_apod
 
@@ -384,12 +452,154 @@ def _find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
+
+def adaptive_savgol(signal, min_window=7, max_window=101, polyorder=2, noise_fraction=0.70, snr_low=2.0, snr_high=20.0, n_windows=8):
+    """
+    Adaptive Savitzky-Golay smoothing, which depends on local SNR
+    """
+
+    y = np.asarray(signal, dtype=float)
+
+    n = len(y)
+
+    if n < 7:
+        return y.copy()
+
+    # ---------------------------------------------------------
+    # 1. Estimate baseline + noise from outer spectral regions
+    # ---------------------------------------------------------
+
+    n_noise = max(int(n * noise_fraction), 5)
+
+    noise_region = np.concatenate((y[:n_noise], y[-n_noise:]))
+
+    baseline = np.median(noise_region)
+
+    noise_sigma = (1.4826 * np.median(np.abs(noise_region - baseline)))
+
+    if noise_sigma <= np.finfo(float).eps:
+        noise_sigma = np.std(noise_region)
+
+    if noise_sigma <= np.finfo(float).eps:
+        return y.copy()
+
+    # Work relative to baseline
+    y0 = y - baseline
+
+    # ---------------------------------------------------------
+    # 2. LOCAL signal magnitude
+    # ---------------------------------------------------------
+
+    pilot_window = _make_valid_savgol_window(min_window, n, polyorder)
+
+    envelope = savgol_filter(np.abs(y0), pilot_window, polyorder, mode="interp")
+
+    # Savgol can occasionally produce tiny negative overshoots
+    envelope = np.maximum(envelope, 0)
+
+    local_snr = envelope / noise_sigma
+
+    # ---------------------------------------------------------
+    # 3. Convert SNR to window
+    # ---------------------------------------------------------
+
+    strength = ((local_snr - snr_low) / (snr_high - snr_low))
+
+    strength = np.clip(strength, 0.0, 1.0)
+
+    target_window = (max_window - strength * (max_window - min_window))
+
+    # ---------------------------------------------------------
+    # 4. Prepare odd SG windows
+    # ---------------------------------------------------------
+
+    windows = np.linspace(min_window, max_window, n_windows)
+
+    windows = np.array([_make_valid_savgol_window(int(round(w)), n, polyorder) for w in windows])
+
+    windows = np.unique(windows)
+
+    # ---------------------------------------------------------
+    # 5. Calculate SG
+    # ---------------------------------------------------------
+
+    filtered = np.array([savgol_filter(y0, int(w), polyorder, mode="interp") for w in windows])
+
+    # ---------------------------------------------------------
+    # 6. Interpolate
+    # ---------------------------------------------------------
+
+    result = np.empty_like(y0)
+
+    for i in range(n):
+
+        w_target = target_window[i]
+
+        upper_idx = np.searchsorted(windows, w_target)
+
+        if upper_idx == 0:
+            result[i] = filtered[0, i]
+
+        elif upper_idx >= len(windows):
+            result[i] = filtered[-1, i]
+
+        else:
+            lower_idx = upper_idx - 1
+
+            w1 = windows[lower_idx]
+            w2 = windows[upper_idx]
+
+            if w2 == w1:
+                result[i] = filtered[lower_idx, i]
+
+            else:
+                alpha = ((w_target - w1) / (w2 - w1))
+
+                result[i] = ((1 - alpha) * filtered[lower_idx, i] + alpha * filtered[upper_idx, i])
+
+    # Put baseline back
+    result += baseline
+
+    return result
+
+
+def _make_valid_savgol_window(window, n_points, polyorder):
+    """
+    savgol window is odd, valid, and larger than polynomial order.
+    """
+
+    window = int(window)
+
+    if window % 2 == 0:
+        window += 1
+
+    minimum = polyorder + 2
+
+    if minimum % 2 == 0:
+        minimum += 1
+
+    window = max(window, minimum)
+
+    maximum = n_points
+
+    if maximum % 2 == 0:
+        maximum -= 1
+
+    window = min(window, maximum)
+
+    return window
+
 def _calculate_M2(FFT_real, Frequency):
+
+    # RealPart_raw = np.real(FFT_real)
+
+    # RealPart = adaptive_savgol(RealPart_raw, min_window=5, max_window=1001, polyorder=2, noise_fraction=0.10, snr_low=2, snr_high=20)
 
     RealPart = np.real(FFT_real)
 
     # Take the integral of the REAL PART OF FFT by counts
-    Integral = trapezoid(RealPart)
+    # Integral = trapezoid(RealPart)
+    Integral = trapezoid(RealPart, x=Frequency)
 
     if Integral == 0:
         raise ValueError("Cannot calculate M2 because FFT integral is zero.")
@@ -400,15 +610,19 @@ def _calculate_M2(FFT_real, Frequency):
     # Calculate the integral of normalized FFT to receive 1
     Integral_one = trapezoid(Fur_normalized)
 
+    # First moment
+    f_mean = trapezoid(Frequency * Fur_normalized, x=Frequency)
+
     # Multiplication (the power ^n will give the nth moment (here it is n=2)
-    Multiplication = (Frequency ** 2) * Fur_normalized
+    # Multiplication = (Frequency ** 2) * Fur_normalized
+    Multiplication = ((Frequency-f_mean) ** 2) * Fur_normalized
 
     # Calculate the integral of multiplication - the nth moment
     # The (2pi)^2 are the units to transform from rad/sec to Hz
     # ppbly it should be (2pi)^n for generalized moment calculation
-    M2 = (trapezoid(Multiplication)) * 4 * np.pi ** 2
+    M2 = (trapezoid(Multiplication, x=Frequency)) * 4 * np.pi ** 2
 
-    ##### The untis of M2: 10^12 Hz^2
+    ##### The untis of M2: rad^2/s^2
 
     # Check the validity
     if np.abs(np.mean(Multiplication[0:10])) > 10 ** (-6):
