@@ -10,3 +10,4 @@
 ?- allow D_GRID user control
 - check upd FID after phasing
 ?- add manual freq tune
+- add on\off smoothing on M2 calculation
