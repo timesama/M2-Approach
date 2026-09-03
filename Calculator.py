@@ -8,6 +8,8 @@ from scipy.integrate import trapezoid
 from scipy.signal import savgol_filter
 from sympy import symbols, diff, solve
 
+import matplotlib.pyplot as plt
+
 logger = logging.getLogger(__name__)
 
 def moving_average(arr, window_size):
@@ -352,7 +354,7 @@ def _simple_baseline_correction(FFT):
     Amp = _calculate_amplitude(Re, Im)
     return Amp, Re, Im
 
-def _calculate_apodization1(Real, Freq):
+def _calculate_apodization(Real, Freq):
     sigma_ap = 0.25
 
     apodization_function_s = np.exp(-(Freq / sigma_ap) ** 6)
@@ -362,7 +364,7 @@ def _calculate_apodization1(Real, Freq):
     return Real_apod
 
 
-def _calculate_apodization(Real, Freq):
+def _calculate_apodization1(Real, Freq):
 
     # 1. Smooth
     df = np.abs(Freq[1] - Freq[0])
@@ -621,6 +623,9 @@ def _calculate_M2(FFT_real, Frequency):
     # The (2pi)^2 are the units to transform from rad/sec to Hz
     # ppbly it should be (2pi)^n for generalized moment calculation
     M2 = (trapezoid(Multiplication, x=Frequency)) * 4 * np.pi ** 2
+
+    # plt.plot(Frequency, Multiplication)
+    # plt.show()
 
     ##### The untis of M2: rad^2/s^2
 
