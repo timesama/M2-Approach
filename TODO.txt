@@ -11,3 +11,5 @@
 - check upd FID after phasing
 ?- add manual freq tune
 - add on\off smoothing on M2 calculation
+- add the percentage defining for savitazki golay smoothing: recommended 5%
+- add restoration of original data on pressing the manual phasing by default

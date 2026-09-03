@@ -354,7 +354,7 @@ def _simple_baseline_correction(FFT):
     Amp = _calculate_amplitude(Re, Im)
     return Amp, Re, Im
 
-def _calculate_apodization(Real, Freq):
+def _calculate_apodization1(Real, Freq):
     sigma_ap = 0.25
 
     apodization_function_s = np.exp(-(Freq / sigma_ap) ** 6)
@@ -364,7 +364,7 @@ def _calculate_apodization(Real, Freq):
     return Real_apod
 
 
-def _calculate_apodization1(Real, Freq):
+def _calculate_apodization(Real, Freq):
 
     # 1. Smooth
     df = np.abs(Freq[1] - Freq[0])
