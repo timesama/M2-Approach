@@ -217,7 +217,7 @@ class MainWindow(QMainWindow):
 
     def check_for_updates(self):
         """Check GitHub releases and prompt when a newer app version exists."""
-        current_version = '0.3.2'
+        current_version = '0.3.3'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             response = requests.get(url)
@@ -225,16 +225,22 @@ class MainWindow(QMainWindow):
             latest_release = response.json()
             latest_version = latest_release['tag_name']
 
-            if version.parse(latest_version) > version.parse(current_version):
-                msg = QMessageBox(self)
-                msg.setIcon(QMessageBox.Information)
-                msg.setWindowTitle("New Relaxyzer Available")
-                msg.setText(f"A new version (Relaxyzer {latest_version}) is available.\nWould you like to update?")
-                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-                msg.setWindowFlags(msg.windowFlags() | Qt.WindowStaysOnTopHint)
-                result = msg.exec_()
-                if result == QMessageBox.Yes:
-                    self.open_url()
+            new_version = version.parse(latest_version)
+            current_version = version.parse(current_version)
+
+            if new_version > current_version:
+                if (new_version.major, new_version.minor) > (current_version.major, current_version.minor): 
+                    msg = QMessageBox(self)
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setWindowTitle("New Relaxyzer Available")
+                    msg.setText(f"A new version (Relaxyzer {latest_version}) is available.\nWould you like to update?")
+                    msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                    msg.setWindowFlags(msg.windowFlags() | Qt.WindowStaysOnTopHint)
+                    result = msg.exec_()
+                    if result == QMessageBox.Yes:
+                        self.open_url()
+                else:
+                    print(f"There is a new patch update: {latest_version}!")
 
         except requests.RequestException as e:
             logger.warning("Failed to check for updates: %s", e)
