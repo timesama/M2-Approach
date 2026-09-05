@@ -15,8 +15,10 @@ BETA = 2
 """
 Use Dres dtep 5Hz. Use Dres range 0 - 100 KHz.
 """
-DELTA_GRID = 5 # Hz
-MAX_HZ_DRES = 100000 #Hz
+# DELTA_GRID = 5 # Hz
+# MAX_HZ_DRES = 100000 #Hz
+DELTA_GRID = 1.5 # Hz
+MAX_HZ_DRES = 30000 #Hz
 # N_POINTS = int(np.round(MAX_HZ_DRES/DELTA_GRID), 0) # no need
 
 ### Use frequency MHz
@@ -67,7 +69,6 @@ def dq_kernel(x_values, kernel, beta=2.0, k_value=K, l_value=L):
         return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.cos(k_value * 1.4575 * x_values)
     if kernel == "p-l":
         return 1.0 - np.exp(-(k_value * x_values)**beta) * np.cos(l_value * x_values)
-        # return 1.0 - np.exp(-(k_value* 0.945 * x_values)**beta) * np.sinc(k_value * 1.4575 * x_values)
 
     raise ValueError(f"Unknown kernel: {kernel}. Use one of {VALID_KERNELS}")
 
@@ -140,15 +141,20 @@ def fit_selected_model(fullTimearray, time0, ndq0, kernel="gaussian", n_componen
     if not np.isfinite(l_value) or l_value <= 0:
         raise ValueError("Dres L value must be a positive finite number.")
 
+    try:
+        model = make_fit_model(kernel, n_components, k_value, beta)
+    except:
+        #TODO: add here the error window
+        print('ALARM')
+        return
 
-    model = make_fit_model(kernel, n_components, k_value, beta)
     if n_components == 1:
-        default_p0 = [0.25, 1e-3]
+        default_p0 = [0.1, 1e-3]
         bounds_min = [0, 0.001]
         bounds_max = [RAD_MAX_GRID, 1.0]
         param_names = ["mu", "sigma"]
     elif n_components == 2:
-        default_p0 = [0.25, 0.001, 0.05, 0.001, 0.5]
+        default_p0 = [0.1, 0.001, 0.05, 0.001, 0.5]
         bounds_min = [0, 0.001, 0, 0.001, 0.0]
         bounds_max = [RAD_MAX_GRID, 1.0, RAD_MAX_GRID, 1.0, 1.0]
         param_names = ["mu1", "sigma1", "mu2", "sigma2", "frac1"]
