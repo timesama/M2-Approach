@@ -73,7 +73,7 @@ def fit_tail(time, dq_norm, ref_norm, fit_from, fit_to, exponent):
 
     def exponent_model(x_values, amplitude, tau, offset):
         safe_tau = tau + 1e-12
-        scaled_time = x_values / safe_tau
+        scaled_time = 2*x_values / safe_tau
         exponent_values = -(scaled_time**exponent)
         return amplitude * np.exp(exponent_values) + offset
 
