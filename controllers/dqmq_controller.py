@@ -207,6 +207,7 @@ class DQMQTabController(BaseTabController):
             self.reset_cached_results(clear_raw=False)
             self._write_raw_table(raw_data)
             self.render_raw_plot()
+            self._write_filename()
             logger.info("DQMQ raw load completed: %d points", len(raw_data["time"]))
             self._status("Loaded DQMQ data.")
 
@@ -237,6 +238,15 @@ class DQMQTabController(BaseTabController):
                 )
 
         return time, dq, ref
+
+    def _write_filename(self):
+        try:
+            file_path = self._get_current_file()
+            name_base = os.path.basename(file_path)
+            self.ui.DQMQ_TextEdit_FilenameLabel.setText(name_base)
+        except:
+            logger.exception("Couldn't read the filename")
+            return
 
     def plot_original(self):
         result = self.render_raw_plot()
@@ -318,7 +328,6 @@ class DQMQTabController(BaseTabController):
         else:
             tail_fraction = np.round(self.analysis_result["tail_fraction"],2)
         text_line.setText(f"Tail fraction: {tail_fraction}")
-
 
     def plot_norm(self):
         return self.run_full_analysis()
@@ -1007,7 +1016,6 @@ class DQMQTabController(BaseTabController):
 
         return save_path
 
-
     def reset_Dres_values(self):
         logger.info("Dres fitting parameters restored to defaults")
         self._status("Dres fitting parameters restored to defaults.")
@@ -1019,7 +1027,6 @@ class DQMQTabController(BaseTabController):
         self.ui.DQMQ_DoubleSpinBox_DresWeibullBeta.setValue(2)
         self.ui.DQMQ_DoubleSpinBox_DresK.setValue(0.4)
         self.ui.DQMQ_DoubleSpinBox_DresL.setValue(0.4)
-
 
     def plot_from_values(self):
         try:

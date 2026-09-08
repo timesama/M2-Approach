@@ -217,7 +217,7 @@ class MainWindow(QMainWindow):
 
     def check_for_updates(self):
         """Check GitHub releases and prompt when a newer app version exists."""
-        current_version = '0.3.3'
+        current_version = '0.3.4'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             response = requests.get(url)
@@ -500,8 +500,6 @@ class MainWindow(QMainWindow):
         self.show_status("Deleted selected row.")
 
     def highlight_row(self, table, row_selected):
-
-
         for col in range(table.columnCount()):
             for row in range(table.rowCount()):
                 item = table.item(row, col)
@@ -511,7 +509,6 @@ class MainWindow(QMainWindow):
             item_selected = table.item(row_selected-1, col)
             if item_selected is not None:
                 item_selected.setBackground(QColor(255, 255, 0))
-
 
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)

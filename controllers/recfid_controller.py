@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import os
 import pyqtgraph as pg
 import pyqtgraph.exporters
 from PySide6.QtCore import QSignalBlocker, Qt
@@ -268,6 +269,14 @@ class RecFIDController(BaseTabController):
             f"Build-up T₂*={round(t2_build, 5)}, M₂={round(m2_build, 5)}; "
             f"FID T₂*={self.fid_result['T2']}, M₂={self.fid_result['M2']}"
         )
+        self._update_text(
+            "RecFID_Label_RebuildData",
+            f"T₂*={round(t2_build, 2)}, M₂={round(m2_build, 5)}",
+            )
+        self._update_text(
+            "RecFID_Label_FileName",
+            f"{os.path.basename(self.selected_fid_files[0])}",
+            )
         return m2_build, t2_build
 
     def run_time_analysis(self):
@@ -800,6 +809,8 @@ class RecFIDController(BaseTabController):
             "RecFID_TextEdit_OriginalResults",
             "RecFID_TextEdit_SEMaxResult",
             "RecFID_TextEdit_BuildUpResults",
+            "RecFID_Label_FileName",
+            "RecFID_Label_RebuildData"
         ):
             widget = getattr(self.ui, widget_name, None)
             if widget is not None:
@@ -822,6 +833,14 @@ class RecFIDController(BaseTabController):
     def _text(self, widget_name, default=""):
         widget = getattr(self.ui, widget_name, None)
         return widget.currentText() if widget is not None else default
+
+    def _update_text(self, widget_name, text_line = ""):
+        try:
+            widget = getattr(self.ui, widget_name, None)
+            widget.setText(text_line)
+        except:
+            logger.exception("Coulkdn;t update file data")
+            return
 
     def _warn(self, title, message):
         self._status(message)

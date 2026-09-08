@@ -60,20 +60,24 @@ class RecFIDTimeAnalysisDialog(QDialog):
         self.slider_label.setText(f"T₂ Threshold: {threshold:.2f}")
         t2_masked = np.ma.masked_where((self.t2 < 5) | (self.t2 > threshold), self.t2)
         cmap = "rainbow" if self.rainbow_checkbox.isChecked() else "RdYlGn"
+
         self.canvas.figure.clf()
         grid = self.canvas.figure.add_gridspec(1, 2, width_ratios=[1, 1], wspace=0.1)
         ax_main = self.canvas.figure.add_subplot(grid[0])
         ax_hist = self.canvas.figure.add_subplot(grid[1])
         heatmap = ax_main.pcolormesh(self.finish_range, self.start_range, t2_masked, shading="auto", cmap=cmap)
         self.canvas.figure.colorbar(heatmap, ax=ax_main, label="T₂ Value")
+
         ax_main.set_xlabel("Finish Range")
         ax_main.set_ylabel("Start Range")
         ax_main.set_xlim(self.finish_range[0], self.finish_range[-1])
         ax_main.set_ylim(self.start_range[0], self.start_range[-1])
+
         compressed = t2_masked.compressed()
         if compressed.size:
             ax_hist.hist(compressed, bins=20, color="blue")
             ax_hist.set_xlim(float(np.min(compressed)), float(np.max(compressed)))
+
         ax_hist.set_ylabel("Count")
         ax_hist.yaxis.set_label_position("right")
         ax_hist.yaxis.tick_right()

@@ -5,13 +5,13 @@
 
 - consider adding header to saved csv
 - blocked Loaded button in DQMQ - add standard csv saving mechanism?
-- indicate filename or something in DQMQ/Reconstruct FID
++ indicate filename or something in DQMQ/Reconstruct FID
 - check the tail fraction
 ?- allow D_GRID user control
 - check upd FID after phasing
 ?- add manual freq tune
 - add on\off smoothing on M2 calculation
 - add the percentage defining for savitazki golay smoothing: recommended 5%
-- add restoration of original data on pressing the manual phasing by default
-
--adaptive grid in Dres requires adaptive boundaries for the center\width etc values
++ add restoration of original data on pressing the manual phasing by default
+- update the interactive dres calculation to the module in use
+- adaptive grid in Dres requires adaptive boundaries for the center\width etc values
