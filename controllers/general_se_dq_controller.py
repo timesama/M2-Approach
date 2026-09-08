@@ -281,6 +281,7 @@ class GeneralSEDQController(BaseTabController):
             return
 
         mw = self.parent
+        mw.update_file(keep_phasing=False)
         phasing_manual_module.Frequency = self.state.spectrum.frequency
         phasing_manual_module.Re_spectra = self.state.spectrum.re_spectra
         phasing_manual_module.Im_spectra = self.state.spectrum.im_spectra
