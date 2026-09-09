@@ -10,9 +10,7 @@ from packaging import version
 
 import numpy as np
 import pyqtgraph as pg
-# import pyqtgraph.exporters
 import requests
-# from PySide6.QtCore import QCoreApplication, Qt
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import QApplication, QFileDialog, QDialog, QInputDialog, QMainWindow, QMessageBox, QScrollArea, QTableWidgetItem
