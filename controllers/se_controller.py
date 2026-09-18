@@ -36,10 +36,19 @@ class SETabController(BaseTabController):
         short_to = self.ui.Settings_DoubleSpinBox_SCShortEnd.value() * 2
         long_from = self.ui.Settings_DoubleSpinBox_SCLongStart.value() * 2
         long_to = self.ui.Settings_DoubleSpinBox_SCLongEnd.value() * 2
-        absolute = self.ui.Settings_RadioButton_SCAbsolute.isChecked()
+
+        checked_way = 1 # ISO alterantive is default
+
+        if self.ui.Settings_RadioButton_SCAbsolute.isChecked():
+            checked_way  = 0
+        elif self.ui.Settings_RadioButton_SCRelative.isChecked():
+            checked_way = 1
+        elif self.ui.Settings_RadioButton_SCRatio.isChecked():
+            checked_way = 2
+
 
         times = [int(short_from), int(short_to), int(long_from), int(long_to)]
-        sfc = Cal.calculate_SC(amp, times, absolute)
+        sfc = Cal.calculate_SC(amp, times, checked_way)
 
         self.ui.SE_Table_Data.setRowCount(i)
         t2 = round(t2, 3)

@@ -641,16 +641,20 @@ def _calculate_M2(FFT_real, Frequency):
 
     return M2, T2
 
-def calculate_SC(Amplitude, times, absolute):
+def calculate_SC(Amplitude, times, checked_way):
 
     try:
         S = np.mean(Amplitude[times[0]:times[1]])
         L = np.mean(Amplitude[times[2]:times[3]])
 
-        if absolute:
+        if checked_way == 0: # absolute
             solid_content = S
-        else:
+        elif checked_way == 1: # ISO alternative
             solid_content = (S-L)/S
+        elif checked_way == 2: # Tario for GS
+            solid_content = L/S
+        else:
+            solid_content = 0
         return solid_content
     except Exception as e:
         logger.warning("Could not calculate solid content; using 0: %s", e)
