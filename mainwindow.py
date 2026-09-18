@@ -88,13 +88,11 @@ class MainWindow(QMainWindow):
         self.gs_controller = GSTabController(ui=self.ui, state=self.app_state, parent=self)
         self.recfid_controller = RecFIDController(ui=self.ui, state=self.app_state, parent=self)
         self.general_se_dq_controller = GeneralSEDQController(ui=self.ui, state=self.app_state, parent=self, se_controller=self.se_controller, dq_controller=self.dq_controller)
-        self.interactive_dres_figure = None
 
         self.state()
 
         self.ui.Settings_Button_DefaultFolder.clicked.connect(self.default_folder)
         self.ui.Settings_Button_OpenProjectPage.clicked.connect(self.open_url)
-        self.ui.Settings_Button_InteractiveDres.clicked.connect(self.open_interactive_dres_tool)
         self.check_for_updates()
 
         self.ui.tabWidget.currentChanged.connect(self.state)
@@ -250,54 +248,6 @@ class MainWindow(QMainWindow):
         open_application('https://github.com/timesama/M2-Approach/releases')
         self.show_status("Opened project releases page.")
 
-    def open_interactive_dres_tool(self):
-        """Open or raise the standalone interactive Dres matplotlib tool."""
-        try:
-            import matplotlib.pyplot as plt
-
-            if (
-                self.interactive_dres_figure is not None
-                and plt.fignum_exists(self.interactive_dres_figure.number)
-            ):
-                self._raise_interactive_dres_window(self.interactive_dres_figure)
-                self.show_status("Interactive Dres tool is already open.")
-                return
-
-            from plotmat import plot_interactive_Dres as interactive_dres
-
-            self.interactive_dres_figure = interactive_dres.open_interactive_dres(parent=self)
-            self.interactive_dres_figure.canvas.mpl_connect(
-                "close_event",
-                self._clear_interactive_dres_reference,
-            )
-            self.show_status("Opened interactive Dres tool.")
-        except Exception:
-            logger.exception("Could not open the interactive Dres tool.")
-            self.interactive_dres_figure = None
-            self.show_status("Could not open interactive Dres tool.")
-            QMessageBox.warning(
-                self,
-                "Interactive Dres",
-                "Could not open the interactive Dres tool.",
-                QMessageBox.Ok,
-            )
-
-    def _raise_interactive_dres_window(self, figure):
-        """Bring the existing interactive Dres matplotlib window to the front when possible."""
-        manager = getattr(figure.canvas, "manager", None)
-        window = getattr(manager, "window", None)
-        if window is not None:
-            if hasattr(window, "raise_"):
-                window.raise_()
-            if hasattr(window, "activateWindow"):
-                window.activateWindow()
-        elif manager is not None and hasattr(manager, "show"):
-            manager.show()
-
-    def _clear_interactive_dres_reference(self, event):
-        """Forget the Dres figure after matplotlib has closed it."""
-        if event.canvas.figure is self.interactive_dres_figure:
-            self.interactive_dres_figure = None
 
     def update_file(self, keep_phasing):
         """Load the selected SE/DQ file into the shared FID/FFT preview widgets."""

@@ -586,7 +586,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>6</number>
+              <number>0</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -6778,7 +6778,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <string>Solid Content ( S-L to S)</string>
                   </property>
                   <property name="checked">
-                   <bool>false</bool>
+                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>
@@ -6922,7 +6922,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <string>Ratio (L to S)</string>
                   </property>
                   <property name="checked">
-                   <bool>true</bool>
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -7014,19 +7014,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  </widget>
                 </item>
                </layout>
-              </widget>
-              <widget class="QPushButton" name="Settings_Button_InteractiveDres">
-               <property name="geometry">
-                <rect>
-                 <x>730</x>
-                 <y>30</y>
-                 <width>224</width>
-                 <height>24</height>
-                </rect>
-               </property>
-               <property name="text">
-                <string>Interactive Dres</string>
-               </property>
               </widget>
              </widget>
             </widget>
