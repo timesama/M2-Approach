@@ -5616,7 +5616,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                          <string>Medium</string>
                         </property>
                         <property name="checked">
-                         <bool>true</bool>
+                         <bool>false</bool>
                         </property>
                        </widget>
                       </item>
@@ -5624,6 +5624,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
                        <widget class="QRadioButton" name="GS_RadioButton_Long">
                         <property name="text">
                          <string>Long</string>
+                        </property>
+                        <property name="checked">
+                         <bool>true</bool>
                         </property>
                        </widget>
                       </item>

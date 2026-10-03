@@ -4,6 +4,7 @@ import re
 
 import numpy as np
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
+from PySide6.QtCore import QSignalBlocker
 
 from calculations import t1t2_signal
 from controllers.base_tab_controller import BaseTabController
@@ -14,6 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class T1T2TabController(BaseTabController):
+    def __init__(self, ui, state, parent=None):
+        super().__init__(ui, state, parent)
+        self.file_settings = {}
+
     def connect_signals(self):
         self.ui.T1T2_Button_Plot.clicked.connect(self.plot_relaxation_time_from_user)
         self.ui.T1T2_Table_Results.horizontalHeader().sectionDoubleClicked.connect(
@@ -30,9 +35,108 @@ class T1T2TabController(BaseTabController):
         self.ui.T1T2_DoubleSpinBox_InitialTau1.returnPressed.connect(self.calculate_relaxation_time_from_user)
         self.ui.T1T2_DoubleSpinBox_InitialTau2.returnPressed.connect(self.calculate_relaxation_time_from_user)
         self.ui.T1T2_DoubleSpinBox_InitialTau3.returnPressed.connect(self.calculate_relaxation_time_from_user)
-        self.ui.T1T2_ComboBox_ChooseFile.activated.connect(
-            lambda *_args: self.calculate_relaxation_time_from_user()
-        )
+
+        # self.ui.T1T2_ComboBox_ChooseFile.activated.connect(
+        #     lambda *_args: self.calculate_relaxation_time_from_user()
+        # )
+
+        self.ui.T1T2_ComboBox_ChooseFile.activated.connect(self.on_file_selected)
+
+
+    def _current_file_key(self):
+        idx = self.ui.T1T2_ComboBox_ChooseFile.currentIndex()
+
+        if idx < 0:
+            return None
+
+        item = self.ui.T1T2_Table_Results.item(idx, T1Columns.FOLDER)
+
+        if item is None:
+            return None
+
+        return item.text()
+
+
+    def _save_current_settings(self):
+        key = self._current_file_key()
+
+        if key is None:
+            return
+
+        if self.ui.T1T2_Button_FitOneExp.isChecked():
+            order = 1
+        elif self.ui.T1T2_Button_FitTwoExp.isChecked():
+            order = 2
+        else:
+            order = 3
+
+        self.file_settings[key] = {
+            "order": order,
+
+            "time_unit": (
+                "seconds"
+                if self.ui.T1T2_RadioButton_Seconds.isChecked()
+                else "milliseconds"
+            ),
+
+            "tau1": self.ui.T1T2_DoubleSpinBox_InitialTau1.value(),
+            "tau2": self.ui.T1T2_DoubleSpinBox_InitialTau2.value(),
+            "tau3": self.ui.T1T2_DoubleSpinBox_InitialTau3.value(),
+
+            "fit_from": self.ui.T1T2_DoubleSpinBox_FitFrom.value(),
+            "fit_to": self.ui.T1T2_DoubleSpinBox_FitTo.value(),
+        }
+
+
+    def _restore_current_settings(self):
+        key = self._current_file_key()
+
+        if key is None:
+            return False
+
+        settings = self.file_settings.get(key)
+
+        if settings is None:
+            return False
+
+        widgets = [
+            self.ui.T1T2_Button_FitOneExp,
+            self.ui.T1T2_Button_FitTwoExp,
+            self.ui.T1T2_Button_FitThreeExp,
+            self.ui.T1T2_RadioButton_Seconds,
+            self.ui.T1T2_RadioButton_Milliseconds,
+            self.ui.T1T2_DoubleSpinBox_InitialTau1,
+            self.ui.T1T2_DoubleSpinBox_InitialTau2,
+            self.ui.T1T2_DoubleSpinBox_InitialTau3,
+            self.ui.T1T2_DoubleSpinBox_FitFrom,
+            self.ui.T1T2_DoubleSpinBox_FitTo,
+        ]
+
+        blockers = [QSignalBlocker(widget) for widget in widgets]
+
+        order = settings["order"]
+
+        self.ui.T1T2_Button_FitOneExp.setChecked(order == 1)
+        self.ui.T1T2_Button_FitTwoExp.setChecked(order == 2)
+        self.ui.T1T2_Button_FitThreeExp.setChecked(order == 3)
+
+        seconds = settings["time_unit"] == "seconds"
+
+        self.ui.T1T2_RadioButton_Seconds.setChecked(seconds)
+        self.ui.T1T2_RadioButton_Milliseconds.setChecked(not seconds)
+
+        self.ui.T1T2_DoubleSpinBox_InitialTau1.setValue(settings["tau1"])
+        self.ui.T1T2_DoubleSpinBox_InitialTau2.setValue(settings["tau2"])
+        self.ui.T1T2_DoubleSpinBox_InitialTau3.setValue(settings["tau3"])
+
+        self.ui.T1T2_DoubleSpinBox_FitFrom.setValue(settings["fit_from"])
+        self.ui.T1T2_DoubleSpinBox_FitTo.setValue(settings["fit_to"])
+
+        return True
+
+    def on_file_selected(self, *_args):
+        self._restore_current_settings()
+        self.calculate_relaxation_time(show_warning=True)
 
     def update_T12_table(self):
         if self.parent.selected_T1files:
@@ -276,9 +380,6 @@ class T1T2TabController(BaseTabController):
         return preserved_rows
 
     def change_exponential_order(self):
-        # self.ui.T1T2_DoubleSpinBox_InitialTau1.setEnabled(True)
-        # self.ui.T1T2_DoubleSpinBox_InitialTau2.setEnabled(not self.ui.T1T2_Button_FitOneExp.isChecked())
-        # self.ui.T1T2_DoubleSpinBox_InitialTau3.setEnabled(self.ui.T1T2_Button_FitThreeExp.isChecked())
         self.calculate_relaxation_time(show_warning=True)
 
     def calculate_relaxation_time_from_user(self):
@@ -371,8 +472,10 @@ class T1T2TabController(BaseTabController):
             return
 
         logger.info("T1T2 fit completed: tau1=%s tau2=%s tau3=%s r2=%s", tau_1, tau_2, tau_3, r2)
+
         if show_warning:
             self._status("Fit completed.")
+
         self.ui.T1T2_TextEdit_FitResult.setText(f"R² {r2}")
         table.setItem(idx, T1Columns.TAU_1, QTableWidgetItem(str(tau_1)))
         table.setItem(idx, T1Columns.TAU_2, QTableWidgetItem(str(tau_2)))
@@ -381,12 +484,18 @@ class T1T2TabController(BaseTabController):
         table.setItem(idx, T1Columns.A_2, QTableWidgetItem(str(amp_2)))
         table.setItem(idx, T1Columns.A_3, QTableWidgetItem(str(amp_3)))
         table.resizeColumnsToContents()
+
         figure.clear()
         figure.plot(time_values, signal_values, pen=None, symbolPen=None, symbol="o", symbolBrush="r", symbolSize=10)
         figure.plot(fit_time_curve, fit_signal_curve, pen="b")
+
         dictionary[key]["T1 1"] = tau_1
         dictionary[key]["T1 2"] = tau_2
         dictionary[key]["T1 3"] = tau_3
+
+        self._save_current_settings()
+
+
 
     def plot_relaxation_time_from_user(self):
         self.plot_relaxation_time(show_warning=True)
