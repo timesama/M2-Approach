@@ -3,16 +3,21 @@
     + clear combobox 4
     + clear highlight - but it remembers the highlight from prev click on the corresponding tab
 
+the things i dont want to do:
 - consider adding header to saved csv
 - blocked Loaded button in DQMQ - add standard csv saving mechanism?
+?- allow D_GRID user control
+- adaptive grid in Dres requires adaptive boundaries for the center\width etc values
+    - which is exactly the reson im not going to do this.
+
+the things i can do
 + indicate filename or something in DQMQ/Reconstruct FID
 - check the tail fraction
-?- allow D_GRID user control
 - check upd FID after phasing
 ?- add manual freq tune
 + add the percentage defining for savitazki golay smoothing: recommended 5%
 + add restoration of original data on pressing the manual phasing by default
-- adaptive grid in Dres requires adaptive boundaries for the center\width etc values
-- save the value of y0 for spin diffusion
+- save the value of y0 for spin diffusion - and actually all the values changed in the T1T2 and GS tab!
 + allow copy paste for y0
 - add new tab with complex fitting.
+- do not load the file with the same filepath to the T1T2, FID, SpinDiffusion
