@@ -24,13 +24,13 @@ class GSTabController(BaseTabController):
         self.ui.GS_RadioButton_Medium.clicked.connect(self.calculate_sqrt_time)
         self.ui.GS_RadioButton_Long.clicked.connect(self.calculate_sqrt_time)
 
-        self.ui.GS_DoubleSpinBox_FitFrom.editingFinished.connect(self.calculate_sqrt_time)
-        self.ui.GS_DoubleSpinBox_FitTo.editingFinished.connect(self.calculate_sqrt_time)
-        # self.ui.GS_DoubleSpinBox_y0.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_FitFrom.returnPressed.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_FitTo.returnPressed.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_y0.returnPressed.connect(self.calculate_sqrt_time)
 
-        self.ui.GS_DoubleSpinBox_Beta.editingFinished.connect(self.calculate_sqrt_time)
-        self.ui.GS_DoubleSpinBox_R2.editingFinished.connect(self.calculate_sqrt_time)
-        self.ui.GS_DoubleSpinBox_M2.editingFinished.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_Beta.returnPressed.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_R2.returnPressed.connect(self.calculate_sqrt_time)
+        self.ui.GS_DoubleSpinBox_M2.returnPressed.connect(self.calculate_sqrt_time)
         self.ui.GS_ComboBox_ChooseFile.activated.connect(lambda *_args: self.calculate_sqrt_time())
 
     def update_GS_table(self):

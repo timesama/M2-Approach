@@ -24,8 +24,8 @@ class SETabController(BaseTabController):
         self.ui.SE_RadioButton_EActKCal.clicked.connect(self.plot_Arr)
         self.ui.SE_RadioButton_EActKJ.clicked.connect(self.plot_Arr)
         self.ui.SE_CheckBox_EActToKelvin.clicked.connect(self.plot_Arr)
-        self.ui.SE_DoubleSpinBox_EActStart.editingFinished.connect(self.plot_Arr)
-        self.ui.SE_DoubleSpinBox_EActEnd.editingFinished.connect(self.plot_Arr)
+        self.ui.SE_DoubleSpinBox_EActStart.returnPressed.connect(self.plot_Arr)
+        self.ui.SE_DoubleSpinBox_EActEnd.returnPressed.connect(self.plot_Arr)
         self.ui.SE_Button_EActDone.clicked.connect(self.hide_Eact)
 
     def process_processed_file(self, i, filename, amp, m2, t2, file_path):

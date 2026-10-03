@@ -14,8 +14,8 @@ class DQTabController(BaseTabController):
         self.ui.DQ_Table_Data.currentItemChanged.connect(lambda *_args: self.update_graphs())
         self.ui.DQ_Table_Data.itemSelectionChanged.connect(self.update_graphs)
         self.ui.DQ_ComboBox_FitFunction.activated.connect(lambda *_args: self.plot_fit_from_user())
-        self.ui.DQ_DoubleSpinBox_FilterFrom.editingFinished.connect(self.update_graphs_from_user)
-        self.ui.DQ_DoubleSpinBox_FilterTo.editingFinished.connect(self.update_graphs_from_user)
+        self.ui.DQ_DoubleSpinBox_FilterFrom.returnPressed.connect(self.update_graphs_from_user)
+        self.ui.DQ_DoubleSpinBox_FilterTo.returnPressed.connect(self.update_graphs_from_user)
 
     def process_processed_file(self, i, filename, x, y, z, m2, t2, file_path):
         match = re.search(r"_(\d+\.\d+)_", filename)

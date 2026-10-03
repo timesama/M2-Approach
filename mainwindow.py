@@ -136,7 +136,7 @@ class MainWindow(QMainWindow):
         self.ui.DQMQ_Button_CalculateDres.clicked.connect(
             self.dqmq_controller.calculate_dres
         )
-        self.ui.DQMQ_DoubleSpinBox_IntegralShift.editingFinished.connect(
+        self.ui.DQMQ_DoubleSpinBox_IntegralShift.returnPressed.connect(
             self.dqmq_controller.update_integral_sum_shift
         )
 
