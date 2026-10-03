@@ -193,10 +193,8 @@ class GeneralSEDQController(BaseTabController):
             amp_spectra = Cal._calculate_amplitude(re_spectra, im_spectra)
 
         ### calculate savitzki golay dynamic filter before apodization
-        # re_smoothed = Cal.adaptive_savgol(re_spectra, min_window=5, max_window=1001, polyorder=2, noise_fraction=0.10, snr_low=2, snr_high=20)
-
-        real_apod = Cal._calculate_apodization(re_spectra, frequency)
-        # real_apod = Cal._calculate_apodization(re_smoothed, frequency)
+        threshold_percentage = self.ui.Settings_DoubleSpinBox_threshold_percentage.value()
+        real_apod = Cal._calculate_apodization(re_spectra, frequency, threshold_percentage)
 
         m2, t2 = Cal._calculate_M2(real_apod, frequency)
 
@@ -248,7 +246,8 @@ class GeneralSEDQController(BaseTabController):
         elif mw.tab == "DQ" and filename:
             mw.phased_spectra_DQ[filename] = {"re": re_spectra.tolist(), "im": im_spectra.tolist()}
 
-        real_apod = Cal._calculate_apodization(re_spectra, frequency)
+        threshold_percentage = self.ui.Settings_DoubleSpinBox_threshold_percentage.value()
+        real_apod = Cal._calculate_apodization(re_spectra, frequency,threshold_percentage)
         amp_spectra = Cal._calculate_amplitude(re_spectra, im_spectra)
 
         mw.update_graphs(frequency, amp_spectra, re_spectra, im_spectra, self.ui.FFTWidget)

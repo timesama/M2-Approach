@@ -152,9 +152,9 @@ class RecFIDController(BaseTabController):
     def run_basic_data_analysis(self):
         data, data_empty, fid, fid_empty = self._choose_files_for_comparison(0)
 
-        # result = self._apply_mse_divider_to_analysis_result(data)
+        threshold_percentage = self._value("Settings_DoubleSpinBox_threshold_percentage", 5)
 
-        result = recfid.analyze_signal(data, fid, data_empty, fid_empty, self._analysis_options())
+        result = recfid.analyze_signal(data, fid, data_empty, fid_empty, self._analysis_options(), threshold_percentage)
 
 
         if result is None:
@@ -187,7 +187,8 @@ class RecFIDController(BaseTabController):
 
         for index, file_name in enumerate(self.selected_data_files):
             data_empty = self.selected_data_empty_files[index] if self.selected_data_empty_files else None
-            result = recfid.analyze_signal(file_name, fid, data_empty, fid_empty, self._analysis_options())
+            threshold_percentage = self._value("Settings_DoubleSpinBox_threshold_percentage", 5)
+            result = recfid.analyze_signal(file_name, fid, data_empty, fid_empty, self._analysis_options(), threshold_percentage)
             self.data_results[file_name] = self._data_result_from_analysis(result)
             se_max.append(float(np.max(result.signal_data)))
             se_t2.append(result.t2_data)
@@ -252,6 +253,7 @@ class RecFIDController(BaseTabController):
             begin,
             finish,
             self._value("RecFID_DoubleSpinBox_ApodizationSigma", 100.0),
+            self._value("Settings_DoubleSpinBox_threshold_percentage", 5),
         )
 
         self.build_result = {
@@ -406,6 +408,7 @@ class RecFIDController(BaseTabController):
         start_range, finish_range = recfid.time_range_grid(
             self.fid_result["Time_td_fid"], self._value("RecFID_SpinBox_TimeAnalysisRange", 24)
         )
+
         m2 = []
         t2 = []
         for begin in start_range:
@@ -423,6 +426,7 @@ class RecFIDController(BaseTabController):
                             begin,
                             finish,
                             self._value("RecFID_DoubleSpinBox_ApodizationSigma", 100.0),
+                            self._value("Settings_DoubleSpinBox_threshold_percentage", 5),
                         )
                     except Exception:
                         logger.exception("RecFID time-analysis point failed: begin=%s finish=%s", begin, finish)
@@ -519,29 +523,6 @@ class RecFIDController(BaseTabController):
         )
         self.selected_data_empty_files = []
         return True
-
-
-    # def _apply_mse_divider_to_analysis_result(self, result):
-    #     if self.recfid_mode != "mse":
-    #         return result
-    #     divider = self._validated_mse_divider()
-    #     if divider is None:
-    #         return None
-    #     # MSE divider applies only to the MSE data amplitude, not the FID reference.
-    #     return recfid.SignalAnalysisResult(
-    #         time_data=result.time_data,
-    #         signal_data=result.signal_data / divider,
-    #         time_fid=result.time_fid,
-    #         signal_fid=result.signal_fid,
-    #         frequency_data=result.frequency_data,
-    #         spectrum_data=result.spectrum_data / divider,
-    #         frequency_fid=result.frequency_fid,
-    #         spectrum_fid=result.spectrum_fid,
-    #         m2_data=result.m2_data,
-    #         t2_data=result.t2_data,
-    #         m2_fid=result.m2_fid,
-    #         t2_fid=result.t2_fid,
-    #     )
 
     def _data_result_from_analysis(self, result):
         return {

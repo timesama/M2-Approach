@@ -354,26 +354,19 @@ def _simple_baseline_correction(FFT):
     Amp = _calculate_amplitude(Re, Im)
     return Amp, Re, Im
 
-def _calculate_apodization1(Real, Freq):
-    sigma_ap = 0.25
 
-    apodization_function_s = np.exp(-(Freq / sigma_ap) ** 6)
-
-    Real_apod = Real * apodization_function_s
-
-    return Real_apod
-
-
-def _calculate_apodization(Real, Freq):
+def _calculate_apodization(Real, Freq, threshold_percentage):
 
     # 1. Smooth
     df = np.abs(Freq[1] - Freq[0])
 
     window = int(round(0.0005/df))
 
+    # only odd windows!
     if window % 2 == 0:
         window += 1
 
+    # but not less than 5 points
     if window < 5:
         window = 5
 
@@ -385,7 +378,7 @@ def _calculate_apodization(Real, Freq):
     maximum_idx = np.argmax(Real_smooth)
     maximum = Real_smooth[maximum_idx]
 
-    threshold = maximum*0.05
+    threshold = maximum* threshold_percentage/100
 
     right_idx = maximum_idx
 
@@ -401,33 +394,6 @@ def _calculate_apodization(Real, Freq):
     apodization_function_s = np.exp(-(Freq/sigma_ap)**6)
 
     Real_apod = Real_smooth*apodization_function_s
-
-
-    # while left_idx > 0:
-    #     if Real_smooth[left_idx] < threshold:
-    #         break
-
-    #     left_idx -= 1
-
-    # # 5. Find right edge
-    # right_idx = maximum_idx
-
-    # while right_idx < len(Real_smooth)-1:
-    #     if Real_smooth[right_idx] < threshold:
-    #         break
-
-    #     right_idx += 1
-
-    # 6. Calculate sigma
-    # left_width = np.abs(Freq[left_idx] - Freq[maximum_idx])
-
-    # right_width = np.abs(Freq[right_idx] - Freq[maximum_idx])
-
-    # sigma_ap = max(left_width, right_width   )
-
-    # # 7. Apodization
-    # apodization_function_s = np.exp(-(Freq/sigma_ap)**6)
-    # Real_apod = (Real_smooth * apodization_function_s)
 
     return Real_apod
 
@@ -593,14 +559,9 @@ def _make_valid_savgol_window(window, n_points, polyorder):
 
 def _calculate_M2(FFT_real, Frequency):
 
-    # RealPart_raw = np.real(FFT_real)
-
-    # RealPart = adaptive_savgol(RealPart_raw, min_window=5, max_window=1001, polyorder=2, noise_fraction=0.10, snr_low=2, snr_high=20)
-
     RealPart = np.real(FFT_real)
 
     # Take the integral of the REAL PART OF FFT by counts
-    # Integral = trapezoid(RealPart)
     Integral = trapezoid(RealPart, x=Frequency)
 
     if Integral == 0:
@@ -616,11 +577,11 @@ def _calculate_M2(FFT_real, Frequency):
     f_mean = trapezoid(Frequency * Fur_normalized, x=Frequency)
 
     # Multiplication (the power ^n will give the nth moment (here it is n=2)
-    # Multiplication = (Frequency ** 2) * Fur_normalized
+
     Multiplication = ((Frequency-f_mean) ** 2) * Fur_normalized
 
     # Calculate the integral of multiplication - the nth moment
-    # The (2pi)^2 are the units to transform from rad/sec to Hz
+    # The (2pi)^2 are the units to transform from Hz to rad/sec, all squared ofc
     # ppbly it should be (2pi)^n for generalized moment calculation
     M2 = (trapezoid(Multiplication, x=Frequency)) * 4 * np.pi ** 2
 

@@ -93,7 +93,8 @@ class PhasingManual(QDialog):
 
         Integral=trapezoid(self.Real_freq_phased)
         delta=np.mean(self.Real_freq_phased[:100])-np.mean(self.Real_freq_phased[-100:])
-        M2,T2=Cal._calculate_M2(Cal._calculate_apodization(self.Real_freq_phased, Frequency), Frequency)
+        #TODO: hardcoded threshold_percentage
+        M2,T2=Cal._calculate_M2(Cal._calculate_apodization(self.Real_freq_phased, Frequency), Frequency, 5)
 
         self.ui.Integral.setText(f"Integral: {round(Integral,3)}")
         self.ui.Delta.setText(f"Delta: {round(delta,7)}")

@@ -6509,7 +6509,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <item>
                  <widget class="QGroupBox" name="Settings_GroupBox_AnalysisPreferences">
                   <property name="title">
-                   <string>Analysis preferences</string>
+                   <string>FID pre-processing options</string>
                   </property>
                   <widget class="QCheckBox" name="Settings_CheckBox_Baseline">
                    <property name="geometry">
@@ -6712,7 +6712,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <item row="1" column="0" colspan="3">
                  <widget class="QRadioButton" name="Settings_RadioButton_SCRelative">
                   <property name="text">
-                   <string>Solid Content ( S-L to S)</string>
+                   <string>Relative ( S-L to S)</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
@@ -6947,6 +6947,108 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </property>
                   <property name="value">
                    <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QGroupBox" name="groupBox">
+               <property name="geometry">
+                <rect>
+                 <x>750</x>
+                 <y>10</y>
+                 <width>248</width>
+                 <height>81</height>
+                </rect>
+               </property>
+               <property name="title">
+                <string>M2 calculation</string>
+               </property>
+               <layout class="QFormLayout" name="formLayout_3">
+                <item row="0" column="0">
+                 <widget class="QTextEdit" name="Settings_Label_threshold_percentage">
+                  <property name="minimumSize">
+                   <size>
+                    <width>20</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>100</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="mouseTracking">
+                   <bool>false</bool>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background: transparent</string>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::NoFrame</enum>
+                  </property>
+                  <property name="verticalScrollBarPolicy">
+                   <enum>Qt::ScrollBarAlwaysOff</enum>
+                  </property>
+                  <property name="horizontalScrollBarPolicy">
+                   <enum>Qt::ScrollBarAlwaysOff</enum>
+                  </property>
+                  <property name="sizeAdjustPolicy">
+                   <enum>QAbstractScrollArea::AdjustToContents</enum>
+                  </property>
+                  <property name="html">
+                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Threshold %&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="textInteractionFlags">
+                   <set>Qt::NoTextInteraction</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QDoubleSpinBox" name="Settings_DoubleSpinBox_threshold_percentage">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>70</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="prefix">
+                   <string/>
+                  </property>
+                  <property name="suffix">
+                   <string/>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="minimum">
+                   <double>0.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>100.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>1.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>5.000000000000000</double>
                   </property>
                  </widget>
                 </item>

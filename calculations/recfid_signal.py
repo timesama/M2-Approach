@@ -169,7 +169,7 @@ def reference_long_component(time, component, end):
     popt, _ = curve_fit(Cal.decaying_exponential, time_range, smooth, p0=[5, 30, 0.5], maxfev=20000)
     return component - Cal.decaying_exponential(time, *popt)
 
-def freq_domain_correction(time, real, imaginary=0, apodize=True, time_a=100.0, adjust=True):
+def freq_domain_correction(time, real, imaginary=0, apodize=True, time_a=100.0, adjust=True, threshold_percentage = 5):
     number_of_points = 2**16
     imaginary_array = np.zeros_like(np.asarray(real, dtype=float)) if np.isscalar(imaginary) else np.asarray(imaginary)
     real_array = np.asarray(real, dtype=float)
@@ -195,7 +195,7 @@ def freq_domain_correction(time, real, imaginary=0, apodize=True, time_a=100.0, 
 
     _, real_baseline, _ = Cal._simple_baseline_correction(fft)
 
-    real_apod = Cal._calculate_apodization(real_baseline, frequency)
+    real_apod = Cal._calculate_apodization(real_baseline, frequency, threshold_percentage)
 
     return frequency, real_apod
 
@@ -260,7 +260,7 @@ def for_the_sake_of_beauty(time_td, re_td, time_td_fid, re_td_fid, apodize=True,
     return time_td, re_td, time_td_fid, re_td_fid
 
 
-def analyze_signal(data_file, fid_file, data_empty=None, fid_empty=None, options: AnalysisOptions | None = None):
+def analyze_signal(data_file, fid_file, data_empty=None, fid_empty=None, options: AnalysisOptions | None = None, threshold_percentage = 5):
     options = options or AnalysisOptions()
 
     time_td, re_td, time_fid, re_fid = nmr_signal_correction(
@@ -272,11 +272,11 @@ def analyze_signal(data_file, fid_file, data_empty=None, fid_empty=None, options
     )
 
     freq_data, spectrum_data = freq_domain_correction(
-        time_td, re_td, 0, options.apodize_time_domain, options.apodization_time, options.adjust_frequency_phase
+        time_td, re_td, 0, options.apodize_time_domain, options.apodization_time, options.adjust_frequency_phase, threshold_percentage
     )
 
     freq_fid, spectrum_fid = freq_domain_correction(
-        time_fid, re_fid, 0, options.apodize_time_domain, options.apodization_time, options.adjust_frequency_phase
+        time_fid, re_fid, 0, options.apodize_time_domain, options.apodization_time, options.adjust_frequency_phase, threshold_percentage
     )
 
     m2_data, t2_data = Cal._calculate_M2(spectrum_data, freq_data)
@@ -364,12 +364,12 @@ def build_up_fid(time, data, amplitude, function_to_fit, start, finish):
         data_built,
     )
 
-def analyze_build_up(time, data, extrapolation, function_to_fit, begin, finish, apodization_time=100.0):
+def analyze_build_up(time, data, extrapolation, function_to_fit, begin, finish, apodization_time=100.0, threshold_percentage=5):
 
     time_build, data_build, data_fit = build_up_fid(time, data, extrapolation, function_to_fit, begin, finish)
 
     freq_build, spectrum_build = freq_domain_correction(
-        time_build, data_build, 0, True, apodization_time, True
+        time_build, data_build, 0, True, apodization_time, True, threshold_percentage
     )
 
     m2_build, t2_build = Cal._calculate_M2(spectrum_build, freq_build)
