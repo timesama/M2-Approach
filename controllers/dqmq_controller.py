@@ -242,10 +242,9 @@ class DQMQTabController(BaseTabController):
     def _write_filename(self):
         try:
             file_path = self._get_current_file()
-            name_base = os.path.basename(file_path)
-            self.ui.DQMQ_TextEdit_FilenameLabel.setText(name_base)
+            self.ui.DQMQ_TextEdit_FilenameLabel.setText(file_path)
         except:
-            logger.exception("Couldn't read the filename")
+            logger.exception("Couldn't read the filepath")
             return
 
     def plot_original(self):

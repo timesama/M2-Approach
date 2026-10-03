@@ -15,5 +15,5 @@
 + add restoration of original data on pressing the manual phasing by default
 - adaptive grid in Dres requires adaptive boundaries for the center\width etc values
 - save the value of y0 for spin diffusion
-- allow copy paste for y0
++ allow copy paste for y0
 - add new tab with complex fitting.
