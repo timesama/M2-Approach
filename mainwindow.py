@@ -472,25 +472,36 @@ class MainWindow(QMainWindow):
 
         dlg = OpenFilesDialog(self)
         if dlg.exec():
-            # if self.tab == 'DQ_Temp':
-            #     DQfileNames = dlg.selectedFiles()
-            #     self.selected_DQfiles.extend(DQfileNames)
-            #     self.show_status(f"Loaded {len(DQfileNames)} DQ temperature file(s).")
-            #     self.dq_temp_controller.update_DQ_comparison()
+
             if self.tab == 'T1T2':
                 while self.ui.T1T2_ComboBox_ChooseFile.count()>0:
                     self.ui.T1T2_ComboBox_ChooseFile.removeItem(0)
                 T1fileNames = dlg.selectedFiles()
-                self.selected_T1files.extend(T1fileNames)
-                self.show_status(f"Loaded {len(T1fileNames)} T1/T2 file(s).")
+
+                added, skipped = self._add_unique_files(self.selected_T1files, T1fileNames)
+
+                if skipped:
+                    self.show_status(f"Loaded {len(added)} T1/T2 file(s); "f"skipped {len(skipped)} duplicate(s).")
+                else:
+                    self.show_status(f"Loaded {len(T1fileNames)} T1/T2 file(s).")
+
                 self.t1t2_controller.update_T12_table()
+
             elif self.tab == 'GS':
                 while self.ui.GS_ComboBox_ChooseFile.count() > 0:
                     self.ui.GS_ComboBox_ChooseFile.removeItem(0)
                 GSfileNames = dlg.selectedFiles()
-                self.selected_GSfiles.extend(GSfileNames)
-                self.show_status(f"Loaded {len(GSfileNames)} spin diffusion file(s).")
+
+                added, skipped = self._add_unique_files(self.selected_GSfiles, GSfileNames)
+
+                if skipped:
+                    self.show_status(f"Loaded {len(added)} spin diffusion file(s); "f"skipped {len(skipped)} duplicate(s).")
+                else:
+                    self.show_status(f"Loaded {len(GSfileNames)} spin diffusion file(s).")
+
+
                 self.gs_controller.update_GS_table()
+
             elif self.tab == 'DQMQ':
                 self.selected_DQMQfile = dlg.selectedFiles()
                 self.app_state.dqmq_files = self.selected_DQMQfile
@@ -531,9 +542,17 @@ class MainWindow(QMainWindow):
 
         if dlg.exec():
             fileNames = dlg.selectedFiles()
-            files.extend(fileNames)
-            self.ui.btn_Start.setStyleSheet("background-color: green")
-            self.show_status(f"Added {len(fileNames)} file(s).")
+
+            added, skipped = self._add_unique_files(files, fileNames)
+
+            if added:
+                self.ui.btn_Start.setStyleSheet("background-color: green")
+
+            if skipped:
+                self.show_status(f"Added {len(added)} file(s); "f"skipped {len(skipped)} duplicate(s).")
+            else:
+                self.show_status(f"Added {len(added)} file(s).")
+
         else:
             self.show_status("File loading cancelled.")
 
@@ -596,6 +615,33 @@ class MainWindow(QMainWindow):
             self.group_data_SD = data
             self.gs_controller.plot_sqrt_time()
             self.show_status("Updated spin diffusion groups.")
+
+    def _add_unique_files(self, existing_files, new_files):
+        """
+        Add only files that are not already present in existing_files.
+        File identity is based on the normalized absolute path.
+        """
+
+        existing_paths = {
+            os.path.normcase(os.path.abspath(path))
+            for path in existing_files
+        }
+
+        added_files = []
+        skipped_files = []
+
+        for path in new_files:
+            normalized = os.path.normcase(os.path.abspath(path))
+
+            if normalized in existing_paths:
+                skipped_files.append(path)
+                continue
+
+            existing_files.append(path)
+            existing_paths.add(normalized)
+            added_files.append(path)
+
+        return added_files, skipped_files
 
     def _connect_dqmq_workflow_signals(self):
         """Connect DQMQ edit signals without recalculating while users type."""
