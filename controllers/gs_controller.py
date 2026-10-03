@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class GSTabController(BaseTabController):
+    def __init__(self, ui, state, parent=None):
+        super().__init__(ui, state, parent)
+        self.file_settings = {}
+
     def connect_signals(self):
         self.ui.GS_Table_Results.horizontalHeader().sectionDoubleClicked.connect(
             lambda index: self.parent.renameSection(self.ui.GS_Table_Results, index)
@@ -31,7 +35,102 @@ class GSTabController(BaseTabController):
         self.ui.GS_DoubleSpinBox_Beta.returnPressed.connect(self.calculate_sqrt_time)
         self.ui.GS_DoubleSpinBox_R2.returnPressed.connect(self.calculate_sqrt_time)
         self.ui.GS_DoubleSpinBox_M2.returnPressed.connect(self.calculate_sqrt_time)
-        self.ui.GS_ComboBox_ChooseFile.activated.connect(lambda *_args: self.calculate_sqrt_time())
+        # self.ui.GS_ComboBox_ChooseFile.activated.connect(lambda *_args: self.calculate_sqrt_time())
+        self.ui.GS_ComboBox_ChooseFile.activated.connect(self.on_file_selected)
+
+    def _current_file_key(self):
+        idx = self.ui.GS_ComboBox_ChooseFile.currentIndex()
+
+        if idx < 0:
+            return None
+
+        item = self.ui.GS_Table_Results.item(
+            idx,
+            GSColumns.FOLDER
+        )
+
+        if item is None:
+            return None
+
+        return item.text()
+
+    def _save_current_settings(self):
+        key = self._current_file_key()
+
+        if key is None:
+            return
+
+        if self.ui.GS_RadioButton_Short.isChecked():
+            component = "short"
+        elif self.ui.GS_RadioButton_Medium.isChecked():
+            component = "medium"
+        else:
+            component = "long"
+
+        self.file_settings[key] = {
+            "use_sqrt_time": self.ui.GS_CheckBox_UseSqrtTime.isChecked(),
+            "component": component,
+
+            "fit_from": self.ui.GS_DoubleSpinBox_FitFrom.value(),
+            "fit_to": self.ui.GS_DoubleSpinBox_FitTo.value(),
+
+            "y0": self.ui.GS_DoubleSpinBox_y0.value(),
+
+            "beta": self.ui.GS_DoubleSpinBox_Beta.value(),
+            "r2": self.ui.GS_DoubleSpinBox_R2.value(),
+            "m2": self.ui.GS_DoubleSpinBox_M2.value(),
+        }
+
+    def _restore_current_settings(self):
+        key = self._current_file_key()
+
+        if key is None:
+            return False
+
+        settings = self.file_settings.get(key)
+
+        if settings is None:
+            return False
+
+        widgets = [
+            self.ui.GS_CheckBox_UseSqrtTime,
+            self.ui.GS_RadioButton_Short,
+            self.ui.GS_RadioButton_Medium,
+            self.ui.GS_RadioButton_Long,
+            self.ui.GS_DoubleSpinBox_FitFrom,
+            self.ui.GS_DoubleSpinBox_FitTo,
+            self.ui.GS_DoubleSpinBox_y0,
+            self.ui.GS_DoubleSpinBox_Beta,
+            self.ui.GS_DoubleSpinBox_R2,
+            self.ui.GS_DoubleSpinBox_M2,
+        ]
+
+        blockers = [QSignalBlocker(widget) for widget in widgets]
+
+        self.ui.GS_CheckBox_UseSqrtTime.setChecked(
+            settings["use_sqrt_time"]
+        )
+
+        component = settings["component"]
+
+        self.ui.GS_RadioButton_Short.setChecked(component == "short")
+        self.ui.GS_RadioButton_Medium.setChecked(component == "medium")
+        self.ui.GS_RadioButton_Long.setChecked(component == "long")
+
+        self.ui.GS_DoubleSpinBox_FitFrom.setValue(settings["fit_from"])
+        self.ui.GS_DoubleSpinBox_FitTo.setValue(settings["fit_to"])
+
+        self.ui.GS_DoubleSpinBox_y0.setValue(settings["y0"])
+
+        self.ui.GS_DoubleSpinBox_Beta.setValue(settings["beta"])
+        self.ui.GS_DoubleSpinBox_R2.setValue(settings["r2"])
+        self.ui.GS_DoubleSpinBox_M2.setValue(settings["m2"])
+
+        return True
+
+    def on_file_selected(self, *_args):
+        self._restore_current_settings()
+        self.calculate_sqrt_time(show_warning=True)
 
     def update_GS_table(self):
         if self.parent.selected_GSfiles:
@@ -248,6 +347,8 @@ class GSTabController(BaseTabController):
 
         dictionary_entry["sqrtT"] = sqrt_time
         dictionary_entry["d"] = diffusion_distance
+
+        self._save_current_settings()
 
         logger.info("GS fit completed: sqrtT=%s d=%s", sqrt_time, diffusion_distance)
         if show_warning:
