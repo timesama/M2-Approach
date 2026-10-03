@@ -79,11 +79,12 @@ def fit_range(time_values, signal_values, fit_from, fit_to):
     return fit_time, fit_signal
 
 
-def fit_spin_diffusion(time_values, signal_values, time_plateau, signal_plateau, beta, r2, m2):
+def fit_spin_diffusion(time_values, signal_values, signal_plateau, beta, r2, m2):
     """Fit the GS line and calculate the domain size from it."""
-    fit_time_curve, fit_signal_curve, fit_time_plateau, fit_signal_plateau, sqrt_time, r2_value = linear_fit_GS(time_values, signal_values, time_plateau, signal_plateau)
+    fit_time_curve, fit_signal_curve, sqrt_time, r2_value = linear_fit_GS(time_values, signal_values, signal_plateau)
     diffusion_distance = calculate_domain_size(sqrt_time, beta, r2, m2)
-    return fit_time_curve, fit_signal_curve, fit_time_plateau, fit_signal_plateau, sqrt_time, r2_value, diffusion_distance
+
+    return fit_time_curve, fit_signal_curve, sqrt_time, r2_value, diffusion_distance
 
 
 def is_valid_fit_range(time_values, fit_time, fit_signal):
@@ -110,22 +111,20 @@ def calculate_domain_size(t05, beta, r2, M2):
     d = np.round(d, 3)
     return d
 
-def linear_fit_GS(Time, Signal, Time_plateau, Signal_plateau):
+def linear_fit_GS(Time, Signal, Signal_plateau):
     # Fit using curve_fit
     Time = np.array(Time).flatten()
     Signal = np.array(Signal).flatten()
     popt, _ = curve_fit(Cal.linear_model, Time, Signal)
     a_1, b_1 = popt
 
-    # Fit plateau
-    Time_plateau = np.array(Time_plateau).flatten()
-    Signal_plateau = np.array(Signal_plateau).flatten()
-    popt_plateau, _ = curve_fit(Cal.linear_model, Time_plateau, Signal_plateau)
-    a_2, b_2 = popt_plateau
+    # eq 1: y = ax + b
+    # eq 2: y0 = b
+    b_2 = Signal_plateau
 
     # Extrapolate to find Time (sqrtT) where Signal = 0: a * sqrtT + b = 0 -> sqrtT = -b / a
     # sqrtT = -b / a if a != 0 else np.nan
-    diff_a = a_1 - a_2
+    diff_a = a_1
     diff_b = b_2 - b_1
 
     if diff_a == 0:
@@ -138,8 +137,8 @@ def linear_fit_GS(Time, Signal, Time_plateau, Signal_plateau):
     Time_fit = np.linspace(min(Time), sqrtT + 50, 300)
     fitted_curve = Cal.linear_model(Time_fit, a_1, b_1)
 
-    Time_fit_plateau = np.linspace(sqrtT-100, max(Time_plateau), 300)
-    fitted_curve_plateau = Cal.linear_model(Time_fit_plateau, a_2, b_2)
+    # Time_fit_plateau = np.linspace(0, max(Time), 300)
+    # fitted_curve_plateau = Cal.linear_model(Time_fit_plateau, 0, b_2)
 
     # Compute R^2 manually
     residuals = Signal - Cal.linear_model(Time, a_1, b_1)
@@ -149,4 +148,4 @@ def linear_fit_GS(Time, Signal, Time_plateau, Signal_plateau):
 
     R2 = np.round(R2, 4)
 
-    return Time_fit, fitted_curve, Time_fit_plateau, fitted_curve_plateau, sqrtT, R2
+    return Time_fit, fitted_curve, sqrtT, R2

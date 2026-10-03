@@ -26,8 +26,7 @@ class GSTabController(BaseTabController):
 
         self.ui.GS_DoubleSpinBox_FitFrom.editingFinished.connect(self.calculate_sqrt_time)
         self.ui.GS_DoubleSpinBox_FitTo.editingFinished.connect(self.calculate_sqrt_time)
-        self.ui.GS_DoubleSpinBox_FitFrom_2.editingFinished.connect(self.calculate_sqrt_time)
-        self.ui.GS_DoubleSpinBox_FitTo_2.editingFinished.connect(self.calculate_sqrt_time)
+        # self.ui.GS_DoubleSpinBox_y0.editingFinished.connect(self.calculate_sqrt_time)
 
         self.ui.GS_DoubleSpinBox_Beta.editingFinished.connect(self.calculate_sqrt_time)
         self.ui.GS_DoubleSpinBox_R2.editingFinished.connect(self.calculate_sqrt_time)
@@ -193,31 +192,30 @@ class GSTabController(BaseTabController):
         fit_to = self.ui.GS_DoubleSpinBox_FitTo.value()
         fit_time, fit_signal = gs_signal.fit_range(time_original, signal_original, fit_from, fit_to)
 
-        fit_from_plateau = self.ui.GS_DoubleSpinBox_FitFrom_2.value()
-        fit_to_plateau  = self.ui.GS_DoubleSpinBox_FitTo_2.value()
+        y_to_fit = self.ui.GS_DoubleSpinBox_y0.value()
+        # TODO: here
 
-        fit_time_plateau, fit_signal_plateau = gs_signal.fit_range(time_original, signal_original, fit_from_plateau, fit_to_plateau)
+        # # y_to_fit = self._update_metadata(dictionary_entry["y0"])
+        # y_to_fit = self._update_metadata(dictionary_entry)
+        # dictionary_entry["y0"] = y_to_fit
 
         if not gs_signal.is_valid_fit_range(time_original, fit_time, fit_signal):
             if show_warning:
                 self._warn_invalid_range()
             return
 
-        if not gs_signal.is_valid_fit_range(time_original, fit_time_plateau, fit_signal_plateau):
-            if show_warning:
-                self._warn_invalid_range()
-            return
-
         try:
-            fit_time_curve, fit_signal_curve, fit_time_plateau, fit_signal_plateau,sqrt_time, r2_value, diffusion_distance = gs_signal.fit_spin_diffusion(
+            fit_time_curve, fit_signal_curve, sqrt_time, r2_value, diffusion_distance = gs_signal.fit_spin_diffusion(
                 fit_time,
                 fit_signal,
-                fit_time_plateau,
-                fit_signal_plateau,
+                y_to_fit,
                 self.ui.GS_DoubleSpinBox_Beta.value(),
                 self.ui.GS_DoubleSpinBox_R2.value(),
                 self.ui.GS_DoubleSpinBox_M2.value(),
             )
+            fit_time_plateau = time_original
+            fit_signal_plateau = [y_to_fit] * len(fit_time_plateau)
+
         except Exception:
             logger.exception("GS fit failed: index=%d", idx)
             figure.clear()
@@ -257,18 +255,12 @@ class GSTabController(BaseTabController):
 
     def _update_fit_limits(self, time_original):
 
-
         min = time_original[0]
         max = time_original[-1]
         half = time_original[int(len(time_original)/2)]
-        shlish = time_original[int(len(time_original)/3)]
-        two_thirds = time_original[int(2*len(time_original)/3)]
 
         slope_from = self.ui.GS_DoubleSpinBox_FitFrom
         slope_to = self.ui.GS_DoubleSpinBox_FitTo
-
-        plateau_from = self.ui.GS_DoubleSpinBox_FitFrom_2
-        plateau_to = self.ui.GS_DoubleSpinBox_FitTo_2
 
         with QSignalBlocker(slope_from):
             slope_from.setRange(min, max)
@@ -276,26 +268,14 @@ class GSTabController(BaseTabController):
         with QSignalBlocker(slope_to):
             slope_to.setRange(min, max)
 
-        with QSignalBlocker(plateau_from):
-            plateau_from.setRange(min, max)
-
-        with QSignalBlocker(plateau_to):
-            plateau_to.setRange(min, max)
+        if (slope_from.value() == min and
+            slope_to.value() == min
+        ):
+            slope_to.setValue(half)
 
         # print(f"Sooooo\ncondition slope from is min: {slope_from.value() == min}\n condition slope to is min: {slope_to.value() == min}\ncondition plateau from is min: {plateau_from.value() == min}\n condition plateau to is min: {plateau_to.value() == min}\n")
 
         # print(f"values: slope_from {slope_from.value()}, slope_to {slope_to.value()}, plateau_from {plateau_from.value()}, plateau_to {plateau_to.value()}\n")
-
-
-        if (slope_from.value() == min and
-            slope_to.value() == min and
-            plateau_from.value() == min and
-            plateau_to.value() == min
-        ):
-            slope_to.setValue(half)
-            plateau_from.setValue(two_thirds)
-            plateau_to.setValue(max)
-
 
     def _selected_signal_source(self):
         if self.ui.GS_RadioButton_Short.isChecked():
@@ -304,6 +284,21 @@ class GSTabController(BaseTabController):
             return "medium"
 
         return "long"
+
+
+    def _update_metadata(self, dictionary_entry):
+
+        y0_box = self.ui.GS_DoubleSpinBox_y0
+
+        if "y0" not in dictionary_entry:
+            dictionary_entry["y0"] = y0_box.value()
+
+        value_y0 = dictionary_entry["y0"]
+
+        with QSignalBlocker(y0_box):
+            y0_box.setValue(value_y0)
+
+        return float(y0_box.value())
 
     def plot_sqrt_time_from_user(self):
         self.plot_sqrt_time(show_warning=True)

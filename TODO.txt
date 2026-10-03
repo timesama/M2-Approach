@@ -13,5 +13,7 @@
 - add on\off smoothing on M2 calculation
 - add the percentage defining for savitazki golay smoothing: recommended 5%
 + add restoration of original data on pressing the manual phasing by default
-- update the interactive dres calculation to the module in use
 - adaptive grid in Dres requires adaptive boundaries for the center\width etc values
+- save the value of y0 for spin diffusion
+- allow copy paste for y0
+- add new tab with complex fitting.
