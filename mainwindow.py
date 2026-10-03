@@ -612,7 +612,7 @@ class MainWindow(QMainWindow):
         for widget_name in analysis_parameter_widgets:
             self._connect_dqmq_signal(
                 widget_name,
-                "editingFinished",
+                "returnPressed",
                 self.dqmq_controller.on_analysis_parameter_editing_finished,
             )
 
@@ -647,7 +647,7 @@ class MainWindow(QMainWindow):
         for widget_name in dres_parameter_widgets:
             self._connect_dqmq_signal(
                 widget_name,
-                "editingFinished",
+                "returnPressed",
                 self.dqmq_controller.mark_dres_stale,
             )
 
@@ -668,7 +668,7 @@ class MainWindow(QMainWindow):
         )
         self._connect_dqmq_signal(
             "DQMQ_DoubleSpinBox_DresFitTo",
-            "editingFinished",
+            "returnPressed",
             self.dqmq_controller.mark_dres_stale,
         )
 

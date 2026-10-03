@@ -82,7 +82,7 @@ class RecFIDController(BaseTabController):
             "RecFID_DoubleSpinBox_BuildTo",
             "RecFID_DoubleSpinBox_MseDivider",
         ):
-            self._connect(widget_name, "editingFinished", lambda *_args: self.rebuild(show_warning=False))
+            self._connect(widget_name, "returnPressed", lambda *_args: self.rebuild(show_warning=False))
         self._connect("RecFID_ComboBox_BuildFunction", "activated", lambda *_args: self.rebuild(show_warning=False))
 
     def initialize_plots(self):
