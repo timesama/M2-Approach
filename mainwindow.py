@@ -18,7 +18,7 @@ from pyqtgraph import mkColor, mkPen
 from ui_Form import Ui_NMR
 from controllers import (
     SETabController, DQTabController,
-    T1T2TabController, DQMQTabController, GSTabController, GeneralSEDQController, RecFIDController
+    T1T2TabController, DQMQTabController, GSTabController, GeneralSEDQController, RecFIDController, ModelFitController
 )
 from dialogs.open_files_dialog import OpenFilesDialog
 import dialogs.open_files_dialog as open_files_dialog_module
@@ -65,6 +65,8 @@ class MainWindow(QMainWindow):
         self.selected_DQMQfile = []
         self.app_state.dqmq_files = self.selected_DQMQfile
         self.selected_GSfiles = []
+        self.selected_ModelFit_files = []
+
         self.window_array = np.array([])
         self.dq_t2 = {}
         self.dq_comparison_linear = {}
@@ -76,6 +78,8 @@ class MainWindow(QMainWindow):
         self.group_data_SD = {}
         self.phased_spectra_SE = {}
         self.phased_spectra_DQ = {}
+        self.ModelFit_dictionary = {}
+
         self.tab = None
         self.se_controller = SETabController(ui=self.ui, state=self.app_state, parent=self)
         self.dq_controller = DQTabController(
@@ -88,6 +92,7 @@ class MainWindow(QMainWindow):
         self.gs_controller = GSTabController(ui=self.ui, state=self.app_state, parent=self)
         self.recfid_controller = RecFIDController(ui=self.ui, state=self.app_state, parent=self)
         self.general_se_dq_controller = GeneralSEDQController(ui=self.ui, state=self.app_state, parent=self, se_controller=self.se_controller, dq_controller=self.dq_controller)
+        self.modelfit_controller = ModelFitController(ui=self.ui, state=self.app_state, parent=self) #TODO: should i add here se controller?
 
         self.state()
 
@@ -101,6 +106,7 @@ class MainWindow(QMainWindow):
         self.ui.DQMQ_Button_Save.clicked.connect(self.save_data)
         self.ui.T1T2_Button_Save.clicked.connect(self.save_data)
         self.ui.GS_Button_Save.clicked.connect(self.save_data)
+        self.ui.ModelFit_Button_Save.clicked.connect(self.save_data)
 
         self.ui.btn_Load.clicked.connect(self.load_data)
         self.ui.T1T2_Button_Load.clicked.connect(self.load_data)
@@ -113,40 +119,29 @@ class MainWindow(QMainWindow):
         self.ui.T1T2_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.DQMQ_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
         self.ui.GS_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
+        self.ui.ModelFit_Button_SelectFiles.clicked.connect(self.open_select_comparison_files_dialog)
 
         self.ui.T1T2_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.GS_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.SE_Button_ClearTable.clicked.connect(self.clear_list)
         self.ui.DQ_Button_ClearTable.clicked.connect(self.clear_list)
+        self.ui.ModelFit_Button_ClearFiles.clicked.connect(self.clear_list)
 
         self.ui.btn_DeleteRow.clicked.connect(self.delete_row)
         self.ui.SE_Button_DeleteRow.clicked.connect(self.delete_row)
         self.ui.GS_Button_DeleteRow.clicked.connect(self.delete_row)
         self.ui.DQ_Button_DeleteRow.clicked.connect(self.delete_row)
+        self.ui.ModelFit_Button_DeleteFile.clicked.connect(self.delete_row)
 
         self.ui.btn_Start.clicked.connect(self.general_se_dq_controller.analysis)
 
-        self.ui.DQMQ_Button_PlotOriginal.clicked.connect(
-            self.dqmq_controller.plot_original
-        )
+        self.ui.DQMQ_Button_PlotOriginal.clicked.connect(self.dqmq_controller.plot_original)
         self.ui.DQMQ_Button_PlotNorm.clicked.connect(self.dqmq_controller.plot_norm)
-        self.ui.DQMQ_Button_CalculateIntegralSum.clicked.connect(
-            self.dqmq_controller.calculate_integral_sum
-        )
-        self.ui.DQMQ_Button_CalculateDres.clicked.connect(
-            self.dqmq_controller.calculate_dres
-        )
-        self.ui.DQMQ_DoubleSpinBox_IntegralShift.returnPressed.connect(
-            self.dqmq_controller.update_integral_sum_shift
-        )
-
-        self.ui.DQMQ_Button_ResetValues.clicked.connect(
-            self.dqmq_controller.reset_Dres_values
-        )
-
-        self.ui.DQMQ_Button_CalculateUsingValues.clicked.connect(
-            self.dqmq_controller.plot_from_values
-        )
+        self.ui.DQMQ_Button_CalculateIntegralSum.clicked.connect(self.dqmq_controller.calculate_integral_sum)
+        self.ui.DQMQ_Button_CalculateDres.clicked.connect(self.dqmq_controller.calculate_dres)
+        self.ui.DQMQ_DoubleSpinBox_IntegralShift.returnPressed.connect(self.dqmq_controller.update_integral_sum_shift)
+        self.ui.DQMQ_Button_ResetValues.clicked.connect(self.dqmq_controller.reset_Dres_values)
+        self.ui.DQMQ_Button_CalculateUsingValues.clicked.connect(self.dqmq_controller.plot_from_values)
 
         self._connect_dqmq_workflow_signals()
 
@@ -167,6 +162,8 @@ class MainWindow(QMainWindow):
         self.setup_graph(self.ui.GS_PlotWidget_RawSignal, "√Time, √us", "Signal", "")
         self.setup_graph(self.ui.GS_PlotWidget_SqrtTime, "X axis", "√Time, √us", "")
 
+        self.setup_graph(self.ui.ModelFit_PlotWidget_PlotData, "Time, μs", "Amplitude", "NMR Signal")
+
         self.recfid_controller.initialize_plots()
         self.se_controller.connect_signals()
         self.dq_controller.connect_signals()
@@ -174,6 +171,8 @@ class MainWindow(QMainWindow):
         self.t1t2_controller.connect_signals()
         self.gs_controller.connect_signals()
         self.recfid_controller.connect_signals()
+
+        self.modelfit_controller.connect_signals()
 
         # Table Headers
         self.copy_enabler = TableCopyEnabler(self)
@@ -241,7 +240,6 @@ class MainWindow(QMainWindow):
         except requests.RequestException as e:
             logger.warning("Failed to check for updates: %s", e)
             self.show_status("Could not check for updates.")
-
 
     def open_url(self):
         """Open the GitHub releases page used by the Settings tab."""
@@ -322,11 +320,10 @@ class MainWindow(QMainWindow):
             self.ui.btn_Start.setStyleSheet("background-color: none")
             self.group_data_SE = {}
             self.phased_spectra_SE = {}
+
         elif self.tab == 'DQ':
             self.selected_files_DQ_single = []
             self.app_state.dq_files = []
-            # self.selected_files_gly = []
-            # self.selected_files_empty = []
             self.ui.DQ_Table_Data.setRowCount(0)
             self.ui.DQ_PlotWidget_T2.clear()
             self.ui.DQ_PlotWidget_NormIntensity.clear()
@@ -335,13 +332,7 @@ class MainWindow(QMainWindow):
             self.ui.FidWidget.clear()
             self.ui.btn_Start.setStyleSheet("background-color: none")
             self.phased_spectra_DQ = {}
-        # elif self.tab == 'DQ_Temp':
-        #     self.selected_DQfiles = []
-        #     self.dq_t2 = {}
-        #     self.ui.DQTemp_Table_Results.setRowCount(0)
-        #     self.ui.DQTemp_PlotWidget_T2Distribution.clear()
-        #     self.ui.DQTemp_PlotWidget_CenterVsXAxis.clear()
-        #     self.ui.DQTemp_PlotWidget_PolyFit.clear()
+
         elif self.tab == 'T1T2':
             self.selected_T1files = []
             self.tau_dictionary = {}
@@ -349,10 +340,12 @@ class MainWindow(QMainWindow):
             self.ui.T1T2_PlotWidget_RawSignal.clear()
             self.ui.T1T2_PlotWidget_RelaxationTime.clear()
             self.group_data_T1T2 = {}
+
         elif self.tab == 'DQMQ':
             self.selected_DQMQfile = []
             self.app_state.dqmq_files = []
             self.dqmq_controller.reset_cached_results()
+
         elif self.tab == 'GS':
             self.selected_GSfiles = []
             self.GS_dictionary = {}
@@ -360,6 +353,31 @@ class MainWindow(QMainWindow):
             self.ui.GS_PlotWidget_RawSignal.clear()
             self.ui.GS_PlotWidget_SqrtTime.clear()
             self.group_data_SD = {}
+
+        elif self.tab == 'ModelFit':
+            # clear files
+            self.selected_ModelFit_files = []
+            self.ModelFit_dictionary = {}
+            # clear table and graph
+            self.ui.ModelFit_Table_Data.setRowCount(0)
+            self.ui.ModelFit_PlotWidget_PlotData.clear()
+            # clear equation labels
+            self.ui.ModelFit_Label_Equation_1.setText('Equation')
+            self.ui.ModelFit_Label_Equation_2.setText('Equation')
+            self.ui.ModelFit_Label_Equation_3.setText('Equation')
+            self.ui.ModelFit_Label_Equation_4.setText('Equation')
+            # clear combobox choices
+            self.ui.ModelFit_Combobox_Function_1.setCurrentIndex(-1)
+            self.ui.ModelFit_Combobox_Function_2.setCurrentIndex(-1)
+            self.ui.ModelFit_Combobox_Function_3.setCurrentIndex(-1)
+            self.ui.ModelFit_Combobox_Function_4.setCurrentIndex(-1)
+            # clear widgets: TODO
+
+            # self.ui.ModelFit_Widget_Equation_1.clear()
+            # self.ui.ModelFit_Widget_Equation_2.clear()
+            # self.ui.ModelFit_Widget_Equation_3.clear()
+            # self.ui.ModelFit_Widget_Equation_4.clear()
+
         elif self.tab == 'Extra':
             return
 
@@ -369,8 +387,9 @@ class MainWindow(QMainWindow):
             combobox = self.ui.comboBox_4
         elif self.tab == 'GS':
             combobox = self.ui.GS_ComboBox_ChooseFile
+        elif self.tab == 'ModelFit':
+            combobox = self.ui.ModelFit_ComboBox_ChooseFile
 
-        # if self.tab != 'DQMQ' and  self.tab != 'DQ_Temp':
         if self.tab != 'DQMQ':
             while combobox.count()>0:
                 combobox.removeItem(0)
@@ -396,6 +415,9 @@ class MainWindow(QMainWindow):
             table = self.ui.GS_Table_Results
             combobox = self.ui.GS_ComboBox_ChooseFile
             files = self.selected_GSfiles
+        elif self.tab == 'ModelFit':
+            self.modelfit_controller.delete_file()
+            return
         else:
             return
 
@@ -446,6 +468,7 @@ class MainWindow(QMainWindow):
             self.ui.FFTWidget.clear()
 
         self.show_status("Deleted selected row.")
+
 
     def highlight_row(self, table, row_selected):
         for col in range(table.columnCount()):
@@ -499,7 +522,6 @@ class MainWindow(QMainWindow):
                 else:
                     self.show_status(f"Loaded {len(GSfileNames)} spin diffusion file(s).")
 
-
                 self.gs_controller.update_GS_table()
 
             elif self.tab == 'DQMQ':
@@ -508,6 +530,19 @@ class MainWindow(QMainWindow):
                 self.dqmq_controller.state.dqmq_files = self.selected_DQMQfile
                 self.show_status("Loaded DQMQ file.")
                 self.dqmq_controller.dq_mq_analysis()
+
+            elif self.tab == 'ModelFit':
+                while self.ui.ModelFit_ComboBox_ChooseFile.count() > 0:
+                    self.ui.ModelFit_ComboBox_ChooseFile.removeItem(0)
+                ModelFitFileNames = dlg.selectedFiles()
+
+                added, skipped = self._add_unique_files(self.selected_ModelFit_files, ModelFitFileNames)
+
+                if skipped:
+                    self.show_status(f"Loaded {len(added)} file(s); "f"skipped {len(skipped)} duplicate(s).")
+                else:
+                    self.show_status(f"Loaded {len(ModelFitFileNames)} file(s).")
+
 
     def open_select_dialog(self):
         """Open the primary SE/DQ file picker."""
@@ -767,6 +802,9 @@ class MainWindow(QMainWindow):
         elif current_name == "f_GS":
             self.tab = 'GS'
 
+        elif current_name == "h_FitFID":
+            self.tab = 'ModelFit'
+
         elif current_name == "Settings_Tab":
             self.tab = 'Extra'
 
@@ -965,12 +1003,7 @@ class MainWindow(QMainWindow):
                 default_name,
             )
 
-            save_path, _ = QFileDialog.getSaveFileName(
-                self,
-                "Save DQMQ results",
-                default_path,
-                "Excel Workbook (*.xlsx)",
-            )
+            save_path, _ = QFileDialog.getSaveFileName(self, "Save DQMQ results", default_path, "Excel Workbook (*.xlsx)",)
 
             if not save_path:
                 self.show_status("Save cancelled.")
@@ -985,10 +1018,7 @@ class MainWindow(QMainWindow):
 
                 excel_path = self.dqmq_controller.save_results_excel(save_path)
 
-                files_json = (
-                    os.path.splitext(excel_path)[0]
-                    + "_files.json"
-                )
+                files_json = (os.path.splitext(excel_path)[0] + "_files.json")
 
                 with open(files_json, "w", encoding="utf-8") as file:
                     json.dump(
@@ -1016,6 +1046,10 @@ class MainWindow(QMainWindow):
 
         elif self.tab == 'RecFID':
             self.recfid_controller.save_results()
+            return
+
+        elif self.tab == 'ModelFit':
+            self.modelfit_controller.save_results()
             return
 
         dialog = SaveFilesDialog(self)
@@ -1172,9 +1206,7 @@ class MainWindow(QMainWindow):
         if self.tab == 'GS':
             if len(first_values) > GSColumns.FOLDER:
                 return self._looks_like_path(first_values[GSColumns.X_AXIS]) or self._looks_numeric(first_values[GSColumns.FOLDER])
-        # if self.tab == 'DQ_Temp':
-        #     if len(first_values) > DQTempColumns.FOLDER:
-        #         return self._looks_like_path(first_values[DQTempColumns.NAME]) and not self._looks_like_path(first_values[DQTempColumns.FOLDER])
+
         return False
 
     @staticmethod

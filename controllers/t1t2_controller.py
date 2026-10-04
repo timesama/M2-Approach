@@ -36,9 +36,6 @@ class T1T2TabController(BaseTabController):
         self.ui.T1T2_DoubleSpinBox_InitialTau2.returnPressed.connect(self.calculate_relaxation_time_from_user)
         self.ui.T1T2_DoubleSpinBox_InitialTau3.returnPressed.connect(self.calculate_relaxation_time_from_user)
 
-        # self.ui.T1T2_ComboBox_ChooseFile.activated.connect(
-        #     lambda *_args: self.calculate_relaxation_time_from_user()
-        # )
 
         self.ui.T1T2_ComboBox_ChooseFile.activated.connect(self.on_file_selected)
 
