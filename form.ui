@@ -586,7 +586,7 @@
               <enum>QTabWidget::Rounded</enum>
              </property>
              <property name="currentIndex">
-              <number>2</number>
+              <number>0</number>
              </property>
              <property name="elideMode">
               <enum>Qt::ElideLeft</enum>
@@ -1613,6 +1613,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      </widget>
                     </item>
                    </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="RecFID_Button_SaveReconstructed">
+                   <property name="text">
+                    <string>Save Reconstructed</string>
+                   </property>
                   </widget>
                  </item>
                  <item>

@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import os
+import csv
 import pyqtgraph as pg
 import pyqtgraph.exporters
 from PySide6.QtCore import QSignalBlocker, Qt
@@ -84,6 +85,10 @@ class RecFIDController(BaseTabController):
         ):
             self._connect(widget_name, "returnPressed", lambda *_args: self.rebuild(show_warning=False))
         self._connect("RecFID_ComboBox_BuildFunction", "activated", lambda *_args: self.rebuild(show_warning=False))
+        self._connect("RecFID_Button_SaveReconstructed", "clicked", self.save_reconstructed)
+
+        # why am I suddently using a different (and stupid) notation for signals?
+        # 23 from mom, 23 from dad, 1 from the Lord
 
     def initialize_plots(self):
         self._setup_graph("RecFID_PlotWidget_OriginalNMRSignal", "Time, μs", "Amplitude", "FID / data")
@@ -349,6 +354,41 @@ class RecFIDController(BaseTabController):
                 handle.write(f"{echo_time}\t{t2}\t{ratio}\t{maximum}\t\n")
             handle.write("\n")
         self._status(f"Saved RecFID SE maxima and T2 values to {file_path}")
+
+    def save_reconstructed(self):
+        if not self.fid_result or self.extrapolation is None:
+            self._warn("No build-up data", "Run RecFID analysis before saving reconstructed FID.")
+            return
+        file_path, _ = QFileDialog.getSaveFileName(
+            self.parent,
+            "Save Reconstructed FID",
+            f"_FID_BU.csv",
+            "Text Files (*.csv);;All Files (*)",
+            # options=QFileDialog.DontConfirmOverwrite,
+        )
+        if not file_path:
+            return
+
+        def _format_dat_number(value):
+            mantissa, exponent = f"{float(value):.14E}".split("E")
+            exponent = int(exponent)
+            sign = "+" if exponent >= 0 else "-"
+            return f"{mantissa}E{sign}{abs(exponent):04d}"
+
+
+        graph = self.ui.RecFID_PlotWidget_BuildUpNMRSignal
+        curves = graph.plotItem.listDataItems()
+        x, y1 = curves[0].getData()
+
+        with open(file_path, "w", newline="") as datfile:
+            for time, re in zip(x, y1):
+                datfile.write(
+                    f" {_format_dat_number(time)}"
+                    f" {_format_dat_number(re)}"
+                    f" {_format_dat_number(0.0)}\r\n"
+                )
+
+        self._status(f"Saved reconstructed FID {file_path}")
 
     def open_manual_echo_time_dialog(self):
         if not self.selected_data_files:
