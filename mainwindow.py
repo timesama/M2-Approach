@@ -370,12 +370,10 @@ class MainWindow(QMainWindow):
             self.ui.ModelFit_Combobox_Function_2.setCurrentIndex(-1)
             self.ui.ModelFit_Combobox_Function_3.setCurrentIndex(-1)
             self.ui.ModelFit_Combobox_Function_4.setCurrentIndex(-1)
-            # clear widgets: TODO
 
-            # self.ui.ModelFit_Widget_Equation_1.clear()
-            # self.ui.ModelFit_Widget_Equation_2.clear()
-            # self.ui.ModelFit_Widget_Equation_3.clear()
-            # self.ui.ModelFit_Widget_Equation_4.clear()
+            self.modelfit_controller.file_settings = {}
+            self.modelfit_controller.active_file_path = None
+
 
         elif self.tab == 'Extra':
             return

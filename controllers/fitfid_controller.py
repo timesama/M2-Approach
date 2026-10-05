@@ -164,7 +164,12 @@ class ModelFitController(BaseTabController):
 
         equation_label.setText(spec["equation"])
 
+        use_box = getattr(self.ui, f"ModelFit_CheckBox_UseFunction_{row}")
+        use_box.setChecked(True)
+
         self.build_parameter_widgets(row, model_name)
+
+
 
     def build_parameter_widgets(self, row, model_name):
 
@@ -556,8 +561,8 @@ class ModelFitController(BaseTabController):
             getattr(self.ui, f"ModelFit_Label_Equation_{row}").setText("Equation")
 
         self.ui.ModelFit_CheckBox_Show_Original.setChecked(True)
-        self.ui.ModelFit_CheckBox_Show_Cumulative.setChecked(False)
-        self.ui.ModelFit_CheckBox_Show_Contributions.setChecked(False)
+        self.ui.ModelFit_CheckBox_Show_Cumulative.setChecked(True)
+        self.ui.ModelFit_CheckBox_Show_Contributions.setChecked(True)
 
         self.ui.ModelFit_Table_Data.clearContents()
         self.ui.ModelFit_Table_Data.setRowCount(0)
