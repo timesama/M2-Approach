@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
 
     def check_for_updates(self):
         """Check GitHub releases and prompt when a newer app version exists."""
-        current_version = '0.3.4'
+        current_version = '0.3.5'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             response = requests.get(url)
@@ -245,7 +245,6 @@ class MainWindow(QMainWindow):
         """Open the GitHub releases page used by the Settings tab."""
         open_application('https://github.com/timesama/M2-Approach/releases')
         self.show_status("Opened project releases page.")
-
 
     def update_file(self, keep_phasing):
         """Load the selected SE/DQ file into the shared FID/FFT preview widgets."""
