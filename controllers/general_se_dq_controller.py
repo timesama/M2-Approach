@@ -85,7 +85,6 @@ class GeneralSEDQController(BaseTabController):
                     len(files),
                     os.path.basename(file_path),
                 )
-                # self._status(line)
 
                 try:
                     file_path_gly = mw.selected_files_gly[i - 1] if self.ui.Settings_CheckBox_Glycerol.isChecked() else []
