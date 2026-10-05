@@ -543,6 +543,8 @@ class MainWindow(QMainWindow):
                 else:
                     self.show_status(f"Loaded {len(ModelFitFileNames)} file(s).")
 
+                self.modelfit_controller.on_files_load()
+
 
     def open_select_dialog(self):
         """Open the primary SE/DQ file picker."""
@@ -1017,7 +1019,6 @@ class MainWindow(QMainWindow):
             try:
 
                 excel_path = self.dqmq_controller.save_results_excel(save_path)
-
                 files_json = (os.path.splitext(excel_path)[0] + "_files.json")
 
                 with open(files_json, "w", encoding="utf-8") as file:
@@ -1049,8 +1050,65 @@ class MainWindow(QMainWindow):
             return
 
         elif self.tab == 'ModelFit':
-            self.modelfit_controller.save_results()
+            file_path = self.ui.ModelFit_ComboBox_ChooseFile.currentData()
+
+            if not file_path:
+                self.show_status("Select a ModelFit file first.")
+                QMessageBox.warning(
+                    self,
+                    "No ModelFit file selected",
+                    "Select a ModelFit file first.",
+                    QMessageBox.Ok,
+                )
+                return
+
+            data = self.ModelFit_dictionary.get(file_path)
+
+            if data is None or "Fit" not in data:
+                self.show_status("Fit the selected file first.")
+                QMessageBox.warning(
+                    self,
+                    "No ModelFit result",
+                    "Fit the selected file before saving.",
+                    QMessageBox.Ok,
+                )
+                return
+
+            filename = os.path.splitext(os.path.basename(file_path))[0]
+            default_name = f"{filename}_ModelFit.xlsx"
+            default_path = os.path.join(os.path.dirname(file_path), default_name)
+
+            save_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Save ModelFit results",
+                default_path,
+                "Excel Workbook (*.xlsx)",
+            )
+
+            if not save_path:
+                self.show_status("Save cancelled.")
+                return
+
+            self.show_status("Saving ModelFit analysis results...")
+
+            try:
+                excel_path = self.modelfit_controller.save_results_excel(save_path)
+
+            except Exception as exc:
+                logger.exception("Could not save ModelFit results")
+                self.show_status(f"Could not save ModelFit results: {exc}")
+
+                QMessageBox.warning(
+                    self,
+                    "ModelFit save failed",
+                    str(exc),
+                    QMessageBox.Ok,
+                )
+                return
+
+            self.show_status("Saved ModelFit analysis results.")
             return
+
 
         dialog = SaveFilesDialog(self)
         self.show_status("Saving analysis results...")
