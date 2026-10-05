@@ -823,7 +823,11 @@ class ModelFitController(BaseTabController):
 
             for column in range(table.columnCount()):
                 item = table.item(row, column)
-                row_data.append(item.text() if item else "")
+
+                if column == 1 or column == 2:
+                    row_data.append(float(item.text()) if item else "")
+                else:
+                    row_data.append(item.text() if item else "")
 
             rows.append(row_data)
 
