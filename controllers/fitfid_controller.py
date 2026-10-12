@@ -9,8 +9,7 @@ import pandas as pd
 
 from PySide6.QtWidgets import QMessageBox, QHBoxLayout, QLabel, QDoubleSpinBox, QCheckBox, QTableWidgetItem
 
-from scipy.optimize import curve_fit
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSignalBlocker
 from pyqtgraph import mkPen
 
 import Calculator as Cal
@@ -111,6 +110,7 @@ class ModelFitController(BaseTabController):
         self.apply_plot_style_to_checkboxes()
         self.initialize_model_rows()
         self.connect_model_rows()
+        self.connect_use_function_checkboxes()
 
         self.ui.ModelFit_ComboBox_ChooseFile.activated.connect(self.on_file_selected)
 
@@ -119,6 +119,9 @@ class ModelFitController(BaseTabController):
         self.ui.ModelFit_CheckBox_Show_Original.toggled.connect(self.plot)
         self.ui.ModelFit_CheckBox_Show_Cumulative.toggled.connect(self.plot)
         self.ui.ModelFit_CheckBox_Show_Contributions.toggled.connect(self.plot)
+
+        self.ui.ModelFit_DoubleSpinBox_ZeroShift.returnPressed.connect(self.shift_time)
+
 
 ### when the model is chosen
     def initialize_model_rows(self):
@@ -165,11 +168,24 @@ class ModelFitController(BaseTabController):
         equation_label.setText(spec["equation"])
 
         use_box = getattr(self.ui, f"ModelFit_CheckBox_UseFunction_{row}")
-        use_box.setChecked(True)
+        with QSignalBlocker(use_box):
+
+            use_box.setChecked(True)
 
         self.build_parameter_widgets(row, model_name)
 
+    def connect_use_function_checkboxes(self):
+        for row in range(1, 5):
+            check = getattr(self.ui, f"ModelFit_CheckBox_UseFunction_{row}")
 
+            check.toggled.connect(
+                lambda model_name, row=row:
+                    self.clear_model_combobox(row)
+            )
+
+    def clear_model_combobox(self, row):
+        combobox_model = getattr(self.ui, f"ModelFit_Combobox_Function_{row}")
+        combobox_model.setCurrentIndex(-1)
 
     def build_parameter_widgets(self, row, model_name):
 
@@ -252,6 +268,10 @@ class ModelFitController(BaseTabController):
 
         combo.setCurrentIndex(-1)
 
+    def shift_time(self):
+        self._save_current_settings()
+        self.on_file_selected()
+
 ### On file selected
     def on_file_selected(self):
 
@@ -290,6 +310,8 @@ class ModelFitController(BaseTabController):
 
             # regular pre-processing
             try:
+                delta = self.ui.ModelFit_DoubleSpinBox_ZeroShift.value()
+
                 if selected_file_path not in dictionary:
                     Time, Real_Signal = self.run_analysis(selected_file_path)
 
@@ -298,9 +320,10 @@ class ModelFitController(BaseTabController):
                         "Signal": np.asarray(Real_Signal),
                     }
                 else:
-                    Time = np.asarray(dictionary[selected_file_path]["Time"])
+                    Time = np.asarray(dictionary[selected_file_path]["Time"]) + delta
                     Real_Signal = np.asarray(dictionary[selected_file_path]["Signal"])
 
+                # Time = Time + delta
                 self.plot()
 
             except Exception as exc:
@@ -345,7 +368,9 @@ class ModelFitController(BaseTabController):
         if data is None:
             return
 
-        time = np.asarray(data["Time"])
+        delta = self.ui.ModelFit_DoubleSpinBox_ZeroShift.value()
+
+        time = np.asarray(data["Time"]) + delta
         signal = np.asarray(data["Signal"])
 
         if self.ui.ModelFit_CheckBox_Show_Original.isChecked():
@@ -356,10 +381,10 @@ class ModelFitController(BaseTabController):
                     name="Original"
                 )
 
-        if (self.ui.ModelFit_CheckBox_Show_Cumulative.isChecked() and "Cumulative" in data):
+        if self.ui.ModelFit_CheckBox_Show_Cumulative.isChecked() and "Cumulative" in data:
             graph.plot(
-                time,
-                np.asarray(data["Cumulative"]),
+                data["FitPlotTime"],
+                data["Cumulative"],
                 pen=self._modelfit_pen("Cumulative"),
                 name="Cumulative",
             )
@@ -378,7 +403,7 @@ class ModelFitController(BaseTabController):
                     continue
 
                 graph.plot(
-                    time,
+                    data["FitPlotTime"],
                     np.asarray(data[key]),
                     pen=self._modelfit_pen(
                         key,
@@ -448,6 +473,11 @@ class ModelFitController(BaseTabController):
         table.setItem(row_index, 0, QTableWidgetItem("Reduced χ²"))
         table.setItem(row_index, 1, QTableWidgetItem(f"{reduced_chi_squared:.6g}"))
 
+        # Shift
+        delta = self.ui.ModelFit_DoubleSpinBox_ZeroShift.value()
+        table.setItem(row_index, 0, QTableWidgetItem("Shift Signal"))
+        table.setItem(row_index, 1, QTableWidgetItem(f"{delta:.2g}"))
+
         table.resizeColumnsToContents()
 
 #### Save settings for file - restore -reset etc
@@ -486,6 +516,8 @@ class ModelFitController(BaseTabController):
         self.ui.ModelFit_CheckBox_Show_Original.setChecked(plot["original"])
         self.ui.ModelFit_CheckBox_Show_Cumulative.setChecked(plot["cumulative"])
         self.ui.ModelFit_CheckBox_Show_Contributions.setChecked(plot["contributions"])
+
+        self.ui.ModelFit_DoubleSpinBox_ZeroShift.setValue(settings["shift"])
 
         self._restore_table(settings["table"])
 
@@ -536,6 +568,7 @@ class ModelFitController(BaseTabController):
                 "contributions": self.ui.ModelFit_CheckBox_Show_Contributions.isChecked(),
             },
             "table": self._capture_table(),
+            "shift": self.ui.ModelFit_DoubleSpinBox_ZeroShift.value()
         }
 
     def _capture_table(self):
@@ -567,6 +600,8 @@ class ModelFitController(BaseTabController):
         self.ui.ModelFit_Table_Data.clearContents()
         self.ui.ModelFit_Table_Data.setRowCount(0)
 
+        self.ui.ModelFit_DoubleSpinBox_ZeroShift.setValue(0)
+
 ### Actual fit
     def run_fitting(self):
         file_path = self.ui.ModelFit_ComboBox_ChooseFile.currentData()
@@ -585,9 +620,15 @@ class ModelFitController(BaseTabController):
             if not components:
                 raise ValueError("Enable at least one fitting function.")
 
+            time = np.asarray(data["Time"], dtype=float)
+            signal = np.asarray(data["Signal"], dtype=float)
+
+            delta = self.ui.ModelFit_DoubleSpinBox_ZeroShift.value()
+            shifted_time = time + delta
+
             result = modelfit_signal.fit_components(
-                np.asarray(data["Time"], dtype=float),
-                np.asarray(data["Signal"], dtype=float),
+                shifted_time,
+                signal,
                 components,
             )
 
@@ -648,6 +689,9 @@ class ModelFitController(BaseTabController):
         data = self.parent.ModelFit_dictionary[file_path]
 
         # Store fitted curves
+        # data["Cumulative"] = np.asarray(result["cumulative"])
+
+        data["FitPlotTime"] = np.asarray(result["plot_time"])
         data["Cumulative"] = np.asarray(result["cumulative"])
 
         for row in range(1, 5):
@@ -825,7 +869,10 @@ class ModelFitController(BaseTabController):
                 item = table.item(row, column)
 
                 if column == 1 or column == 2:
-                    row_data.append(float(item.text()) if item else "")
+                    try:
+                        row_data.append(float(item.text()) if item else "")
+                    except:
+                        row_data.append(item.text() if item else "")
                 else:
                     row_data.append(item.text() if item else "")
 
