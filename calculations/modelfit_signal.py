@@ -52,8 +52,8 @@ MODEL_SPECS = {
                 "name": "n",
                 "label": "n",
                 "default": 2.0,
-                "minimum": 0.01,
-                "maximum": 10.0,
+                "minimum": 1e-9,
+                "maximum": 2.0,
             },
         ],
     },
@@ -187,8 +187,15 @@ def fit_components(time, signal, components):
 
 
 def _build_fit_result(time, signal, components, free_parameters, free_lookup, popt, pcov):
+
     parameter_results = []
-    contributions = {}
+    fit_contributions = {}
+    plot_contributions = {}
+
+    time_fitting_plot = time - time[0]
+
+    # time_fitting_plot = np.arange(0, max(time), 0.5)
+    time_fitting_plot = time - time[0]
 
     # Reconstruct final parameters and individual component curves
     for component in components:
@@ -237,16 +244,21 @@ def _build_fit_result(time, signal, components, free_parameters, free_lookup, po
         else:
             amplitude_ratios = {row: 0.0 for row in range(1, 5)}
 
-        contributions[component["row"]] = component["function"](time, **final_parameters)
+        # contributions[component["row"]] = component["function"](time_fitting_plot, **final_parameters)
+        fit_contributions[component["row"]] = component["function"](time, **final_parameters)
+        plot_contributions[component["row"]] = component["function"](time_fitting_plot, **final_parameters)
 
-    # Cumulative fitted curve
-    cumulative = np.zeros_like(time, dtype=float)
+    cumulative = np.zeros_like(time_fitting_plot, dtype=float)
 
-    for contribution in contributions.values():
+    for contribution in plot_contributions.values():
         cumulative += contribution
 
-    # Residuals and statistics
-    residuals = signal - cumulative
+    cumulative_residuals_calculation = np.zeros_like(time, dtype=float)
+
+    for contribution in fit_contributions.values():
+        cumulative_residuals_calculation += contribution
+
+    residuals = signal - cumulative_residuals_calculation
     ss_res = np.sum(residuals ** 2)
     ss_tot = np.sum((signal - np.mean(signal)) ** 2)
 
@@ -264,7 +276,9 @@ def _build_fit_result(time, signal, components, free_parameters, free_lookup, po
 
     return {
         "parameters": parameter_results,
-        "contributions": contributions,
+        # "contributions": contributions,
+        "plot_time": time_fitting_plot,
+        "contributions": plot_contributions,
         "cumulative": cumulative,
         "residuals": residuals,
         "covariance": pcov,
