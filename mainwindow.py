@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
 
     def check_for_updates(self):
         """Check GitHub releases and prompt when a newer app version exists."""
-        current_version = '0.3.5'
+        current_version = '0.4.2'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             response = requests.get(url)
@@ -1289,6 +1289,7 @@ class MainWindow(QMainWindow):
         fid_file_path = os.path.join(result_folder, f"NMR_{variable}.png")
         fft_csv_path  = os.path.join(result_folder, f"FFT_{variable}.csv")
         fid_csv_path  = os.path.join(result_folder, f"NMR_{variable}.csv")
+        fid_dat_path  = os.path.join(result_folder, f"NMR_{variable}.dat")
 
         pg.QtGui.QGuiApplication.processEvents()
 
@@ -1317,7 +1318,19 @@ class MainWindow(QMainWindow):
         _, y2 = curves[1].getData()
         x, y3 = curves[2].getData()
 
-        with open(fid_csv_path, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
+        # with open(fid_csv_path, 'w', newline='') as csvfile:
+        #     writer = csv.writer(csvfile, delimiter=" ", quoting=csv.QUOTE_NONE, lineterminator="\n",)
+        #     for xi, y2i, y3i in zip(x, y2, y3):
+        #         # writer.writerow([format_dat_number(xi), format_dat_number(y2i), format_dat_number(y3i),])
+        #         writer.writerow([xi, y2i, y3i])
+
+        with open(fid_dat_path, "w", newline="") as datfile:
+            writer = csv.writer(
+                datfile,
+                delimiter=" ",
+                quoting=csv.QUOTE_NONE,
+                lineterminator="\n",
+            )
+
             for xi, y2i, y3i in zip(x, y2, y3):
                 writer.writerow([xi, y2i, y3i])
