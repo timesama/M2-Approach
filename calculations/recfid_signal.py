@@ -227,11 +227,22 @@ def nmr_signal_correction(
         re_td = smooth_noisy_signal(re_td, options.smooth_order, options.smooth_window)
         re_td_fid = smooth_noisy_signal(re_td_fid, options.smooth_order, options.smooth_window)
 
-    if options.subtract_empty and file_path_empty and file_path_empty_fid:
+    # if options.subtract_empty and file_path_empty and file_path_empty_fid:
+    #     _, re_empty, _ = read_data(file_path_empty)
+    #     re_td = re_td - re_empty[: len(time_td)]
+    #     _, re_empty_fid, _ = read_data(file_path_empty_fid)
+    #     re_td_fid = re_td_fid - re_empty_fid[: len(time_td_fid)]
+
+
+
+    if options.subtract_empty and file_path_empty:
         _, re_empty, _ = read_data(file_path_empty)
-        re_td = re_td - re_empty[: len(time_td)]
+        re_td = re_td - re_empty[:len(time_td)]
+
+    if options.subtract_empty and file_path_empty_fid:
         _, re_empty_fid, _ = read_data(file_path_empty_fid)
-        re_td_fid = re_td_fid - re_empty_fid[: len(time_td_fid)]
+        re_td_fid = re_td_fid - re_empty_fid[:len(time_td_fid)]
+
 
     if options.adjust_fid_zero:
         time_td_fid = time_td_fid + options.fid_zero_shift
