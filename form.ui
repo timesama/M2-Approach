@@ -2996,7 +2996,7 @@ stop:1 rgba(170, 255, 127, 255));
                     <enum>QAbstractItemView::SelectRows</enum>
                    </property>
                    <property name="sortingEnabled">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                    <property name="columnCount">
                     <number>4</number>
