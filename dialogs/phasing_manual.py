@@ -63,6 +63,7 @@ class PhasingManual(QDialog):
 
         self.ui.dial.setValue(0)
         self.ui.Box_smooth.setValue(0)
+        self.ui.Box_Threshold.setValue(5)
 
         try:
             self.process_data()
@@ -90,11 +91,12 @@ class PhasingManual(QDialog):
         self.ui.PhasingGraph.plot(Frequency, self.Real_freq_phased, pen='b', name='Phased', width=2)
 
     def update_text(self):
+        threshold_percentage = float(self.ui.Box_Threshold.value())
 
         Integral=trapezoid(self.Real_freq_phased)
         delta=np.mean(self.Real_freq_phased[:100])-np.mean(self.Real_freq_phased[-100:])
         #TODO: hardcoded threshold_percentage
-        M2,T2=Cal._calculate_M2(Cal._calculate_apodization(self.Real_freq_phased, Frequency), Frequency, 5)
+        M2,T2=Cal._calculate_M2(Cal._calculate_apodization(self.Real_freq_phased, Frequency, threshold_percentage), Frequency)
 
         self.ui.Integral.setText(f"Integral: {round(Integral,3)}")
         self.ui.Delta.setText(f"Delta: {round(delta,7)}")
