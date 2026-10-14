@@ -1784,6 +1784,50 @@ li.checked::marker { content: &quot;\2612&quot;; }
                      <number>5</number>
                     </property>
                     <item>
+                     <widget class="QGroupBox" name="groupBox_2">
+                      <property name="title">
+                       <string/>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_27">
+                       <item>
+                        <widget class="QCheckBox" name="RecFID_CheckBox_UseFixedMaximum">
+                         <property name="text">
+                          <string>Fix Maximum</string>
+                         </property>
+                         <property name="checked">
+                          <bool>false</bool>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QDoubleSpinBox" name="RecFID_DoubleSpinBox_FixedMaximum">
+                         <property name="minimumSize">
+                          <size>
+                           <width>100</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="prefix">
+                          <string/>
+                         </property>
+                         <property name="suffix">
+                          <string/>
+                         </property>
+                         <property name="decimals">
+                          <number>0</number>
+                         </property>
+                         <property name="minimum">
+                          <double>-10000000.000000000000000</double>
+                         </property>
+                         <property name="maximum">
+                          <double>10000000.000000000000000</double>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
                      <widget class="QGroupBox" name="RecFID_GroupBox_SE">
                       <property name="title">
                        <string>SE</string>

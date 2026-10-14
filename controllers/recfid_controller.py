@@ -134,7 +134,7 @@ class RecFIDController(BaseTabController):
             try:
                 if self.run_basic_data_analysis() is None:
                     return
-                if self.extrapolate() is None:
+                if self.find_maximum() is None:
                     return
                 self.build_up()
             except Exception as exc:
@@ -146,7 +146,7 @@ class RecFIDController(BaseTabController):
             return
         with busy_cursor():
             try:
-                if self.extrapolate() is None:
+                if self.find_maximum() is None:
                     return
                 self.build_up()
             except Exception as exc:
@@ -160,7 +160,6 @@ class RecFIDController(BaseTabController):
         threshold_percentage = self._value("Settings_DoubleSpinBox_threshold_percentage", 5)
 
         result = recfid.analyze_signal(data, fid, data_empty, fid_empty, self._analysis_options(), threshold_percentage)
-
 
         if result is None:
             return None
@@ -215,29 +214,58 @@ class RecFIDController(BaseTabController):
         return extrapolation
 
     def extrapolate(self):
+
         if self.recfid_mode == "se":
             extrapolation = self.run_se_analysis()
-            self.extrapolation = extrapolation
             self._plot_se_maximum()
+
         elif self.recfid_mode == "mse":
             result = self.run_basic_data_analysis()
+
             if result is None:
-                self.extrapolation = None
+                extrapolation = None
                 self.se_max_result = {}
                 self.build_result = {}
                 return None
-            raw_maximum = float(np.max(result.signal_data))
-            self.extrapolation = raw_maximum
+
+            extrapolation = float(np.max(result.signal_data))
+
             self.se_max_result = {
                 "echo_time": np.array([0.0]),
-                "maximum": np.array([raw_maximum]),
+                "maximum": np.array([extrapolation]),
                 "t2": np.array([result.t2_data]),
             }
             self._clear_or_hide("RecFID_PlotWidget_SEMax", hide=True)
-        else:
+
+        return extrapolation
+
+    def find_maximum(self):
+        if self.recfid_mode == 'none':
             raise ValueError("Load one data file for MSE mode or multiple data files for SE mode before running.")
 
+        if self.ui.RecFID_CheckBox_UseFixedMaximum.isChecked():
+            result = self.run_basic_data_analysis()
+
+            if result is None:
+                extrapolation = None
+                self.se_max_result = {}
+                self.build_result = {}
+                return None
+
+            maximum = self.ui.RecFID_DoubleSpinBox_FixedMaximum.value()
+            self.extrapolation = maximum
+
+            self.se_max_result = {
+                "echo_time": np.array([0.0]),
+                "maximum": np.array([maximum]),
+                "t2": np.array([result.t2_data]),
+            }
+
+        else:
+            self.extrapolation = self.extrapolate()
+
         self._status(f"RecFID max = {round(self.extrapolation, 2)}")
+
         return self.extrapolation
 
     def build_up(self):
@@ -823,6 +851,8 @@ class RecFIDController(BaseTabController):
             "RecFID_DoubleSpinBox_SEFitFrom",
             "RecFID_DoubleSpinBox_SEFitTo",
             "RecFID_DoubleSpinBox_MseDivider",
+            "RecFID_DoubleSpinBox_FixedMaximum",
+            "RecFID_CheckBox_UseFixedMaximum"
         )
 
     def _clear_result_text_widgets(self):
