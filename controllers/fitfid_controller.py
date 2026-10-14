@@ -426,8 +426,10 @@ class ModelFitController(BaseTabController):
 
         table = self.ui.ModelFit_Table_Data
         table.clearContents()
-        number_rows = (len(parameter_results) + 6)
+        number_rows = (len(parameter_results) + 8)
         table.setRowCount(number_rows)
+
+        amplitude_sum = 0
 
         row_index = 0
 
@@ -442,13 +444,16 @@ class ModelFitController(BaseTabController):
                 )
 
             table.setItem(row_index, 0, QTableWidgetItem(parameter_text))
-            table.setItem(row_index, 1, QTableWidgetItem(f"{result['value']:.6g}"))
+            table.setItem(row_index, 1, QTableWidgetItem(f"{result['value']:.3f}"))
+
+            if  result['name'] == 'A':
+                amplitude_sum += result['value']
 
             if result["fixed"]:
                 error_text = "—"
 
             elif np.isfinite(result["error"]):
-                error_text = (f"{result['error']:.6g}")
+                error_text = (f"{result['error']:.3f}")
 
             else:
                 error_text = "NaN"
@@ -460,23 +465,29 @@ class ModelFitController(BaseTabController):
 
         for component_row in range(1, 5):
             table.setItem(row_index, 0, QTableWidgetItem(f"A{component_row} ratio"))
-            table.setItem(row_index, 1, QTableWidgetItem(f"{amplitude_ratios[component_row]:.6g}"))
+            table.setItem(row_index, 1, QTableWidgetItem(f"{amplitude_ratios[component_row]:.3f}"))
             row_index += 1
 
         # R2
         table.setItem(row_index, 0, QTableWidgetItem("R²"))
-        table.setItem(row_index, 1, QTableWidgetItem(f"{r_squared:.6g}"))
+        table.setItem(row_index, 1, QTableWidgetItem(f"{r_squared:.6f}"))
 
         row_index += 1
 
         # reduced chi squared
         table.setItem(row_index, 0, QTableWidgetItem("Reduced χ²"))
-        table.setItem(row_index, 1, QTableWidgetItem(f"{reduced_chi_squared:.6g}"))
+        table.setItem(row_index, 1, QTableWidgetItem(f"{reduced_chi_squared:.6f}"))
 
         # Shift
+        row_index += 1
         delta = self.ui.ModelFit_DoubleSpinBox_ZeroShift.value()
         table.setItem(row_index, 0, QTableWidgetItem("Shift Signal"))
-        table.setItem(row_index, 1, QTableWidgetItem(f"{delta:.2g}"))
+        table.setItem(row_index, 1, QTableWidgetItem(f"{delta:.2f}"))
+
+        # Absolute Fitted Maximum
+        row_index += 1
+        table.setItem(row_index, 0, QTableWidgetItem("A(t=0)"))
+        table.setItem(row_index, 1, QTableWidgetItem(f"{amplitude_sum:.3f}"))
 
         table.resizeColumnsToContents()
 
