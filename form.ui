@@ -1814,13 +1814,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
                           <string/>
                          </property>
                          <property name="decimals">
-                          <number>0</number>
+                          <number>3</number>
                          </property>
                          <property name="minimum">
                           <double>-10000000.000000000000000</double>
                          </property>
                          <property name="maximum">
                           <double>10000000.000000000000000</double>
+                         </property>
+                         <property name="singleStep">
+                          <double>0.100000000000000</double>
                          </property>
                         </widget>
                        </item>
@@ -8185,7 +8188,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                    <string/>
                   </property>
                   <property name="decimals">
-                   <number>0</number>
+                   <number>2</number>
                   </property>
                   <property name="minimum">
                    <double>0.000000000000000</double>
