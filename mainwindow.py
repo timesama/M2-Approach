@@ -212,7 +212,7 @@ class MainWindow(QMainWindow):
 
     def check_for_updates(self):
         """Check GitHub releases and prompt when a newer app version exists."""
-        current_version = '0.4.3'
+        current_version = '0.4.4'
         url = 'https://api.github.com/repos/timesama/M2-Approach/releases/latest'
         try:
             response = requests.get(url)
