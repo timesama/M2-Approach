@@ -213,22 +213,32 @@ class RecFIDController(BaseTabController):
         self._plot_all_processed_signals()
         return extrapolation
 
-    def extrapolate(self):
+    def extrapolate(self, extrapolated_to_fixed_maximum=False, fixed_maximum = 1):
 
         if self.recfid_mode == "se":
-            extrapolation = self.run_se_analysis()
+            if extrapolated_to_fixed_maximum:
+                extrapolation = fixed_maximum
+            else:
+                extrapolation = self.run_se_analysis()
+
+            self.extrapolation = extrapolation
             self._plot_se_maximum()
 
         elif self.recfid_mode == "mse":
             result = self.run_basic_data_analysis()
 
             if result is None:
-                extrapolation = None
+                self.extrapolation = None
                 self.se_max_result = {}
                 self.build_result = {}
                 return None
 
-            extrapolation = float(np.max(result.signal_data))
+            if extrapolated_to_fixed_maximum:
+                extrapolation = fixed_maximum
+            else:
+                extrapolation = float(np.max(result.signal_data))
+
+            self.extrapolation = extrapolation
 
             self.se_max_result = {
                 "echo_time": np.array([0.0]),
@@ -237,32 +247,16 @@ class RecFIDController(BaseTabController):
             }
             self._clear_or_hide("RecFID_PlotWidget_SEMax", hide=True)
 
-        return extrapolation
-
     def find_maximum(self):
         if self.recfid_mode == 'none':
             raise ValueError("Load one data file for MSE mode or multiple data files for SE mode before running.")
 
         if self.ui.RecFID_CheckBox_UseFixedMaximum.isChecked():
-            result = self.run_basic_data_analysis()
-
-            if result is None:
-                extrapolation = None
-                self.se_max_result = {}
-                self.build_result = {}
-                return None
-
             maximum = self.ui.RecFID_DoubleSpinBox_FixedMaximum.value()
-            self.extrapolation = maximum
-
-            self.se_max_result = {
-                "echo_time": np.array([0.0]),
-                "maximum": np.array([maximum]),
-                "t2": np.array([result.t2_data]),
-            }
+            self.extrapolate(extrapolated_to_fixed_maximum = True, fixed_maximum = maximum)
 
         else:
-            self.extrapolation = self.extrapolate()
+            self.extrapolate()
 
         self._status(f"RecFID max = {round(self.extrapolation, 2)}")
 
