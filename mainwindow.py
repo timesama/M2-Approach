@@ -471,7 +471,6 @@ class MainWindow(QMainWindow):
 
     def highlight_row(self, table, row_selected):
         table.selectRow(row_selected)
-        print('selected row is: ', row_selected)
 
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)
