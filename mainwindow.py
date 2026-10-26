@@ -477,6 +477,7 @@ class MainWindow(QMainWindow):
         graph_widget.getAxis('left').setLabel(ylabel)
         graph_widget.getAxis('bottom').setLabel(xlabel)
         graph_widget.setTitle(title)
+        graph_widget.setBackground(None)
 
     def open_select_comparison_files_dialog(self):
         """Open the multi/single-file picker for comparison-style tabs."""

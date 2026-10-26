@@ -792,6 +792,7 @@ class RecFIDController(BaseTabController):
         widget.getAxis("left").setLabel(ylabel)
         widget.getAxis("bottom").setLabel(xlabel)
         widget.setTitle(title)
+        widget.setBackground(None)
 
     def _capture_initial_input_widget_state(self):
         self._initial_input_widget_state = {}

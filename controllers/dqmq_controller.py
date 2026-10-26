@@ -431,7 +431,7 @@ class DQMQTabController(BaseTabController):
             figure.plot(
                 result["time0"],
                 result["nDQ"],
-                pen=mkPen("k", width=1),
+                pen=mkPen(DQMQ_PLOT_STYLES["ndq"]["color"], width=1),
                 symbol="o",
                 symbolPen=DQMQ_PLOT_STYLES["ndq"]["color"],
                 symbolBrush=DQMQ_PLOT_STYLES["ndq"]["color"],

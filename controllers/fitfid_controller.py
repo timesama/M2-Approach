@@ -77,7 +77,6 @@ class ModelFitController(BaseTabController):
             if widget is None:
                 continue
             color = MODELFIT_PLOT_STYLES[style_name]["color"]
-            # widget.setStyleSheet(f"background-color: rgb{color}; color: black;")
 
             color_list = list(color)
             color_list.insert(3, 255)
