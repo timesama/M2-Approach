@@ -5,6 +5,7 @@ from utils.logging_config import setup_logging
 
 from PySide6.QtGui import QPalette, QColor, Qt
 from PySide6.QtCore import QSettings
+import pyqtgraph as pg
 
 
 def main():
@@ -12,6 +13,12 @@ def main():
     app = QApplication(sys.argv)
 
     app.setStyle("Fusion")
+    palette = app.palette()
+    pg.setConfigOption("foreground", palette.color(QPalette.Text))
+    if app.styleHints().colorScheme() == Qt.ColorScheme.Light:
+        palette.setColor(QPalette.Window, QColor("white"))
+        palette.setColor(QPalette.Base, QColor("white"))
+        app.setPalette(palette)
 
     window = MainWindow()
     window.show()
