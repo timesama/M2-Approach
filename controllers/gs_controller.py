@@ -521,7 +521,7 @@ class GSTabController(BaseTabController):
             pen=None,
             symbol="o",
             symbolBrush=(255, 255, 0, 255),
-            symbolPen="k",
+            # symbolPen="k",
             symbolSize=13,
         )
 

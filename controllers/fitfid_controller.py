@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 MODELFIT_PLOT_STYLES = {
     "Original": {
-        "color": (0, 0, 0),
+        "color": (0, 0, 255),
         "width": 4,
     },
     "Cumulative": {
@@ -77,7 +77,7 @@ class ModelFitController(BaseTabController):
             if widget is None:
                 continue
             color = MODELFIT_PLOT_STYLES[style_name]["color"]
-            widget.setStyleSheet(f"background-color: rgb{color}; color: black;")
+            # widget.setStyleSheet(f"background-color: rgb{color}; color: black;")
 
             color_list = list(color)
             color_list.insert(3, 255)

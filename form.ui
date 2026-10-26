@@ -1658,7 +1658,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                     <item>
                      <widget class="QComboBox" name="RecFID_ComboBox_BuildFunction">
                       <property name="styleSheet">
-                       <string notr="true">background: white</string>
+                       <string notr="true"/>
                       </property>
                       <property name="placeholderText">
                        <string>Choose Function</string>

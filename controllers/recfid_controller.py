@@ -721,7 +721,7 @@ class RecFIDController(BaseTabController):
         graph.clear()
         graph.show()
         graph.plot([0], [self.extrapolation], pen="r", symbolPen=None, symbol="o", symbolBrush="r")
-        graph.plot(self.se_max_result["fit_x"], self.se_max_result["fit_y"], pen=mkPen("k", width=3, style=Qt.DashLine), symbol=None)
+        graph.plot(self.se_max_result["fit_x"], self.se_max_result["fit_y"], pen=mkPen("c", width=3, style=Qt.DashLine), symbol=None)
         graph.plot(
             self.se_max_result["echo_time"],
             self.se_max_result["maximum"],

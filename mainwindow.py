@@ -30,8 +30,10 @@ from controllers.table_columns import T1Columns, GSColumns
 from utils.ui_busy import busy_cursor
 logger = logging.getLogger(__name__)
 
-pg.CONFIG_OPTIONS['background'] = 'w'
-pg.CONFIG_OPTIONS['foreground'] = 'k'
+
+
+# pg.CONFIG_OPTIONS['background'] = 'w'
+# pg.CONFIG_OPTIONS['foreground'] = 'k'
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -468,15 +470,18 @@ class MainWindow(QMainWindow):
 
 
     def highlight_row(self, table, row_selected):
-        for col in range(table.columnCount()):
-            for row in range(table.rowCount()):
-                item = table.item(row, col)
-                if item is not None:
-                    item.setBackground(QColor(255, 255, 255))
+        table.selectRow(row_selected)
+        print('selected row is: ', row_selected)
+        # for col in range(table.columnCount()):
+        #     for row in range(table.rowCount()):
+        #         item = table.item(row, col)
+        #         if item is not None:
+        #             #TODO: may I somehow just select row without highlighting it with yellow?
+        #             item.setBackground(QColor(255, 255, 255))
 
-            item_selected = table.item(row_selected-1, col)
-            if item_selected is not None:
-                item_selected.setBackground(QColor(255, 255, 0))
+        #     item_selected = table.item(row_selected-1, col)
+        #     if item_selected is not None:
+        #         item_selected.setBackground(QColor(255, 255, 0))
 
     def setup_graph(self, graph_widget, xlabel="", ylabel="", title=""):
         graph_widget.getAxis('left').setLabel(ylabel)

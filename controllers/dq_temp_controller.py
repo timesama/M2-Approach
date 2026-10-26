@@ -131,12 +131,12 @@ class DQTempTabController(BaseTabController):
 
         if legend is not None:
             legend.clear()
-            legend.setPen((0, 0, 0))
+            legend.setPen((128, 128, 128))
             legend.anchor(itemPos=(1, 0), parentPos=(1, 0))
 
         if legend_center is not None:
             legend_center.clear()
-            legend_center.setPen((0, 0, 0))
+            legend_center.setPen((128, 128, 128))
 
         comparison_axis = []
         center_gauss = []
